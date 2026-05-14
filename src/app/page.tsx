@@ -384,7 +384,79 @@ function SparkSVG({ size = 20, color = "#fff", opacity = 1 }: { size?: number; c
 /* Theme → decorator renderer */
 function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionTheme> }) {
   const c = "rgba(255,255,255,0.9)";
-  if (theme.id === "valentine" || theme.id === "love") {
+  
+  if (theme.isPremium) {
+    if (theme.id === "festival_plus") {
+      // Rangoli / Mandala inspired background
+      return (
+        <>
+          <div style={{ position: "absolute", right: "-10%", top: "-30%", opacity: 0.15, pointerEvents: "none" }}>
+            <svg width="240" height="240" viewBox="0 0 100 100" fill="none">
+              <path d="M50 0 C60 40 100 50 100 50 C60 60 50 100 50 100 C40 60 0 50 0 50 C40 40 50 0 50 0 Z" fill="#fff" />
+              <circle cx="50" cy="50" r="25" stroke="#fff" strokeWidth="2" strokeDasharray="4 4" />
+              <circle cx="50" cy="50" r="15" stroke="#fff" strokeWidth="1" />
+            </svg>
+          </div>
+          <div style={{ position: "absolute", left: "-5%", bottom: "-20%", opacity: 0.1, pointerEvents: "none" }}>
+            <svg width="150" height="150" viewBox="0 0 100 100" fill="none">
+              <path d="M50 0 C60 40 100 50 100 50 C60 60 50 100 50 100 C40 60 0 50 0 50 C40 40 50 0 50 0 Z" fill="#fff" />
+            </svg>
+          </div>
+          <div className="twinkle-1" style={{ position: "absolute", top: 10, right: 40, pointerEvents: "none" }}><SparkSVG size={32} color={c} opacity={0.4} /></div>
+          <div className="twinkle-2" style={{ position: "absolute", bottom: 20, right: 120, pointerEvents: "none" }}><SparkSVG size={20} color={c} opacity={0.3} /></div>
+        </>
+      );
+    }
+    if (theme.id === "birthday_plus") {
+      // Big balloons / Confetti
+      return (
+        <>
+          <div className="float-drift-1" style={{ position: "absolute", right: "5%", top: "10%", opacity: 0.15, pointerEvents: "none" }}>
+            <svg width="120" height="150" viewBox="0 0 50 80" fill="none">
+              <ellipse cx="25" cy="30" rx="20" ry="25" fill="#fff" />
+              <path d="M25 55 L22 65 L28 65 Z" fill="#fff" />
+              <path d="M25 65 Q 30 75 25 80" stroke="#fff" fill="none" strokeWidth="1.5" />
+            </svg>
+          </div>
+          <div className="twinkle-1" style={{ position: "absolute", top: 12, right: 24, pointerEvents: "none" }}><StarSVG size={40} color={c} opacity={0.3} /></div>
+          <div className="twinkle-2" style={{ position: "absolute", top: 20, right: 160, pointerEvents: "none" }}><StarSVG size={24} color={c} opacity={0.25} /></div>
+          <div className="ribbon-sway" style={{ position: "absolute", bottom: 0, right: "20%", pointerEvents: "none" }}><RibbonSVG width={180} color="#fff" opacity={0.15} /></div>
+        </>
+      );
+    }
+    if (theme.id === "valentine_plus" || theme.id === "love_plus") {
+      // Giant Hearts
+      return (
+        <>
+          <div className="heart-beat" style={{ position: "absolute", right: "-5%", top: "-10%", opacity: 0.12, pointerEvents: "none" }}>
+            <HeartSVG size={200} color="#fff" opacity={1} />
+          </div>
+          <div className="float-drift-1" style={{ position: "absolute", right: "40%", bottom: "-10%", opacity: 0.1, pointerEvents: "none" }}>
+            <HeartSVG size={100} color="#fff" opacity={1} />
+          </div>
+          <div className="float-drift-2" style={{ position: "absolute", top: 15, right: 120, pointerEvents: "none" }}><HeartSVG size={32} color={c} opacity={0.3} /></div>
+        </>
+      );
+    }
+    if (theme.id === "anniversary_plus" || theme.id === "wedding_plus") {
+      // Elegant interlocking rings / florish
+      return (
+        <>
+          <div className="float-drift-1" style={{ position: "absolute", right: "5%", top: "10%", opacity: 0.15, pointerEvents: "none" }}>
+            <svg width="150" height="100" viewBox="0 0 100 60" fill="none">
+              <circle cx="35" cy="30" r="25" stroke="#fff" strokeWidth="4" />
+              <circle cx="65" cy="30" r="25" stroke="#fff" strokeWidth="4" />
+            </svg>
+          </div>
+          <div className="twinkle-1" style={{ position: "absolute", bottom: 10, right: 100, pointerEvents: "none" }}><DiamondSVG size={30} color={c} opacity={0.3} /></div>
+          <div className="ribbon-sway" style={{ position: "absolute", bottom: 0, left: "20%", pointerEvents: "none" }}><RibbonSVG width={200} color="#fff" opacity={0.15} /></div>
+        </>
+      );
+    }
+  }
+
+  // Regular theme decorations
+  if (theme.id.startsWith("valentine") || theme.id.startsWith("love")) {
     return (
       <>
         <div className="float-drift-1" style={{ position: "absolute", top: 14, right: 28, pointerEvents: "none" }}><HeartSVG size={44} color={c} opacity={0.22} /></div>
@@ -392,12 +464,11 @@ function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionThem
         <div className="float-drift-3" style={{ position: "absolute", bottom: 10, right: 50, pointerEvents: "none" }}><HeartSVG size={32} color={c} opacity={0.12} /></div>
         <div className="float-drift-4" style={{ position: "absolute", top: 20, right: 160, pointerEvents: "none" }}><HeartSVG size={18} color={c} opacity={0.18} /></div>
         <div className="float-drift-1" style={{ position: "absolute", bottom: 8, right: 200, pointerEvents: "none" }}><SparkSVG size={16} color={c} opacity={0.15} /></div>
-        {/* Ribbon across bottom */}
         <div className="ribbon-sway" style={{ position: "absolute", bottom: 0, left: "30%", pointerEvents: "none" }}><RibbonSVG width={120} color="#fff" opacity={0.12} /></div>
       </>
     );
   }
-  if (theme.id === "birthday") {
+  if (theme.id.startsWith("birthday")) {
     return (
       <>
         <div className="twinkle-1" style={{ position: "absolute", top: 12, right: 24, pointerEvents: "none" }}><StarSVG size={36} color={c} opacity={0.22} /></div>
@@ -409,7 +480,7 @@ function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionThem
       </>
     );
   }
-  if (theme.id === "anniversary" || theme.id === "wedding") {
+  if (theme.id.startsWith("anniversary") || theme.id.startsWith("wedding")) {
     return (
       <>
         <div className="float-drift-1" style={{ position: "absolute", top: 12, right: 24, pointerEvents: "none" }}><RingSVG size={44} color={c} opacity={0.22} /></div>
@@ -420,7 +491,7 @@ function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionThem
       </>
     );
   }
-  if (theme.id === "friendship") {
+  if (theme.id.startsWith("friendship")) {
     return (
       <>
         <div className="float-drift-1" style={{ position: "absolute", top: 10, right: 24, pointerEvents: "none" }}><SunRaySVG size={48} color={c} opacity={0.2} /></div>
@@ -430,7 +501,7 @@ function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionThem
       </>
     );
   }
-  if (theme.id === "festival") {
+  if (theme.id.startsWith("festival")) {
     return (
       <>
         <div className="twinkle-1" style={{ position: "absolute", top: 10, right: 24, pointerEvents: "none" }}><SparkSVG size={32} color={c} opacity={0.22} /></div>
@@ -544,12 +615,12 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
             border: "1.5px solid rgba(255,255,255,0.35)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            {(theme.id === "valentine" || theme.id === "love") && <div className="heart-beat"><HeartSVG size={22} color="#fff" opacity={0.95} /></div>}
-            {theme.id === "birthday" && <StarSVG size={21} color="#fff" opacity={0.95} />}
-            {(theme.id === "anniversary" || theme.id === "wedding") && <RingSVG size={22} color="#fff" opacity={0.95} />}
-            {theme.id === "friendship" && <SunRaySVG size={24} color="#fff" opacity={0.9} />}
-            {theme.id === "festival" && <SparkSVG size={20} color="#fff" opacity={0.95} />}
-            {theme.id === "general" && <DiamondSVG size={20} color="#fff" opacity={0.95} />}
+            {(theme.id.startsWith("valentine") || theme.id.startsWith("love")) && <div className="heart-beat"><HeartSVG size={22} color="#fff" opacity={0.95} /></div>}
+            {theme.id.startsWith("birthday") && <StarSVG size={21} color="#fff" opacity={0.95} />}
+            {(theme.id.startsWith("anniversary") || theme.id.startsWith("wedding")) && <RingSVG size={22} color="#fff" opacity={0.95} />}
+            {theme.id.startsWith("friendship") && <SunRaySVG size={24} color="#fff" opacity={0.9} />}
+            {theme.id.startsWith("festival") && <SparkSVG size={20} color="#fff" opacity={0.95} />}
+            {theme.id.startsWith("general") && <DiamondSVG size={20} color="#fff" opacity={0.95} />}
           </div>
 
           {/* Title + subtitle — clipped if needed */}

@@ -19,9 +19,11 @@ export default function AdminSectionsPage() {
   const [theme, setTheme] = useState<SectionTheme>("birthday");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
   const reload = async () => {
     const [secs, prods] = await Promise.all([getSectionsDB(), getProductsDB()]);
-    setSections(secs.sort((a, b) => a.order - b.order));
+    setSections(secs.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
     setProducts(prods);
   };
 
@@ -80,6 +82,26 @@ export default function AdminSectionsPage() {
     if (!confirm(`Delete section "${sec.title}"?`)) return;
     await deleteSectionDB(sec.id);
     await reload();
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDrop = async (dropIndex: number) => {
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    const newSections = [...sections];
+    const [draggedItem] = newSections.splice(draggedIndex, 1);
+    newSections.splice(dropIndex, 0, draggedItem);
+
+    // Update order values sequentially
+    const updatedSections = newSections.map((sec, i) => ({ ...sec, order: i }));
+    setSections(updatedSections);
+    setDraggedIndex(null);
+
+    // Save all new orders to DB
+    await Promise.all(updatedSections.map(sec => saveSectionDB(sec)));
   };
 
   const cardStyle: React.CSSProperties = {
@@ -182,11 +204,26 @@ export default function AdminSectionsPage() {
       )}
 
       {/* Existing sections */}
-      {sections.map(sec => {
+      {sections.map((sec, index) => {
         const t = SECTION_THEMES.find(th => th.id === sec.theme) || SECTION_THEMES[0];
         return (
-          <div key={sec.id} style={cardStyle}>
+          <div 
+            key={sec.id} 
+            draggable 
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => handleDrop(index)}
+            style={{
+              ...cardStyle, 
+              cursor: "grab",
+              opacity: draggedIndex === index ? 0.5 : 1,
+              transform: "translateZ(0)", // hardware acceleration
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, flexWrap: "wrap" }}>
+              <div style={{ cursor: "grab", fontSize: 18, color: "var(--text-muted)" }}>
+                ☰
+              </div>
               <div style={{
                 background: t.gradient, borderRadius: 12, padding: "8px 14px",
                 fontSize: 13, fontWeight: 700, color: "#fff", whiteSpace: "nowrap",
