@@ -350,11 +350,16 @@ export function isAdminLoggedIn(): boolean {
 
 export type SectionTheme =
   | "birthday"
+  | "birthday_plus"
   | "valentine"
+  | "valentine_plus"
   | "love"
+  | "love_plus"
   | "friendship"
   | "anniversary"
+  | "anniversary_plus"
   | "wedding"
+  | "wedding_plus"
   | "festival"
   | "general";
 
@@ -366,15 +371,21 @@ export interface SectionThemeConfig {
   accent: string;      // accent color
   bgLight: string;     // card bg
   tagline: string;     // default tagline
+  isPremium?: boolean; // full-width themed body with effects
 }
 
 export const SECTION_THEMES: SectionThemeConfig[] = [
   { id: "birthday", label: "Birthday", emoji: "🎂🎁🎈🎉", gradient: "linear-gradient(135deg,#FF8C42,#FFD166)", accent: "#FF8C42", bgLight: "#FFF9F0", tagline: "Birthday surprises they'll never forget" },
+  { id: "birthday_plus", label: "Birthday++", emoji: "🎂✨🎁🎉", gradient: "linear-gradient(135deg,#FF6B6B,#FFD93D)", accent: "#FF6B6B", bgLight: "#FFF4E6", tagline: "Premium full-theme birthday experience", isPremium: true },
   { id: "valentine", label: "Valentine", emoji: "💕🌹💌💗", gradient: "linear-gradient(135deg,#FF4D6D,#FF758F)", accent: "#E91E63", bgLight: "#FFF0F3", tagline: "Tell them how much you care" },
+  { id: "valentine_plus", label: "Valentine++", emoji: "💖🔥🌹✨", gradient: "linear-gradient(135deg,#E80054,#FF5277)", accent: "#E80054", bgLight: "#FFEBF0", tagline: "Premium romantic full-theme design", isPremium: true },
   { id: "love", label: "Love", emoji: "❤️💘💋🫶", gradient: "linear-gradient(135deg,#FF6B6B,#EE5A24)", accent: "#E74C3C", bgLight: "#FFF5F5", tagline: "Express your deepest feelings" },
+  { id: "love_plus", label: "Love++", emoji: "❤️🔥💋✨", gradient: "linear-gradient(135deg,#D63031,#FF7675)", accent: "#D63031", bgLight: "#FFEDED", tagline: "Premium deep love full-theme design", isPremium: true },
   { id: "friendship", label: "Friendship", emoji: "🤝🌟😄💛", gradient: "linear-gradient(135deg,#F7B731,#F39C12)", accent: "#F39C12", bgLight: "#FFFEF0", tagline: "Celebrate your bestie" },
   { id: "anniversary", label: "Anniversary", emoji: "💑💍🥂✨", gradient: "linear-gradient(135deg,#C59B76,#8B6914)", accent: "#B8860B", bgLight: "#FFF8F0", tagline: "Mark the milestones of your love" },
+  { id: "anniversary_plus", label: "Anniversary++", emoji: "💍✨🥂💖", gradient: "linear-gradient(135deg,#B33939,#FF5252)", accent: "#B33939", bgLight: "#FFEDED", tagline: "Premium red full-theme anniversary", isPremium: true },
   { id: "wedding", label: "Wedding", emoji: "💒🤵👰💐", gradient: "linear-gradient(135deg,#A8937A,#7A5C3C)", accent: "#8B7355", bgLight: "#FFFDF5", tagline: "Perfect gifts for the big day" },
+  { id: "wedding_plus", label: "Wedding++", emoji: "💒✨💍🕊️", gradient: "linear-gradient(135deg,#CCA876,#A67D3D)", accent: "#A67D3D", bgLight: "#FFF8EB", tagline: "Premium golden full-theme wedding", isPremium: true },
   { id: "festival", label: "Festival", emoji: "🎊🪔🎆✨", gradient: "linear-gradient(135deg,#9B59B6,#6C3483)", accent: "#9B59B6", bgLight: "#F8F0FF", tagline: "Festive season specials" },
   { id: "general", label: "General", emoji: "✨🎁💝🌈", gradient: "linear-gradient(135deg,#667EEA,#764BA2)", accent: "#667EEA", bgLight: "#F0F4FF", tagline: "Gifts for every occasion" },
 ];

@@ -505,7 +505,8 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
   return (
     <section className="occasion-banner-reveal" style={{
       width: "100%",
-      background: theme.bgLight,
+      background: theme.isPremium ? theme.gradient : theme.bgLight,
+      position: "relative",
       overflow: "hidden",
     }}>
       {/* ── GRADIENT HEADER — full width, no radius ── */}
@@ -590,7 +591,25 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
       </div>
 
       {/* ── CARD SHELF — horizontal scroll with arrows ── */}
-      <div style={{ background: theme.bgLight, position: "relative" }}>
+      <div style={{ background: theme.isPremium ? "transparent" : theme.bgLight, position: "relative" }}>
+        
+        {/* Premium Background Effects */}
+        {theme.isPremium && (
+          <div style={{
+            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            opacity: 0.08,
+            mixBlendMode: "overlay"
+          }} />
+        )}
+        {theme.isPremium && (
+          <div style={{
+            position: "absolute", bottom: "-20%", right: "-10%", width: "50%", height: "80%",
+            background: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)",
+            pointerEvents: "none", zIndex: 0,
+          }} />
+        )}
+
         {/* Left arrow */}
         {canLeft && <ArrowBtn dir="left" accent={theme.accent} onClick={() => scroll("left")} />}
         {/* Right arrow */}
@@ -601,6 +620,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
           ref={scrollRef}
           onScroll={updateArrows}
           style={{
+            position: "relative", zIndex: 1,
             display: "flex",
             gap: 12,
             overflowX: "auto",
