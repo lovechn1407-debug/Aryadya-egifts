@@ -408,9 +408,19 @@ function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionThem
       );
     }
     if (theme.id === "birthday_plus") {
-      // Big balloons / Confetti
+      // Big balloons / Confetti Poppers
       return (
         <>
+          <div className="float-drift-1" style={{ position: "absolute", left: "10%", top: "10%", opacity: 0.4, pointerEvents: "none" }}>
+            <svg width="150" height="150" viewBox="0 0 100 100" fill="none">
+              <rect x="20" y="20" width="8" height="16" fill="#FFD700" transform="rotate(45 24 28)" />
+              <circle cx="60" cy="30" r="6" fill="#fff" />
+              <polygon points="40,70 46,82 34,82" fill="#4ECDC4" transform="rotate(20 40 76)" />
+              <rect x="70" y="60" width="6" height="12" fill="#FFA07A" transform="rotate(-30 73 66)" />
+              <circle cx="80" cy="80" r="4" fill="#fff" />
+              <rect x="10" y="80" width="10" height="10" fill="#FF6B6B" transform="rotate(15 15 85)" />
+            </svg>
+          </div>
           <div className="float-drift-1" style={{ position: "absolute", right: "5%", top: "10%", opacity: 0.15, pointerEvents: "none" }}>
             <svg width="120" height="150" viewBox="0 0 50 80" fill="none">
               <ellipse cx="25" cy="30" rx="20" ry="25" fill="#fff" />
@@ -438,7 +448,32 @@ function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionThem
         </>
       );
     }
-    if (theme.id === "anniversary_plus" || theme.id === "wedding_plus") {
+    if (theme.id === "anniversary_plus") {
+      // Wired LED light hanging
+      return (
+        <>
+          <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: 60, pointerEvents: "none" }}>
+            <svg width="100%" height="100%" viewBox="0 0 200 60" preserveAspectRatio="none" fill="none">
+              {/* Wires */}
+              <path d="M-10 10 Q 40 40 100 10 T 210 10" stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" fill="none" />
+              <path d="M-10 20 Q 60 55 120 15 T 210 20" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" />
+              
+              {/* Glowing LED Bulbs */}
+              <circle cx="20" cy="18" r="2.5" fill="#fff" filter="drop-shadow(0 0 4px #fff)" className="twinkle-1" />
+              <circle cx="60" cy="28" r="2.5" fill="#fff" filter="drop-shadow(0 0 4px #fff)" className="twinkle-2" />
+              <circle cx="90" cy="18" r="2.5" fill="#fff" filter="drop-shadow(0 0 4px #fff)" className="twinkle-3" />
+              <circle cx="130" cy="12" r="2.5" fill="#fff" filter="drop-shadow(0 0 4px #fff)" className="twinkle-1" />
+              <circle cx="170" cy="22" r="2.5" fill="#fff" filter="drop-shadow(0 0 4px #fff)" className="twinkle-2" />
+              <circle cx="40" cy="35" r="2" fill="#fff" filter="drop-shadow(0 0 3px #fff)" className="twinkle-3" />
+              <circle cx="110" cy="30" r="2" fill="#fff" filter="drop-shadow(0 0 3px #fff)" className="twinkle-1" />
+              <circle cx="150" cy="25" r="2" fill="#fff" filter="drop-shadow(0 0 3px #fff)" className="twinkle-2" />
+            </svg>
+          </div>
+          <div className="twinkle-1" style={{ position: "absolute", bottom: 10, right: 100, pointerEvents: "none" }}><DiamondSVG size={30} color={c} opacity={0.3} /></div>
+        </>
+      );
+    }
+    if (theme.id === "wedding_plus") {
       // Elegant interlocking rings / florish
       return (
         <>
@@ -678,6 +713,16 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
             position: "absolute", bottom: "-20%", right: "-10%", width: "50%", height: "80%",
             background: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)",
             pointerEvents: "none", zIndex: 0,
+          }} />
+        )}
+        
+        {/* Glitter effect for Wedding++ */}
+        {theme.id === "wedding_plus" && (
+          <div className="twinkle-1" style={{
+            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='150' height='150' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='1.5' fill='white' opacity='0.8' /%3E%3Ccircle cx='40' cy='30' r='1' fill='white' opacity='0.5' /%3E%3Ccircle cx='80' cy='20' r='2' fill='white' opacity='0.6' /%3E%3Ccircle cx='20' cy='80' r='1' fill='white' opacity='0.9' /%3E%3Ccircle cx='70' cy='70' r='1.5' fill='white' opacity='0.4' /%3E%3Ccircle cx='90' cy='90' r='1' fill='white' opacity='0.7' /%3E%3Ccircle cx='50' cy='90' r='2' fill='white' opacity='0.5' /%3E%3Ccircle cx='30' cy='50' r='1.5' fill='white' opacity='0.8' /%3E%3C/svg%3E\")",
+            opacity: 0.6,
+            mixBlendMode: "screen",
           }} />
         )}
 
