@@ -11,6 +11,8 @@ export interface ProductOverride {
   id: string;
   visible?: boolean;
   price?: number;
+  cuttedPrice?: number;
+  badge?: "hot" | "new" | "specials" | "premium" | "";
   rating?: number;
   reviewCount?: number;
 }
@@ -44,6 +46,10 @@ export async function getVisibleSectionsDB(): Promise<DisplaySection[]> {
 
 export async function saveSectionDB(section: DisplaySection): Promise<void> {
   await set(ref(database, `sections/${section.id}`), section);
+}
+
+export async function updateSectionDB(id: string, changes: Partial<DisplaySection>): Promise<void> {
+  await update(ref(database, `sections/${id}`), changes);
 }
 
 export async function deleteSectionDB(id: string): Promise<void> {

@@ -22,6 +22,8 @@ export interface Product {
   tagline: string;
   category: "birthday" | "proposal" | "anniversary" | "friendship" | "love";
   price: number; // in INR paise (multiply by 100)
+  cuttedPrice?: number; // in INR paise (optional, for strikethrough display)
+  badge?: "hot" | "new" | "specials" | "premium" | ""; // Product badge overlay
   visible: boolean;
   thumbnail: string; // emoji or image url
   previewRoute: string; // e.g. "/preview/birthday-magic-box"
@@ -406,6 +408,8 @@ export interface DisplaySection {
   productIds: string[]; // which products appear in this section
   visible: boolean;
   order: number; // sort order
+  countdownEnabled?: boolean;
+  countdownEndTime?: string;
   createdAt: string;
 }
 

@@ -16,6 +16,7 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceInput, setPriceInput] = useState("");
+  const [cuttedPriceInput, setCuttedPriceInput] = useState("");
   const [editingRating, setEditingRating] = useState<string | null>(null);
   const [ratingInput, setRatingInput] = useState(5);
   const [reviewInput, setReviewInput] = useState("");
@@ -45,8 +46,22 @@ export default function AdminProductsPage() {
 
   const savePrice = async (id: string) => {
     const n = parseInt(priceInput, 10);
-    if (!isNaN(n) && n > 0) await updateProductOverrideDB(id, { price: n * 100 });
+    const cn = parseInt(cuttedPriceInput, 10);
+    
+    const updates: Partial<Product> = {};
+    if (!isNaN(n) && n > 0) updates.price = n * 100;
+    if (!isNaN(cn) && cn > 0) updates.cuttedPrice = cn * 100;
+    else if (cuttedPriceInput === "") updates.cuttedPrice = undefined; // allow clearing
+    
+    if (Object.keys(updates).length > 0) {
+      await updateProductOverrideDB(id, updates);
+    }
     setEditingPrice(null);
+    reload();
+  };
+
+  const updateBadge = async (id: string, badge: any) => {
+    await updateProductOverrideDB(id, { badge });
     reload();
   };
 
@@ -133,17 +148,26 @@ export default function AdminProductsPage() {
                   </div>
                 )}
               </div>
-              <div>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: 0.8 }}>Price</p>
+              <div style={{ gridColumn: "span 2" }}>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: 0.8 }}>Pricing</p>
                 {editingPrice === product.id ? (
-                  <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+                  <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
                     <input
                       className="input-field"
                       type="number"
+                      placeholder="Real Price (₹)"
                       value={priceInput}
                       onChange={e => setPriceInput(e.target.value)}
-                      style={{ padding: "6px 10px", fontSize: 14, width: 80 }}
+                      style={{ padding: "6px 10px", fontSize: 14, width: 100 }}
                       autoFocus
+                    />
+                    <input
+                      className="input-field"
+                      type="number"
+                      placeholder="Cutted Price (₹)"
+                      value={cuttedPriceInput}
+                      onChange={e => setCuttedPriceInput(e.target.value)}
+                      style={{ padding: "6px 10px", fontSize: 14, width: 110, color: "var(--text-muted)", textDecoration: "line-through" }}
                     />
                     <button className="btn-primary" style={{ padding: "6px 12px", fontSize: 12 }} onClick={() => savePrice(product.id)}>Save</button>
                     <button className="btn-secondary" style={{ padding: "6px 10px", fontSize: 12 }} onClick={() => setEditingPrice(null)}>✕</button>
@@ -151,8 +175,17 @@ export default function AdminProductsPage() {
                 ) : (
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
                     <p style={{ fontSize: 24, fontWeight: 800, color: "#FF6FA3" }}>₹{Math.floor(product.price / 100)}</p>
+                    {product.cuttedPrice && (
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.4)", textDecoration: "line-through" }}>
+                        ₹{Math.floor(product.cuttedPrice / 100)}
+                      </p>
+                    )}
                     <button
-                      onClick={() => { setEditingPrice(product.id); setPriceInput(String(Math.floor(product.price / 100))); }}
+                      onClick={() => { 
+                        setEditingPrice(product.id); 
+                        setPriceInput(String(Math.floor(product.price / 100))); 
+                        setCuttedPriceInput(product.cuttedPrice ? String(Math.floor(product.cuttedPrice / 100)) : "");
+                      }}
                       style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 14 }}
                     >
                       ✏️
@@ -164,6 +197,23 @@ export default function AdminProductsPage() {
 
             {/* Actions */}
             <div style={{ display: "flex", gap: 10, padding: "14px 24px", flexWrap: "wrap", alignItems: "center" }}>
+              {/* Badge Selection */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Badge:</span>
+                <select 
+                  className="input-field" 
+                  value={product.badge || ""} 
+                  onChange={(e) => updateBadge(product.id, e.target.value)}
+                  style={{ padding: "4px 8px", fontSize: 12, width: 100 }}
+                >
+                  <option value="">None</option>
+                  <option value="hot">🔥 HOT</option>
+                  <option value="new">✨ NEW</option>
+                  <option value="specials">🎁 SPECIAL</option>
+                  <option value="premium">💎 PREMIUM</option>
+                </select>
+              </div>
+
               {/* Visibility toggle */}
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <label className="toggle">

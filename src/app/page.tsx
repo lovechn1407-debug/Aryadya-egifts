@@ -177,10 +177,15 @@ function ProductCard({ product, accent, onCardClick }: { product: Product; accen
 
   return (
     <div onClick={() => onCardClick(product)}
-      style={{ cursor: "pointer", borderRadius: 10, overflow: "hidden", border: `1.5px solid ${color}22`, boxShadow: `0 4px 16px ${color}12`, transition: "transform 0.22s, box-shadow 0.22s", background: "#fff", display: "flex", flexDirection: "column" }}
+      style={{ cursor: "pointer", borderRadius: 10, overflow: "hidden", border: `1.5px solid ${color}22`, boxShadow: `0 4px 16px ${color}12`, transition: "transform 0.22s, box-shadow 0.22s", background: "#fff", display: "flex", flexDirection: "column", position: "relative" }}
       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 14px 36px ${color}28`; }}
       onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${color}12`; }}
     >
+      {product.badge && (
+        <div style={{ position: "absolute", top: 8, left: 8, zIndex: 10, padding: "4px 8px", background: product.badge === "hot" ? "#EF4444" : product.badge === "new" ? "#3B82F6" : product.badge === "specials" ? "#10B981" : "#F59E0B", color: "#fff", fontSize: 10, fontWeight: 900, borderRadius: 6, textTransform: "uppercase", letterSpacing: 0.5, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+          {product.badge === "hot" ? "🔥 HOT" : product.badge === "new" ? "✨ NEW" : product.badge === "specials" ? "🎁 SPECIAL" : "💎 PREMIUM"}
+        </div>
+      )}
       {/* Iframe — maintains 3:4 ratio */}
       <div ref={containerRef} style={{ aspectRatio: "3/4", position: "relative", overflow: "hidden", background: `${color}08`, flexShrink: 0 }}>
         <iframe src={`/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
@@ -195,7 +200,10 @@ function ProductCard({ product, accent, onCardClick }: { product: Product; accen
           <span style={{ fontSize: 10, color: "#9CA3AF", marginLeft: 2 }}>{rating.toFixed(1)}</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 7 }}>
-          <span style={{ fontSize: 17, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {product.cuttedPrice && <span style={{ fontSize: 11, color: "#9CA3AF", textDecoration: "line-through", lineHeight: 1 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
+            <span style={{ fontSize: 17, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", lineHeight: 1.1 }}>₹{Math.floor(product.price / 100)}</span>
+          </div>
           <button style={{ background: `linear-gradient(135deg,${color},${color}CC)`, color: "#fff", border: "none", borderRadius: 7, padding: "6px 13px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 10px ${color}30` }}>
             View →
           </button>
@@ -307,6 +315,7 @@ function ProductModal({ product, accent, onClose }: { product: Product; accent: 
           <div style={{ marginTop: 16 }}>{product.slides.slice(0,5).map(s => <div key={s.slideNumber} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><div style={{ width: 7, height: 7, borderRadius: "50%", background: accent, flexShrink: 0 }} /><span style={{ fontSize: 13, color: "#374151" }}>{s.title}</span></div>)}</div>
           <div style={{ margin: "20px 0", padding: "14px 0", borderTop: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "baseline", gap: 8 }}>
             <span style={{ fontSize: 30, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price/100)}</span>
+            {product.cuttedPrice && <span style={{ fontSize: 16, color: "#9CA3AF", textDecoration: "line-through", fontWeight: 600 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
             <span style={{ fontSize: 13, color: "#9CA3AF" }}>one-time</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -596,6 +605,31 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
+  
+  const [timeLeft, setTimeLeft] = useState<{d: number, h: number, m: number, s: number} | null>(null);
+
+  useEffect(() => {
+    if (!section.countdownEnabled || !section.countdownEndTime) return;
+    const end = new Date(section.countdownEndTime).getTime();
+    
+    const update = () => {
+      const now = Date.now();
+      const diff = end - now;
+      if (diff <= 0) {
+        setTimeLeft(null);
+      } else {
+        setTimeLeft({
+          d: Math.floor(diff / (1000 * 60 * 60 * 24)),
+          h: Math.floor((diff / (1000 * 60 * 60)) % 24),
+          m: Math.floor((diff / 1000 / 60) % 60),
+          s: Math.floor((diff / 1000) % 60),
+        });
+      }
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [section.countdownEnabled, section.countdownEndTime]);
 
   const updateArrows = () => {
     const el = scrollRef.current;
@@ -676,6 +710,15 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
             }}>
               {section.subtitle}
             </p>
+            {timeLeft && (
+              <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center" }}>
+                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "rgba(255,255,255,0.9)", marginRight: 4 }}>Ends In:</span>
+                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.d}d</div>
+                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.h}h</div>
+                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.m}m</div>
+                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.s}s</div>
+              </div>
+            )}
           </div>
 
           {/* Count pill — always visible */}

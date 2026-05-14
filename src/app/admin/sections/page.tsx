@@ -4,7 +4,7 @@ import {
   SECTION_THEMES, SectionTheme, DisplaySection, Product,
 } from "@/lib/data";
 import {
-  getSectionsDB, saveSectionDB, deleteSectionDB, getProductsDB,
+  getSectionsDB, saveSectionDB, deleteSectionDB, updateSectionDB, getProductsDB,
 } from "@/lib/db";
 
 export default function AdminSectionsPage() {
@@ -18,6 +18,8 @@ export default function AdminSectionsPage() {
   const [subtitle, setSubtitle] = useState("");
   const [theme, setTheme] = useState<SectionTheme>("birthday");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [countdownEnabled, setCountdownEnabled] = useState(false);
+  const [countdownEndTime, setCountdownEndTime] = useState("");
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -45,10 +47,12 @@ export default function AdminSectionsPage() {
         productIds: selectedProducts,
         visible: true,
         order: sections.length,
+        countdownEnabled,
+        countdownEndTime,
         createdAt: new Date().toISOString(),
       };
       await saveSectionDB(newSection);
-      setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]);
+      setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
       setShowCreate(false);
       await reload();
     } catch (err: any) {
@@ -145,6 +149,15 @@ export default function AdminSectionsPage() {
             <div>
               <label style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 6 }}>Subtitle (optional)</label>
               <input value={subtitle} onChange={e => setSubtitle(e.target.value)} placeholder="Auto-filled from theme" style={inputStyle} />
+            </div>
+            <div style={{ gridColumn: "1 / -1", background: "rgba(0,0,0,0.15)", padding: 12, borderRadius: 10, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700 }}>
+                <input type="checkbox" checked={countdownEnabled} onChange={e => setCountdownEnabled(e.target.checked)} />
+                Enable Countdown Timer ⏳
+              </label>
+              {countdownEnabled && (
+                <input type="datetime-local" value={countdownEndTime} onChange={e => setCountdownEndTime(e.target.value)} style={{ ...inputStyle, width: "auto", padding: "6px 12px" }} />
+              )}
             </div>
           </div>
 
@@ -246,6 +259,22 @@ export default function AdminSectionsPage() {
               >
                 🗑️
               </button>
+            </div>
+
+            <div style={{ background: "rgba(0,0,0,0.2)", padding: 12, borderRadius: 10, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>
+                <input type="checkbox" checked={sec.countdownEnabled || false} onChange={async (e) => {
+                  await updateSectionDB(sec.id, { countdownEnabled: e.target.checked });
+                  reload();
+                }} />
+                Countdown Timer ⏳
+              </label>
+              {sec.countdownEnabled && (
+                <input type="datetime-local" value={sec.countdownEndTime || ""} onChange={async (e) => {
+                  await updateSectionDB(sec.id, { countdownEndTime: e.target.value });
+                  reload();
+                }} style={{ ...inputStyle, width: "auto", padding: "4px 10px", fontSize: 12 }} />
+              )}
             </div>
 
             <label style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 6 }}>
