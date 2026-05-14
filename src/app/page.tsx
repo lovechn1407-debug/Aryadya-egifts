@@ -1,65 +1,703 @@
-import Image from "next/image";
+"use client";
+import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
+import { getSectionTheme } from "@/lib/data";
+import type { Product, DisplaySection, SectionThemeConfig } from "@/lib/data";
+import type { Order } from "@/lib/data";
+import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB } from "@/lib/db";
 
-export default function Home() {
+/* ── Navbar ── */
+function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <nav style={{
+      position: "sticky", top: 0, zIndex: 100,
+      background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)",
+      borderBottom: "1px solid rgba(0,0,0,0.06)",
+      padding: "0 clamp(16px,4vw,48px)",
+      display: "flex", alignItems: "center", height: 60, gap: 10,
+    }}>
+      <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 24 }}>🎁</span>
+        <span style={{ fontSize: 18, fontWeight: 900, fontFamily: "'Nunito',sans-serif", color: "#E91E8C" }}>Aradhya</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "#9CA3AF" }}>E-Gifts</span>
+      </Link>
+      <div style={{ flex: 1 }} />
+      <Link href="/my-orders" style={{
+        fontSize: 13, fontWeight: 700, color: "#7C3AED", cursor: "pointer",
+        padding: "8px 16px", borderRadius: 999, border: "1.5px solid #7C3AED",
+        background: "transparent", textDecoration: "none", whiteSpace: "nowrap",
+      }}>
+        My Orders
+      </Link>
+      <Link href="/admin" style={{
+        fontSize: 12, fontWeight: 600, color: "#4A4A68", textDecoration: "none",
+        padding: "7px 14px", borderRadius: 999, border: "1px solid rgba(0,0,0,0.08)",
+      }}>Admin</Link>
+    </nav>
+  );
+}
+
+/* ── Hero ── */
+function Hero() {
+  return (
+    <section style={{
+      position: "relative", overflow: "hidden",
+      padding: "80px clamp(16px,4vw,48px) 60px",
+      background: "linear-gradient(180deg, #FFF0F5 0%, #FFFFFF 100%)",
+    }}>
+      {/* Decorative blobs */}
+      <div style={{ position: "absolute", top: -80, right: -60, width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(233,30,140,0.08),transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: -60, left: -80, width: 250, height: 250, borderRadius: "50%", background: "radial-gradient(circle,rgba(124,58,237,0.06),transparent 70%)", pointerEvents: "none" }} />
+
+      <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", position: "relative", zIndex: 1 }}>
+        <div style={{
+          display: "inline-block", padding: "6px 18px", borderRadius: 999, fontSize: 13, fontWeight: 700,
+          background: "linear-gradient(135deg,rgba(233,30,140,0.1),rgba(124,58,237,0.1))",
+          color: "#E91E8C", marginBottom: 20,
+        }}>
+          ✨ India&apos;s Most Loved E-Gifting Platform
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
+
+        <h1 style={{
+          fontSize: "clamp(32px,6vw,56px)", fontWeight: 900,
+          fontFamily: "'Nunito',sans-serif", lineHeight: 1.15,
+          color: "#1A1A2E",
+        }}>
+          Send <span style={{ color: "#E91E8C" }}>Magical</span> Digital
+          <br />Surprises to Your Loved Ones
+        </h1>
+
+        <p style={{
+          fontSize: "clamp(15px,2vw,18px)", color: "#4A4A68",
+          lineHeight: 1.7, maxWidth: 540, margin: "20px auto 0",
+        }}>
+          Beautiful, personalised webpages for birthdays, proposals,
+          anniversaries &amp; more. Preview it, pay once, customise &amp; share.
+        </p>
+
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 32, flexWrap: "wrap" }}>
+          <a href="#gifts" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "linear-gradient(135deg,#E91E8C,#7C3AED)", color: "#fff",
+            borderRadius: 999, padding: "14px 32px", fontWeight: 700, fontSize: 15,
+            textDecoration: "none", boxShadow: "0 8px 24px rgba(233,30,140,0.25)",
+            transition: "transform 0.2s",
+          }}>
+            Browse Gifts 🎁
           </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
+          <a href="#how" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "#fff", color: "#1A1A2E",
+            border: "1px solid rgba(0,0,0,0.1)", borderRadius: 999,
+            padding: "14px 32px", fontWeight: 600, fontSize: 15,
+            textDecoration: "none", transition: "all 0.2s",
+          }}>
+            How it Works
           </a>
         </div>
-      </main>
+
+        {/* Trust indicators */}
+        <div style={{ display: "flex", gap: 28, justifyContent: "center", marginTop: 36, flexWrap: "wrap" }}>
+          {[
+            { icon: "🔒", text: "Secure Payments" },
+            { icon: "⚡", text: "Instant Delivery" },
+            { icon: "✨", text: "Fully Customisable" },
+          ].map(t => (
+            <div key={t.text} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#9CA3AF", fontWeight: 500 }}>
+              <span>{t.icon}</span> {t.text}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── How it Works ── */
+function HowItWorks() {
+  const steps = [
+    { icon: "👀", title: "Browse & Preview", desc: "Explore our collection of stunning digital gift pages. Preview any template live." },
+    { icon: "💳", title: "Pay & Personalise", desc: "One-time payment. Then click directly on the page to edit all texts & messages." },
+    { icon: "🔗", title: "Share the Link", desc: "Get a unique permanent link. Send it to your loved one — they'll be amazed!" },
+  ];
+  return (
+    <section id="how" style={{ padding: "60px clamp(16px,4vw,48px)", background: "#FAFAFA" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+        <h2 style={{ textAlign: "center", fontSize: 28, fontWeight: 800, fontFamily: "'Nunito',sans-serif", color: "#1A1A2E" }}>
+          How it Works
+        </h2>
+        <p style={{ textAlign: "center", fontSize: 15, color: "#9CA3AF", marginTop: 8 }}>Three simple steps to create magic</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 24, marginTop: 36 }}>
+          {steps.map((s, i) => (
+            <div key={i} style={{
+              background: "#fff", borderRadius: 20, padding: 28,
+              border: "1px solid rgba(0,0,0,0.06)",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+              textAlign: "center", transition: "transform 0.2s, box-shadow 0.2s",
+            }}>
+              <div style={{
+                width: 56, height: 56, borderRadius: 16, margin: "0 auto 16px",
+                background: "linear-gradient(135deg,rgba(233,30,140,0.08),rgba(124,58,237,0.08))",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26,
+              }}>{s.icon}</div>
+              <div style={{
+                width: 28, height: 28, borderRadius: "50%", margin: "-40px auto 12px",
+                background: "linear-gradient(135deg,#E91E8C,#7C3AED)", color: "#fff",
+                fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center",
+                position: "relative", top: -4,
+              }}>{i + 1}</div>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: "#1A1A2E" }}>{s.title}</h3>
+              <p style={{ fontSize: 14, color: "#9CA3AF", marginTop: 8, lineHeight: 1.6 }}>{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Product Card ── */
+function ProductCard({ product, accent, onCardClick }: { product: Product; accent?: string; onCardClick: (p: Product) => void }) {
+  const color = accent || "#E91E8C";
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.35);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => setScale(el.offsetWidth / 390);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const IW = 390, IH = IW * 4 / 3;
+  const rating = (product as any).rating ?? 4.5;
+
+  return (
+    <div onClick={() => onCardClick(product)}
+      style={{ cursor: "pointer", borderRadius: 10, overflow: "hidden", border: `1.5px solid ${color}22`, boxShadow: `0 4px 16px ${color}12`, transition: "transform 0.22s, box-shadow 0.22s", background: "#fff", display: "flex", flexDirection: "column" }}
+      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 14px 36px ${color}28`; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${color}12`; }}
+    >
+      {/* Iframe — maintains 3:4 ratio */}
+      <div ref={containerRef} style={{ aspectRatio: "3/4", position: "relative", overflow: "hidden", background: `${color}08`, flexShrink: 0 }}>
+        <iframe src={`/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
+      </div>
+      {/* Solid footer — always visible below iframe */}
+      <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#1F2937", lineHeight: 1.3, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+          {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 2, marginTop: 5 }}>
+          {[1,2,3,4,5].map(i => <span key={i} style={{ color: i <= Math.round(rating) ? "#F59E0B" : "#E5E7EB", fontSize: 11 }}>★</span>)}
+          <span style={{ fontSize: 10, color: "#9CA3AF", marginLeft: 2 }}>{rating.toFixed(1)}</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 7 }}>
+          <span style={{ fontSize: 17, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
+          <button style={{ background: `linear-gradient(135deg,${color},${color}CC)`, color: "#fff", border: "none", borderRadius: 7, padding: "6px 13px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 10px ${color}30` }}>
+            View →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+/* ── Login Modal ── */
+function LoginModal({ onClose }: { onClose: () => void }) {
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [orders, setOrders] = useState<Order[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleLogin = async () => {
+    if (!phone.trim() || !email.trim()) { setError("Enter both phone and email."); return; }
+    setLoading(true); setError("");
+    try {
+      const found = await getOrdersByBuyerDB(phone, email);
+      setOrders(found);
+      if (found.length === 0) setError("No orders found. Check your details.");
+    } catch { setError("Something went wrong. Try again."); }
+    setLoading(false);
+  };
+
+  const inputStyle: React.CSSProperties = { width: "100%", padding: "12px 14px", borderRadius: 10, border: "1.5px solid #E5E7EB", fontSize: 14, color: "#1F2937", background: "#F9FAFB", outline: "none", boxSizing: "border-box" };
+  const drafts = orders?.filter(o => o.status === "paid" || o.status === "editing") ?? [];
+  const finalized = orders?.filter(o => o.status === "finalized") ?? [];
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", zIndex: 1000 }} />
+      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 1001, width: "min(460px,92vw)", background: "#fff", borderRadius: 22, padding: "28px 24px", boxShadow: "0 32px 80px rgba(0,0,0,0.22)", maxHeight: "85vh", overflowY: "auto" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>My Orders</h2>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#9CA3AF" }}>×</button>
+        </div>
+        {orders === null ? (
+          <>
+            <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 20, lineHeight: 1.6 }}>Enter the phone & email you used when purchasing.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <input style={inputStyle} placeholder="Phone (e.g. 9876543210)" value={phone} onChange={e => setPhone(e.target.value)} />
+              <input style={inputStyle} type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} />
+              {error && <p style={{ color: "#EF4444", fontSize: 13 }}>{error}</p>}
+              <button onClick={handleLogin} disabled={loading} style={{ padding: "14px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", fontWeight: 900, fontSize: 15, cursor: "pointer", opacity: loading ? 0.7 : 1 }}>
+                {loading ? "Looking up…" : "Find My Orders →"}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {drafts.length > 0 && (<div style={{ background: "#FEF3C7", borderRadius: 12, padding: "12px 16px", marginBottom: 14, border: "1px solid #FCD34D" }}><p style={{ fontWeight: 700, color: "#92400E", fontSize: 13 }}>⚠️ {drafts.length} draft{drafts.length > 1 ? "s" : ""} awaiting personalisation</p></div>)}
+            {drafts.map(o => (
+              <div key={o.id} style={{ background: "#F5F3FF", borderRadius: 12, padding: 16, border: "1px solid #DDD6FE", marginBottom: 10 }}>
+                <p style={{ fontWeight: 700, color: "#1F2937", fontSize: 14 }}>{o.productName}</p>
+                <p style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{new Date(o.createdAt).toLocaleDateString("en-IN")}</p>
+                <Link href={`/edit/${o.id}`} onClick={onClose} style={{ display: "inline-block", marginTop: 10, background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", padding: "8px 18px", borderRadius: 999, textDecoration: "none", fontSize: 13, fontWeight: 700 }}>Continue Editing ✍️</Link>
+              </div>
+            ))}
+            {finalized.map(o => (
+              <div key={o.id} style={{ background: "#F0FDF4", borderRadius: 12, padding: 16, border: "1px solid #BBF7D0", marginBottom: 10 }}>
+                <p style={{ fontWeight: 700, color: "#1F2937", fontSize: 14 }}>{o.productName}</p>
+                <p style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>For: {o.buyerName} · ₹{Math.floor(o.amount/100)}</p>
+                <Link href={`/view/${o.id}`} onClick={onClose} style={{ display: "inline-block", marginTop: 10, background: "#10B981", color: "#fff", padding: "8px 18px", borderRadius: 999, textDecoration: "none", fontSize: 13, fontWeight: 700 }}>View Your Page 🔗</Link>
+              </div>
+            ))}
+            <button onClick={() => setOrders(null)} style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: 13, marginTop: 8 }}>← Try different details</button>
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+/* ── Product Quick-View Modal ── */
+function ProductModal({ product, accent, onClose }: { product: Product; accent: string; onClose: () => void }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.4);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const u = () => setScale(el.offsetWidth / 390);
+    u(); const ro = new ResizeObserver(u); ro.observe(el); return () => ro.disconnect();
+  }, []);
+  const IW = 390, IH = IW * 4 / 3;
+  const rating = (product as any).rating ?? 4.5;
+  const reviewCount = (product as any).reviewCount;
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", zIndex: 900 }} />
+      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 901, width: "min(860px,95vw)", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: 22, boxShadow: "0 40px 100px rgba(0,0,0,0.28)", display: "flex", flexWrap: "wrap" }}>
+        {/* Preview pane */}
+        <div ref={containerRef} style={{ flex: "1 1 300px", minHeight: 280, position: "relative", overflow: "hidden", borderRadius: "22px 0 0 22px", background: `${accent}10` }}>
+          <iframe src={`/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
+        </div>
+        {/* Details pane */}
+        <div style={{ flex: "1 1 260px", padding: "28px 24px" }}>
+          <button onClick={onClose} style={{ float: "right", background: "#F3F4F6", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 18, color: "#6B7280" }}>×</button>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", lineHeight: 1.3, marginTop: 4, paddingRight: 36 }}>{product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu,"").trim()}</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 10 }}>
+            {[1,2,3,4,5].map(i => <span key={i} style={{ color: i <= Math.round(rating) ? "#F59E0B" : "#E5E7EB", fontSize: 18 }}>★</span>)}
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", marginLeft: 4 }}>{rating.toFixed(1)}{reviewCount ? ` (${reviewCount})` : ""}</span>
+          </div>
+          <p style={{ fontSize: 13, color: "#6B7280", marginTop: 14, lineHeight: 1.7 }}>{product.tagline}</p>
+          <div style={{ marginTop: 16 }}>{product.slides.slice(0,5).map(s => <div key={s.slideNumber} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><div style={{ width: 7, height: 7, borderRadius: "50%", background: accent, flexShrink: 0 }} /><span style={{ fontSize: 13, color: "#374151" }}>{s.title}</span></div>)}</div>
+          <div style={{ margin: "20px 0", padding: "14px 0", borderTop: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span style={{ fontSize: 30, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price/100)}</span>
+            <span style={{ fontSize: 13, color: "#9CA3AF" }}>one-time</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <Link href={`/order/${product.id}`} style={{ display: "block", textAlign: "center", background: `linear-gradient(135deg,${accent},${accent}BB)`, color: "#fff", padding: "15px", borderRadius: 13, textDecoration: "none", fontWeight: 900, fontSize: 15, fontFamily: "'Nunito',sans-serif", boxShadow: `0 8px 24px ${accent}35` }}>Buy &amp; Personalise ₹{Math.floor(product.price/100)} →</Link>
+            <Link href={`/preview/${product.id}`} style={{ display: "block", textAlign: "center", background: "#F9FAFB", color: "#374151", padding: "12px", borderRadius: 13, textDecoration: "none", fontWeight: 700, fontSize: 13, border: "1px solid #E5E7EB" }}>🔍 View Full Preview</Link>
+          </div>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 16 }}>{["🔒 Secure","📩 Instant","💌 Shareable"].map(b => <span key={b} style={{ fontSize: 11, color: "#9CA3AF" }}>{b}</span>)}</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ── SVG Decorators per theme ── */
+function HeartSVG({ size = 32, color = "#fff", opacity = 1 }: { size?: number; color?: string; opacity?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" style={{ opacity }}>
+      <path d="M16 28S4 20 4 11.5C4 8 7 5 10.5 5c2.2 0 4.1 1.1 5.5 2.8C17.4 6.1 19.3 5 21.5 5 25 5 28 8 28 11.5 28 20 16 28 16 28Z" fill={color} />
+    </svg>
+  );
+}
+function StarSVG({ size = 28, color = "#fff", opacity = 1 }: { size?: number; color?: string; opacity?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 28 28" fill="none" style={{ opacity }}>
+      <path d="M14 2l2.9 8.6H26l-7.4 5.3 2.9 8.6L14 19.2l-7.5 5.3 2.9-8.6L2 10.6h9.1Z" fill={color} />
+    </svg>
+  );
+}
+function DiamondSVG({ size = 28, color = "#fff", opacity = 1 }: { size?: number; color?: string; opacity?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 28 28" fill="none" style={{ opacity }}>
+      <path d="M14 2L26 11l-12 15L2 11Z" fill={color} />
+      <path d="M2 11h24" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+    </svg>
+  );
+}
+function RibbonSVG({ width = 80, color = "#fff", opacity = 0.18 }: { width?: number; color?: string; opacity?: number }) {
+  return (
+    <svg width={width} height={32} viewBox="0 0 80 32" fill="none" style={{ opacity }}>
+      <path d="M0 16 Q20 2 40 16 Q60 30 80 16" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M0 22 Q20 8 40 22 Q60 36 80 22" stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.5" />
+    </svg>
+  );
+}
+function RingSVG({ size = 36, color = "#fff", opacity = 1 }: { size?: number; color?: string; opacity?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" style={{ opacity }}>
+      <circle cx="18" cy="18" r="12" stroke={color} strokeWidth="3" fill="none" />
+      <circle cx="18" cy="18" r="7" stroke={color} strokeWidth="1.5" fill="none" opacity="0.5" />
+      <path d="M12 10 L18 6 L24 10" stroke={color} strokeWidth="2" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+function SunRaySVG({ size = 44, color = "#fff", opacity = 0.25 }: { size?: number; color?: string; opacity?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 44 44" fill="none" style={{ opacity }}>
+      <circle cx="22" cy="22" r="8" fill={color} />
+      {[0,45,90,135,180,225,270,315].map((deg, i) => (
+        <line key={i} x1="22" y1="22"
+          x2={22 + 16 * Math.cos(deg * Math.PI / 180)}
+          y2={22 + 16 * Math.sin(deg * Math.PI / 180)}
+          stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+      ))}
+    </svg>
+  );
+}
+function SparkSVG({ size = 20, color = "#fff", opacity = 1 }: { size?: number; color?: string; opacity?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" style={{ opacity }}>
+      <path d="M10 1v18M1 10h18M3.5 3.5l13 13M16.5 3.5l-13 13" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/* Theme → decorator renderer */
+function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionTheme> }) {
+  const c = "rgba(255,255,255,0.9)";
+  if (theme.id === "valentine" || theme.id === "love") {
+    return (
+      <>
+        <div className="float-drift-1" style={{ position: "absolute", top: 14, right: 28, pointerEvents: "none" }}><HeartSVG size={44} color={c} opacity={0.22} /></div>
+        <div className="float-drift-2" style={{ position: "absolute", top: 8, right: 90, pointerEvents: "none" }}><HeartSVG size={26} color={c} opacity={0.15} /></div>
+        <div className="float-drift-3" style={{ position: "absolute", bottom: 10, right: 50, pointerEvents: "none" }}><HeartSVG size={32} color={c} opacity={0.12} /></div>
+        <div className="float-drift-4" style={{ position: "absolute", top: 20, right: 160, pointerEvents: "none" }}><HeartSVG size={18} color={c} opacity={0.18} /></div>
+        <div className="float-drift-1" style={{ position: "absolute", bottom: 8, right: 200, pointerEvents: "none" }}><SparkSVG size={16} color={c} opacity={0.15} /></div>
+        {/* Ribbon across bottom */}
+        <div className="ribbon-sway" style={{ position: "absolute", bottom: 0, left: "30%", pointerEvents: "none" }}><RibbonSVG width={120} color="#fff" opacity={0.12} /></div>
+      </>
+    );
+  }
+  if (theme.id === "birthday") {
+    return (
+      <>
+        <div className="twinkle-1" style={{ position: "absolute", top: 12, right: 24, pointerEvents: "none" }}><StarSVG size={36} color={c} opacity={0.22} /></div>
+        <div className="twinkle-2" style={{ position: "absolute", top: 8, right: 80, pointerEvents: "none" }}><SparkSVG size={20} color={c} opacity={0.2} /></div>
+        <div className="twinkle-3" style={{ position: "absolute", bottom: 12, right: 60, pointerEvents: "none" }}><StarSVG size={22} color={c} opacity={0.14} /></div>
+        <div className="float-drift-2" style={{ position: "absolute", top: 16, right: 150, pointerEvents: "none" }}><StarSVG size={16} color={c} opacity={0.18} /></div>
+        <div className="twinkle-1" style={{ position: "absolute", bottom: 6, right: 180, pointerEvents: "none" }}><SparkSVG size={14} color={c} opacity={0.15} /></div>
+        <div className="ribbon-sway" style={{ position: "absolute", top: 0, right: "20%", pointerEvents: "none" }}><RibbonSVG width={100} color="#fff" opacity={0.1} /></div>
+      </>
+    );
+  }
+  if (theme.id === "anniversary" || theme.id === "wedding") {
+    return (
+      <>
+        <div className="float-drift-1" style={{ position: "absolute", top: 12, right: 24, pointerEvents: "none" }}><RingSVG size={44} color={c} opacity={0.22} /></div>
+        <div className="float-drift-2" style={{ position: "absolute", top: 6, right: 90, pointerEvents: "none" }}><DiamondSVG size={24} color={c} opacity={0.2} /></div>
+        <div className="twinkle-1" style={{ position: "absolute", bottom: 10, right: 55, pointerEvents: "none" }}><SparkSVG size={18} color={c} opacity={0.18} /></div>
+        <div className="float-drift-3" style={{ position: "absolute", top: 20, right: 160, pointerEvents: "none" }}><HeartSVG size={18} color={c} opacity={0.15} /></div>
+        <div className="ribbon-sway" style={{ position: "absolute", bottom: 0, left: "40%", pointerEvents: "none" }}><RibbonSVG width={140} color="#fff" opacity={0.1} /></div>
+      </>
+    );
+  }
+  if (theme.id === "friendship") {
+    return (
+      <>
+        <div className="float-drift-1" style={{ position: "absolute", top: 10, right: 24, pointerEvents: "none" }}><SunRaySVG size={48} color={c} opacity={0.2} /></div>
+        <div className="twinkle-2" style={{ position: "absolute", top: 8, right: 90, pointerEvents: "none" }}><StarSVG size={22} color={c} opacity={0.15} /></div>
+        <div className="twinkle-1" style={{ position: "absolute", bottom: 10, right: 60, pointerEvents: "none" }}><SparkSVG size={16} color={c} opacity={0.18} /></div>
+        <div className="float-drift-4" style={{ position: "absolute", top: 18, right: 155, pointerEvents: "none" }}><SunRaySVG size={28} color={c} opacity={0.12} /></div>
+      </>
+    );
+  }
+  if (theme.id === "festival") {
+    return (
+      <>
+        <div className="twinkle-1" style={{ position: "absolute", top: 10, right: 24, pointerEvents: "none" }}><SparkSVG size={32} color={c} opacity={0.22} /></div>
+        <div className="twinkle-2" style={{ position: "absolute", top: 6, right: 80, pointerEvents: "none" }}><StarSVG size={26} color={c} opacity={0.18} /></div>
+        <div className="twinkle-3" style={{ position: "absolute", bottom: 10, right: 55, pointerEvents: "none" }}><DiamondSVG size={20} color={c} opacity={0.15} /></div>
+        <div className="float-drift-3" style={{ position: "absolute", top: 16, right: 155, pointerEvents: "none" }}><SparkSVG size={14} color={c} opacity={0.14} /></div>
+        <div className="ribbon-sway" style={{ position: "absolute", bottom: 0, right: "25%", pointerEvents: "none" }}><RibbonSVG width={110} color="#fff" opacity={0.1} /></div>
+      </>
+    );
+  }
+  // general / default
+  return (
+    <>
+      <div className="float-drift-1" style={{ position: "absolute", top: 12, right: 24, pointerEvents: "none" }}><DiamondSVG size={36} color={c} opacity={0.2} /></div>
+      <div className="twinkle-2" style={{ position: "absolute", top: 8, right: 85, pointerEvents: "none" }}><SparkSVG size={20} color={c} opacity={0.16} /></div>
+      <div className="float-drift-2" style={{ position: "absolute", bottom: 10, right: 55, pointerEvents: "none" }}><StarSVG size={20} color={c} opacity={0.14} /></div>
+      <div className="ribbon-sway" style={{ position: "absolute", bottom: 0, left: "35%", pointerEvents: "none" }}><RibbonSVG width={100} color="#fff" opacity={0.1} /></div>
+    </>
+  );
+}
+
+/* ── Scroll Arrow Button ── */
+function ArrowBtn({ dir, accent, onClick }: { dir: "left" | "right"; accent: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        position: "absolute",
+        top: "50%", transform: "translateY(-50%)",
+        [dir]: 6,
+        zIndex: 20,
+        width: 36, height: 36, borderRadius: "50%",
+        background: "#fff",
+        border: `1.5px solid ${accent}44`,
+        boxShadow: `0 4px 16px ${accent}28`,
+        cursor: "pointer",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: accent, padding: 0,
+      }}
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        {dir === "right"
+          ? <path d="M6.5 4l5 5-5 5" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          : <path d="M11.5 4l-5 5 5 5" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        }
+      </svg>
+    </button>
+  );
+}
+
+/* ── Occasion Section — Full-width shelf ── */
+function OccasionSection({ section, products, onCardClick }: { section: DisplaySection; products: Product[]; onCardClick: (p: Product, accent?: string) => void }) {
+  const theme = getSectionTheme(section.theme);
+  const sectionProducts = products.filter(p => section.productIds.includes(p.id));
+  if (sectionProducts.length === 0) return null;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const updateArrows = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  };
+
+  const scroll = (dir: "left" | "right") => {
+    scrollRef.current?.scrollBy({ left: dir === "left" ? -300 : 300, behavior: "smooth" });
+  };
+
+  return (
+    <section className="occasion-banner-reveal" style={{
+      width: "100%",
+      background: theme.bgLight,
+      overflow: "hidden",
+    }}>
+      {/* ── GRADIENT HEADER — full width, no radius ── */}
+      <div style={{
+        background: theme.gradient,
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* Grain */}
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          opacity: 0.04,
+        }} />
+        {/* Shine */}
+        <div style={{
+          position: "absolute", top: 0, left: "-15%", width: "45%", height: "100%",
+          background: "linear-gradient(105deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)",
+          pointerEvents: "none",
+        }} />
+
+        <OccasionDecorators theme={theme} />
+
+        {/* Single compact row — never wraps */}
+        <div style={{
+          padding: "14px clamp(14px,3vw,40px)",
+          display: "flex", alignItems: "center", gap: 12, flexWrap: "nowrap",
+          position: "relative", zIndex: 2, overflow: "hidden",
+        }}>
+          {/* Icon orb */}
+          <div style={{
+            width: 44, height: 44, borderRadius: 13, flexShrink: 0,
+            background: "rgba(255,255,255,0.22)",
+            backdropFilter: "blur(10px)",
+            border: "1.5px solid rgba(255,255,255,0.35)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            {(theme.id === "valentine" || theme.id === "love") && <div className="heart-beat"><HeartSVG size={22} color="#fff" opacity={0.95} /></div>}
+            {theme.id === "birthday" && <StarSVG size={21} color="#fff" opacity={0.95} />}
+            {(theme.id === "anniversary" || theme.id === "wedding") && <RingSVG size={22} color="#fff" opacity={0.95} />}
+            {theme.id === "friendship" && <SunRaySVG size={24} color="#fff" opacity={0.9} />}
+            {theme.id === "festival" && <SparkSVG size={20} color="#fff" opacity={0.95} />}
+            {theme.id === "general" && <DiamondSVG size={20} color="#fff" opacity={0.95} />}
+          </div>
+
+          {/* Title + subtitle — clipped if needed */}
+          <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+            <h2 style={{
+              fontSize: "clamp(14px,2vw,20px)", fontWeight: 900,
+              color: "#fff", fontFamily: "'Nunito',sans-serif",
+              lineHeight: 1.2, margin: 0,
+              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              textShadow: "0 2px 8px rgba(0,0,0,0.18)",
+            }}>
+              {section.title}
+            </h2>
+            <p style={{
+              fontSize: "clamp(11px,1.5vw,13px)", color: "rgba(255,255,255,0.82)",
+              marginTop: 2, lineHeight: 1.4,
+              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+            }}>
+              {section.subtitle}
+            </p>
+          </div>
+
+          {/* Count pill — always visible */}
+          <div style={{
+            flexShrink: 0,
+            background: "rgba(255,255,255,0.22)",
+            border: "1.5px solid rgba(255,255,255,0.3)",
+            borderRadius: 10, padding: "6px 14px",
+            display: "flex", flexDirection: "column", alignItems: "center",
+          }}>
+            <span style={{ fontSize: 18, fontWeight: 900, color: "#fff", lineHeight: 1, fontFamily: "'Nunito',sans-serif" }}>
+              {sectionProducts.length}
+            </span>
+            <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.75)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
+              {sectionProducts.length === 1 ? "Gift" : "Gifts"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── CARD SHELF — horizontal scroll with arrows ── */}
+      <div style={{ background: theme.bgLight, position: "relative" }}>
+        {/* Left arrow */}
+        {canLeft && <ArrowBtn dir="left" accent={theme.accent} onClick={() => scroll("left")} />}
+        {/* Right arrow */}
+        {canRight && <ArrowBtn dir="right" accent={theme.accent} onClick={() => scroll("right")} />}
+
+        {/* Scroll row */}
+        <div
+          ref={scrollRef}
+          onScroll={updateArrows}
+          style={{
+            display: "flex",
+            gap: 12,
+            overflowX: "auto",
+            padding: "18px clamp(14px,3vw,32px) 22px",
+            scrollSnapType: "x mandatory",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
+          {sectionProducts.map(p => (
+            <div
+              key={p.id}
+              style={{
+                flexShrink: 0,
+                /* 2 cards on mobile → grow to 260px max on desktop */
+                width: "clamp(160px, calc(50vw - 26px), 260px)",
+                scrollSnapAlign: "start",
+              }}
+            >
+              <ProductCard product={p} accent={theme.accent} onCardClick={p => onCardClick(p, theme.accent)} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── All Gifts fallback ── */
+function AllGifts({ products, onCardClick }: { products: Product[]; onCardClick: (p: Product, accent?: string) => void }) {
+  if (products.length === 0) return null;
+  return (
+    <section id="gifts" style={{ padding: "60px clamp(16px,4vw,48px)" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <h2 style={{ fontSize: 28, fontWeight: 800, fontFamily: "'Nunito',sans-serif", color: "#1A1A2E" }}>
+          🎁 All Gift Pages
+        </h2>
+        <p style={{ fontSize: 15, color: "#9CA3AF", marginTop: 6 }}>Browse our complete collection</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 20, marginTop: 28 }}>
+          {products.map(p => (
+            <ProductCard key={p.id} product={p} onCardClick={onCardClick} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Footer ── */
+function Footer() {
+  return (
+    <footer style={{
+      padding: "40px clamp(16px,4vw,48px) 24px",
+      background: "#FAFAFA", borderTop: "1px solid rgba(0,0,0,0.06)",
+      textAlign: "center",
+    }}>
+      <p style={{ fontSize: 15, fontWeight: 700, color: "#E91E8C", fontFamily: "'Nunito',sans-serif" }}>
+        🎁 Aradhya E-Gifts
+      </p>
+      <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 8 }}>
+        Personalised digital surprises for every occasion. Made with ❤️ in India.
+      </p>
+      <p style={{ fontSize: 12, color: "#D1D5DB", marginTop: 16 }}>
+        © {new Date().getFullYear()} Aradhya E-Gifts. All rights reserved.
+      </p>
+    </footer>
+  );
+}
+
+/* ── Main Page ── */
+export default function HomePage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [sections, setSections] = useState<DisplaySection[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedAccent, setSelectedAccent] = useState("#E91E8C");
+  const [showLogin, setShowLogin] = useState(false);
+
+  useEffect(() => {
+    getProductsDB().then(all => setProducts(all.filter(p => p.visible)));
+    getVisibleSectionsDB().then(setSections);
+  }, []);
+
+  const openModal = (p: Product, accent?: string) => { setSelectedProduct(p); setSelectedAccent(accent || "#E91E8C"); };
+
+  const sectionedIds = new Set(sections.flatMap(s => s.productIds));
+  const unsectioned = products.filter(p => !sectionedIds.has(p.id));
+
+  return (
+    <div>
+      <Navbar onLoginClick={() => setShowLogin(true)} />
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      {selectedProduct && <ProductModal product={selectedProduct} accent={selectedAccent} onClose={() => setSelectedProduct(null)} />}
+      <Hero />
+      {sections.map(sec => <OccasionSection key={sec.id} section={sec} products={products} onCardClick={openModal} />)}
+      <AllGifts products={products} onCardClick={openModal} />
+      <HowItWorks />
+      <Footer />
     </div>
   );
 }

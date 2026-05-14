@@ -1,0 +1,95 @@
+"use client";
+import { use, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { getProduct } from "@/lib/data";
+import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
+import SweetApologyBox from "@/components/templates/SweetApologyBox";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+function renderTemplate(productId: string, customData: Record<string, string>, autoPlay?: boolean) {
+  switch (productId) {
+    case "birthday-magic-box":
+      return <BirthdayMagicBox customData={customData} autoPlay={autoPlay} />;
+    case "sweet-apology-box":
+      return <SweetApologyBox customData={customData} autoPlay={autoPlay} />;
+    default:
+      return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#fff" }}>
+          <p>Template not found.</p>
+        </div>
+      );
+  }
+}
+
+function PreviewContent({ productId }: { productId: string }) {
+  const searchParams = useSearchParams();
+  const isEmbed = searchParams.get("embed") === "1";
+  const product = getProduct(productId);
+
+  if (!product) return notFound();
+
+  const defaultData: Record<string, string> = {};
+  product.slides.forEach(sl => sl.fields.forEach(f => { defaultData[f.id] = f.defaultValue; }));
+
+  if (isEmbed) {
+    // Embed mode: no top bar, auto-play slides, no padding
+    return renderTemplate(productId, defaultData, true);
+  }
+
+  return (
+    <div style={{ position: "relative" }}>
+      {/* Top bar overlay */}
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
+        background: "linear-gradient(135deg,#FF2D78,#9B59FC)",
+        padding: "0 12px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 8, height: 46,
+        boxShadow: "0 2px 20px rgba(255,45,120,0.4)",
+        overflow: "hidden",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1, overflow: "hidden" }}>
+          <Link href="/" style={{ color: "rgba(255,255,255,0.85)", textDecoration: "none", fontSize: 12, fontWeight: 600, flexShrink: 0 }}>← Back</Link>
+          <span style={{ color: "rgba(255,255,255,0.35)", flexShrink: 0 }}>|</span>
+          <span style={{
+            color: "#fff", fontWeight: 700, fontSize: 12,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim() || product.name}
+          </span>
+        </div>
+        <Link
+          href={`/order/${productId}`}
+          style={{
+            flexShrink: 0,
+            background: "rgba(255,255,255,0.22)",
+            color: "#fff",
+            border: "1px solid rgba(255,255,255,0.4)",
+            borderRadius: 999,
+            padding: "6px 12px",
+            fontWeight: 700,
+            fontSize: 11,
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Buy — ₹{Math.floor(product.price / 100)}
+        </Link>
+      </div>
+
+      <div style={{ paddingTop: 46 }}>
+        {renderTemplate(productId, defaultData, false)}
+      </div>
+    </div>
+  );
+}
+
+export default function PreviewPage({ params }: { params: Promise<{ productId: string }> }) {
+  const { productId } = use(params);
+  return (
+    <Suspense fallback={null}>
+      <PreviewContent productId={productId} />
+    </Suspense>
+  );
+}
