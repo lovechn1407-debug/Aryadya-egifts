@@ -39,6 +39,7 @@ export default function AdminSectionsPage() {
       productIds: selectedProducts,
       visible: true,
       order: sections.length,
+      createdAt: new Date().toISOString(),
     };
     await saveSectionDB(newSection);
     setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]);
