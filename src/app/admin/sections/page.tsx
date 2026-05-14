@@ -28,24 +28,33 @@ export default function AdminSectionsPage() {
   useEffect(() => { reload(); }, []);
 
   const handleCreate = async () => {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      alert("Please enter a section title");
+      return;
+    }
     setSaving(true);
-    const themeConfig = SECTION_THEMES.find(t => t.id === theme);
-    const newSection: DisplaySection = {
-      id: `sec_${Date.now()}`,
-      title: title.trim(),
-      subtitle: subtitle.trim() || themeConfig?.tagline || "",
-      theme,
-      productIds: selectedProducts,
-      visible: true,
-      order: sections.length,
-      createdAt: new Date().toISOString(),
-    };
-    await saveSectionDB(newSection);
-    setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]);
-    setShowCreate(false);
-    setSaving(false);
-    await reload();
+    try {
+      const themeConfig = SECTION_THEMES.find(t => t.id === theme);
+      const newSection: DisplaySection = {
+        id: `sec_${Date.now()}`,
+        title: title.trim(),
+        subtitle: subtitle.trim() || themeConfig?.tagline || "",
+        theme,
+        productIds: selectedProducts,
+        visible: true,
+        order: sections.length,
+        createdAt: new Date().toISOString(),
+      };
+      await saveSectionDB(newSection);
+      setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]);
+      setShowCreate(false);
+      await reload();
+    } catch (err: any) {
+      console.error(err);
+      alert("Error creating section: " + err?.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggleProduct = (id: string) => {
