@@ -177,7 +177,7 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
       }} />
       <div style={{
         position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-        zIndex: 2001, width: "min(440px, 92vw)", maxHeight: "90vh", background: "#fff", borderRadius: 28,
+        zIndex: 2001, width: "min(380px, 92vw)", maxHeight: "90vh", background: "#fff", borderRadius: 24,
         padding: "0", boxShadow: "0 32px 80px rgba(124,58,237,0.22)",
         overflowY: "auto", overflowX: "hidden", animation: "fadeSlide 0.4s ease both",
       }}>
@@ -187,54 +187,54 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
           background: "linear-gradient(90deg, #7C3AED, #E91E8C, #F59E0B)",
         }} />
 
-        <div style={{ padding: "20px 20px 16px" }}>
+        <div style={{ padding: "16px 16px 12px" }}>
           {/* Header */}
-          <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
             <div style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center",
-              width: 48, height: 48, borderRadius: 16,
+              width: 40, height: 40, borderRadius: 12,
               background: "linear-gradient(135deg, #F5F3FF, #FFF0F5)",
               border: "2px solid #EDE9FE", marginBottom: 8,
-              fontSize: 24,
+              fontSize: 20,
             }}>🎉</div>
             <h2 style={{
-              fontSize: 20, fontWeight: 900, color: "#1F2937",
+              fontSize: 18, fontWeight: 900, color: "#1F2937",
               fontFamily: "'Nunito',sans-serif",
             }}>Your Gift is Ready!</h2>
-            <p style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>
+            <p style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
               Share this with your loved one ❤️
             </p>
           </div>
 
           {/* QR Code */}
           <div style={{
-            display: "flex", justifyContent: "center", padding: 16,
+            display: "flex", justifyContent: "center", padding: 12,
             background: "linear-gradient(135deg, #FFF0F5 0%, #F5F3FF 50%, #FFFBEB 100%)",
-            borderRadius: 20, marginBottom: 16,
+            borderRadius: 16, marginBottom: 12,
             border: "1.5px solid #EDE9FE",
           }}>
             <div style={{
-              borderRadius: 20, padding: 8,
+              borderRadius: 16, padding: 6,
               background: "#fff",
               boxShadow: "0 8px 32px rgba(124,58,237,0.12)",
             }}>
-              <canvas ref={canvasRef} style={{ display: "block", borderRadius: 14, width: "100%", maxWidth: 180 }} />
+              <canvas ref={canvasRef} style={{ display: "block", borderRadius: 12, width: "100%", maxWidth: 150 }} />
             </div>
           </div>
 
           {/* Action buttons */}
-          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
             <button onClick={downloadQR} style={{
-              flex: 1, padding: "13px 0", borderRadius: 14, border: "none", cursor: "pointer",
+              flex: 1, padding: "10px 0", borderRadius: 10, border: "none", cursor: "pointer",
               background: "linear-gradient(135deg, #7C3AED, #E91E8C)", color: "#fff",
-              fontWeight: 800, fontSize: 14, fontFamily: "'Nunito',sans-serif",
-              boxShadow: "0 6px 20px rgba(124,58,237,0.25)",
+              fontWeight: 800, fontSize: 13, fontFamily: "'Nunito',sans-serif",
+              boxShadow: "0 4px 14px rgba(124,58,237,0.2)",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-            }}>📥 Download QR</button>
+            }}>📥 Download</button>
             <button onClick={shareQR} style={{
-              flex: 1, padding: "13px 0", borderRadius: 14,
+              flex: 1, padding: "10px 0", borderRadius: 10,
               border: "1.5px solid #E5E7EB", background: "#fff", color: "#374151",
-              cursor: "pointer", fontWeight: 800, fontSize: 14,
+              cursor: "pointer", fontWeight: 800, fontSize: 13,
               fontFamily: "'Nunito',sans-serif",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             }}>📤 Share</button>
@@ -242,30 +242,30 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
 
           {/* Link */}
           <div style={{
-            display: "flex", alignItems: "center", gap: 8,
+            display: "flex", alignItems: "center", gap: 6,
             background: "#F9FAFB", border: "1.5px solid #E5E7EB",
-            borderRadius: 14, padding: "10px 12px",
+            borderRadius: 10, padding: "8px 10px",
           }}>
-            <div style={{ fontSize: 16, flexShrink: 0 }}>🔗</div>
+            <div style={{ fontSize: 14, flexShrink: 0 }}>🔗</div>
             <p style={{
-              flex: 1, fontSize: 12, color: "#6B7280", overflow: "hidden",
+              flex: 1, fontSize: 11, color: "#6B7280", overflow: "hidden",
               textOverflow: "ellipsis", whiteSpace: "nowrap",
               fontFamily: "monospace",
             }}>{url}</p>
             <button onClick={copyLink} style={{
               background: copied ? "#10B981" : "linear-gradient(135deg, #7C3AED, #E91E8C)",
-              color: "#fff", border: "none", borderRadius: 10,
-              padding: "8px 16px", fontWeight: 700, fontSize: 12,
+              color: "#fff", border: "none", borderRadius: 8,
+              padding: "6px 12px", fontWeight: 700, fontSize: 11,
               cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.3s",
               fontFamily: "'Nunito',sans-serif",
-            }}>{copied ? "✓ Copied!" : "Copy"}</button>
+            }}>{copied ? "✓" : "Copy"}</button>
           </div>
 
           {/* Close */}
           <button onClick={onClose} style={{
-            display: "block", width: "100%", marginTop: 14, padding: "10px",
+            display: "block", width: "100%", marginTop: 10, padding: "8px",
             background: "none", border: "none", color: "#9CA3AF",
-            fontSize: 13, cursor: "pointer", fontWeight: 600,
+            fontSize: 12, cursor: "pointer", fontWeight: 600,
           }}>Close ✕</button>
         </div>
       </div>
