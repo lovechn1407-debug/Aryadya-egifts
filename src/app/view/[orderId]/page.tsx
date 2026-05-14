@@ -72,52 +72,27 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
-      {/* Share/Info banner */}
-      {showBanner && (
+      {/* Share/Info banner ONLY for unfinalized pages */}
+      {showBanner && !isFinalized && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, zIndex: 300,
-          background: isFinalized
-            ? "linear-gradient(135deg, #0F3D2E, #0A2D1F)"
-            : "linear-gradient(135deg, #3D0F2E, #1F0A1A)",
-          borderBottom: isFinalized ? "1px solid rgba(0,217,160,0.3)" : "1px solid rgba(255,45,120,0.3)",
+          background: "linear-gradient(135deg, #3D0F2E, #1F0A1A)",
+          borderBottom: "1px solid rgba(255,45,120,0.3)",
           padding: "12px 20px",
           display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap"
         }}>
-          {isFinalized ? (
-            <>
-              <span style={{ fontSize: 20 }}>✅</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: 700, fontSize: 14, color: "#00D9A0" }}>
-                  Your personalised page is ready!
-                </p>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>
-                  For: {order.buyerName} · Created by Aradhya E-Gifts
-                </p>
-              </div>
-              <button
-                onClick={copyLink}
-                className="btn-primary"
-                style={{ padding: "8px 18px", fontSize: 13 }}
-              >
-                {copied ? "✓ Copied!" : "Copy Link 🔗"}
-              </button>
-            </>
-          ) : (
-            <>
-              <span style={{ fontSize: 20 }}>⚠️</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: 700, fontSize: 14, color: "#FF6B6B" }}>
-                  Page not yet finalized
-                </p>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>
-                  Go back to the editor to finalize your page.
-                </p>
-              </div>
-              <Link href={`/edit/${orderId}`} className="btn-primary" style={{ padding: "8px 18px", fontSize: 13 }}>
-                Back to Editor ✍️
-              </Link>
-            </>
-          )}
+          <span style={{ fontSize: 20 }}>⚠️</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontWeight: 700, fontSize: 14, color: "#FF6B6B" }}>
+              Page not yet finalized
+            </p>
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>
+              Go back to the editor to finalize your page.
+            </p>
+          </div>
+          <Link href={`/edit/${orderId}`} className="btn-primary" style={{ padding: "8px 18px", fontSize: 13 }}>
+            Back to Editor ✍️
+          </Link>
           <button
             onClick={() => setShowBanner(false)}
             style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 18, padding: 4 }}
@@ -128,7 +103,7 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
       )}
 
       {/* The actual personalized page content */}
-      <div style={{ paddingTop: showBanner ? 58 : 0 }}>
+      <div style={{ paddingTop: (!isFinalized && showBanner) ? 58 : 0 }}>
         {renderFinalTemplate(product.id, mergedData)}
       </div>
     </div>

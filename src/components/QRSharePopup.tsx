@@ -177,9 +177,9 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
       }} />
       <div style={{
         position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-        zIndex: 2001, width: "min(440px, 92vw)", background: "#fff", borderRadius: 28,
+        zIndex: 2001, width: "min(440px, 92vw)", maxHeight: "90vh", background: "#fff", borderRadius: 28,
         padding: "0", boxShadow: "0 32px 80px rgba(124,58,237,0.22)",
-        overflow: "hidden", animation: "fadeSlide 0.4s ease both",
+        overflowY: "auto", overflowX: "hidden", animation: "fadeSlide 0.4s ease both",
       }}>
         {/* Top gradient strip */}
         <div style={{
