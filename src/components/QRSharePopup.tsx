@@ -187,30 +187,30 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
           background: "linear-gradient(90deg, #7C3AED, #E91E8C, #F59E0B)",
         }} />
 
-        <div style={{ padding: "28px 28px 24px" }}>
+        <div style={{ padding: "20px 20px 16px" }}>
           {/* Header */}
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ textAlign: "center", marginBottom: 16 }}>
             <div style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center",
-              width: 56, height: 56, borderRadius: 16,
+              width: 48, height: 48, borderRadius: 16,
               background: "linear-gradient(135deg, #F5F3FF, #FFF0F5)",
-              border: "2px solid #EDE9FE", marginBottom: 12,
-              fontSize: 28,
+              border: "2px solid #EDE9FE", marginBottom: 8,
+              fontSize: 24,
             }}>🎉</div>
             <h2 style={{
-              fontSize: 22, fontWeight: 900, color: "#1F2937",
+              fontSize: 20, fontWeight: 900, color: "#1F2937",
               fontFamily: "'Nunito',sans-serif",
             }}>Your Gift is Ready!</h2>
-            <p style={{ fontSize: 14, color: "#6B7280", marginTop: 4 }}>
+            <p style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>
               Share this with your loved one ❤️
             </p>
           </div>
 
           {/* QR Code */}
           <div style={{
-            display: "flex", justifyContent: "center", padding: 20,
+            display: "flex", justifyContent: "center", padding: 16,
             background: "linear-gradient(135deg, #FFF0F5 0%, #F5F3FF 50%, #FFFBEB 100%)",
-            borderRadius: 20, marginBottom: 20,
+            borderRadius: 20, marginBottom: 16,
             border: "1.5px solid #EDE9FE",
           }}>
             <div style={{
@@ -218,7 +218,7 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
               background: "#fff",
               boxShadow: "0 8px 32px rgba(124,58,237,0.12)",
             }}>
-              <canvas ref={canvasRef} style={{ display: "block", borderRadius: 14 }} />
+              <canvas ref={canvasRef} style={{ display: "block", borderRadius: 14, width: "100%", maxWidth: 180 }} />
             </div>
           </div>
 

@@ -72,7 +72,8 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
-      {/* Share/Info banner ONLY for unfinalized pages */}
+      
+      {/* For Unfinalized Pages: Warning Banner */}
       {showBanner && !isFinalized && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, zIndex: 300,
@@ -98,6 +99,47 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
             style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 18, padding: 4 }}
           >
             ×
+          </button>
+        </div>
+      )}
+
+      {/* For Finalized Pages: Minimal Glass Header */}
+      {isFinalized && (
+        <div style={{
+          position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)", zIndex: 300,
+          background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          border: "1px solid rgba(255,255,255,0.3)",
+          borderRadius: 999, padding: "8px 16px 8px 20px",
+          display: "flex", alignItems: "center", gap: 16,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.1)",
+          width: "max-content", maxWidth: "calc(100vw - 32px)"
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 14, fontWeight: 800, color: "#fff", textShadow: "0 1px 2px rgba(0,0,0,0.2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu,"").trim()}
+            </p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.9)", textShadow: "0 1px 2px rgba(0,0,0,0.2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              A gift for {order.buyerName}
+            </p>
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                await navigator.share({ title: `A gift for ${order.buyerName}`, url: pageUrl });
+              } catch {
+                copyLink();
+              }
+            }}
+            style={{
+              background: copied ? "#10B981" : "rgba(255,255,255,0.25)",
+              color: "#fff", border: "1px solid rgba(255,255,255,0.4)",
+              borderRadius: 999, padding: "6px 14px", fontSize: 12, fontWeight: 700,
+              cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
+              transition: "all 0.2s"
+            }}
+          >
+            {copied ? "✓ Copied" : "📤 Share"}
           </button>
         </div>
       )}
