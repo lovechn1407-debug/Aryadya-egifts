@@ -2,8 +2,9 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getProduct } from "@/lib/data";
-import { createOrderDB } from "@/lib/db";
+import { createOrderDB, getCouponDB, getOrdersByBuyerDB, saveCouponDB } from "@/lib/db";
 import { sendOrderConfirmationEmail } from "@/lib/email";
+import type { Coupon } from "@/lib/data";
 import Link from "next/link";
 
 export default function OrderPage({ params }: { params: Promise<{ productId: string }> }) {
@@ -14,6 +15,11 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [step, setStep] = useState<"details" | "payment" | "processing">("details");
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [couponMsg, setCouponMsg] = useState({ type: "", text: "" });
+  const [couponLoading, setCouponLoading] = useState(false);
 
   if (!product) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8F5FF" }}>
@@ -32,6 +38,76 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
 
   const handleDetailsSubmit = () => { if (validate()) setStep("payment"); };
 
+  const applyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    setCouponMsg({ type: "", text: "" });
+    try {
+      const c = await getCouponDB(couponInput);
+      if (!c) {
+        setCouponMsg({ type: "error", text: "Invalid coupon code." });
+        return;
+      }
+      if (!c.active) {
+        setCouponMsg({ type: "error", text: "Coupon is no longer active." });
+        return;
+      }
+      if (c.totalStocks <= c.usedCount) {
+        setCouponMsg({ type: "error", text: "Coupon usage limit reached." });
+        return;
+      }
+      if (c.minimumOrderValue > product.price) {
+        setCouponMsg({ type: "error", text: `Minimum order value for this coupon is ₹${Math.floor(c.minimumOrderValue/100)}` });
+        return;
+      }
+      const now = new Date();
+      if (c.validFrom && now < new Date(c.validFrom)) {
+        setCouponMsg({ type: "error", text: "Coupon is not valid yet." });
+        return;
+      }
+      if (c.validTo && now > new Date(c.validTo)) {
+        setCouponMsg({ type: "error", text: "Coupon has expired." });
+        return;
+      }
+      
+      // Check per-person limit if email is provided
+      if (form.email && form.phone) {
+        const pastOrders = await getOrdersByBuyerDB(form.phone, form.email);
+        const usedPast = pastOrders.filter(o => o.couponCode === c.id).length;
+        if (usedPast >= c.perPersonLimit) {
+          setCouponMsg({ type: "error", text: "You have reached the usage limit for this coupon." });
+          return;
+        }
+      } else {
+        setCouponMsg({ type: "error", text: "Please fill Name, Email and Phone first to apply coupon." });
+        return;
+      }
+
+      setAppliedCoupon(c);
+      setCouponMsg({ type: "success", text: "Coupon applied successfully!" });
+    } catch (err: any) {
+      setCouponMsg({ type: "error", text: "Error verifying coupon." });
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponMsg({ type: "", text: "" });
+  };
+
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === "percentage") {
+      discountAmount = Math.floor(product.price * (appliedCoupon.discountAmount / 100));
+    } else {
+      discountAmount = appliedCoupon.discountAmount * 100;
+    }
+  }
+  const finalPrice = Math.max(0, product.price - discountAmount);
+
   const handlePayment = async () => {
     setStep("processing");
     const order = await createOrderDB({
@@ -40,8 +116,13 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
       buyerName: form.name,
       buyerEmail: form.email,
       buyerPhone: form.phone,
-      amount: product.price,
+      amount: finalPrice, // use finalPrice here!
     });
+
+    if (appliedCoupon) {
+      // update usage count in DB
+      await saveCouponDB({ ...appliedCoupon, usedCount: appliedCoupon.usedCount + 1 });
+    }
 
     // Send confirmation email (fire-and-forget)
     const editLink = `${window.location.origin}/edit/${order.id}`;
@@ -51,7 +132,7 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
       order_id: order.id,
       product_name: product.name,
       product_emoji: product.thumbnail || "🎁",
-      amount: String(Math.floor(product.price / 100)),
+      amount: String(Math.floor(finalPrice / 100)),
       edit_link: editLink,
     });
 
@@ -137,6 +218,43 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
             </h1>
             <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 24 }}>Secure payment — your personalised editor opens instantly.</p>
 
+            {/* Coupon Section */}
+            <div style={{ background: "#F9FAFB", borderRadius: 14, padding: "18px 20px", marginBottom: 20, border: "1px solid #F3F4F6" }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#4B5563", marginBottom: 10 }}>HAVE A COUPON CODE?</p>
+              {!appliedCoupon ? (
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input 
+                    type="text" 
+                    value={couponInput} 
+                    onChange={e => setCouponInput(e.target.value.toUpperCase())}
+                    placeholder="Enter code"
+                    style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1px solid #D1D5DB", outline: "none", fontSize: 14, textTransform: "uppercase" }}
+                  />
+                  <button 
+                    onClick={applyCoupon}
+                    disabled={couponLoading || !couponInput.trim()}
+                    style={{ padding: "0 16px", background: couponInput.trim() ? "#1F2937" : "#E5E7EB", color: "#fff", border: "none", borderRadius: 10, fontWeight: 700, cursor: couponInput.trim() ? "pointer" : "default" }}
+                  >
+                    {couponLoading ? "..." : "Apply"}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#ECFDF5", border: "1px solid #A7F3D0", padding: "10px 14px", borderRadius: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 18 }}>🎟️</span>
+                    <div>
+                      <p style={{ fontSize: 14, fontWeight: 800, color: "#065F46" }}>{appliedCoupon.id}</p>
+                      <p style={{ fontSize: 11, color: "#059669" }}>Applied successfully</p>
+                    </div>
+                  </div>
+                  <button onClick={removeCoupon} style={{ background: "none", border: "none", color: "#EF4444", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Remove</button>
+                </div>
+              )}
+              {couponMsg.text && (
+                <p style={{ fontSize: 12, marginTop: 8, color: couponMsg.type === "error" ? "#EF4444" : "#10B981", fontWeight: 600 }}>{couponMsg.text}</p>
+              )}
+            </div>
+
             {/* Summary */}
             <div style={{ background: "#F9FAFB", borderRadius: 14, padding: "18px 20px", marginBottom: 20, border: "1px solid #F3F4F6" }}>
               {[["Name", form.name], ["Email", form.email], ["Phone", form.phone]].map(([label, val]) => (
@@ -145,11 +263,23 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
                   <span style={{ fontWeight: 600, color: "#1F2937" }}>{val}</span>
                 </div>
               ))}
-              <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: 14, marginTop: 4, display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: 700, fontSize: 15, color: "#1F2937" }}>Total</span>
-                <span style={{ fontWeight: 900, fontSize: 22, background: "linear-gradient(135deg,#7C3AED,#EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Nunito',sans-serif" }}>
-                  ₹{Math.floor(product.price / 100)}
-                </span>
+              <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: 14, marginTop: 4 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontSize: 14, color: "#6B7280" }}>Subtotal</span>
+                  <span style={{ fontSize: 14, color: "#1F2937", fontWeight: 600 }}>₹{Math.floor(product.price / 100)}</span>
+                </div>
+                {appliedCoupon && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                    <span style={{ fontSize: 14, color: "#10B981", fontWeight: 600 }}>Discount ({appliedCoupon.id})</span>
+                    <span style={{ fontSize: 14, color: "#10B981", fontWeight: 600 }}>-₹{Math.floor(discountAmount / 100)}</span>
+                  </div>
+                )}
+                <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid #E5E7EB" }}>
+                  <span style={{ fontWeight: 800, fontSize: 16, color: "#1F2937" }}>Total</span>
+                  <span style={{ fontWeight: 900, fontSize: 24, background: "linear-gradient(135deg,#7C3AED,#EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Nunito',sans-serif" }}>
+                    ₹{Math.floor(finalPrice / 100)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -163,7 +293,7 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
             <div style={{ display: "flex", gap: 12 }}>
               <button onClick={() => setStep("details")} style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1.5px solid #E5E7EB", background: "#fff", color: "#374151", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>← Back</button>
               <button onClick={handlePayment} style={{ flex: 2, padding: "14px", borderRadius: 14, border: "none", background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", fontWeight: 900, fontSize: 15, cursor: "pointer", fontFamily: "'Nunito',sans-serif", boxShadow: "0 8px 24px rgba(124,58,237,0.3)" }}>
-                Pay ₹{Math.floor(product.price / 100)} & Personalise 🎉
+                Pay ₹{Math.floor(finalPrice / 100)} & Personalise 🎉
               </button>
             </div>
           </div>

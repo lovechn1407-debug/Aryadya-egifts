@@ -4,7 +4,7 @@
 import { ref, get, set, update, remove } from "firebase/database";
 import { database } from "./firebase";
 import { PRODUCT_REGISTRY } from "./data";
-import type { Product, DisplaySection, Order } from "./data";
+import type { Product, DisplaySection, Order, Coupon } from "./data";
 
 // ── PRODUCT OVERRIDES (price / visible / rating stored in Firebase) ──────────
 export interface ProductOverride {
@@ -116,4 +116,24 @@ export async function getOrdersByBuyerDB(phone: string, email: string): Promise<
     const op = o.buyerPhone.replace(/\D/g, "").slice(-10);
     return op === ph && o.buyerEmail.toLowerCase().trim() === em;
   });
+}
+
+// ── COUPONS ───────────────────────────────────────────────────────────────────
+export async function getCouponsDB(): Promise<Coupon[]> {
+  const snap = await get(ref(database, "coupons"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, Coupon>);
+}
+
+export async function getCouponDB(id: string): Promise<Coupon | null> {
+  const snap = await get(ref(database, `coupons/${id.toUpperCase()}`));
+  return snap.exists() ? (snap.val() as Coupon) : null;
+}
+
+export async function saveCouponDB(coupon: Coupon): Promise<void> {
+  await set(ref(database, `coupons/${coupon.id.toUpperCase()}`), coupon);
+}
+
+export async function deleteCouponDB(id: string): Promise<void> {
+  await remove(ref(database, `coupons/${id.toUpperCase()}`));
 }

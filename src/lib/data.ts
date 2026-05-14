@@ -42,6 +42,23 @@ export interface Order {
   status: "pending" | "paid" | "editing" | "finalized";
   customizations: Record<string, string>; // fieldId -> value
   finalizedAt?: string;
+  couponCode?: string; // Optional coupon code used
+  discountAmount?: number; // Optional discount applied in paise
+  createdAt: string;
+}
+
+export interface Coupon {
+  id: string; // The coupon code itself, uppercase (e.g., "FESTIVAL50")
+  active: boolean;
+  discountType: "percentage" | "value";
+  discountAmount: number; // 10 for 10%, or 5000 for ₹50 off
+  totalStocks: number; // How many times it can be used overall
+  usedCount: number; // How many times it has been used
+  validFrom: string; // ISO
+  validTo: string; // ISO
+  perPersonLimit: number; // Limit per email
+  minimumOrderValue: number; // Minimum order in paise
+  description: string;
   createdAt: string;
 }
 

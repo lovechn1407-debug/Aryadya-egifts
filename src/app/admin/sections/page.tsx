@@ -109,8 +109,9 @@ export default function AdminSectionsPage() {
   };
 
   const cardStyle: React.CSSProperties = {
-    background: "var(--dark-card2)", border: "1px solid var(--dark-border)",
+    background: "#FFFFFF", border: "1px solid #E5E7EB",
     borderRadius: 16, padding: 24, marginBottom: 16,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
   };
   const btnStyle = (color: string): React.CSSProperties => ({
     background: color, color: "#fff", border: "none", borderRadius: 10,
@@ -118,16 +119,16 @@ export default function AdminSectionsPage() {
   });
   const inputStyle: React.CSSProperties = {
     width: "100%", padding: "10px 14px", borderRadius: 10,
-    border: "1px solid var(--dark-border)", background: "var(--dark-card)",
-    color: "#fff", fontSize: 14, outline: "none",
+    border: "1px solid #D1D5DB", background: "#F9FAFB",
+    color: "#1F2937", fontSize: 14, outline: "none",
   };
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800 }}>📂 Display Sections</h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: 14, marginTop: 4 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1F2937" }}>📂 Display Sections</h1>
+          <p style={{ color: "#6B7280", fontSize: 14, marginTop: 4 }}>
             Create occasion-based sections like Blinkit for the homepage
           </p>
         </div>
@@ -139,19 +140,19 @@ export default function AdminSectionsPage() {
       {/* Create form */}
       {showCreate && (
         <div style={{ ...cardStyle, border: "2px solid #E91E8C" }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Create New Section</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: "#1F2937" }}>Create New Section</h3>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
             <div>
-              <label style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 6 }}>Section Title *</label>
+              <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 6 }}>Section Title *</label>
               <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Birthday Specials 🎂" style={inputStyle} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 6 }}>Subtitle (optional)</label>
+              <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 6 }}>Subtitle (optional)</label>
               <input value={subtitle} onChange={e => setSubtitle(e.target.value)} placeholder="Auto-filled from theme" style={inputStyle} />
             </div>
-            <div style={{ gridColumn: "1 / -1", background: "rgba(0,0,0,0.15)", padding: 12, borderRadius: 10, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700 }}>
+            <div style={{ gridColumn: "1 / -1", background: "#F3F4F6", padding: 12, borderRadius: 10, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "#1F2937" }}>
                 <input type="checkbox" checked={countdownEnabled} onChange={e => setCountdownEnabled(e.target.checked)} />
                 Enable Countdown Timer ⏳
               </label>
@@ -162,7 +163,7 @@ export default function AdminSectionsPage() {
           </div>
 
           {/* Theme picker */}
-          <label style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 8 }}>Choose Theme</label>
+          <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 8 }}>Choose Theme</label>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: 8, marginBottom: 16 }}>
             {SECTION_THEMES.map(t => (
               <div
@@ -181,7 +182,7 @@ export default function AdminSectionsPage() {
           </div>
 
           {/* Product picker */}
-          <label style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 8 }}>Select Products for this Section</label>
+          <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 8 }}>Select Products for this Section</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
             {products.map(p => (
               <div
@@ -189,9 +190,9 @@ export default function AdminSectionsPage() {
                 onClick={() => toggleProduct(p.id)}
                 style={{
                   padding: "8px 16px", borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 600,
-                  background: selectedProducts.includes(p.id) ? "#E91E8C" : "var(--dark-card)",
-                  color: selectedProducts.includes(p.id) ? "#fff" : "var(--text-secondary)",
-                  border: `1px solid ${selectedProducts.includes(p.id) ? "#E91E8C" : "var(--dark-border)"}`,
+                  background: selectedProducts.includes(p.id) ? "#E91E8C" : "#F9FAFB",
+                  color: selectedProducts.includes(p.id) ? "#fff" : "#6B7280",
+                  border: `1px solid ${selectedProducts.includes(p.id) ? "#E91E8C" : "#E5E7EB"}`,
                 }}
               >
                 {p.thumbnail} {p.name}
@@ -209,8 +210,8 @@ export default function AdminSectionsPage() {
       {sections.length === 0 && !showCreate && (
         <div style={{ ...cardStyle, textAlign: "center", padding: 48 }}>
           <p style={{ fontSize: 40 }}>📂</p>
-          <p style={{ fontSize: 16, fontWeight: 700, marginTop: 12 }}>No sections yet</p>
-          <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 6 }}>
+          <p style={{ fontSize: 16, fontWeight: 700, marginTop: 12, color: "#1F2937" }}>No sections yet</p>
+          <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 6 }}>
             Create your first occasion section to display on the homepage
           </p>
         </div>
@@ -234,7 +235,7 @@ export default function AdminSectionsPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, flexWrap: "wrap" }}>
-              <div style={{ cursor: "grab", fontSize: 18, color: "var(--text-muted)" }}>
+              <div style={{ cursor: "grab", fontSize: 18, color: "#9CA3AF" }}>
                 ☰
               </div>
               <div style={{
@@ -243,8 +244,8 @@ export default function AdminSectionsPage() {
               }}>{t.label}</div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700 }}>{sec.title}</h3>
-                <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{sec.subtitle}</p>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>{sec.title}</h3>
+                <p style={{ fontSize: 12, color: "#9CA3AF" }}>{sec.subtitle}</p>
               </div>
 
               <button
@@ -261,8 +262,8 @@ export default function AdminSectionsPage() {
               </button>
             </div>
 
-            <div style={{ background: "rgba(0,0,0,0.2)", padding: 12, borderRadius: 10, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "var(--text-muted)" }}>
+            <div style={{ background: "#F9FAFB", padding: 12, borderRadius: 10, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", border: "1px solid #E5E7EB" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "#4B5563" }}>
                 <input type="checkbox" checked={sec.countdownEnabled || false} onChange={async (e) => {
                   await updateSectionDB(sec.id, { countdownEnabled: e.target.checked });
                   reload();
@@ -277,7 +278,7 @@ export default function AdminSectionsPage() {
               )}
             </div>
 
-            <label style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 6 }}>
+            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 6 }}>
               Products in this section (click to toggle):
             </label>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -289,9 +290,9 @@ export default function AdminSectionsPage() {
                     onClick={() => toggleSectionProduct(sec, p.id)}
                     style={{
                       padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600,
-                      background: isIn ? t.accent : "var(--dark-card)",
-                      color: isIn ? "#fff" : "var(--text-muted)",
-                      border: `1px solid ${isIn ? t.accent : "var(--dark-border)"}`,
+                      background: isIn ? t.accent : "#F9FAFB",
+                      color: isIn ? "#fff" : "#9CA3AF",
+                      border: `1px solid ${isIn ? t.accent : "#E5E7EB"}`,
                       transition: "all 0.15s",
                     }}
                   >
