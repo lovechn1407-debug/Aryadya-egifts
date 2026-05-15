@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
+import MaintenanceWrapper from "@/components/MaintenanceWrapper";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -26,7 +28,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <MaintenanceWrapper>
+          {children}
+        </MaintenanceWrapper>
+      </body>
     </html>
   );
 }

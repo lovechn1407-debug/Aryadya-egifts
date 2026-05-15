@@ -20,6 +20,8 @@ export default function AdminSectionsPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [countdownEnabled, setCountdownEnabled] = useState(false);
   const [countdownEndTime, setCountdownEndTime] = useState("");
+  
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -31,7 +33,7 @@ export default function AdminSectionsPage() {
 
   useEffect(() => { reload(); }, []);
 
-  const handleCreate = async () => {
+  const handleCreateOrUpdate = async () => {
     if (!title.trim()) {
       alert("Please enter a section title");
       return;
@@ -39,28 +41,63 @@ export default function AdminSectionsPage() {
     setSaving(true);
     try {
       const themeConfig = SECTION_THEMES.find(t => t.id === theme);
-      const newSection: DisplaySection = {
-        id: `sec_${Date.now()}`,
-        title: title.trim(),
-        subtitle: subtitle.trim() || themeConfig?.tagline || "",
-        theme,
-        productIds: selectedProducts,
-        visible: true,
-        order: sections.length,
-        countdownEnabled,
-        countdownEndTime,
-        createdAt: new Date().toISOString(),
-      };
-      await saveSectionDB(newSection);
+      
+      if (editingSectionId) {
+        // Update existing section
+        await updateSectionDB(editingSectionId, {
+          title: title.trim(),
+          subtitle: subtitle.trim() || themeConfig?.tagline || "",
+          theme,
+          productIds: selectedProducts,
+          countdownEnabled,
+          countdownEndTime
+        });
+      } else {
+        // Create new section (at the top)
+        const minOrder = sections.length > 0 ? Math.min(...sections.map(s => s.order ?? 0)) : 0;
+        const newSection: DisplaySection = {
+          id: `sec_${Date.now()}`,
+          title: title.trim(),
+          subtitle: subtitle.trim() || themeConfig?.tagline || "",
+          theme,
+          productIds: selectedProducts,
+          visible: true,
+          order: minOrder - 1, // Appears at the top
+          countdownEnabled,
+          countdownEndTime,
+          createdAt: new Date().toISOString(),
+        };
+        await saveSectionDB(newSection);
+      }
+      
       setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
       setShowCreate(false);
+      setEditingSectionId(null);
       await reload();
     } catch (err: any) {
       console.error(err);
-      alert("Error creating section: " + err?.message);
+      alert("Error saving section: " + err?.message);
     } finally {
       setSaving(false);
     }
+  };
+
+  const openEdit = (sec: DisplaySection) => {
+    setTitle(sec.title);
+    setSubtitle(sec.subtitle || "");
+    setTheme(sec.theme);
+    setSelectedProducts(sec.productIds);
+    setCountdownEnabled(sec.countdownEnabled || false);
+    setCountdownEndTime(sec.countdownEndTime || "");
+    setEditingSectionId(sec.id);
+    setShowCreate(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEditOrCreate = () => {
+    setShowCreate(false);
+    setEditingSectionId(null);
+    setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
   };
 
   const toggleProduct = (id: string) => {
@@ -130,7 +167,7 @@ export default function AdminSectionsPage() {
           </p>
         </div>
         <button 
-          onClick={() => { setShowCreate(!showCreate); if(showCreate) setTitle(""); }} 
+          onClick={() => showCreate ? cancelEditOrCreate() : setShowCreate(true)} 
           style={{ background: "#0F172A", color: "#FFFFFF", border: "none", borderRadius: 8, padding: "10px 16px", fontWeight: 600, cursor: "pointer", transition: "background 0.2s" }}
           onMouseEnter={e => e.currentTarget.style.background = "#1E293B"}
           onMouseLeave={e => e.currentTarget.style.background = "#0F172A"}
@@ -141,7 +178,7 @@ export default function AdminSectionsPage() {
 
       {showCreate && (
         <div style={{ ...cardStyle, marginBottom: 24, border: "1px solid #CBD5E1" }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#0F172A" }}>Create New Homepage Section</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#0F172A" }}>{editingSectionId ? "Edit Homepage Section" : "Create New Homepage Section"}</h3>
           
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
             <div>
@@ -195,8 +232,8 @@ export default function AdminSectionsPage() {
             </div>
           </div>
 
-          <button onClick={handleCreate} disabled={saving} style={{ background: saving ? "#94A3B8" : "#10B981", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: 14 }}>
-            {saving ? "Creating..." : "Save Section"}
+          <button onClick={handleCreateOrUpdate} disabled={saving} style={{ background: saving ? "#94A3B8" : "#10B981", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: 14 }}>
+            {saving ? "Saving..." : "Save Section"}
           </button>
         </div>
       )}
@@ -265,6 +302,9 @@ export default function AdminSectionsPage() {
             </div>
             
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button onClick={() => openEdit(sec)} style={{ padding: "8px 12px", fontSize: 12, fontWeight: 600, background: "#DBEAFE", border: "none", borderRadius: 6, cursor: "pointer", color: "#1D4ED8" }}>
+                Edit
+              </button>
               <button onClick={() => toggleVisibility(sec)} style={{ padding: "8px 12px", fontSize: 12, fontWeight: 600, background: "#F1F5F9", border: "none", borderRadius: 6, cursor: "pointer", color: "#334155" }}>
                 {sec.visible ? "Hide" : "Show"}
               </button>

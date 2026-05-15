@@ -1,0 +1,195 @@
+"use client";
+import { useState, useEffect, useRef } from "react";
+import { getSettingsDB, saveSettingsDB, Settings } from "@/lib/db";
+
+const PREDEFINED_TEMPLATES = {
+  maintenance: {
+    title: "Under Maintenance",
+    description: "We are currently upgrading our platform. Please check back later. <br/><br/> Current Time: <b>{current_time}</b>",
+    note: "We apologize for the inconvenience.",
+    countdownEnabled: true,
+  },
+  serverDown: {
+    title: "Server Down",
+    description: "Our servers are experiencing unexpected issues. Our engineers are working hard to resolve it. <br/> Status Update: <i>{current_time}</i>",
+    note: "Rest assured, no data has been lost.",
+    countdownEnabled: false,
+  },
+  error404: {
+    title: "Error 404 - Not Found",
+    description: "The page you are looking for does not exist or has been moved.",
+    note: "",
+    countdownEnabled: false,
+  },
+  closed: {
+    title: "Website Closed Permanently",
+    description: "We have permanently closed down our services. Thank you for your support over the years.",
+    note: "For refunds, please contact support@example.com",
+    countdownEnabled: false,
+  }
+};
+
+export default function SettingsPage() {
+  const [settings, setSettings] = useState<Settings>({
+    maintenance: { enabled: false, title: "", description: "", note: "", countdownEnabled: false, countdownTarget: "" }
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    getSettingsDB().then(s => {
+      setSettings(s);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleChange = (field: string, value: any) => {
+    setSettings(s => ({
+      ...s,
+      maintenance: { ...s.maintenance, [field]: value }
+    }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    await saveSettingsDB(settings);
+    setTimeout(() => setSaving(false), 500);
+  };
+
+  const applyTemplate = (key: keyof typeof PREDEFINED_TEMPLATES) => {
+    const t = PREDEFINED_TEMPLATES[key];
+    setSettings(s => ({
+      ...s,
+      maintenance: { ...s.maintenance, ...t }
+    }));
+  };
+
+  const insertTextAtCursor = (text: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const val = el.value;
+    const newVal = val.slice(0, start) + text + val.slice(end);
+    handleChange("description", newVal);
+    setTimeout(() => {
+      el.focus();
+      el.setSelectionRange(start + text.length, start + text.length);
+    }, 0);
+  };
+
+  const insertHTMLTag = (tag: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const val = el.value;
+    const selectedText = val.slice(start, end);
+    const newText = `<${tag}>${selectedText}</${tag}>`;
+    const newVal = val.slice(0, start) + newText + val.slice(end);
+    handleChange("description", newVal);
+  };
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, text: string) => {
+    e.dataTransfer.setData("text/plain", text);
+  };
+
+  if (loading) return <div style={{ padding: 32 }}>Loading settings...</div>;
+
+  const m = settings.maintenance;
+
+  return (
+    <div style={{ padding: "32px 48px", maxWidth: 900 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: "#0F172A", letterSpacing: -0.5 }}>Platform Settings</h1>
+          <p style={{ color: "#64748B", fontSize: 14, marginTop: 4 }}>Manage site-wide configuration and maintenance</p>
+        </div>
+        <button onClick={handleSave} disabled={saving} style={{ background: "#0F172A", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}>
+          {saving ? "Saving..." : "Save Settings"}
+        </button>
+      </div>
+
+      <div style={{ background: "#fff", padding: 32, borderRadius: 16, border: "1px solid #E2E8F0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
+        
+        {/* Toggle */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Maintenance Mode</h2>
+            <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>When active, all visitors will see the maintenance screen instead of the public storefront.</p>
+          </div>
+          <label style={{ position: "relative", display: "inline-block", width: 50, height: 28 }}>
+            <input type="checkbox" checked={m.enabled} onChange={e => handleChange("enabled", e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
+            <span style={{ position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0, background: m.enabled ? "#10B981" : "#CBD5E1", transition: "0.4s", borderRadius: 34 }}>
+              <span style={{ position: "absolute", content: "''", height: 20, width: 20, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: m.enabled ? "translateX(22px)" : "none" }}></span>
+            </span>
+          </label>
+        </div>
+
+        {/* Templates */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Quick Templates</label>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={() => applyTemplate("maintenance")} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #E2E8F0", background: "#F8FAFC", cursor: "pointer", fontSize: 13 }}>Maintenance</button>
+            <button onClick={() => applyTemplate("serverDown")} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #E2E8F0", background: "#F8FAFC", cursor: "pointer", fontSize: 13 }}>Server Down</button>
+            <button onClick={() => applyTemplate("error404")} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #E2E8F0", background: "#F8FAFC", cursor: "pointer", fontSize: 13 }}>Error 404</button>
+            <button onClick={() => applyTemplate("closed")} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #E2E8F0", background: "#F8FAFC", cursor: "pointer", fontSize: 13 }}>Closed</button>
+          </div>
+        </div>
+
+        {/* Title */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Page Title</label>
+          <input type="text" value={m.title} onChange={e => handleChange("title", e.target.value)} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} />
+        </div>
+
+        {/* Description Editor */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Description (Supports HTML & Variables)</label>
+          
+          <div style={{ display: "flex", gap: 8, marginBottom: 8, padding: 8, background: "#F1F5F9", borderRadius: 8 }}>
+            <button onClick={() => insertHTMLTag("b")} style={{ fontWeight: "bold", padding: "4px 8px", cursor: "pointer", background: "#fff", border: "1px solid #E2E8F0", borderRadius: 4 }}>B</button>
+            <button onClick={() => insertHTMLTag("i")} style={{ fontStyle: "italic", padding: "4px 8px", cursor: "pointer", background: "#fff", border: "1px solid #E2E8F0", borderRadius: 4 }}>I</button>
+            <div style={{ width: 1, background: "#CBD5E1", margin: "0 4px" }} />
+            <div style={{ fontSize: 12, color: "#64748B", display: "flex", alignItems: "center", marginRight: 4 }}>Drag & Drop Variables:</div>
+            
+            <div draggable onDragStart={e => handleDragStart(e, "{current_time}")} onClick={() => insertTextAtCursor("{current_time}")} style={{ padding: "4px 8px", background: "#DBEAFE", color: "#1D4ED8", fontSize: 12, borderRadius: 4, cursor: "grab", fontFamily: "monospace" }}>{"{current_time}"}</div>
+            <div draggable onDragStart={e => handleDragStart(e, "{countdown_time}")} onClick={() => insertTextAtCursor("{countdown_time}")} style={{ padding: "4px 8px", background: "#FCE7F3", color: "#BE185D", fontSize: 12, borderRadius: 4, cursor: "grab", fontFamily: "monospace" }}>{"{countdown_time}"}</div>
+          </div>
+
+          <textarea 
+            ref={textareaRef}
+            value={m.description} 
+            onChange={e => handleChange("description", e.target.value)} 
+            style={{ width: "100%", padding: "14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14, minHeight: 120, fontFamily: "monospace" }} 
+          />
+        </div>
+
+        {/* Note */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Highlight Note (Optional)</label>
+          <input type="text" value={m.note} onChange={e => handleChange("note", e.target.value)} placeholder="e.g. We apologize for the inconvenience." style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} />
+        </div>
+
+        {/* Countdown */}
+        <div style={{ background: "#F8FAFC", padding: 20, borderRadius: 12, border: "1px solid #E2E8F0" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <label style={{ fontSize: 14, fontWeight: 700, color: "#1E293B" }}>Enable Countdown Timer</label>
+            <input type="checkbox" checked={m.countdownEnabled} onChange={e => handleChange("countdownEnabled", e.target.checked)} style={{ width: 16, height: 16 }} />
+          </div>
+          
+          {m.countdownEnabled && (
+            <div style={{ marginTop: 16 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 8, display: "block" }}>Target Date & Time</label>
+              <input type="datetime-local" value={m.countdownTarget} onChange={e => handleChange("countdownTarget", e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", outline: "none" }} />
+              <p style={{ fontSize: 12, color: "#64748B", marginTop: 8 }}>Use <code style={{ background: "#E2E8F0", padding: "2px 4px", borderRadius: 4 }}>{"{countdown_time}"}</code> in the description to show the remaining time.</p>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}

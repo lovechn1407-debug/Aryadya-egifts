@@ -14,6 +14,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState("");
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceInput, setPriceInput] = useState("");
   const [cuttedPriceInput, setCuttedPriceInput] = useState("");
@@ -41,6 +43,14 @@ export default function AdminProductsPage() {
 
   const toggleVisibility = async (id: string, current: boolean) => {
     await updateProductOverrideDB(id, { visible: !current });
+    reload();
+  };
+
+  const saveName = async (id: string) => {
+    if (nameInput.trim()) {
+      await updateProductOverrideDB(id, { name: nameInput.trim() });
+    }
+    setEditingName(null);
     reload();
   };
 
@@ -117,7 +127,18 @@ export default function AdminProductsPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 4 }}>
-                  <h2 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", margin: 0 }}>{product.name}</h2>
+                  {editingName === product.id ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <input style={{...inputStyle, minWidth: 200}} type="text" value={nameInput} onChange={e => setNameInput(e.target.value)} autoFocus />
+                      <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#0F172A", color: "#FFFFFF", border: "none", cursor: "pointer" }} onClick={() => saveName(product.id)}>Save</button>
+                      <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#F1F5F9", color: "#334155", border: "none", cursor: "pointer" }} onClick={() => setEditingName(null)}>✕</button>
+                    </div>
+                  ) : (
+                    <h2 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                      {product.name}
+                      <button onClick={() => { setEditingName(product.id); setNameInput(product.name); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#94A3B8" }}>✏️</button>
+                    </h2>
+                  )}
                   <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: "#E0E7FF", color: "#4338CA", border: "1px solid #C7D2FE" }}>
                     {CATEGORY_LABELS[product.category]}
                   </span>

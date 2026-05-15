@@ -109,6 +109,11 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
   const finalPrice = Math.max(0, product.price - discountAmount);
 
   const handlePayment = async () => {
+    if (finalPrice > 0) {
+      alert("Payment method not set by admin.");
+      return;
+    }
+
     setStep("processing");
     const order = await createOrderDB({
       productId: product.id,

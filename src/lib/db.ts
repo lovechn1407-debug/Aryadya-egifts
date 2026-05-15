@@ -6,9 +6,41 @@ import { database } from "./firebase";
 import { PRODUCT_REGISTRY } from "./data";
 import type { Product, DisplaySection, Order, Coupon } from "./data";
 
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+export interface Settings {
+  maintenance: {
+    enabled: boolean;
+    title: string;
+    description: string;
+    note: string;
+    countdownEnabled: boolean;
+    countdownTarget: string;
+  };
+}
+
+export async function getSettingsDB(): Promise<Settings> {
+  const snap = await get(ref(database, "settings"));
+  if (snap.exists()) return snap.val() as Settings;
+  return {
+    maintenance: {
+      enabled: false,
+      title: "Under Maintenance",
+      description: "We are currently upgrading our platform. Please check back later.",
+      note: "",
+      countdownEnabled: false,
+      countdownTarget: ""
+    }
+  };
+}
+
+export async function saveSettingsDB(settings: Settings): Promise<void> {
+  await set(ref(database, "settings"), settings);
+}
+
 // ── PRODUCT OVERRIDES (price / visible / rating stored in Firebase) ──────────
 export interface ProductOverride {
   id: string;
+  name?: string;
   visible?: boolean;
   price?: number;
   cuttedPrice?: number;
