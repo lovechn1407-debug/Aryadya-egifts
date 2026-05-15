@@ -417,16 +417,40 @@ function S5({ d, ch, em, oc }: { d: Record<string,string>; ch: ()=>void; em: boo
 
 import SongLibraryPopup from "../SongLibraryPopup";
 
-function S6({ d, ch, em, oc, audio }: { d: Record<string,string>; ch: ()=>void; em: boolean; oc?: (id:string,v:string)=>void; audio: any }) {
+function S6({ d, ch, em, oc }: { d: Record<string,string>; ch: ()=>void; em: boolean; oc?: (id:string,v:string)=>void }) {
   const [pickingFor, setPickingFor] = useState<number | null>(null);
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const [audioObj, setAudioObj] = useState<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioObj) {
+        audioObj.pause();
+        audioObj.currentTime = 0;
+      }
+    };
+  }, [audioObj]);
 
   const songs = [
-    { n:"s6_song1", a:"s6_artist1", u:"s6_url1" },
-    { n:"s6_song2", a:"s6_artist2", u:"s6_url2" },
-    { n:"s6_song3", a:"s6_artist3", u:"s6_url3" },
+    { n:"s6_song1", a:"s6_artist1", u:"s6_url1", e:"🎵" },
+    { n:"s6_song2", a:"s6_artist2", u:"s6_url2", e:"🎶" },
+    { n:"s6_song3", a:"s6_artist3", u:"s6_url3", e:"🎸" },
   ];
 
-  const fmt = (s: number) => `0:${Math.floor(s).toString().padStart(2, "0")}`;
+  const togglePlay = (idx: number, url?: string) => {
+    if (!url) return;
+    if (playingIdx === idx) {
+      audioObj?.pause();
+      setPlayingIdx(null);
+    } else {
+      if (audioObj) audioObj.pause();
+      const newAudio = new Audio(url);
+      newAudio.play().catch(e => console.error("Could not play", e));
+      newAudio.onended = () => setPlayingIdx(null);
+      setAudioObj(newAudio);
+      setPlayingIdx(idx);
+    }
+  };
 
   return (
     <div>
@@ -434,64 +458,40 @@ function S6({ d, ch, em, oc, audio }: { d: Record<string,string>; ch: ()=>void; 
       <Card>
         <ET fid="s6_note" data={d} onChange={oc} editMode={em}
           style={{ display:"block", textAlign:"center", fontFamily:"'Dancing Script',cursive", fontSize:20, color:"#E91E8C", marginBottom:16 }} />
-        
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {songs.map((s,i) => {
-            const url = d[s.u];
-            const isActive = audio.url === url && !!url;
-            return (
-              <div key={i} style={{ background: isActive ? "#FDF2F8" : "rgba(233,30,140,0.03)", borderRadius: 16, padding: "16px", border: `1px solid ${isActive ? "#E91E8C" : "rgba(233,30,140,0.1)"}`, transition: "all 0.3s" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <button
-                    onClick={() => audio.togglePlay(url)}
-                    style={{
-                      width: 44, height: 44, borderRadius: "50%", background: isActive && audio.playing ? "#E91E8C" : "#FFE4EE",
-                      color: isActive && audio.playing ? "#fff" : "#E91E8C", border: "none", cursor: url ? "pointer" : "default",
-                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, opacity: url ? 1 : 0.4,
-                      boxShadow: isActive && audio.playing ? "0 4px 12px rgba(233,30,140,0.3)" : "none",
-                      transition: "all 0.2s"
-                    }}
-                  >
-                    {isActive && audio.playing ? "⏸" : "▶️"}
-                  </button>
-                  <div style={{ flex: 1 }}>
-                    <ET fid={s.n} data={d} onChange={oc} editMode={em} style={{ display:"block", fontWeight:700, fontSize:15, color: "#2D2D2D", marginBottom: 2 }} />
-                    <ET fid={s.a} data={d} onChange={oc} editMode={em} style={{ display:"block", fontSize:13, color:"#7a6b73" }} />
-                  </div>
+        {songs.map((s,i) => {
+          const url = d[s.u];
+          return (
+            <div key={i} style={{ marginBottom:10 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(233,30,140,0.06)", borderRadius:14, padding:"12px 14px", border:"1px solid rgba(233,30,140,0.1)" }}>
+                <div style={{ width:36, height:36, borderRadius:"50%", background:"#FFE4EE", display:"flex", alignItems:"center", justifyContent:"center" }}>{s.e}</div>
+                <div style={{ flex:1 }}>
+                  <ET fid={s.n} data={d} onChange={oc} editMode={em} style={{ display:"block", fontWeight:700, fontSize:14 }} />
+                  <ET fid={s.a} data={d} onChange={oc} editMode={em} style={{ display:"block", fontSize:12, color:"#7a6b73" }} />
                 </div>
-
-                {isActive && (
-                  <div style={{ marginTop: 16 }}>
-                    <div style={{ position: "relative", height: 6, borderRadius: 99, background: "rgba(233,30,140,0.15)", cursor: "pointer" }}
-                      onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const percent = ((e.clientX - rect.left) / rect.width) * 100;
-                        audio.seek(percent);
-                      }}
-                    >
-                      <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 99, background: "#E91E8C", width: `${audio.progress}%` }} />
-                      <div style={{ position: "absolute", top: -4, width: 14, height: 14, borderRadius: "50%", background: "#E91E8C", left: `calc(${audio.progress}% - 7px)` }} />
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#E91E8C", marginTop: 6, fontWeight: 600 }}>
-                      <span>{fmt((audio.progress / 100) * audio.duration || 0)}</span>
-                      <span>{fmt(audio.duration || 0)}</span>
-                    </div>
-                  </div>
-                )}
-
-                {em && (
-                  <div style={{ marginTop: 12, textAlign: "right" }}>
-                    <button onClick={() => setPickingFor(i)} style={{ background: "none", border: "1px dashed #E91E8C", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#E91E8C", cursor: "pointer", fontWeight: 600 }}>
-                      {url ? "🎵 Change Song Audio" : "🎵 Add Song Audio"}
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={() => togglePlay(i, url)}
+                  style={{
+                    background: playingIdx === i ? "#E91E8C" : "transparent",
+                    color: playingIdx === i ? "#fff" : "#E91E8C",
+                    border: playingIdx === i ? "none" : "1px solid rgba(233,30,140,0.3)",
+                    borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: url ? "pointer" : "default", opacity: url ? 1 : 0.3
+                  }}
+                >
+                  {playingIdx === i ? "⏸" : "▶️"}
+                </button>
               </div>
-            );
-          })}
-        </div>
-
-        <div style={{ textAlign:"center", marginTop:24 }}><PinkBtn onClick={ch}>Next 🎁</PinkBtn></div>
+              {em && (
+                <div style={{ marginTop: 4, textAlign: "right" }}>
+                  <button onClick={() => setPickingFor(i)} style={{ background: "none", border: "1px dashed #E91E8C", borderRadius: 6, padding: "4px 10px", fontSize: 11, color: "#E91E8C", cursor: "pointer", fontWeight: 600 }}>
+                    {url ? "🎵 Change Song Audio" : "🎵 Add Song Audio"}
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <div style={{ textAlign:"center", marginTop:16 }}><PinkBtn onClick={ch}>Next 🎁</PinkBtn></div>
       </Card>
       
       {pickingFor !== null && (
@@ -607,66 +607,6 @@ export default function BirthdayMagicBox({
   const [slide, setSlide] = useState(1);
   const [showModal, setShowModal] = useState(false);
 
-  // Global Audio State
-  const [globalAudio, setGlobalAudio] = useState<HTMLAudioElement | null>(null);
-  const [globalPlaying, setGlobalPlaying] = useState(false);
-  const [globalMuted, setGlobalMuted] = useState(false);
-  const [globalProgress, setGlobalProgress] = useState(0);
-  const [globalDuration, setGlobalDuration] = useState(0);
-  const [activeUrl, setActiveUrl] = useState<string | null>(null);
-
-  // Initialize Audio Object ONCE
-  useEffect(() => {
-    const audio = new Audio();
-    audio.onloadedmetadata = () => setGlobalDuration(Math.floor(audio.duration));
-    audio.ontimeupdate = () => setGlobalProgress((audio.currentTime / (audio.duration || 1)) * 100);
-    audio.onended = () => {
-      setGlobalPlaying(false);
-      setGlobalProgress(0);
-    };
-    setGlobalAudio(audio);
-    return () => {
-      audio.pause();
-      audio.src = "";
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!globalAudio) return;
-    if (globalPlaying) {
-      globalAudio.play().catch(e => console.log("Auto-play prevented", e));
-    } else {
-      globalAudio.pause();
-    }
-  }, [globalPlaying, globalAudio]);
-
-  useEffect(() => {
-    if (globalAudio) {
-      globalAudio.muted = globalMuted;
-    }
-  }, [globalMuted, globalAudio]);
-
-  const toggleGlobalPlay = (url: string) => {
-    if (!globalAudio) return;
-    if (activeUrl === url) {
-      setGlobalPlaying(!globalPlaying);
-    } else {
-      globalAudio.src = url;
-      globalAudio.currentTime = 0;
-      setActiveUrl(url);
-      setGlobalPlaying(true);
-    }
-  };
-
-  const seekGlobalAudio = (percent: number) => {
-    if (!globalAudio) return;
-    const newTime = (percent / 100) * globalAudio.duration;
-    if (!isNaN(newTime)) {
-      globalAudio.currentTime = newTime;
-      setGlobalProgress(percent);
-    }
-  };
-
   // Auto-cycle slides for card thumbnail preview
   useEffect(() => {
     if (!autoPlay) return;
@@ -690,10 +630,7 @@ export default function BirthdayMagicBox({
       case 3: return <S3 {...p} ch={() => go(4)} />;
       case 4: return <S4 {...p} ch={() => go(5)} />;
       case 5: return <S5 {...p} ch={() => go(6)} />;
-      case 6: return <S6 {...p} ch={() => go(7)} audio={{
-        url: activeUrl, playing: globalPlaying, progress: globalProgress, duration: globalDuration,
-        togglePlay: toggleGlobalPlay, seek: seekGlobalAudio
-      }} />;
+      case 6: return <S6 {...p} ch={() => go(7)} />;
       case 7: return <S7 {...p} onAll={() => setShowModal(true)} />;
       case 9: return <S9 {...p} onRestart={() => { setShowModal(false); go(1); }} />;
       default: return null;
@@ -702,23 +639,6 @@ export default function BirthdayMagicBox({
 
   return (
     <div style={{ position:"relative", minHeight:"100vh", overflow:"hidden" }}>
-      {/* Global Mute Button */}
-      {activeUrl && !editMode && (
-        <button
-          onClick={() => setGlobalMuted(!globalMuted)}
-          style={{
-            position: "fixed", top: 16, right: 16, zIndex: 100,
-            width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.8)",
-            backdropFilter: "blur(8px)", border: "1px solid rgba(233,30,140,0.2)",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
-            color: globalMuted ? "#7a6b73" : "#E91E8C", transition: "all 0.2s"
-          }}
-        >
-          {globalMuted ? "🔇" : "🔊"}
-        </button>
-      )}
-
       <div style={{ position:"fixed", inset:0, zIndex:0,
         background:"radial-gradient(ellipse at top left,#FFE4EE 0%,transparent 55%),radial-gradient(ellipse at bottom right,#FFF9C4 0%,transparent 55%),linear-gradient(135deg,#FFF0F5 0%,#FFFDE7 100%)" }} />
       <main style={{ position:"relative", zIndex:10, minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
