@@ -128,6 +128,52 @@ function NavBtns({ onBack, onNext, nextLabel = "Next →", nextDisabled }: {
   );
 }
 
+// ── Slide -1: Background Music ──
+function S_Minus1({ d, ch, em, oc, bgProps }: { d: Record<string,string>; ch: () => void; em: boolean; oc?: (id:string,v:string)=>void; bgProps: any }) {
+  return (
+    <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "64px 24px" }}>
+      <div style={{ background: "#fff", borderRadius: 24, padding: "40px 24px", width: "100%", maxWidth: 400, boxShadow: "0 12px 40px rgba(0,0,0,0.08)" }}>
+        <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 700, fontSize: 24, color: "#e91e8c", marginBottom: 8 }}>
+          Global Background Music 🎵
+        </h3>
+        <p style={{ fontSize: 13, color: "#888", marginBottom: 24 }}>Plays continuously throughout the website</p>
+        
+        <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#fdf0f0", color: "#e91e8c", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+          <Music size={40} />
+        </div>
+        
+        <ET fid="bg_song_name" data={d} onChange={oc} editMode={em} style={{ display: "block", fontSize: 18, fontWeight: 700, color: "#2d2d2d", marginBottom: 8 }} />
+        
+        {em && (
+          <div style={{ marginTop: 24 }}>
+            <button onClick={() => bgProps.setIsPicking(true)} style={{ background: "#e91e8c", color: "#fff", border: "none", borderRadius: 12, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <Music size={16} />
+              {d.bg_song_url ? "Change Background Music" : "Select Background Music"}
+            </button>
+          </div>
+        )}
+        
+        <div style={{ marginTop: 32 }}>
+          <PillBtn onClick={ch}>Next: Intro Slide 💌</PillBtn>
+        </div>
+      </div>
+      
+      {bgProps.isPicking && (
+        <SongLibraryPopup
+          onClose={() => bgProps.setIsPicking(false)}
+          onSelect={(song) => {
+            if (oc) {
+              oc("bg_song_name", song.name);
+              oc("bg_song_url", song.url);
+            }
+            bgProps.setIsPicking(false);
+          }}
+        />
+      )}
+    </section>
+  );
+}
+
 // ── Slide 1: Apology intro ──
 function S1({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: boolean; oc?: (id:string,v:string)=>void }) {
   return (
@@ -286,10 +332,10 @@ function S3({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
 }
 
 import SongLibraryPopup from "../SongLibraryPopup";
-import { Play, Pause, Music, SkipBack, SkipForward } from "lucide-react";
+import { Play, Pause, Music, SkipBack, SkipForward, VolumeX, Volume2 } from "lucide-react";
 
 // ── Slide 4: Music player ──
-function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: boolean; oc?: (id:string,v:string)=>void }) {
+function S4({ d, ch, em, oc, onPlayStateChange }: { d: Record<string,string>; ch: () => void; em: boolean; oc?: (id:string,v:string)=>void; onPlayStateChange?: (playing: boolean) => void }) {
   const [playing, setPlaying] = useState(false);
   const [songIdx, setSongIdx] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -342,6 +388,7 @@ function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
   }, [songIdx, d, em]);
 
   useEffect(() => {
+    onPlayStateChange?.(playing);
     if (audioObj) {
       if (playing) audioObj.play().catch(e => console.error(e));
       else audioObj.pause();
@@ -512,9 +559,57 @@ export default function SweetApologyBox({
   forcedSlide?: number;
   autoPlay?: boolean;
 }) {
-  const [slide, setSlide] = useState(0);
+  const [slide, setSlide] = useState(editMode ? -1 : 0);
+  const [isPickingBgSong, setIsPickingBgSong] = useState(false);
   const activeSlide = editMode && forcedSlide !== undefined ? forcedSlide : slide;
   const go = (n: number) => setSlide(n);
+
+  // Background Audio State
+  const [bgAudio, setBgAudio] = useState<HTMLAudioElement | null>(null);
+  const [globalMuted, setGlobalMuted] = useState(false);
+  const [slideAudioPlaying, setSlideAudioPlaying] = useState(false);
+
+  useEffect(() => {
+    if (editMode) return;
+    const audio = new Audio();
+    audio.loop = true;
+    setBgAudio(audio);
+
+    const startBgAudio = () => {
+      if (audio.paused) {
+        audio.play().catch(e => console.log("Bg audio autoplay prevented", e));
+      }
+    };
+    window.addEventListener("click", startBgAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("click", startBgAudio);
+      audio.pause();
+      audio.src = "";
+    };
+  }, [editMode]);
+
+  useEffect(() => {
+    if (!bgAudio) return;
+    if (customData.bg_song_url && bgAudio.src !== customData.bg_song_url) {
+      bgAudio.src = customData.bg_song_url;
+    }
+  }, [bgAudio, customData.bg_song_url]);
+
+  useEffect(() => {
+    if (!bgAudio || editMode) return;
+    if (slideAudioPlaying) {
+      bgAudio.pause();
+    } else {
+      if (!globalMuted) {
+        bgAudio.play().catch(e => console.log("Bg audio play prevented", e));
+      }
+    }
+  }, [slideAudioPlaying, bgAudio, globalMuted, editMode]);
+
+  useEffect(() => {
+    if (bgAudio) bgAudio.muted = globalMuted;
+  }, [globalMuted, bgAudio]);
 
   // Auto-play: cycle slides every 3s (for homepage modal preview)
   useEffect(() => {
@@ -528,10 +623,11 @@ export default function SweetApologyBox({
   const renderSlide = () => {
     const p = { d: customData, em: editMode, oc: onFieldChange };
     switch (activeSlide) {
+      case -1: return <S_Minus1 {...p} ch={() => go(0)} bgProps={{ isPicking: isPickingBgSong, setIsPicking: setIsPickingBgSong }} />;
       case 0: return <S1 {...p} ch={() => go(1)} />;
       case 1: return <S2 {...p} ch={() => go(2)} ap={autoPlay} />;
       case 2: return <S3 {...p} ch={() => go(3)} />;
-      case 3: return <S4 {...p} ch={() => go(4)} />;
+      case 3: return <S4 {...p} ch={() => go(4)} onPlayStateChange={setSlideAudioPlaying} />;
       case 4: return <S5 ch={() => go(5)} em={editMode} ap={autoPlay} />;
       case 5: return <S6 {...p} />;
       default: return null;
@@ -552,8 +648,26 @@ export default function SweetApologyBox({
           {renderSlide()}
         </div>
       </main>
+      
+      {/* Global Mute Button */}
+      {customData.bg_song_url && !editMode && (
+        <button
+          onClick={() => setGlobalMuted(!globalMuted)}
+          style={{
+            position: "fixed", bottom: 24, right: 24, zIndex: 100,
+            width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.9)",
+            backdropFilter: "blur(12px)", border: "1px solid rgba(233,30,140,0.15)",
+            boxShadow: "0 8px 24px rgba(233,30,140,0.15)", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: globalMuted ? "#888" : "#e91e8c", transition: "all 0.3s",
+          }}
+        >
+          {globalMuted ? <VolumeX size={24} strokeWidth={2.5} /> : <Volume2 size={24} strokeWidth={2.5} />}
+        </button>
+      )}
+
       {!editMode && (
-        <div style={{ textAlign: "center", paddingBottom: 16, fontSize: 12, color: "#c89a9a" }}>
+        <div style={{ position: "absolute", bottom: 16, width: "100%", textAlign: "center", fontSize: 12, color: "#c89a9a", zIndex: 1 }}>
           Preview · Purchase to personalise ✨
         </div>
       )}

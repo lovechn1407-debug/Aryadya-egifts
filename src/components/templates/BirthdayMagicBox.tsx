@@ -96,6 +96,43 @@ function Title({ title, sub }: { title: string; sub: string }) {
 }
 
 // ── Slides ────────────────────────────────────────────────────────────────────
+function S0({ d, ch, em, oc, bgProps }: { d: Record<string,string>; ch: ()=>void; em: boolean; oc?: (id:string,v:string)=>void; bgProps: any }) {
+  return (
+    <div>
+      <Title title="Global Background Music 🎵" sub="Plays continuously throughout the website" />
+      <Card>
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#FDF2F8", color: "#E91E8C", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+            <Music size={40} />
+          </div>
+          <ET fid="bg_song_name" data={d} onChange={oc} editMode={em} style={{ display: "block", fontSize: 20, fontWeight: 800, color: "#2D2D2D", marginBottom: 8 }} />
+          {em && (
+            <div style={{ marginTop: 24 }}>
+              <button onClick={() => bgProps.setIsPicking(true)} style={{ background: "#E91E8C", color: "#fff", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <Music size={18} />
+                {d.bg_song_url ? "Change Background Music" : "Select Background Music"}
+              </button>
+            </div>
+          )}
+        </div>
+        <div style={{ textAlign:"center", marginTop:32 }}><PinkBtn onClick={ch}>Next: Welcome Slide 🎁</PinkBtn></div>
+      </Card>
+      {bgProps.isPicking && (
+        <SongLibraryPopup
+          onClose={() => bgProps.setIsPicking(false)}
+          onSelect={(song) => {
+            if (oc) {
+              oc("bg_song_name", song.name);
+              oc("bg_song_url", song.url);
+            }
+            bgProps.setIsPicking(false);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 function S1({ d, ch, em, oc }: { d: Record<string,string>; ch: ()=>void; em: boolean; oc?: (id:string,v:string)=>void }) {
   return (
     <Card withDots>
@@ -604,17 +641,63 @@ export default function BirthdayMagicBox({
   forcedSlide?: number;
   autoPlay?: boolean;
 }) {
-  const SLIDE_ORDER = [1, 2, 3, 4, 5, 6, 7, 9];
-  const [slide, setSlide] = useState(1);
+  const SLIDE_ORDER = editMode ? [0, 1, 2, 3, 4, 5, 6, 7, 9] : [1, 2, 3, 4, 5, 6, 7, 9];
+  const [slide, setSlide] = useState(editMode ? 0 : 1);
   const [showModal, setShowModal] = useState(false);
+  const [isPickingBgSong, setIsPickingBgSong] = useState(false);
 
-  // Global Audio State
+  // Global Audio State (for Slide 6 playlist)
   const [globalAudio, setGlobalAudio] = useState<HTMLAudioElement | null>(null);
   const [globalPlaying, setGlobalPlaying] = useState(false);
   const [globalMuted, setGlobalMuted] = useState(false);
   const [globalProgress, setGlobalProgress] = useState(0);
   const [globalDuration, setGlobalDuration] = useState(0);
   const [activeUrl, setActiveUrl] = useState<string | null>(null);
+
+  // Background Audio State
+  const [bgAudio, setBgAudio] = useState<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (editMode) return;
+    const audio = new Audio();
+    audio.loop = true;
+    setBgAudio(audio);
+
+    const startBgAudio = () => {
+      if (audio.paused) {
+        audio.play().catch(e => console.log("Bg audio autoplay prevented", e));
+      }
+    };
+    window.addEventListener("click", startBgAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("click", startBgAudio);
+      audio.pause();
+      audio.src = "";
+    };
+  }, [editMode]);
+
+  useEffect(() => {
+    if (!bgAudio) return;
+    if (customData.bg_song_url && bgAudio.src !== customData.bg_song_url) {
+      bgAudio.src = customData.bg_song_url;
+    }
+  }, [bgAudio, customData.bg_song_url]);
+
+  useEffect(() => {
+    if (!bgAudio || editMode) return;
+    if (globalPlaying) {
+      bgAudio.pause();
+    } else {
+      if (!globalMuted) {
+        bgAudio.play().catch(e => console.log("Bg audio play prevented", e));
+      }
+    }
+  }, [globalPlaying, bgAudio, globalMuted, editMode]);
+
+  useEffect(() => {
+    if (bgAudio) bgAudio.muted = globalMuted;
+  }, [globalMuted, bgAudio]);
 
   // Initialize Audio Object ONCE
   useEffect(() => {
@@ -678,6 +761,7 @@ export default function BirthdayMagicBox({
       });
     }, 1500);
     return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPlay]);
 
   const activeSlide = editMode && forcedSlide !== undefined ? forcedSlide : slide;
@@ -686,6 +770,7 @@ export default function BirthdayMagicBox({
   const renderSlide = () => {
     const p = { d: customData, em: editMode, oc: onFieldChange };
     switch (activeSlide) {
+      case 0: return <S0 {...p} ch={() => go(1)} bgProps={{ isPicking: isPickingBgSong, setIsPicking: setIsPickingBgSong }} />;
       case 1: return <S1 {...p} ch={() => go(2)} />;
       case 2: return <S2 {...p} ch={() => go(3)} />;
       case 3: return <S3 {...p} ch={() => go(4)} />;
@@ -704,16 +789,16 @@ export default function BirthdayMagicBox({
   return (
     <div style={{ position:"relative", minHeight:"100vh", overflow:"hidden" }}>
       {/* Global Mute Button */}
-      {activeUrl && !editMode && (
+      {customData.bg_song_url && !editMode && (
         <button
           onClick={() => setGlobalMuted(!globalMuted)}
           style={{
-            position: "fixed", top: 16, right: 16, zIndex: 100,
-            width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.8)",
-            backdropFilter: "blur(8px)", border: "1px solid rgba(233,30,140,0.2)",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
-            color: globalMuted ? "#7a6b73" : "#E91E8C", transition: "all 0.2s"
+            position: "fixed", bottom: 24, right: 24, zIndex: 100,
+            width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.9)",
+            backdropFilter: "blur(12px)", border: "1px solid rgba(233,30,140,0.15)",
+            boxShadow: "0 8px 24px rgba(233,30,140,0.15)", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: globalMuted ? "#888" : "#E91E8C", transition: "all 0.3s"
           }}
         >
           {globalMuted ? <VolumeX size={24} strokeWidth={2.5} /> : <Volume2 size={24} strokeWidth={2.5} />}

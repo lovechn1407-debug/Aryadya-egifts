@@ -86,6 +86,15 @@ export const PRODUCT_REGISTRY: Product[] = [
     createdAt: new Date().toISOString(),
     slides: [
       {
+        slideNumber: 0,
+        title: "Background Music",
+        description: "Plays continuously throughout the website",
+        fields: [
+          { id: "bg_song_name", label: "Background Song Name", type: "text", defaultValue: "Piano Cover" },
+          { id: "bg_song_url", label: "Background Song URL", type: "text", defaultValue: "" },
+        ],
+      },
+      {
         slideNumber: 1,
         title: "Welcome Slide",
         description: "The opening birthday greeting",
@@ -184,6 +193,15 @@ export const PRODUCT_REGISTRY: Product[] = [
     previewRoute: "/preview/sweet-apology-box",
     createdAt: new Date().toISOString(),
     slides: [
+      {
+        slideNumber: -1,
+        title: "Background Music",
+        description: "Plays continuously throughout the website",
+        fields: [
+          { id: "bg_song_name", label: "Background Song Name", type: "text", defaultValue: "Romantic Piano" },
+          { id: "bg_song_url", label: "Background Song URL", type: "text", defaultValue: "" },
+        ],
+      },
       {
         slideNumber: 0,
         title: "Apology Intro",
