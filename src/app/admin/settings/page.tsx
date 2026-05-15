@@ -31,11 +31,14 @@ const PREDEFINED_TEMPLATES = {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>({
-    maintenance: { enabled: false, title: "", description: "", note: "", countdownEnabled: false, countdownTarget: "" }
+    maintenance: { enabled: false, title: "", description: "", note: "", countdownEnabled: false, countdownTarget: "" },
+    marquees: []
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
+  const [draggedMarqueeIndex, setDraggedMarqueeIndex] = useState<number | null>(null);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -96,9 +99,50 @@ export default function SettingsPage() {
     e.dataTransfer.setData("text/plain", text);
   };
 
+  const addMarquee = () => {
+    setSettings(s => ({
+      ...s,
+      marquees: [...(s.marquees || []), { id: `mq_${Date.now()}`, text: "New Announcement", color: "#1F2937", order: s.marquees?.length || 0 }]
+    }));
+  };
+
+  const updateMarquee = (index: number, field: string, value: any) => {
+    setSettings(s => {
+      const newMqs = [...(s.marquees || [])];
+      newMqs[index] = { ...newMqs[index], [field]: value };
+      return { ...s, marquees: newMqs };
+    });
+  };
+
+  const deleteMarquee = (index: number) => {
+    setSettings(s => {
+      const newMqs = [...(s.marquees || [])];
+      newMqs.splice(index, 1);
+      return { ...s, marquees: newMqs };
+    });
+  };
+
+  const handleMarqueeDragStart = (index: number) => {
+    setDraggedMarqueeIndex(index);
+  };
+
+  const handleMarqueeDrop = (dropIndex: number) => {
+    if (draggedMarqueeIndex === null || draggedMarqueeIndex === dropIndex) return;
+    setSettings(s => {
+      const newMqs = [...(s.marquees || [])];
+      const [draggedItem] = newMqs.splice(draggedMarqueeIndex, 1);
+      newMqs.splice(dropIndex, 0, draggedItem);
+      // Update orders
+      newMqs.forEach((mq, idx) => mq.order = idx);
+      return { ...s, marquees: newMqs };
+    });
+    setDraggedMarqueeIndex(null);
+  };
+
   if (loading) return <div style={{ padding: 32 }}>Loading settings...</div>;
 
   const m = settings.maintenance;
+  const mqs = settings.marquees || [];
 
   return (
     <div style={{ padding: "32px 48px", maxWidth: 900 }}>
@@ -189,6 +233,51 @@ export default function SettingsPage() {
           )}
         </div>
 
+      </div>
+
+      <div style={{ background: "#fff", padding: 32, borderRadius: 16, border: "1px solid #E2E8F0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginTop: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Top Announcement Bar (Marquees)</h2>
+            <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>Configure sliding text banners at the top of your site.</p>
+          </div>
+          <button onClick={addMarquee} style={{ background: "#10B981", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}>+ Add Marquee</button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {mqs.map((mq, index) => (
+            <div 
+              key={mq.id}
+              draggable
+              onDragStart={() => handleMarqueeDragStart(index)}
+              onDragOver={e => e.preventDefault()}
+              onDrop={() => handleMarqueeDrop(index)}
+              style={{
+                display: "flex", alignItems: "center", gap: 16, padding: "16px", background: "#F8FAFC", 
+                borderRadius: 12, border: "1px solid #E2E8F0",
+                opacity: draggedMarqueeIndex === index ? 0.5 : 1,
+                cursor: "grab"
+              }}
+            >
+              <div style={{ fontSize: 20, color: "#CBD5E1" }}>☰</div>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+                <input 
+                  type="text" 
+                  value={mq.text} 
+                  onChange={e => updateMarquee(index, "text", e.target.value)}
+                  placeholder="Enter announcement (HTML tags like <b> supported)"
+                  style={{ width: "100%", padding: "10px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 14, outline: "none" }}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#475569" }}>Text Color:</label>
+                <input type="color" value={mq.color} onChange={e => updateMarquee(index, "color", e.target.value)} style={{ width: 32, height: 32, border: "none", padding: 0, cursor: "pointer", background: "transparent" }} />
+              </div>
+              <button onClick={() => deleteMarquee(index)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", padding: "8px 12px", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}>Delete</button>
+            </div>
+          ))}
+          {mqs.length === 0 && <p style={{ fontSize: 14, color: "#64748B", textAlign: "center", padding: "24px 0" }}>No announcements added.</p>}
+        </div>
       </div>
     </div>
   );

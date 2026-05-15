@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   SECTION_THEMES, SectionTheme, DisplaySection, Product,
 } from "@/lib/data";
@@ -21,9 +21,16 @@ export default function AdminSectionsPage() {
   const [countdownEnabled, setCountdownEnabled] = useState(false);
   const [countdownEndTime, setCountdownEndTime] = useState("");
   
+  const [titleSize, setTitleSize] = useState<"small" | "normal" | "medium" | "big" | "bigger">("normal");
+  const [headerNote, setHeaderNote] = useState("");
+  const [headerNoteEnabled, setHeaderNoteEnabled] = useState(false);
+
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const noteRef = useRef<HTMLTextAreaElement>(null);
 
   const reload = async () => {
     const [secs, prods] = await Promise.all([getSectionsDB(), getProductsDB()]);
@@ -43,14 +50,19 @@ export default function AdminSectionsPage() {
       const themeConfig = SECTION_THEMES.find(t => t.id === theme);
       
       if (editingSectionId) {
-        // Update existing section
+        // Update
+        const section = sections.find(s => s.id === editingSectionId);
+        if (!section) return;
         await updateSectionDB(editingSectionId, {
           title: title.trim(),
-          subtitle: subtitle.trim() || themeConfig?.tagline || "",
+          subtitle: subtitle.trim(),
           theme,
           productIds: selectedProducts,
           countdownEnabled,
-          countdownEndTime
+          countdownEndTime,
+          titleSize,
+          headerNote,
+          headerNoteEnabled
         });
       } else {
         // Create new section (at the top)
@@ -65,12 +77,16 @@ export default function AdminSectionsPage() {
           order: minOrder - 1, // Appears at the top
           countdownEnabled,
           countdownEndTime,
+          titleSize,
+          headerNote,
+          headerNoteEnabled,
           createdAt: new Date().toISOString(),
         };
         await saveSectionDB(newSection);
       }
       
       setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
+      setTitleSize("normal"); setHeaderNote(""); setHeaderNoteEnabled(false);
       setShowCreate(false);
       setEditingSectionId(null);
       await reload();
@@ -89,6 +105,9 @@ export default function AdminSectionsPage() {
     setSelectedProducts(sec.productIds);
     setCountdownEnabled(sec.countdownEnabled || false);
     setCountdownEndTime(sec.countdownEndTime || "");
+    setTitleSize(sec.titleSize || "normal");
+    setHeaderNote(sec.headerNote || "");
+    setHeaderNoteEnabled(sec.headerNoteEnabled || false);
     setEditingSectionId(sec.id);
     setShowCreate(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -98,6 +117,7 @@ export default function AdminSectionsPage() {
     setShowCreate(false);
     setEditingSectionId(null);
     setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
+    setTitleSize("normal"); setHeaderNote(""); setHeaderNoteEnabled(false);
   };
 
   const toggleProduct = (id: string) => {
@@ -129,7 +149,19 @@ export default function AdminSectionsPage() {
     setDraggedIndex(index);
   };
 
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragOverIndex !== index) setDragOverIndex(index);
+    
+    // Auto-scroll logic
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const threshold = 150;
+    if (rect.top < threshold) window.scrollBy(0, -10);
+    if (window.innerHeight - rect.bottom < threshold) window.scrollBy(0, 10);
+  };
+
   const handleDrop = async (dropIndex: number) => {
+    setDragOverIndex(null);
     if (draggedIndex === null || draggedIndex === dropIndex) return;
 
     const newSections = [...sections];
@@ -142,6 +174,18 @@ export default function AdminSectionsPage() {
       newSections.map((sec, idx) => updateSectionDB(sec.id, { order: idx }))
     );
     setDraggedIndex(null);
+  };
+
+  const insertTextAtCursor = (text: string) => {
+    if (!noteRef.current) return;
+    const start = noteRef.current.selectionStart;
+    const end = noteRef.current.selectionEnd;
+    const val = headerNote;
+    setHeaderNote(val.substring(0, start) + text + val.substring(end));
+    setTimeout(() => {
+      noteRef.current?.focus();
+      noteRef.current?.setSelectionRange(start + text.length, start + text.length);
+    }, 10);
   };
 
   const inputStyle: React.CSSProperties = {
@@ -211,6 +255,39 @@ export default function AdminSectionsPage() {
                 <input type="datetime-local" value={countdownEndTime} onChange={e => setCountdownEndTime(e.target.value)} style={inputStyle} />
               </div>
             )}
+            
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Title Font Size</label>
+              <select value={titleSize} onChange={e => setTitleSize(e.target.value as any)} style={inputStyle}>
+                <option value="small">Small</option>
+                <option value="normal">Normal</option>
+                <option value="medium">Medium</option>
+                <option value="big">Big</option>
+                <option value="bigger">Bigger</option>
+              </select>
+            </div>
+            
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 10 }}>
+                <input type="checkbox" checked={headerNoteEnabled} onChange={e => setHeaderNoteEnabled(e.target.checked)} style={{ width: 16, height: 16, accentColor: "#0F172A" }} />
+                Enable Header Note
+              </label>
+              {headerNoteEnabled && (
+                <div style={{ border: "1px solid #CBD5E1", borderRadius: 8, overflow: "hidden" }}>
+                  <div style={{ background: "#F1F5F9", padding: "8px 12px", borderBottom: "1px solid #CBD5E1", display: "flex", gap: 8 }}>
+                    <button onClick={() => insertTextAtCursor("<b></b>")} style={{ background: "#fff", border: "1px solid #CBD5E1", padding: "4px 8px", borderRadius: 4, fontWeight: "bold", cursor: "pointer", fontSize: 12 }}>B</button>
+                    <button onClick={() => insertTextAtCursor("<i></i>")} style={{ background: "#fff", border: "1px solid #CBD5E1", padding: "4px 8px", borderRadius: 4, fontStyle: "italic", cursor: "pointer", fontSize: 12 }}>I</button>
+                  </div>
+                  <textarea 
+                    ref={noteRef}
+                    value={headerNote} 
+                    onChange={e => setHeaderNote(e.target.value)} 
+                    placeholder="E.g. Valid till stocks last!"
+                    style={{ ...inputStyle, border: "none", borderRadius: 0, minHeight: 80, resize: "vertical" }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           
           <div style={{ marginBottom: 16 }}>
@@ -241,22 +318,25 @@ export default function AdminSectionsPage() {
       {/* Sections List */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {sections.map((sec, index) => (
-          <div
-            key={sec.id}
-            draggable
-            onDragStart={() => handleDragStart(index)}
-            onDragOver={e => e.preventDefault()}
-            onDrop={() => handleDrop(index)}
-            style={{
-              ...cardStyle,
-              cursor: "grab",
-              display: "flex", alignItems: "flex-start", gap: 16,
-              opacity: draggedIndex === index ? 0.5 : 1,
-              background: sec.visible ? "#FFFFFF" : "#F8FAFC",
-              transition: "transform 0.2s, opacity 0.2s"
-            }}
-          >
-            <div style={{ fontSize: 20, color: "#CBD5E1", cursor: "grab", paddingTop: 4 }}>
+          <div key={sec.id}>
+            {dragOverIndex === index && (
+              <div style={{ height: 4, background: "#3B82F6", borderRadius: 2, marginBottom: 16, boxShadow: "0 0 8px rgba(59,130,246,0.5)" }} />
+            )}
+            <div
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={e => handleDragOver(e, index)}
+              onDrop={() => handleDrop(index)}
+              style={{
+                ...cardStyle,
+                cursor: "grab",
+                display: "flex", alignItems: "flex-start", gap: 16,
+                opacity: draggedIndex === index ? 0.5 : 1,
+                background: sec.visible ? "#FFFFFF" : "#F8FAFC",
+                transition: "transform 0.2s, opacity 0.2s"
+              }}
+            >
+              <div style={{ fontSize: 20, color: "#CBD5E1", cursor: "grab", paddingTop: 4 }}>
               ☰
             </div>
             
@@ -312,8 +392,18 @@ export default function AdminSectionsPage() {
                 Delete
               </button>
             </div>
+            </div>
           </div>
         ))}
+        {sections.length > 0 && dragOverIndex === sections.length && (
+          <div style={{ height: 4, background: "#3B82F6", borderRadius: 2, marginTop: -4, boxShadow: "0 0 8px rgba(59,130,246,0.5)" }} />
+        )}
+
+        <div 
+          onDragOver={e => handleDragOver(e, sections.length)} 
+          onDrop={() => handleDrop(sections.length)}
+          style={{ height: 20, marginTop: -16, width: "100%" }} 
+        />
 
         {sections.length === 0 && !showCreate && (
           <div style={{ textAlign: "center", padding: "60px 0", background: "#FFFFFF", borderRadius: 12, border: "1px dashed #CBD5E1" }}>

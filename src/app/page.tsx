@@ -4,7 +4,71 @@ import Link from "next/link";
 import { getSectionTheme } from "@/lib/data";
 import type { Product, DisplaySection, SectionThemeConfig } from "@/lib/data";
 import type { Order } from "@/lib/data";
-import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB } from "@/lib/db";
+import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB, Settings } from "@/lib/db";
+
+/* ── Marquee Bar ── */
+function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (marquees.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % marquees.length);
+    }, 4000); // 4 seconds per message
+    return () => clearInterval(interval);
+  }, [marquees.length]);
+
+  if (marquees.length === 0) return null;
+
+  return (
+    <div style={{ height: 40, overflow: "hidden", position: "relative", background: "#fff", borderBottom: "1px solid #F3F4F6", zIndex: 101 }}>
+      {marquees.map((mq, index) => {
+        let yPos = "100%";
+        let opacity = 0;
+        let zIndex = 0;
+        let transition = "transform 0.5s ease, opacity 0.5s ease";
+
+        if (index === currentIndex) {
+          yPos = "0";
+          opacity = 1;
+          zIndex = 2;
+        } else if (index === (currentIndex - 1 + marquees.length) % marquees.length) {
+          // Just left the screen (moved up)
+          yPos = "-100%";
+          opacity = 0;
+          zIndex = 1;
+        } else {
+          // Waiting to enter from bottom
+          yPos = "100%";
+          opacity = 0;
+          zIndex = 0;
+          transition = "none"; // Reset instantly to bottom
+        }
+
+        return (
+          <div
+            key={mq.id}
+            style={{
+              position: "absolute",
+              top: 0, left: 0, right: 0, height: "100%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transform: `translateY(${yPos})`,
+              opacity,
+              transition,
+              zIndex,
+              fontSize: 13,
+              fontWeight: 600,
+              color: mq.color || "#1F2937",
+              textAlign: "center",
+              padding: "0 16px"
+            }}
+            dangerouslySetInnerHTML={{ __html: mq.text }}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 /* ── Navbar ── */
 function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
@@ -184,6 +248,11 @@ function ProductCard({ product, accent, onCardClick }: { product: Product; accen
       {product.badge && (
         <div style={{ position: "absolute", top: 8, left: 8, zIndex: 10, padding: "4px 8px", background: product.badge === "hot" ? "#EF4444" : product.badge === "new" ? "#3B82F6" : product.badge === "specials" ? "#10B981" : "#F59E0B", color: "#fff", fontSize: 10, fontWeight: 900, borderRadius: 6, textTransform: "uppercase", letterSpacing: 0.5, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
           {product.badge === "hot" ? "🔥 HOT" : product.badge === "new" ? "✨ NEW" : product.badge === "specials" ? "🎁 SPECIAL" : "💎 PREMIUM"}
+        </div>
+      )}
+      {(product as any).showStock && (product as any).stockLeft > 0 && (
+        <div style={{ position: "absolute", top: 8, right: 8, zIndex: 10, padding: "4px 8px", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(4px)", color: "#EF4444", fontSize: 10, fontWeight: 800, borderRadius: 6, textTransform: "uppercase", letterSpacing: 0.5, border: "1px solid rgba(239,68,68,0.3)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+          Only {(product as any).stockLeft} left
         </div>
       )}
       {/* Iframe — maintains 3:4 ratio */}
@@ -602,6 +671,15 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
   const sectionProducts = products.filter(p => section.productIds.includes(p.id));
   if (sectionProducts.length === 0) return null;
 
+  const titleSizes = {
+    small: "clamp(12px, 1.5vw, 16px)",
+    normal: "clamp(14px, 2vw, 20px)",
+    medium: "clamp(18px, 3vw, 26px)",
+    big: "clamp(24px, 4vw, 36px)",
+    bigger: "clamp(32px, 6vw, 48px)"
+  };
+  const titleSize = titleSizes[section.titleSize || "normal"];
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -695,7 +773,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
           {/* Title + subtitle — clipped if needed */}
           <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
             <h2 style={{
-              fontSize: "clamp(14px,2vw,20px)", fontWeight: 900,
+              fontSize: titleSize, fontWeight: 900,
               color: "#fff", fontFamily: "'Nunito',sans-serif",
               lineHeight: 1.2, margin: 0,
               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
@@ -710,6 +788,21 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
             }}>
               {section.subtitle}
             </p>
+            {section.headerNoteEnabled && section.headerNote && (
+              <div 
+                style={{
+                  marginTop: 6,
+                  padding: "6px 12px",
+                  background: "rgba(0,0,0,0.15)",
+                  borderRadius: 8,
+                  borderLeft: "3px solid rgba(255,255,255,0.5)",
+                  fontSize: "clamp(11px,1.5vw,13px)",
+                  color: "rgba(255,255,255,0.9)",
+                  display: "inline-block"
+                }}
+                dangerouslySetInnerHTML={{ __html: section.headerNote }}
+              />
+            )}
             {timeLeft && (
               <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center" }}>
                 <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "rgba(255,255,255,0.9)", marginRight: 4 }}>Ends In:</span>
@@ -858,13 +951,17 @@ export default function HomePage() {
   const [showLogin, setShowLogin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const [settings, setSettings] = useState<Settings | null>(null);
+
   useEffect(() => {
     Promise.all([
       getProductsDB(),
-      getVisibleSectionsDB()
-    ]).then(([allProds, visibleSecs]) => {
+      getVisibleSectionsDB(),
+      getSettingsDB()
+    ]).then(([allProds, visibleSecs, fetchedSettings]) => {
       setProducts(allProds.filter(p => p.visible));
       setSections(visibleSecs);
+      setSettings(fetchedSettings);
       setLoading(false);
     });
   }, []);
@@ -874,8 +971,11 @@ export default function HomePage() {
   const sectionedIds = new Set(sections.flatMap(s => s.productIds));
   const unsectioned = products.filter(p => !sectionedIds.has(p.id));
 
+  const sortedMarquees = [...(settings?.marquees || [])].sort((a, b) => a.order - b.order);
+
   return (
     <div>
+      {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
       <Navbar onLoginClick={() => setShowLogin(true)} />
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {selectedProduct && <ProductModal product={selectedProduct} accent={selectedAccent} onClose={() => setSelectedProduct(null)} />}

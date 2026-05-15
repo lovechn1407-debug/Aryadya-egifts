@@ -22,6 +22,9 @@ export default function AdminProductsPage() {
   const [editingRating, setEditingRating] = useState<string | null>(null);
   const [ratingInput, setRatingInput] = useState(5);
   const [reviewInput, setReviewInput] = useState("");
+  const [editingStock, setEditingStock] = useState<string | null>(null);
+  const [stockInput, setStockInput] = useState("");
+  const [showStockInput, setShowStockInput] = useState(false);
   const [orderCounts, setOrderCounts] = useState<Record<string, number>>({});
   const [revenueCounts, setRevenueCounts] = useState<Record<string, number>>({});
 
@@ -76,8 +79,24 @@ export default function AdminProductsPage() {
   };
 
   const saveRating = async (id: string) => {
-    await updateProductOverrideDB(id, { rating: ratingInput, reviewCount: parseInt(reviewInput) || undefined });
+    const rc = parseInt(reviewInput, 10);
+    const updates: Record<string, any> = {
+      rating: ratingInput
+    };
+    if (!isNaN(rc)) updates.reviewCount = rc;
+    await updateProductOverrideDB(id, updates);
     setEditingRating(null);
+    reload();
+  };
+
+  const saveStock = async (id: string) => {
+    const s = parseInt(stockInput, 10);
+    const updates: Record<string, any> = {
+      showStock: showStockInput
+    };
+    if (!isNaN(s)) updates.stockLeft = s;
+    await updateProductOverrideDB(id, updates);
+    setEditingStock(null);
     reload();
   };
 
@@ -174,6 +193,33 @@ export default function AdminProductsPage() {
                     <span style={{ fontSize: 14, color: "#334155", fontWeight: 600 }}>{((product as any).rating || 5).toFixed(1)}</span>
                     <button onClick={() => { setEditingRating(product.id); setRatingInput((product as any).rating || 5); setReviewInput(String((product as any).reviewCount || "")); }}
                       style={{ background: "transparent", border: "none", color: "#94A3B8", cursor: "pointer", fontSize: 14 }}>✏️</button>
+                  </div>
+                )}
+              </div>
+              <div style={{ gridColumn: "span 2" }}>
+                <p style={{ fontSize: 12, color: "#64748B", fontWeight: 500, marginBottom: 4 }}>Inventory & Stock Tag</p>
+                {editingStock === product.id ? (
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <input
+                      style={{...inputStyle, width: 80, padding: "6px"}}
+                      type="number" placeholder="Left" value={stockInput} onChange={e => setStockInput(e.target.value)} autoFocus
+                    />
+                    <label style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                      <input type="checkbox" checked={showStockInput} onChange={e => setShowStockInput(e.target.checked)} />
+                      Show "Left" Tag
+                    </label>
+                    <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#0F172A", color: "#FFFFFF", border: "none", cursor: "pointer", marginLeft: 8 }} onClick={() => saveStock(product.id)}>Save</button>
+                    <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#F1F5F9", color: "#334155", border: "none", cursor: "pointer" }} onClick={() => setEditingStock(null)}>✕</button>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", margin: 0 }}>
+                      {(product as any).stockLeft || 0} left
+                    </p>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: (product as any).showStock ? "#ECFDF5" : "#F1F5F9", color: (product as any).showStock ? "#059669" : "#64748B" }}>
+                      {(product as any).showStock ? "Tag Visible" : "Tag Hidden"}
+                    </span>
+                    <button onClick={() => { setEditingStock(product.id); setStockInput(String((product as any).stockLeft || "")); setShowStockInput(!!(product as any).showStock); }} style={{ background: "transparent", border: "none", color: "#94A3B8", cursor: "pointer", fontSize: 14 }}>✏️</button>
                   </div>
                 )}
               </div>

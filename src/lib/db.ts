@@ -7,6 +7,13 @@ import { PRODUCT_REGISTRY } from "./data";
 import type { Product, DisplaySection, Order, Coupon } from "./data";
 
 // ── SETTINGS ─────────────────────────────────────────────────────────────────
+export interface Marquee {
+  id: string;
+  text: string;
+  color: string;
+  order: number;
+}
+
 export interface Settings {
   maintenance: {
     enabled: boolean;
@@ -16,6 +23,7 @@ export interface Settings {
     countdownEnabled: boolean;
     countdownTarget: string;
   };
+  marquees?: Marquee[];
 }
 
 export async function getSettingsDB(): Promise<Settings> {
@@ -47,6 +55,8 @@ export interface ProductOverride {
   badge?: "hot" | "new" | "specials" | "premium" | "";
   rating?: number;
   reviewCount?: number;
+  stockLeft?: number;
+  showStock?: boolean;
 }
 
 export async function getProductsDB(): Promise<Product[]> {

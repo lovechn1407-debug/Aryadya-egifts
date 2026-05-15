@@ -462,6 +462,9 @@ export interface DisplaySection {
   order: number; // sort order
   countdownEnabled?: boolean;
   countdownEndTime?: string;
+  titleSize?: "small" | "normal" | "medium" | "big" | "bigger";
+  headerNote?: string;
+  headerNoteEnabled?: boolean;
   createdAt: string;
 }
 
