@@ -856,10 +856,17 @@ export default function HomePage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedAccent, setSelectedAccent] = useState("#E91E8C");
   const [showLogin, setShowLogin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getProductsDB().then(all => setProducts(all.filter(p => p.visible)));
-    getVisibleSectionsDB().then(setSections);
+    Promise.all([
+      getProductsDB(),
+      getVisibleSectionsDB()
+    ]).then(([allProds, visibleSecs]) => {
+      setProducts(allProds.filter(p => p.visible));
+      setSections(visibleSecs);
+      setLoading(false);
+    });
   }, []);
 
   const openModal = (p: Product, accent?: string) => { setSelectedProduct(p); setSelectedAccent(accent || "#E91E8C"); };
@@ -873,8 +880,35 @@ export default function HomePage() {
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {selectedProduct && <ProductModal product={selectedProduct} accent={selectedAccent} onClose={() => setSelectedProduct(null)} />}
       <Hero />
-      {sections.map(sec => <OccasionSection key={sec.id} section={sec} products={products} onCardClick={openModal} />)}
-      <AllGifts products={products} onCardClick={openModal} />
+      
+      {loading ? (
+        <section style={{ padding: "60px clamp(16px,4vw,48px)" }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+            <div className="animate-pulse" style={{ width: 200, height: 32, background: "#e5e7eb", borderRadius: 8, marginBottom: 8 }} />
+            <div className="animate-pulse" style={{ width: 300, height: 16, background: "#f3f4f6", borderRadius: 8, marginBottom: 32 }} />
+            <div style={{ display: "flex", gap: 20, overflowX: "hidden" }}>
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="animate-pulse" style={{ width: "clamp(160px, calc(50vw - 26px), 260px)", height: 340, background: "#f9fafb", borderRadius: 24, border: "1px solid rgba(0,0,0,0.04)" }} />
+              ))}
+            </div>
+            
+            <div style={{ marginTop: 80 }}>
+              <div className="animate-pulse" style={{ width: 240, height: 32, background: "#e5e7eb", borderRadius: 8, marginBottom: 8 }} />
+              <div className="animate-pulse" style={{ width: 340, height: 16, background: "#f3f4f6", borderRadius: 8, marginBottom: 32 }} />
+              <div style={{ display: "flex", gap: 20, overflowX: "hidden" }}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="animate-pulse" style={{ width: "clamp(160px, calc(50vw - 26px), 260px)", height: 340, background: "#f9fafb", borderRadius: 24, border: "1px solid rgba(0,0,0,0.04)" }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <>
+          {sections.map(sec => <OccasionSection key={sec.id} section={sec} products={products} onCardClick={openModal} />)}
+          <AllGifts products={unsectioned} onCardClick={openModal} />
+        </>
+      )}
       <HowItWorks />
       <Footer />
     </div>

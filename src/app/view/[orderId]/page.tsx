@@ -27,14 +27,16 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
   const [product, setProduct] = useState<Product | null>(null);
   const [copied, setCopied] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       const o = await getOrderDB(orderId);
-      if (!o) return;
+      if (!o) { setLoading(false); return; }
       setOrder(o);
       const p = await getProductDB(o.productId);
       if (p) setProduct(p);
+      setLoading(false);
     })();
   }, [orderId]);
 
@@ -45,6 +47,19 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0A0A0F", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes viewSpin { 100% { transform: rotate(360deg); } }
+        ` }} />
+        <div style={{ width: 48, height: 48, borderRadius: "50%", border: "3px solid rgba(255,45,120,0.2)", borderTopColor: "#FF2D78", animation: "viewSpin 1s linear infinite", marginBottom: 24 }} />
+        <h2 style={{ fontWeight: 700, color: "#fff", fontSize: 20 }}>Please wait...</h2>
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginTop: 8 }}>Loading your customized experience ✨</p>
+      </div>
+    );
+  }
 
   if (!order || !product) {
     return (

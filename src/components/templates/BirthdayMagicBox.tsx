@@ -98,25 +98,34 @@ function Title({ title, sub }: { title: string; sub: string }) {
 // ── Slides ────────────────────────────────────────────────────────────────────
 function S0({ d, ch, em, oc, bgProps }: { d: Record<string,string>; ch: ()=>void; em: boolean; oc?: (id:string,v:string)=>void; bgProps: any }) {
   return (
-    <div>
-      <Title title="Global Background Music 🎵" sub="Plays continuously throughout the website" />
-      <Card>
-        <div style={{ textAlign: "center", padding: "20px 0" }}>
-          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#FDF2F8", color: "#E91E8C", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
-            <Music size={40} />
-          </div>
-          <ET fid="bg_song_name" data={d} onChange={oc} editMode={em} style={{ display: "block", fontSize: 20, fontWeight: 800, color: "#2D2D2D", marginBottom: 8 }} />
-          {em && (
-            <div style={{ marginTop: 24 }}>
-              <button onClick={() => bgProps.setIsPicking(true)} style={{ background: "#E91E8C", color: "#fff", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
-                <Music size={18} />
-                {d.bg_song_url ? "Change Background Music" : "Select Background Music"}
-              </button>
-            </div>
-          )}
+    <div style={{ background: "#fff", borderRadius: 12, padding: 32, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", border: "1px solid #eee", margin: "0 auto", maxWidth: 480 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 700, color: "#333", marginBottom: 8, textAlign: "center" }}>Global Background Music 🎵</h2>
+      <p style={{ fontSize: 14, color: "#666", marginBottom: 24, textAlign: "center" }}>Plays continuously throughout the website</p>
+      
+      <div style={{ textAlign: "center", padding: "20px 0" }}>
+        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#f5f5f5", color: "#333", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <Music size={28} />
         </div>
-        <div style={{ textAlign:"center", marginTop:32 }}><PinkBtn onClick={ch}>Next: Welcome Slide 🎁</PinkBtn></div>
-      </Card>
+        
+        <div style={{ display: "block", fontSize: 16, fontWeight: 600, color: "#222", marginBottom: 16 }}>
+          {d.bg_song_name || "No song selected"}
+        </div>
+        
+        {em && (
+          <div style={{ marginTop: 16 }}>
+            <button onClick={() => bgProps.setIsPicking(true)} style={{ background: "#222", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <Music size={16} />
+              {d.bg_song_url ? "Change Background Music" : "Select Background Music"}
+            </button>
+          </div>
+        )}
+      </div>
+      <div style={{ textAlign:"center", marginTop: 24 }}>
+        <button onClick={ch} style={{ background: "#e5e7eb", color: "#374151", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+          Next: Welcome Slide →
+        </button>
+      </div>
+
       {bgProps.isPicking && (
         <SongLibraryPopup
           onClose={() => bgProps.setIsPicking(false)}

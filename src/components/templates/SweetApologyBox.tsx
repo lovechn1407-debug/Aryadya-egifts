@@ -132,29 +132,33 @@ function NavBtns({ onBack, onNext, nextLabel = "Next →", nextDisabled }: {
 function S_Minus1({ d, ch, em, oc, bgProps }: { d: Record<string,string>; ch: () => void; em: boolean; oc?: (id:string,v:string)=>void; bgProps: any }) {
   return (
     <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "64px 24px" }}>
-      <div style={{ background: "#fff", borderRadius: 24, padding: "40px 24px", width: "100%", maxWidth: 400, boxShadow: "0 12px 40px rgba(0,0,0,0.08)" }}>
-        <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 700, fontSize: 24, color: "#e91e8c", marginBottom: 8 }}>
+      <div style={{ background: "#fff", borderRadius: 12, padding: 32, width: "100%", maxWidth: 480, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", border: "1px solid #eee" }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: "#333", marginBottom: 8, fontFamily: "sans-serif" }}>
           Global Background Music 🎵
-        </h3>
-        <p style={{ fontSize: 13, color: "#888", marginBottom: 24 }}>Plays continuously throughout the website</p>
+        </h2>
+        <p style={{ fontSize: 14, color: "#666", marginBottom: 24, fontFamily: "sans-serif" }}>Plays continuously throughout the website</p>
         
-        <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#fdf0f0", color: "#e91e8c", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
-          <Music size={40} />
+        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#f5f5f5", color: "#333", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <Music size={28} />
         </div>
         
-        <ET fid="bg_song_name" data={d} onChange={oc} editMode={em} style={{ display: "block", fontSize: 18, fontWeight: 700, color: "#2d2d2d", marginBottom: 8 }} />
+        <div style={{ display: "block", fontSize: 16, fontWeight: 600, color: "#222", marginBottom: 16, fontFamily: "sans-serif" }}>
+          {d.bg_song_name || "No song selected"}
+        </div>
         
         {em && (
-          <div style={{ marginTop: 24 }}>
-            <button onClick={() => bgProps.setIsPicking(true)} style={{ background: "#e91e8c", color: "#fff", border: "none", borderRadius: 12, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <div style={{ marginTop: 16 }}>
+            <button onClick={() => bgProps.setIsPicking(true)} style={{ background: "#222", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "sans-serif" }}>
               <Music size={16} />
               {d.bg_song_url ? "Change Background Music" : "Select Background Music"}
             </button>
           </div>
         )}
         
-        <div style={{ marginTop: 32 }}>
-          <PillBtn onClick={ch}>Next: Intro Slide 💌</PillBtn>
+        <div style={{ marginTop: 24 }}>
+          <button onClick={ch} style={{ background: "#e5e7eb", color: "#374151", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "sans-serif" }}>
+            Next: Intro Slide →
+          </button>
         </div>
       </div>
       
