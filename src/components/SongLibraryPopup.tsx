@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Song } from "@/lib/data";
 import { getSongsDB } from "@/lib/db";
+import { Play, Pause, X, Music } from "lucide-react";
 
 export default function SongLibraryPopup({
   onClose,
@@ -80,13 +81,13 @@ export default function SongLibraryPopup({
           <button onClick={onClose} style={{
             background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "50%",
             width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 18, cursor: "pointer", color: "#64748B", transition: "all 0.2s",
+            cursor: "pointer", color: "#64748B", transition: "all 0.2s",
             boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
           }}
           onMouseEnter={e => { e.currentTarget.style.color = "#0F172A"; e.currentTarget.style.borderColor = "#CBD5E1"; }}
           onMouseLeave={e => { e.currentTarget.style.color = "#64748B"; e.currentTarget.style.borderColor = "#E2E8F0"; }}
           >
-            ✕
+            <X size={18} />
           </button>
         </div>
 
@@ -99,8 +100,8 @@ export default function SongLibraryPopup({
             </div>
           ) : songs.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px 0", background: "#F8FAFC", borderRadius: 16, border: "2px dashed #E2E8F0" }}>
-              <div style={{ width: 64, height: 64, background: "#FFFFFF", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 16px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
-                📭
+              <div style={{ width: 64, height: 64, background: "#FFFFFF", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", color: "#CBD5E1" }}>
+                <Music size={32} />
               </div>
               <p style={{ color: "#0F172A", fontSize: 16, fontWeight: 700, margin: "0 0 8px" }}>No audio tracks found</p>
               <p style={{ color: "#64748B", fontSize: 14, margin: 0 }}>Upload some songs from the Admin Panel first.</p>
@@ -127,11 +128,11 @@ export default function SongLibraryPopup({
                       background: isActive ? "#3B82F6" : "#F8FAFC",
                       color: isActive ? "#FFFFFF" : "#64748B",
                       border: `1px solid ${isActive ? "#3B82F6" : "#E2E8F0"}`, cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
+                      display: "flex", alignItems: "center", justifyContent: "center",
                       transition: "all 0.2s"
                     }}
                   >
-                    {isActive ? "⏸" : "▶️"}
+                    {isActive ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" style={{ marginLeft: 2 }} />}
                   </button>
 
                   <div style={{ flex: 1, minWidth: 0 }}>

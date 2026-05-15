@@ -416,6 +416,7 @@ function S5({ d, ch, em, oc }: { d: Record<string,string>; ch: ()=>void; em: boo
 }
 
 import SongLibraryPopup from "../SongLibraryPopup";
+import { Play, Pause, Volume2, VolumeX, Music } from "lucide-react";
 
 function S6({ d, ch, em, oc, audio }: { d: Record<string,string>; ch: ()=>void; em: boolean; oc?: (id:string,v:string)=>void; audio: any }) {
   const [pickingFor, setPickingFor] = useState<number | null>(null);
@@ -452,7 +453,7 @@ function S6({ d, ch, em, oc, audio }: { d: Record<string,string>; ch: ()=>void; 
                       transition: "all 0.2s"
                     }}
                   >
-                    {isActive && audio.playing ? "⏸" : "▶️"}
+                    {isActive && audio.playing ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" style={{ marginLeft: 2 }} />}
                   </button>
                   <div style={{ flex: 1 }}>
                     <ET fid={s.n} data={d} onChange={oc} editMode={em} style={{ display:"block", fontWeight:700, fontSize:15, color: "#2D2D2D", marginBottom: 2 }} />
@@ -481,8 +482,8 @@ function S6({ d, ch, em, oc, audio }: { d: Record<string,string>; ch: ()=>void; 
 
                 {em && (
                   <div style={{ marginTop: 12, textAlign: "right" }}>
-                    <button onClick={() => setPickingFor(i)} style={{ background: "none", border: "1px dashed #E91E8C", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#E91E8C", cursor: "pointer", fontWeight: 600 }}>
-                      {url ? "🎵 Change Song Audio" : "🎵 Add Song Audio"}
+                    <button onClick={() => setPickingFor(i)} style={{ background: "none", border: "1px dashed #E91E8C", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: "#E91E8C", cursor: "pointer", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      {url ? <><Music size={14} /> Change Audio</> : <><Music size={14} /> Add Audio</>}
                     </button>
                   </div>
                 )}
@@ -715,7 +716,7 @@ export default function BirthdayMagicBox({
             color: globalMuted ? "#7a6b73" : "#E91E8C", transition: "all 0.2s"
           }}
         >
-          {globalMuted ? "🔇" : "🔊"}
+          {globalMuted ? <VolumeX size={24} strokeWidth={2.5} /> : <Volume2 size={24} strokeWidth={2.5} />}
         </button>
       )}
 

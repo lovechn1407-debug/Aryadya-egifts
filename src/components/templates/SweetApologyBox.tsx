@@ -286,6 +286,7 @@ function S3({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
 }
 
 import SongLibraryPopup from "../SongLibraryPopup";
+import { Play, Pause, Music, SkipBack, SkipForward } from "lucide-react";
 
 // ── Slide 4: Music player ──
 function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: boolean; oc?: (id:string,v:string)=>void }) {
@@ -380,8 +381,8 @@ function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
                 <ET fid={s.n} data={d} onChange={oc} editMode={em} style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }} />
                 <ET fid={s.a} data={d} onChange={oc} editMode={em} style={{ fontSize: 12, color: "#888", marginBottom: 8 }} />
                 <div style={{ textAlign: "right" }}>
-                  <button onClick={() => setPickingFor(i)} style={{ background: "none", border: "1px dashed #e91e8c", borderRadius: 6, padding: "4px 10px", fontSize: 11, color: "#e91e8c", cursor: "pointer", fontWeight: 600 }}>
-                    {d[s.u] ? "🎵 Change Song Audio" : "🎵 Add Song Audio"}
+                  <button onClick={() => setPickingFor(i)} style={{ background: "none", border: "1px dashed #e91e8c", borderRadius: 6, padding: "4px 10px", fontSize: 11, color: "#e91e8c", cursor: "pointer", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    {d[s.u] ? <><Music size={12} /> Change Audio</> : <><Music size={12} /> Add Audio</>}
                   </button>
                 </div>
               </div>
@@ -409,17 +410,23 @@ function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
         <div style={{ display: "flex", alignItems: "center", gap: 24, opacity: em ? 0.4 : 1, pointerEvents: em ? "none" : "auto" }}>
           <button onClick={() => setSongIdx(i => (i - 1 + songs.length) % songs.length)} style={{
             width: 40, height: 40, borderRadius: "50%", border: "1px solid #f8c8c8",
-            background: "none", cursor: "pointer", fontSize: 16,
-          }}>⏮</button>
+            background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#e91e8c"
+          }}>
+            <SkipBack size={18} fill="currentColor" />
+          </button>
           <button onClick={() => setPlaying(p => !p)} style={{
             width: 56, height: 56, borderRadius: "50%", border: "none",
-            background: "#e91e8c", color: "#fff", cursor: "pointer", fontSize: 20,
-            boxShadow: "0 6px 16px rgba(233,30,140,0.35)",
-          }}>{playing ? "⏸" : "▶"}</button>
+            background: "#e91e8c", color: "#fff", cursor: "pointer",
+            boxShadow: "0 6px 16px rgba(233,30,140,0.35)", display: "flex", alignItems: "center", justifyContent: "center"
+          }}>
+            {playing ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" style={{ marginLeft: 3 }} />}
+          </button>
           <button onClick={() => setSongIdx(i => (i + 1) % songs.length)} style={{
             width: 40, height: 40, borderRadius: "50%", border: "1px solid #f8c8c8",
-            background: "none", cursor: "pointer", fontSize: 16,
-          }}>⏭</button>
+            background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#e91e8c"
+          }}>
+            <SkipForward size={18} fill="currentColor" />
+          </button>
         </div>
       </div>
 
