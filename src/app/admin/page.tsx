@@ -28,59 +28,66 @@ export default function AdminLoginPage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(180deg, #FFF0F5 0%, #F5F3FF 50%, #FAFAFA 100%)",
+      background: "#F8FAFC",
       display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Inter', sans-serif"
     }}>
       <div className="fade-in-up" style={{ maxWidth: 420, width: "100%", padding: "0 24px" }}>
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <span style={{ fontSize: 48 }}>🛡️</span>
-          <h1 style={{ fontSize: 28, fontWeight: 900, marginTop: 12, fontFamily: "'Nunito',sans-serif", color: "#1F2937" }}>
-            Admin <span style={{ background: "linear-gradient(135deg,#7C3AED,#E91E8C)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Panel</span>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 12, background: "linear-gradient(135deg, #0F172A, #334155)", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 24, fontWeight: 900, marginBottom: 16 }}>
+            A
+          </div>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: "#0F172A", letterSpacing: -0.5 }}>
+            Welcome back
           </h1>
-          <p style={{ color: "#9CA3AF", fontSize: 14, marginTop: 6 }}>
-            Aradhya E-Gifts · Secure Access
+          <p style={{ color: "#64748B", fontSize: 14, marginTop: 4 }}>
+            Sign in to your admin workspace
           </p>
         </div>
 
         <div style={{
-          background: "#fff", borderRadius: 20, padding: 32,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.06)",
-          border: "1px solid rgba(0,0,0,0.04)",
+          background: "#FFFFFF", borderRadius: 16, padding: "32px 28px",
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
+          border: "1px solid #E2E8F0",
         }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: "#6B7280", display: "block", marginBottom: 8 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: "#334155", display: "block", marginBottom: 8 }}>
             Admin Password
           </label>
           <input
             type="password"
-            placeholder="Enter password…"
+            placeholder="Enter password"
             value={password}
             onChange={e => { setPassword(e.target.value); setError(""); }}
             onKeyDown={e => e.key === "Enter" && handleLogin()}
             autoFocus
             style={{
-              width: "100%", padding: "14px 16px", borderRadius: 12,
-              border: "1.5px solid #E5E7EB", fontSize: 15, color: "#1F2937",
-              background: "#F9FAFB", outline: "none", boxSizing: "border-box",
+              width: "100%", padding: "12px 16px", borderRadius: 10,
+              border: "1px solid #CBD5E1", fontSize: 14, color: "#0F172A",
+              background: "#FFFFFF", outline: "none", boxSizing: "border-box",
+              transition: "all 0.2s",
             }}
+            onFocus={e => { e.currentTarget.style.borderColor = "#3B82F6"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)"; }}
+            onBlur={e => { e.currentTarget.style.borderColor = "#CBD5E1"; e.currentTarget.style.boxShadow = "none"; }}
           />
-          {error && <p style={{ color: "#EF4444", fontSize: 13, marginTop: 8, fontWeight: 600 }}>{error}</p>}
+          {error && <p style={{ color: "#EF4444", fontSize: 13, marginTop: 8, fontWeight: 500 }}>{error}</p>}
           <button
             onClick={handleLogin}
             style={{
-              width: "100%", padding: "14px", borderRadius: 12, border: "none",
-              background: "linear-gradient(135deg,#7C3AED,#E91E8C)", color: "#fff",
-              fontWeight: 800, fontSize: 16, cursor: "pointer", marginTop: 20,
-              fontFamily: "'Nunito',sans-serif",
-              boxShadow: "0 8px 24px rgba(124,58,237,0.25)",
+              width: "100%", padding: "12px", borderRadius: 10, border: "none",
+              background: "#0F172A", color: "#FFFFFF",
+              fontWeight: 600, fontSize: 14, cursor: "pointer", marginTop: 24,
+              transition: "all 0.2s",
             }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#1E293B"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "#0F172A"; }}
           >
-            Enter Admin Panel →
+            Sign in
           </button>
         </div>
 
-        <div style={{ textAlign: "center", marginTop: 20 }}>
-          <Link href="/" style={{ color: "#9CA3AF", fontSize: 13, textDecoration: "none" }}>
-            ← Back to public site
+        <div style={{ textAlign: "center", marginTop: 32 }}>
+          <Link href="/" style={{ color: "#64748B", fontSize: 13, textDecoration: "none", fontWeight: 500 }}>
+            ← Back to website
           </Link>
         </div>
       </div>

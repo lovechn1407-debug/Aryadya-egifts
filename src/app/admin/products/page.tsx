@@ -71,112 +71,111 @@ export default function AdminProductsPage() {
     reload();
   };
 
+  const cardStyle: React.CSSProperties = {
+    background: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.03)"
+  };
+
+  const inputStyle: React.CSSProperties = {
+    padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", 
+    fontSize: 13, color: "#0F172A", background: "#FFFFFF", outline: "none",
+    transition: "border-color 0.2s"
+  };
+
   return (
-    <div style={{ padding: "32px 28px" }}>
+    <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 28, fontWeight: 900, fontFamily: "'Nunito',sans-serif" }}>
-            <span className="gradient-text">Products</span> Manager
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: "#0F172A", letterSpacing: -0.5 }}>
+            Products Manager
           </h1>
-          <p style={{ color: "#6B7280", fontSize: 14, marginTop: 4 }}>
+          <p style={{ color: "#64748B", fontSize: 14, marginTop: 4 }}>
             {PRODUCT_REGISTRY.length} products in registry · Control visibility and pricing
           </p>
         </div>
       </div>
 
-      <div style={{ marginBottom: 20, padding: 16, background: "#F5F3FF", borderRadius: 14, border: "1px solid #EDE9FE" }}>
-        <p style={{ fontSize: 13, color: "#4B5563", lineHeight: 1.7 }}>
-          <strong style={{ color: "#7C3AED" }}>ℹ️ How products work:</strong> Products are code-defined in <code style={{ color: "#EC4899", fontSize: 12 }}>src/lib/data.ts</code>.
+      <div style={{ marginBottom: 24, padding: 16, background: "#EFF6FF", borderRadius: 12, border: "1px solid #BFDBFE", display: "flex", gap: 12 }}>
+        <span style={{ fontSize: 18 }}>ℹ️</span>
+        <p style={{ fontSize: 13, color: "#1D4ED8", lineHeight: 1.6, margin: 0 }}>
+          <strong>How products work:</strong> Products are code-defined in <code style={{ background: "#DBEAFE", padding: "2px 6px", borderRadius: 4, fontSize: 12 }}>src/lib/data.ts</code>.
           To add a new template, modify the code and it will automatically appear here. Use this panel to control visibility, pricing, and view orders.
         </p>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {products.map(product => (
-          <div key={product.id} className="glass-card" style={{ padding: 0, overflow: "hidden" }}>
+          <div key={product.id} style={{ ...cardStyle, overflow: "hidden" }}>
             {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "20px 24px", borderBottom: "1px solid #E5E7EB" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "20px 24px", borderBottom: "1px solid #F1F5F9", background: "#F8FAFC" }}>
               <div style={{
-                width: 60, height: 60, borderRadius: 16, fontSize: 32,
+                width: 64, height: 64, borderRadius: 12, fontSize: 32,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                background: "linear-gradient(135deg,rgba(255,45,120,0.1),rgba(155,89,252,0.1))"
+                background: "#FFFFFF", border: "1px solid #E2E8F0", boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
               }}>
                 {product.thumbnail}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                  <h2 style={{ fontSize: 18, fontWeight: 800, color: "#1F2937" }}>{product.name}</h2>
-                  <span className="badge badge-purple">{CATEGORY_LABELS[product.category]}</span>
-                  <span className={`badge ${product.visible ? "badge-green" : "badge-gray"}`}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 4 }}>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", margin: 0 }}>{product.name}</h2>
+                  <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: "#E0E7FF", color: "#4338CA", border: "1px solid #C7D2FE" }}>
+                    {CATEGORY_LABELS[product.category]}
+                  </span>
+                  <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: product.visible ? "#ECFDF5" : "#F1F5F9", color: product.visible ? "#059669" : "#64748B", border: `1px solid ${product.visible ? "#A7F3D0" : "#E2E8F0"}` }}>
                     {product.visible ? "🟢 Visible" : "⚫ Hidden"}
                   </span>
                 </div>
-                <p style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>{product.tagline}</p>
+                <p style={{ fontSize: 13, color: "#64748B", margin: 0 }}>{product.tagline}</p>
               </div>
             </div>
 
             {/* Stats row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px,1fr))", padding: "16px 24px", gap: 16, borderBottom: "1px solid #E5E7EB" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", padding: "20px 24px", gap: 24, borderBottom: "1px solid #E2E8F0" }}>
               <div>
-                <p style={{ fontSize: 11, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.8 }}>Total Orders</p>
-                <p style={{ fontSize: 24, fontWeight: 800, color: "#7C3AED", marginTop: 2 }}>{orderCounts[product.id] || 0}</p>
+                <p style={{ fontSize: 12, color: "#64748B", fontWeight: 500, marginBottom: 4 }}>Total Orders</p>
+                <p style={{ fontSize: 24, fontWeight: 700, color: "#0F172A" }}>{orderCounts[product.id] || 0}</p>
               </div>
               <div>
-                <p style={{ fontSize: 11, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.8 }}>Revenue</p>
-                <p style={{ fontSize: 24, fontWeight: 800, color: "#F59E0B", marginTop: 2 }}>₹{Math.floor((revenueCounts[product.id] || 0) / 100)}</p>
+                <p style={{ fontSize: 12, color: "#64748B", fontWeight: 500, marginBottom: 4 }}>Revenue</p>
+                <p style={{ fontSize: 24, fontWeight: 700, color: "#10B981" }}>₹{Math.floor((revenueCounts[product.id] || 0) / 100)}</p>
               </div>
               <div>
-                <p style={{ fontSize: 11, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.8 }}>Rating</p>
+                <p style={{ fontSize: 12, color: "#64748B", fontWeight: 500, marginBottom: 4 }}>Rating</p>
                 {editingRating === product.id ? (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-                    <div style={{ display: "flex", gap: 2 }}>
-                      {[1,2,3,4,5].map(s => (
-                        <button key={s} onClick={() => setRatingInput(s)}
-                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: s <= ratingInput ? "#F59E0B" : "#E5E7EB" }}>★</button>
-                      ))}
-                    </div>
-                    <input className="input-field" type="number" placeholder="Reviews" value={reviewInput} onChange={e => setReviewInput(e.target.value)} style={{ padding: "4px 8px", fontSize: 12, width: 80 }} />
-                    <button className="btn-primary" style={{ padding: "4px 10px", fontSize: 12 }} onClick={() => saveRating(product.id)}>Save</button>
-                    <button className="btn-secondary" style={{ padding: "4px 8px", fontSize: 12 }} onClick={() => setEditingRating(null)}>✕</button>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <input style={{...inputStyle, width: 60, padding: "6px"}} type="number" placeholder="Reviews" value={reviewInput} onChange={e => setReviewInput(e.target.value)} />
+                    <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#0F172A", color: "#FFFFFF", border: "none", cursor: "pointer" }} onClick={() => saveRating(product.id)}>Save</button>
+                    <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#F1F5F9", color: "#334155", border: "none", cursor: "pointer" }} onClick={() => setEditingRating(null)}>✕</button>
                   </div>
                 ) : (
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ color: "#F59E0B", fontSize: 18 }}>{'★'.repeat(Math.round((product as any).rating || 5))}</span>
-                    <span style={{ fontSize: 14, color: "#6B7280" }}>{((product as any).rating || 5).toFixed(1)}</span>
+                    <span style={{ fontSize: 14, color: "#334155", fontWeight: 600 }}>{((product as any).rating || 5).toFixed(1)}</span>
                     <button onClick={() => { setEditingRating(product.id); setRatingInput((product as any).rating || 5); setReviewInput(String((product as any).reviewCount || "")); }}
-                      style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: 13 }}>✏️</button>
+                      style={{ background: "transparent", border: "none", color: "#94A3B8", cursor: "pointer", fontSize: 14 }}>✏️</button>
                   </div>
                 )}
               </div>
               <div style={{ gridColumn: "span 2" }}>
-                <p style={{ fontSize: 11, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.8 }}>Pricing</p>
+                <p style={{ fontSize: 12, color: "#64748B", fontWeight: 500, marginBottom: 4 }}>Pricing</p>
                 {editingPrice === product.id ? (
-                  <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <input
-                      className="input-field"
-                      type="number"
-                      placeholder="Real Price (₹)"
-                      value={priceInput}
-                      onChange={e => setPriceInput(e.target.value)}
-                      style={{ padding: "6px 10px", fontSize: 14, width: 100 }}
-                      autoFocus
+                      style={{...inputStyle, width: 100, padding: "6px"}}
+                      type="number" placeholder="Real (₹)" value={priceInput} onChange={e => setPriceInput(e.target.value)} autoFocus
                     />
                     <input
-                      className="input-field"
-                      type="number"
-                      placeholder="Cutted Price (₹)"
-                      value={cuttedPriceInput}
-                      onChange={e => setCuttedPriceInput(e.target.value)}
-                      style={{ padding: "6px 10px", fontSize: 14, width: 110, color: "#9CA3AF", textDecoration: "line-through" }}
+                      style={{...inputStyle, width: 110, padding: "6px", color: "#94A3B8", textDecoration: "line-through"}}
+                      type="number" placeholder="Cutted (₹)" value={cuttedPriceInput} onChange={e => setCuttedPriceInput(e.target.value)}
                     />
-                    <button className="btn-primary" style={{ padding: "6px 12px", fontSize: 12 }} onClick={() => savePrice(product.id)}>Save</button>
-                    <button className="btn-secondary" style={{ padding: "6px 10px", fontSize: 12 }} onClick={() => setEditingPrice(null)}>✕</button>
+                    <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#0F172A", color: "#FFFFFF", border: "none", cursor: "pointer" }} onClick={() => savePrice(product.id)}>Save</button>
+                    <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#F1F5F9", color: "#334155", border: "none", cursor: "pointer" }} onClick={() => setEditingPrice(null)}>✕</button>
                   </div>
                 ) : (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
-                    <p style={{ fontSize: 24, fontWeight: 800, color: "#EC4899" }}>₹{Math.floor(product.price / 100)}</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <p style={{ fontSize: 24, fontWeight: 700, color: "#0F172A", margin: 0 }}>₹{Math.floor(product.price / 100)}</p>
                     {product.cuttedPrice && (
-                      <p style={{ fontSize: 14, fontWeight: 600, color: "#9CA3AF", textDecoration: "line-through" }}>
+                      <p style={{ fontSize: 15, fontWeight: 500, color: "#94A3B8", textDecoration: "line-through", margin: 0 }}>
                         ₹{Math.floor(product.cuttedPrice / 100)}
                       </p>
                     )}
@@ -186,7 +185,7 @@ export default function AdminProductsPage() {
                         setPriceInput(String(Math.floor(product.price / 100))); 
                         setCuttedPriceInput(product.cuttedPrice ? String(Math.floor(product.cuttedPrice / 100)) : "");
                       }}
-                      style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: 14 }}
+                      style={{ background: "transparent", border: "none", color: "#94A3B8", cursor: "pointer", fontSize: 14 }}
                     >
                       ✏️
                     </button>
@@ -196,15 +195,14 @@ export default function AdminProductsPage() {
             </div>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 10, padding: "14px 24px", flexWrap: "wrap", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 16, padding: "16px 24px", flexWrap: "wrap", alignItems: "center", background: "#FFFFFF" }}>
               {/* Badge Selection */}
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 12, color: "#6B7280" }}>Badge:</span>
+                <span style={{ fontSize: 13, color: "#64748B", fontWeight: 500 }}>Badge:</span>
                 <select 
-                  className="input-field" 
+                  style={{...inputStyle, padding: "6px 10px", cursor: "pointer"}}
                   value={product.badge || ""} 
                   onChange={(e) => updateBadge(product.id, e.target.value)}
-                  style={{ padding: "4px 8px", fontSize: 12, width: 100 }}
                 >
                   <option value="">None</option>
                   <option value="hot">🔥 HOT</option>
@@ -217,31 +215,25 @@ export default function AdminProductsPage() {
               {/* Visibility toggle */}
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <label className="toggle">
-                  <input
-                    type="checkbox"
-                    checked={product.visible}
-                    onChange={() => toggleVisibility(product.id, product.visible)}
-                  />
-                  <span className="toggle-slider" />
+                  <input type="checkbox" checked={product.visible} onChange={() => toggleVisibility(product.id, product.visible)} />
+                  <span className="toggle-slider" style={{ background: product.visible ? "#10B981" : "#CBD5E1" }} />
                 </label>
-                <span style={{ fontSize: 13, color: "#6B7280" }}>
-                  {product.visible ? "Visible on public site" : "Hidden from public"}
+                <span style={{ fontSize: 13, color: "#64748B", fontWeight: 500 }}>
+                  {product.visible ? "Visible to public" : "Hidden"}
                 </span>
               </div>
 
-              <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+              <div style={{ marginLeft: "auto", display: "flex", gap: 12 }}>
                 <Link
                   href={`/preview/${product.id}`}
                   target="_blank"
-                  className="btn-secondary"
-                  style={{ padding: "8px 14px", fontSize: 13 }}
+                  style={{ padding: "8px 16px", fontSize: 13, fontWeight: 600, background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, color: "#334155", textDecoration: "none" }}
                 >
                   Preview 👀
                 </Link>
                 <Link
                   href={`/admin/orders?product=${product.id}`}
-                  className="btn-secondary"
-                  style={{ padding: "8px 14px", fontSize: 13 }}
+                  style={{ padding: "8px 16px", fontSize: 13, fontWeight: 600, background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, color: "#1D4ED8", textDecoration: "none" }}
                 >
                   View Orders 📦
                 </Link>

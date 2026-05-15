@@ -50,143 +50,170 @@ function OrdersContent() {
     navigator.clipboard.writeText(url);
   };
 
+  const statusStyles: Record<string, { bg: string; color: string; border: string }> = {
+    pending: { bg: "#F1F5F9", color: "#64748B", border: "#E2E8F0" },
+    paid: { bg: "#FEF3C7", color: "#B45309", border: "#FDE68A" },
+    editing: { bg: "#EFF6FF", color: "#1D4ED8", border: "#BFDBFE" },
+    finalized: { bg: "#F0FDF4", color: "#15803D", border: "#BBF7D0" },
+  };
+
   return (
-    <div style={{ padding: "32px 28px" }}>
+    <div>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 900, fontFamily: "'Nunito',sans-serif" }}>
-          <span className="gradient-text">Orders</span> & Links
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: "#0F172A", letterSpacing: -0.5 }}>
+          Orders & Links
         </h1>
-        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginTop: 4 }}>
+        <p style={{ color: "#64748B", fontSize: 14, marginTop: 4 }}>
           {orders.length} total orders{productFilter ? ` for this product` : ""}
         </p>
       </div>
 
       {/* Filters */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
         <input
-          className="input-field"
           placeholder="Search by name, email, product…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ maxWidth: 280 }}
+          style={{
+            maxWidth: 280, width: "100%", padding: "10px 16px", borderRadius: 8,
+            border: "1px solid #CBD5E1", fontSize: 14, color: "#0F172A",
+            background: "#FFFFFF", outline: "none", boxSizing: "border-box",
+            transition: "all 0.2s",
+          }}
+          onFocus={e => { e.currentTarget.style.borderColor = "#3B82F6"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)"; }}
+          onBlur={e => { e.currentTarget.style.borderColor = "#CBD5E1"; e.currentTarget.style.boxShadow = "none"; }}
         />
-        {["all", "paid", "editing", "finalized"].map(s => (
-          <button
-            key={s}
-            className={`slide-tab ${statusFilter === s ? "active" : ""}`}
-            onClick={() => setStatusFilter(s)}
-          >
-            {s === "all" ? "All" : `${STATUS_ICON[s]} ${s.charAt(0).toUpperCase() + s.slice(1)}`}
-          </button>
-        ))}
+        <div style={{ display: "flex", background: "#E2E8F0", padding: 4, borderRadius: 10, gap: 4 }}>
+          {["all", "paid", "editing", "finalized"].map(s => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              style={{
+                padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600,
+                border: "none", cursor: "pointer", transition: "all 0.2s",
+                background: statusFilter === s ? "#FFFFFF" : "transparent",
+                color: statusFilter === s ? "#0F172A" : "#64748B",
+                boxShadow: statusFilter === s ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+              }}
+            >
+              {s === "all" ? "All" : `${STATUS_ICON[s]} ${s.charAt(0).toUpperCase() + s.slice(1)}`}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loadErr && (
-        <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, padding: "14px 18px", marginBottom: 20, color: "#FCA5A5", fontSize: 13 }}>
+        <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 8, padding: "12px 16px", marginBottom: 20, color: "#EF4444", fontSize: 13 }}>
           ⚠️ Firebase error: {loadErr}
         </div>
       )}
 
       {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <div style={{ textAlign: "center", padding: "60px 0", background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12 }}>
           <p style={{ fontSize: 48 }}>📭</p>
-          <p style={{ color: "rgba(255,255,255,0.3)", marginTop: 12 }}>No orders found.</p>
+          <p style={{ color: "#64748B", marginTop: 12, fontWeight: 500 }}>No orders found.</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {filtered.map(order => (
-            <div key={order.id} className="glass-card" style={{ padding: 20 }}>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
-                {/* Info */}
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                    <span className={`badge ${STATUS_BADGE[order.status]}`}>
-                      {STATUS_ICON[order.status]} {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </span>
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-                      {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                    </span>
-                  </div>
-                  <h3 style={{ fontWeight: 700, fontSize: 16 }}>{order.buyerName}</h3>
-                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{order.buyerEmail} · {order.buyerPhone}</p>
-                  <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>
-                    Product: <span style={{ color: "#C4A3FF" }}>{order.productName}</span>
-                  </p>
-                  <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
-                    Order ID: <code style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>{order.id}</code>
-                  </p>
-                </div>
-
-                {/* Amount */}
-                <div style={{ textAlign: "right" }}>
-                  <p style={{ fontSize: 20, fontWeight: 800 }}>₹{Math.floor(order.amount / 100)}</p>
-                  {order.finalizedAt && (
-                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>
-                      Finalized: {new Date(order.finalizedAt).toLocaleDateString("en-IN")}
+          {filtered.map(order => {
+            const st = statusStyles[order.status] || statusStyles.pending;
+            return (
+              <div key={order.id} style={{
+                background: "#FFFFFF", borderRadius: 12, padding: 20,
+                border: "1px solid #E2E8F0", boxShadow: "0 1px 2px rgba(0,0,0,0.03)"
+              }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                      <span style={{
+                        fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 999,
+                        background: st.bg, color: st.color, border: `1px solid ${st.border}`,
+                        textTransform: "capitalize",
+                      }}>
+                        {STATUS_ICON[order.status]} {order.status}
+                      </span>
+                      <span style={{ fontSize: 12, color: "#94A3B8", fontWeight: 500 }}>
+                        {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    <h3 style={{ fontWeight: 700, fontSize: 16, color: "#0F172A" }}>{order.buyerName}</h3>
+                    <p style={{ fontSize: 13, color: "#64748B", marginTop: 2 }}>{order.buyerEmail} · {order.buyerPhone}</p>
+                    <p style={{ fontSize: 13, color: "#334155", marginTop: 6, fontWeight: 500 }}>
+                      Product: {order.productName}
                     </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
-                {order.status === "finalized" && (
-                  <>
-                    <Link
-                      href={`/view/${order.id}`}
-                      target="_blank"
-                      className="btn-primary"
-                      style={{ padding: "7px 14px", fontSize: 12 }}
-                    >
-                      View Page 🔗
-                    </Link>
-                    <button
-                      onClick={() => copyLink(order.id)}
-                      className="btn-secondary"
-                      style={{ padding: "7px 14px", fontSize: 12 }}
-                    >
-                      Copy Link 📋
-                    </button>
-                  </>
-                )}
-                {(order.status === "paid" || order.status === "editing") && (
-                  <Link
-                    href={`/edit/${order.id}`}
-                    target="_blank"
-                    className="btn-secondary"
-                    style={{ padding: "7px 14px", fontSize: 12 }}
-                  >
-                    Open Editor ✍️
-                  </Link>
-                )}
-                <Link
-                  href={`/preview/${order.productId}`}
-                  target="_blank"
-                  className="btn-secondary"
-                  style={{ padding: "7px 14px", fontSize: 12 }}
-                >
-                  Preview Template 👀
-                </Link>
-              </div>
-
-              {/* Customizations summary */}
-              {Object.keys(order.customizations || {}).length > 0 && (
-                <details style={{ marginTop: 12 }}>
-                  <summary style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", cursor: "pointer" }}>
-                    View customizations ({Object.keys(order.customizations || {}).length} fields)
-                  </summary>
-                  <div style={{ marginTop: 10, padding: 14, background: "rgba(255,255,255,0.03)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)" }}>
-                    {Object.entries(order.customizations || {}).map(([k, v]) => (
-                      <div key={k} style={{ marginBottom: 6 }}>
-                        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{k}: </span>
-                        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>{v.length > 80 ? v.slice(0, 80) + "…" : v}</span>
-                      </div>
-                    ))}
+                    <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 2, fontFamily: "monospace" }}>
+                      ID: {order.id}
+                    </p>
                   </div>
-                </details>
-              )}
-            </div>
-          ))}
+
+                  {/* Amount */}
+                  <div style={{ textAlign: "right" }}>
+                    <p style={{ fontSize: 22, fontWeight: 800, color: "#0F172A" }}>₹{Math.floor(order.amount / 100)}</p>
+                    {order.finalizedAt && (
+                      <p style={{ fontSize: 12, color: "#10B981", marginTop: 4, fontWeight: 500 }}>
+                        Finalized: {new Date(order.finalizedAt).toLocaleDateString("en-IN")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap", paddingTop: 16, borderTop: "1px solid #F1F5F9" }}>
+                  {order.status === "finalized" && (
+                    <>
+                      <Link
+                        href={`/view/${order.id}`}
+                        target="_blank"
+                        style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, background: "#10B981", color: "#FFFFFF", textDecoration: "none" }}
+                      >
+                        View Page 🔗
+                      </Link>
+                      <button
+                        onClick={() => copyLink(order.id)}
+                        style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, background: "#F1F5F9", color: "#334155", border: "none", cursor: "pointer" }}
+                      >
+                        Copy Link 📋
+                      </button>
+                    </>
+                  )}
+                  {(order.status === "paid" || order.status === "editing") && (
+                    <Link
+                      href={`/edit/${order.id}`}
+                      target="_blank"
+                      style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, background: "#3B82F6", color: "#FFFFFF", textDecoration: "none" }}
+                    >
+                      Open Editor ✍️
+                    </Link>
+                  )}
+                  <Link
+                    href={`/preview/${order.productId}`}
+                    target="_blank"
+                    style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, background: "#FFFFFF", color: "#334155", border: "1px solid #E2E8F0", textDecoration: "none" }}
+                  >
+                    Preview Template 👀
+                  </Link>
+                </div>
+
+                {/* Customizations summary */}
+                {Object.keys(order.customizations || {}).length > 0 && (
+                  <details style={{ marginTop: 16 }}>
+                    <summary style={{ fontSize: 13, color: "#64748B", cursor: "pointer", fontWeight: 500 }}>
+                      View customizations ({Object.keys(order.customizations || {}).length} fields)
+                    </summary>
+                    <div style={{ marginTop: 12, padding: 16, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                      {Object.entries(order.customizations || {}).map(([k, v]) => (
+                        <div key={k} style={{ marginBottom: 8, fontSize: 13 }}>
+                          <span style={{ color: "#64748B", fontWeight: 600 }}>{k}: </span>
+                          <span style={{ color: "#334155", wordBreak: "break-all" }}>{v.length > 100 ? v.slice(0, 100) + "…" : v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -195,7 +222,7 @@ function OrdersContent() {
 
 export default function AdminOrdersPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 32, color: "#fff" }}>Loading…</div>}>
+    <Suspense fallback={<div style={{ padding: 32, color: "#0F172A" }}>Loading orders…</div>}>
       <OrdersContent />
     </Suspense>
   );

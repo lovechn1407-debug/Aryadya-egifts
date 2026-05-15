@@ -99,211 +99,190 @@ export default function AdminSectionsPage() {
     const [draggedItem] = newSections.splice(draggedIndex, 1);
     newSections.splice(dropIndex, 0, draggedItem);
 
-    // Update order values sequentially
-    const updatedSections = newSections.map((sec, i) => ({ ...sec, order: i }));
-    setSections(updatedSections);
+    setSections(newSections);
+    
+    await Promise.all(
+      newSections.map((sec, idx) => updateSectionDB(sec.id, { order: idx }))
+    );
     setDraggedIndex(null);
+  };
 
-    // Save all new orders to DB
-    await Promise.all(updatedSections.map(sec => saveSectionDB(sec)));
+  const inputStyle: React.CSSProperties = {
+    width: "100%", padding: "10px 14px", borderRadius: 8,
+    border: "1px solid #CBD5E1", background: "#FFFFFF",
+    color: "#0F172A", fontSize: 14, outline: "none", transition: "all 0.2s"
   };
 
   const cardStyle: React.CSSProperties = {
-    background: "#FFFFFF", border: "1px solid #E5E7EB",
-    borderRadius: 16, padding: 24, marginBottom: 16,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
-  };
-  const btnStyle = (color: string): React.CSSProperties => ({
-    background: color, color: "#fff", border: "none", borderRadius: 10,
-    padding: "10px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer",
-  });
-  const inputStyle: React.CSSProperties = {
-    width: "100%", padding: "10px 14px", borderRadius: 10,
-    border: "1px solid #D1D5DB", background: "#F9FAFB",
-    color: "#1F2937", fontSize: 14, outline: "none",
+    background: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.03)", padding: "20px 24px"
   };
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1F2937" }}>📂 Display Sections</h1>
-          <p style={{ color: "#6B7280", fontSize: 14, marginTop: 4 }}>
-            Create occasion-based sections like Blinkit for the homepage
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: "#0F172A", letterSpacing: -0.5 }}>
+            Sections Manager
+          </h1>
+          <p style={{ color: "#64748B", fontSize: 14, marginTop: 4 }}>
+            Organize homepage shelves and campaigns
           </p>
         </div>
-        <button onClick={() => setShowCreate(!showCreate)} style={btnStyle("#E91E8C")}>
+        <button 
+          onClick={() => { setShowCreate(!showCreate); if(showCreate) setTitle(""); }} 
+          style={{ background: "#0F172A", color: "#FFFFFF", border: "none", borderRadius: 8, padding: "10px 16px", fontWeight: 600, cursor: "pointer", transition: "background 0.2s" }}
+          onMouseEnter={e => e.currentTarget.style.background = "#1E293B"}
+          onMouseLeave={e => e.currentTarget.style.background = "#0F172A"}
+        >
           {showCreate ? "✕ Cancel" : "+ New Section"}
         </button>
       </div>
 
-      {/* Create form */}
       {showCreate && (
-        <div style={{ ...cardStyle, border: "2px solid #E91E8C" }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: "#1F2937" }}>Create New Section</h3>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+        <div style={{ ...cardStyle, marginBottom: 24, border: "1px solid #CBD5E1" }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#0F172A" }}>Create New Homepage Section</h3>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
             <div>
-              <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 6 }}>Section Title *</label>
-              <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Birthday Specials 🎂" style={inputStyle} />
+              <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Display Title *</label>
+              <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Birthday Specials" style={inputStyle} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 6 }}>Subtitle (optional)</label>
-              <input value={subtitle} onChange={e => setSubtitle(e.target.value)} placeholder="Auto-filled from theme" style={inputStyle} />
+              <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Subtitle (Optional)</label>
+              <input value={subtitle} onChange={e => setSubtitle(e.target.value)} placeholder="e.g. Make their day magical" style={inputStyle} />
             </div>
-            <div style={{ gridColumn: "1 / -1", background: "#F3F4F6", padding: 12, borderRadius: 10, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "#1F2937" }}>
-                <input type="checkbox" checked={countdownEnabled} onChange={e => setCountdownEnabled(e.target.checked)} />
-                Enable Countdown Timer ⏳
+            <div>
+              <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Visual Theme</label>
+              <select value={theme} onChange={e => setTheme(e.target.value as SectionTheme)} style={inputStyle}>
+                {SECTION_THEMES.map(t => (
+                  <option key={t.id} value={t.id}>{t.label} ({t.id})</option>
+                ))}
+              </select>
+            </div>
+            
+            <div style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#334155", padding: "10px 0" }}>
+                <input type="checkbox" checked={countdownEnabled} onChange={e => setCountdownEnabled(e.target.checked)} style={{ width: 16, height: 16, accentColor: "#0F172A" }} />
+                Enable Countdown Timer
               </label>
-              {countdownEnabled && (
-                <input type="datetime-local" value={countdownEndTime} onChange={e => setCountdownEndTime(e.target.value)} style={{ ...inputStyle, width: "auto", padding: "6px 12px" }} />
-              )}
+            </div>
+            
+            {countdownEnabled && (
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Countdown End Time *</label>
+                <input type="datetime-local" value={countdownEndTime} onChange={e => setCountdownEndTime(e.target.value)} style={inputStyle} />
+              </div>
+            )}
+          </div>
+          
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 8 }}>Select Products for this Section</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, background: "#F8FAFC", padding: 16, borderRadius: 8, border: "1px solid #E2E8F0" }}>
+              {products.map(p => (
+                <label key={p.id} style={{
+                  display: "flex", alignItems: "center", gap: 8, padding: "8px 12px",
+                  background: selectedProducts.includes(p.id) ? "#E0E7FF" : "#FFFFFF",
+                  border: `1px solid ${selectedProducts.includes(p.id) ? "#A5B4FC" : "#CBD5E1"}`,
+                  borderRadius: 8, cursor: "pointer", fontSize: 13, transition: "all 0.2s"
+                }}>
+                  <input type="checkbox" checked={selectedProducts.includes(p.id)} onChange={() => toggleProduct(p.id)} style={{ display: "none" }} />
+                  <span>{p.thumbnail}</span>
+                  <span style={{ fontWeight: selectedProducts.includes(p.id) ? 600 : 500, color: "#0F172A" }}>{p.name}</span>
+                </label>
+              ))}
+              {products.length === 0 && <span style={{ fontSize: 13, color: "#64748B" }}>No products available. Create some first!</span>}
             </div>
           </div>
 
-          {/* Theme picker */}
-          <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 8 }}>Choose Theme</label>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: 8, marginBottom: 16 }}>
-            {SECTION_THEMES.map(t => (
-              <div
-                key={t.id}
-                onClick={() => setTheme(t.id)}
-                style={{
-                  background: t.gradient, borderRadius: 12, padding: "12px 14px",
-                  cursor: "pointer", border: theme === t.id ? "3px solid #fff" : "3px solid transparent",
-                  opacity: theme === t.id ? 1 : 0.65, transition: "all 0.2s",
-                }}
-              >
-                <p style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{t.label}</p>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", marginTop: 2 }}>{t.tagline}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Product picker */}
-          <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 8 }}>Select Products for this Section</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
-            {products.map(p => (
-              <div
-                key={p.id}
-                onClick={() => toggleProduct(p.id)}
-                style={{
-                  padding: "8px 16px", borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 600,
-                  background: selectedProducts.includes(p.id) ? "#E91E8C" : "#F9FAFB",
-                  color: selectedProducts.includes(p.id) ? "#fff" : "#6B7280",
-                  border: `1px solid ${selectedProducts.includes(p.id) ? "#E91E8C" : "#E5E7EB"}`,
-                }}
-              >
-                {p.thumbnail} {p.name}
-              </div>
-            ))}
-          </div>
-
-          <button onClick={handleCreate} disabled={saving} style={btnStyle(saving ? "#6B7280" : "#10B981")}>
-            {saving ? "Saving…" : "✅ Create Section"}
+          <button onClick={handleCreate} disabled={saving} style={{ background: saving ? "#94A3B8" : "#10B981", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: 14 }}>
+            {saving ? "Creating..." : "Save Section"}
           </button>
         </div>
       )}
 
-      {/* Empty state */}
-      {sections.length === 0 && !showCreate && (
-        <div style={{ ...cardStyle, textAlign: "center", padding: 48 }}>
-          <p style={{ fontSize: 40 }}>📂</p>
-          <p style={{ fontSize: 16, fontWeight: 700, marginTop: 12, color: "#1F2937" }}>No sections yet</p>
-          <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 6 }}>
-            Create your first occasion section to display on the homepage
-          </p>
-        </div>
-      )}
-
-      {/* Existing sections */}
-      {sections.map((sec, index) => {
-        const t = SECTION_THEMES.find(th => th.id === sec.theme) || SECTION_THEMES[0];
-        return (
-          <div 
-            key={sec.id} 
-            draggable 
+      {/* Sections List */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {sections.map((sec, index) => (
+          <div
+            key={sec.id}
+            draggable
             onDragStart={() => handleDragStart(index)}
-            onDragOver={(e) => e.preventDefault()}
+            onDragOver={e => e.preventDefault()}
             onDrop={() => handleDrop(index)}
             style={{
-              ...cardStyle, 
+              ...cardStyle,
               cursor: "grab",
+              display: "flex", alignItems: "flex-start", gap: 16,
               opacity: draggedIndex === index ? 0.5 : 1,
-              transform: "translateZ(0)", // hardware acceleration
+              background: sec.visible ? "#FFFFFF" : "#F8FAFC",
+              transition: "transform 0.2s, opacity 0.2s"
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, flexWrap: "wrap" }}>
-              <div style={{ cursor: "grab", fontSize: 18, color: "#9CA3AF" }}>
-                ☰
-              </div>
-              <div style={{
-                background: t.gradient, borderRadius: 12, padding: "8px 14px",
-                fontSize: 13, fontWeight: 700, color: "#fff", whiteSpace: "nowrap",
-              }}>{t.label}</div>
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>{sec.title}</h3>
-                <p style={{ fontSize: 12, color: "#9CA3AF" }}>{sec.subtitle}</p>
-              </div>
-
-              <button
-                onClick={() => toggleVisibility(sec)}
-                style={{ ...btnStyle(sec.visible ? "#10B981" : "#6B7280"), padding: "6px 14px", fontSize: 12 }}
-              >
-                {sec.visible ? "👁️ Visible" : "🙈 Hidden"}
-              </button>
-              <button
-                onClick={() => handleDelete(sec)}
-                style={{ ...btnStyle("#EF4444"), padding: "6px 14px", fontSize: 12 }}
-              >
-                🗑️
-              </button>
+            <div style={{ fontSize: 20, color: "#CBD5E1", cursor: "grab", paddingTop: 4 }}>
+              ☰
             </div>
+            
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A" }}>{sec.title}</h3>
+                <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: "#F1F5F9", color: "#475569" }}>
+                  Theme: {sec.theme}
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: sec.visible ? "#ECFDF5" : "#F1F5F9", color: sec.visible ? "#059669" : "#64748B" }}>
+                  {sec.visible ? "🟢 Visible" : "⚫ Hidden"}
+                </span>
+                {sec.countdownEnabled && (
+                  <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA" }}>
+                    ⏱️ Timer ON
+                  </span>
+                )}
+              </div>
+              
+              <p style={{ fontSize: 13, color: "#64748B", marginBottom: 12 }}>{sec.subtitle}</p>
 
-            <div style={{ background: "#F9FAFB", padding: 12, borderRadius: 10, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", border: "1px solid #E5E7EB" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "#4B5563" }}>
-                <input type="checkbox" checked={sec.countdownEnabled || false} onChange={async (e) => {
-                  await updateSectionDB(sec.id, { countdownEnabled: e.target.checked });
-                  reload();
-                }} />
-                Countdown Timer ⏳
-              </label>
-              {sec.countdownEnabled && (
-                <input type="datetime-local" value={sec.countdownEndTime || ""} onChange={async (e) => {
-                  await updateSectionDB(sec.id, { countdownEndTime: e.target.value });
-                  reload();
-                }} style={{ ...inputStyle, width: "auto", padding: "4px 10px", fontSize: 12 }} />
-              )}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, background: "#F8FAFC", padding: 12, borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                {products.map(p => {
+                  const active = sec.productIds.includes(p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => toggleSectionProduct(sec, p.id)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6, padding: "6px 10px",
+                        background: active ? "#DBEAFE" : "#FFFFFF",
+                        border: `1px solid ${active ? "#93C5FD" : "#CBD5E1"}`,
+                        borderRadius: 6, cursor: "pointer", fontSize: 12,
+                        color: active ? "#1D4ED8" : "#475569", fontWeight: active ? 600 : 500,
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      {active && <span>✓</span>} {p.thumbnail} {p.name}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-
-            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, display: "block", marginBottom: 6 }}>
-              Products in this section (click to toggle):
-            </label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {products.map(p => {
-                const isIn = sec.productIds.includes(p.id);
-                return (
-                  <div
-                    key={p.id}
-                    onClick={() => toggleSectionProduct(sec, p.id)}
-                    style={{
-                      padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600,
-                      background: isIn ? t.accent : "#F9FAFB",
-                      color: isIn ? "#fff" : "#9CA3AF",
-                      border: `1px solid ${isIn ? t.accent : "#E5E7EB"}`,
-                      transition: "all 0.15s",
-                    }}
-                  >
-                    {p.thumbnail} {p.name}
-                  </div>
-                );
-              })}
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button onClick={() => toggleVisibility(sec)} style={{ padding: "8px 12px", fontSize: 12, fontWeight: 600, background: "#F1F5F9", border: "none", borderRadius: 6, cursor: "pointer", color: "#334155" }}>
+                {sec.visible ? "Hide" : "Show"}
+              </button>
+              <button onClick={() => handleDelete(sec)} style={{ padding: "8px 12px", fontSize: 12, fontWeight: 600, background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 6, cursor: "pointer" }}>
+                Delete
+              </button>
             </div>
           </div>
-        );
-      })}
+        ))}
+
+        {sections.length === 0 && !showCreate && (
+          <div style={{ textAlign: "center", padding: "60px 0", background: "#FFFFFF", borderRadius: 12, border: "1px dashed #CBD5E1" }}>
+            <p style={{ fontSize: 32 }}>📂</p>
+            <p style={{ fontSize: 15, fontWeight: 600, color: "#0F172A", marginTop: 12 }}>No sections created yet</p>
+            <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>Create a section to display products on the homepage.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
