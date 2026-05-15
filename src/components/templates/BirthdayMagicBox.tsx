@@ -415,30 +415,99 @@ function S5({ d, ch, em, oc }: { d: Record<string,string>; ch: ()=>void; em: boo
   );
 }
 
+import SongLibraryPopup from "../SongLibraryPopup";
+
 function S6({ d, ch, em, oc }: { d: Record<string,string>; ch: ()=>void; em: boolean; oc?: (id:string,v:string)=>void }) {
+  const [pickingFor, setPickingFor] = useState<number | null>(null);
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const [audioObj, setAudioObj] = useState<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioObj) {
+        audioObj.pause();
+        audioObj.currentTime = 0;
+      }
+    };
+  }, [audioObj]);
+
   const songs = [
-    { n:"s6_song1", a:"s6_artist1", e:"🎵" },
-    { n:"s6_song2", a:"s6_artist2", e:"🎶" },
-    { n:"s6_song3", a:"s6_artist3", e:"🎸" },
+    { n:"s6_song1", a:"s6_artist1", u:"s6_url1", e:"🎵" },
+    { n:"s6_song2", a:"s6_artist2", u:"s6_url2", e:"🎶" },
+    { n:"s6_song3", a:"s6_artist3", u:"s6_url3", e:"🎸" },
   ];
+
+  const togglePlay = (idx: number, url?: string) => {
+    if (!url) return;
+    if (playingIdx === idx) {
+      audioObj?.pause();
+      setPlayingIdx(null);
+    } else {
+      if (audioObj) audioObj.pause();
+      const newAudio = new Audio(url);
+      newAudio.play().catch(e => console.error("Could not play", e));
+      newAudio.onended = () => setPlayingIdx(null);
+      setAudioObj(newAudio);
+      setPlayingIdx(idx);
+    }
+  };
+
   return (
     <div>
       <Title title="Birthday Playlist 🎵" sub="" />
       <Card>
         <ET fid="s6_note" data={d} onChange={oc} editMode={em}
           style={{ display:"block", textAlign:"center", fontFamily:"'Dancing Script',cursive", fontSize:20, color:"#E91E8C", marginBottom:16 }} />
-        {songs.map((s,i) => (
-          <div key={i} style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(233,30,140,0.06)", borderRadius:14, padding:"12px 14px", marginBottom:10, border:"1px solid rgba(233,30,140,0.1)" }}>
-            <div style={{ width:36, height:36, borderRadius:"50%", background:"#FFE4EE", display:"flex", alignItems:"center", justifyContent:"center" }}>{s.e}</div>
-            <div style={{ flex:1 }}>
-              <ET fid={s.n} data={d} onChange={oc} editMode={em} style={{ display:"block", fontWeight:700, fontSize:14 }} />
-              <ET fid={s.a} data={d} onChange={oc} editMode={em} style={{ display:"block", fontSize:12, color:"#7a6b73" }} />
+        {songs.map((s,i) => {
+          const url = d[s.u];
+          return (
+            <div key={i} style={{ marginBottom:10 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(233,30,140,0.06)", borderRadius:14, padding:"12px 14px", border:"1px solid rgba(233,30,140,0.1)" }}>
+                <div style={{ width:36, height:36, borderRadius:"50%", background:"#FFE4EE", display:"flex", alignItems:"center", justifyContent:"center" }}>{s.e}</div>
+                <div style={{ flex:1 }}>
+                  <ET fid={s.n} data={d} onChange={oc} editMode={em} style={{ display:"block", fontWeight:700, fontSize:14 }} />
+                  <ET fid={s.a} data={d} onChange={oc} editMode={em} style={{ display:"block", fontSize:12, color:"#7a6b73" }} />
+                </div>
+                <button
+                  onClick={() => togglePlay(i, url)}
+                  style={{
+                    background: playingIdx === i ? "#E91E8C" : "transparent",
+                    color: playingIdx === i ? "#fff" : "#E91E8C",
+                    border: playingIdx === i ? "none" : "1px solid rgba(233,30,140,0.3)",
+                    borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: url ? "pointer" : "default", opacity: url ? 1 : 0.3
+                  }}
+                >
+                  {playingIdx === i ? "⏸" : "▶️"}
+                </button>
+              </div>
+              {em && (
+                <div style={{ marginTop: 4, textAlign: "right" }}>
+                  <button onClick={() => setPickingFor(i)} style={{ background: "none", border: "1px dashed #E91E8C", borderRadius: 6, padding: "4px 10px", fontSize: 11, color: "#E91E8C", cursor: "pointer", fontWeight: 600 }}>
+                    {url ? "🎵 Change Song Audio" : "🎵 Add Song Audio"}
+                  </button>
+                </div>
+              )}
             </div>
-            <span>▶️</span>
-          </div>
-        ))}
+          );
+        })}
         <div style={{ textAlign:"center", marginTop:16 }}><PinkBtn onClick={ch}>Next 🎁</PinkBtn></div>
       </Card>
+      
+      {pickingFor !== null && (
+        <SongLibraryPopup
+          onClose={() => setPickingFor(null)}
+          onSelect={(song) => {
+            const slot = songs[pickingFor];
+            if (oc) {
+              oc(slot.n, song.name);
+              oc(slot.a, song.description || "Unknown Artist");
+              oc(slot.u, song.url);
+            }
+            setPickingFor(null);
+          }}
+        />
+      )}
     </div>
   );
 }

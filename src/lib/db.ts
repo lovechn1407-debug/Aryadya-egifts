@@ -137,3 +137,25 @@ export async function saveCouponDB(coupon: Coupon): Promise<void> {
 export async function deleteCouponDB(id: string): Promise<void> {
   await remove(ref(database, `coupons/${id.toUpperCase()}`));
 }
+
+// ── SONGS ────────────────────────────────────────────────────────────────────
+import { Song } from "./data";
+
+export async function getSongsDB(): Promise<Song[]> {
+  const snap = await get(ref(database, "songs"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, Song>);
+}
+
+export async function getSongDB(id: string): Promise<Song | null> {
+  const snap = await get(ref(database, `songs/${id}`));
+  return snap.exists() ? (snap.val() as Song) : null;
+}
+
+export async function saveSongDB(song: Song): Promise<void> {
+  await set(ref(database, `songs/${song.id}`), song);
+}
+
+export async function deleteSongDB(id: string): Promise<void> {
+  await remove(ref(database, `songs/${id}`));
+}

@@ -285,26 +285,76 @@ function S3({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
   );
 }
 
+import SongLibraryPopup from "../SongLibraryPopup";
+
 // ── Slide 4: Music player ──
 function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: boolean; oc?: (id:string,v:string)=>void }) {
   const [playing, setPlaying] = useState(false);
   const [songIdx, setSongIdx] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [pickingFor, setPickingFor] = useState<number | null>(null);
+  const [audioObj, setAudioObj] = useState<HTMLAudioElement | null>(null);
+  const [duration, setDuration] = useState(17);
+
   const ref = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const songs = [d.s4_song1 || "Dil Cheez Tujhe Dedi", d.s4_song2 || "Tere Bina", d.s4_song3 || "Tera Hone Laga Hoon"];
+  const songs = [
+    { n: "s4_song1", a: "s4_artist1", u: "s4_url1", fallback: "Dil Cheez Tujhe Dedi" },
+    { n: "s4_song2", a: "s4_artist2", u: "s4_url2", fallback: "Tere Bina" },
+    { n: "s4_song3", a: "s4_artist3", u: "s4_url3", fallback: "Tera Hone Laga Hoon" },
+  ];
 
   useEffect(() => {
-    if (playing) {
-      ref.current = setInterval(() => setProgress(p => p >= 100 ? 0 : p + 1), 170);
+    if (audioObj) {
+      audioObj.pause();
+      audioObj.currentTime = 0;
     }
-    return () => { if (ref.current) clearInterval(ref.current); };
-  }, [playing]);
-  useEffect(() => setProgress(0), [songIdx]);
+    setProgress(0);
+    setPlaying(false);
+    
+    const url = d[songs[songIdx].u];
+    if (url && !em) {
+      const newAudio = new Audio(url);
+      newAudio.onloadedmetadata = () => {
+        setDuration(Math.floor(newAudio.duration) || 17);
+      };
+      newAudio.ontimeupdate = () => {
+        setProgress((newAudio.currentTime / (newAudio.duration || 1)) * 100);
+      };
+      newAudio.onended = () => {
+        setPlaying(false);
+        setProgress(0);
+      };
+      setAudioObj(newAudio);
+    } else {
+      setAudioObj(null);
+      setDuration(17);
+    }
+    
+    return () => {
+      if (audioObj) {
+        audioObj.pause();
+        audioObj.currentTime = 0;
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [songIdx, d, em]);
 
-  const totalSec = 17;
-  const curSec = Math.floor((progress / 100) * totalSec);
-  const fmt = (s: number) => `0:${s.toString().padStart(2, "0")}`;
+  useEffect(() => {
+    if (audioObj) {
+      if (playing) audioObj.play().catch(e => console.error(e));
+      else audioObj.pause();
+    } else {
+      // Fake progress
+      if (playing) {
+        ref.current = setInterval(() => setProgress(p => p >= 100 ? 0 : p + 1), 170);
+      }
+      return () => { if (ref.current) clearInterval(ref.current); };
+    }
+  }, [playing, audioObj]);
+
+  const curSec = audioObj ? Math.floor((progress / 100) * duration) : Math.floor((progress / 100) * duration);
+  const fmt = (s: number) => `0:${Math.floor(s).toString().padStart(2, "0")}`;
 
   return (
     <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "64px 24px" }}>
@@ -325,13 +375,23 @@ function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
 
         {em ? (
           <div style={{ width: "100%", marginBottom: 12 }}>
-            {[0,1,2].map(i => (
-              <ET key={i} fid={`s4_song${i+1}`} data={d} onChange={oc} editMode={em}
-                style={{ fontWeight: 700, fontSize: 15, textAlign: "center", marginBottom: 4 }} />
+            {songs.map((s, i) => (
+              <div key={i} style={{ marginBottom: 10, background: "#fdf0f0", padding: 12, borderRadius: 12 }}>
+                <ET fid={s.n} data={d} onChange={oc} editMode={em} style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }} />
+                <ET fid={s.a} data={d} onChange={oc} editMode={em} style={{ fontSize: 12, color: "#888", marginBottom: 8 }} />
+                <div style={{ textAlign: "right" }}>
+                  <button onClick={() => setPickingFor(i)} style={{ background: "none", border: "1px dashed #e91e8c", borderRadius: 6, padding: "4px 10px", fontSize: 11, color: "#e91e8c", cursor: "pointer", fontWeight: 600 }}>
+                    {d[s.u] ? "🎵 Change Song Audio" : "🎵 Add Song Audio"}
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
-          <p style={{ fontWeight: 700, fontSize: 17, marginBottom: 16, textAlign: "center" }}>{songs[songIdx]}</p>
+          <div style={{ textAlign: "center", marginBottom: 16 }}>
+            <p style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>{d[songs[songIdx].n] || songs[songIdx].fallback}</p>
+            <p style={{ fontSize: 13, color: "#888" }}>{d[songs[songIdx].a] || "Unknown Artist"}</p>
+          </div>
         )}
 
         {/* Progress bar */}
@@ -341,12 +401,12 @@ function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
             <div style={{ position: "absolute", top: -4, width: 14, height: 14, borderRadius: "50%", background: "#e91e8c", left: `calc(${progress}% - 7px)` }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#888", marginTop: 4 }}>
-            <span>{fmt(curSec)}</span><span>{fmt(totalSec)}</span>
+            <span>{fmt(curSec)}</span><span>{fmt(duration)}</span>
           </div>
         </div>
 
         {/* Controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 24, opacity: em ? 0.4 : 1, pointerEvents: em ? "none" : "auto" }}>
           <button onClick={() => setSongIdx(i => (i - 1 + songs.length) % songs.length)} style={{
             width: 40, height: 40, borderRadius: "50%", border: "1px solid #f8c8c8",
             background: "none", cursor: "pointer", fontSize: 16,
@@ -364,6 +424,21 @@ function S4({ d, ch, em, oc }: { d: Record<string,string>; ch: () => void; em: b
       </div>
 
       <NavBtns onNext={ch} />
+
+      {pickingFor !== null && (
+        <SongLibraryPopup
+          onClose={() => setPickingFor(null)}
+          onSelect={(song) => {
+            const slot = songs[pickingFor];
+            if (oc) {
+              oc(slot.n, song.name);
+              oc(slot.a, song.description || "Unknown Artist");
+              oc(slot.u, song.url);
+            }
+            setPickingFor(null);
+          }}
+        />
+      )}
     </section>
   );
 }

@@ -62,6 +62,14 @@ export interface Coupon {
   createdAt: string;
 }
 
+export interface Song {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  createdAt: string;
+}
+
 // ─── STATIC PRODUCT REGISTRY ─────────────────────────────────────────────────
 // Products are code-defined (not added via UI). Admin can only toggle visibility & price.
 
@@ -133,10 +141,13 @@ export const PRODUCT_REGISTRY: Product[] = [
         fields: [
           { id: "s6_song1", label: "Song 1 Name", type: "text", defaultValue: "Happy Birthday (Classic)" },
           { id: "s6_artist1", label: "Song 1 Artist", type: "text", defaultValue: "Traditional" },
+          { id: "s6_url1", label: "Song 1 URL", type: "text", defaultValue: "" },
           { id: "s6_song2", label: "Song 2 Name", type: "text", defaultValue: "A Million Dreams" },
           { id: "s6_artist2", label: "Song 2 Artist", type: "text", defaultValue: "Pink (The Greatest Showman)" },
+          { id: "s6_url2", label: "Song 2 URL", type: "text", defaultValue: "" },
           { id: "s6_song3", label: "Song 3 Name", type: "text", defaultValue: "Count On Me" },
           { id: "s6_artist3", label: "Song 3 Artist", type: "text", defaultValue: "Bruno Mars" },
+          { id: "s6_url3", label: "Song 3 URL", type: "text", defaultValue: "" },
           { id: "s6_note", label: "Playlist Note", type: "textarea", defaultValue: "A playlist curated just for you 🎵" },
         ],
       },
@@ -209,9 +220,15 @@ export const PRODUCT_REGISTRY: Product[] = [
         title: "Music Player",
         description: "Dedicated songs",
         fields: [
-          { id: "s4_song1", label: "Song 1", type: "text" as const, defaultValue: "Dil Cheez Tujhe Dedi" },
-          { id: "s4_song2", label: "Song 2", type: "text" as const, defaultValue: "Tere Bina" },
-          { id: "s4_song3", label: "Song 3", type: "text" as const, defaultValue: "Tera Hone Laga Hoon" },
+          { id: "s4_song1", label: "Song 1 Name", type: "text", defaultValue: "Dil Cheez Tujhe Dedi" },
+          { id: "s4_artist1", label: "Song 1 Artist", type: "text", defaultValue: "Arijit Singh" },
+          { id: "s4_url1", label: "Song 1 URL", type: "text", defaultValue: "" },
+          { id: "s4_song2", label: "Song 2 Name", type: "text", defaultValue: "Tere Bina" },
+          { id: "s4_artist2", label: "Song 2 Artist", type: "text", defaultValue: "A.R. Rahman" },
+          { id: "s4_url2", label: "Song 2 URL", type: "text", defaultValue: "" },
+          { id: "s4_song3", label: "Song 3 Name", type: "text", defaultValue: "Tera Hone Laga Hoon" },
+          { id: "s4_artist3", label: "Song 3 Artist", type: "text", defaultValue: "Atif Aslam" },
+          { id: "s4_url3", label: "Song 3 URL", type: "text", defaultValue: "" },
         ],
       },
       {
