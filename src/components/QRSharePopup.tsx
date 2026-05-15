@@ -171,6 +171,12 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
 
   return (
     <>
+      <style>{`
+        @keyframes fadeSlideCenter {
+          from { opacity: 0; transform: translate(-50%, calc(-50% + 12px)); }
+          to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+      `}</style>
       <div onClick={onClose} style={{
         position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
         backdropFilter: "blur(8px)", zIndex: 2000,
@@ -179,7 +185,7 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
         position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
         zIndex: 2001, width: "min(380px, 92vw)", maxHeight: "90vh", background: "#fff", borderRadius: 24,
         padding: "0", boxShadow: "0 32px 80px rgba(124,58,237,0.22)",
-        overflowY: "auto", overflowX: "hidden", animation: "fadeSlide 0.4s ease both",
+        overflowY: "auto", overflowX: "hidden", animation: "fadeSlideCenter 0.4s ease both",
       }}>
         {/* Top gradient strip */}
         <div style={{
