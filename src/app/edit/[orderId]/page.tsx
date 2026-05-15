@@ -12,6 +12,7 @@ import { sendFinalizationEmail } from "@/lib/email";
 
 // Slide map for the top tab bar
 const BIRTHDAY_SLIDES = [
+  { n: 0, label: "BG Music" },
   { n: 1, label: "Welcome" },
   { n: 2, label: "Envelope" },
   { n: 3, label: "Letter" },
@@ -23,6 +24,7 @@ const BIRTHDAY_SLIDES = [
 ];
 
 const APOLOGY_SLIDES = [
+  { n: -1, label: "BG Music" },
   { n: 0, label: "Sorry" },
   { n: 1, label: "Hearts" },
   { n: 2, label: "Cards" },
