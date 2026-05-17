@@ -665,6 +665,43 @@ function ArrowBtn({ dir, accent, onClick }: { dir: "left" | "right"; accent: str
   );
 }
 
+/* ── Cutout Style Helper ── */
+function getCutoutStyle(cutout?: string, color: string = "#ffffff"): React.CSSProperties {
+  if (!cutout || cutout === "none") return { display: "none" };
+  
+  let svg = "";
+  let height = 10;
+  let width = 20;
+  
+  if (cutout === "zigzag") {
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,0 10,10 20,0" fill="${color}"/></svg>`;
+  } else if (cutout === "wavy") {
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 10"><path d="M0 0 Q 10 10 20 0 T 40 0 L 40 0 L 0 0" fill="${color}"/></svg>`;
+    width = 40;
+  } else if (cutout === "wavy_stretched") {
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 15"><path d="M0 0 Q 20 15 40 0 T 80 0 L 80 0 L 0 0" fill="${color}"/></svg>`;
+    width = 80;
+    height = 15;
+  } else if (cutout === "circular") {
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><path d="M0 0 A 10 10 0 0 0 20 0 Z" fill="${color}"/></svg>`;
+  }
+  
+  if (!svg) return {};
+  
+  const encoded = "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+  return {
+    position: "absolute",
+    top: -1,
+    left: 0,
+    width: "100%",
+    height: height,
+    backgroundImage: `url("${encoded}")`,
+    backgroundRepeat: "repeat-x",
+    backgroundSize: `${width}px ${height}px`,
+    zIndex: 10
+  };
+}
+
 /* ── Occasion Section — Full-width shelf ── */
 function OccasionSection({ section, products, onCardClick }: { section: DisplaySection; products: Product[]; onCardClick: (p: Product, accent?: string) => void }) {
   const theme = getSectionTheme(section.theme);
@@ -747,6 +784,11 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
         }} />
 
         <OccasionDecorators theme={theme} />
+        
+        {/* Top Cutout */}
+        {section.headerStyle === "new" && section.headerCutout && section.headerCutout !== "none" && (
+          <div style={getCutoutStyle(section.headerCutout, "#ffffff")} />
+        )}
 
         {/* Header Content conditionally rendered based on headerStyle */}
         {section.headerStyle === "new" ? (
@@ -759,7 +801,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
               <div style={{ height: 1, width: 40, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6))" }} />
               <h2 style={{
                 fontSize: `calc(${titleSize} + 4px)`, fontWeight: 700,
-                color: "#fff", fontFamily: "'Dancing Script', cursive",
+                color: "#fff", fontFamily: section.headerFontFamily || "'Dancing Script', cursive",
                 lineHeight: 1.2, margin: 0,
                 textShadow: "0 2px 10px rgba(0,0,0,0.3)",
                 letterSpacing: 0.5,

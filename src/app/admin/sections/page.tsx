@@ -23,6 +23,8 @@ export default function AdminSectionsPage() {
   
   const [titleSize, setTitleSize] = useState<"small" | "normal" | "medium" | "big" | "bigger">("normal");
   const [headerStyle, setHeaderStyle] = useState<"normal" | "new">("normal");
+  const [headerFontFamily, setHeaderFontFamily] = useState<string>("'Dancing Script', cursive");
+  const [headerCutout, setHeaderCutout] = useState<"none" | "wavy" | "zigzag" | "wavy_stretched" | "circular">("none");
   const [headerNote, setHeaderNote] = useState("");
   const [headerNoteEnabled, setHeaderNoteEnabled] = useState(false);
 
@@ -63,6 +65,8 @@ export default function AdminSectionsPage() {
           countdownEndTime,
           titleSize,
           headerStyle,
+          headerFontFamily,
+          headerCutout,
           headerNote,
           headerNoteEnabled
         });
@@ -81,6 +85,8 @@ export default function AdminSectionsPage() {
           countdownEndTime,
           titleSize,
           headerStyle,
+          headerFontFamily,
+          headerCutout,
           headerNote,
           headerNoteEnabled,
           createdAt: new Date().toISOString(),
@@ -89,7 +95,7 @@ export default function AdminSectionsPage() {
       }
       
       setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
-      setTitleSize("normal"); setHeaderStyle("normal"); setHeaderNote(""); setHeaderNoteEnabled(false);
+      setTitleSize("normal"); setHeaderStyle("normal"); setHeaderFontFamily("'Dancing Script', cursive"); setHeaderCutout("none"); setHeaderNote(""); setHeaderNoteEnabled(false);
       setShowCreate(false);
       setEditingSectionId(null);
       await reload();
@@ -110,6 +116,8 @@ export default function AdminSectionsPage() {
     setCountdownEndTime(sec.countdownEndTime || "");
     setTitleSize(sec.titleSize || "normal");
     setHeaderStyle(sec.headerStyle || "normal");
+    setHeaderFontFamily(sec.headerFontFamily || "'Dancing Script', cursive");
+    setHeaderCutout((sec.headerCutout as any) || "none");
     setHeaderNote(sec.headerNote || "");
     setHeaderNoteEnabled(sec.headerNoteEnabled || false);
     setEditingSectionId(sec.id);
@@ -121,7 +129,7 @@ export default function AdminSectionsPage() {
     setShowCreate(false);
     setEditingSectionId(null);
     setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
-    setTitleSize("normal"); setHeaderStyle("normal"); setHeaderNote(""); setHeaderNoteEnabled(false);
+    setTitleSize("normal"); setHeaderStyle("normal"); setHeaderFontFamily("'Dancing Script', cursive"); setHeaderCutout("none"); setHeaderNote(""); setHeaderNoteEnabled(false);
   };
 
   const toggleProduct = (id: string) => {
@@ -286,6 +294,33 @@ export default function AdminSectionsPage() {
                 </div>
               )}
             </div>
+            
+            {theme.includes("_plus") && headerStyle === "new" && (
+              <div style={{ gridColumn: "1 / -1", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div>
+                  <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Header Font Style</label>
+                  <select value={headerFontFamily} onChange={e => setHeaderFontFamily(e.target.value)} style={{ ...inputStyle, fontFamily: headerFontFamily } as any}>
+                    <option value="'Dancing Script', cursive">Dancing Script (Magical Cursive)</option>
+                    <option value="'Playfair Display', serif">Playfair Display (Elegant Serif)</option>
+                    <option value="'Cormorant Garamond', serif">Cormorant Garamond (Premium Serif)</option>
+                    <option value="'Outfit', sans-serif">Outfit (Modern Sans)</option>
+                    <option value="'Special Elite', cursive">Special Elite (Typewriter)</option>
+                    <option value="'Nunito', sans-serif">Nunito (Friendly Sans)</option>
+                    <option value="'Inter', sans-serif">Inter (Clean UI)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Top Outline Cutout</label>
+                  <select value={headerCutout} onChange={e => setHeaderCutout(e.target.value as any)} style={inputStyle}>
+                    <option value="none">None (Standard)</option>
+                    <option value="wavy">Wavy</option>
+                    <option value="wavy_stretched">Wavy (Stretched)</option>
+                    <option value="zigzag">Zigzag</option>
+                    <option value="circular">Circular Spiral (Scallop)</option>
+                  </select>
+                </div>
+              </div>
+            )}
             
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 10 }}>

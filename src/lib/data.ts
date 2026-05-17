@@ -468,6 +468,8 @@ export interface DisplaySection {
   countdownEndTime?: string;
   titleSize?: "small" | "normal" | "medium" | "big" | "bigger";
   headerStyle?: "normal" | "new";
+  headerFontFamily?: string;
+  headerCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular";
   headerNote?: string;
   headerNoteEnabled?: boolean;
   createdAt: string;
