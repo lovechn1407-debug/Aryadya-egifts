@@ -4,9 +4,9 @@ const BOT_TOKEN = "8832668653:AAER53dyUKzFn6lXK3ex2dtEEgErTTNSjlw";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { fileId: string } }
+  { params }: { params: Promise<{ fileId: string }> }
 ) {
-  const { fileId } = params;
+  const { fileId } = await params;
   
   if (!fileId) {
     return new NextResponse("Missing fileId", { status: 400 });
