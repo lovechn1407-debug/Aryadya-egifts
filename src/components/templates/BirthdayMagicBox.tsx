@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import YouTube from "react-youtube";
 
 // ── Editable Text ────────────────────────────────────────────────────────
 function ET({
@@ -132,7 +133,11 @@ function S0({ d, ch, em, oc, bgProps }: { d: Record<string,string>; ch: ()=>void
           onSelect={(song) => {
             if (oc) {
               oc("bg_song_name", song.name);
-              oc("bg_song_url", song.url);
+              oc("bg_song_url", song.url || "");
+              oc("bg_song_type", song.type || "direct");
+              oc("bg_song_youtube_id", song.youtubeId || "");
+              oc("bg_song_start", String(song.startTime || 0));
+              oc("bg_song_end", String(song.endTime || 0));
             }
             bgProps.setIsPicking(false);
           }}
@@ -665,6 +670,8 @@ export default function BirthdayMagicBox({
 
   // Background Audio State
   const [bgAudio, setBgAudio] = useState<HTMLAudioElement | null>(null);
+  const [ytPlayer, setYtPlayer] = useState<any>(null);
+  const isYt = customData.bg_song_type === "youtube" && !!customData.bg_song_youtube_id;
 
   useEffect(() => {
     if (editMode) return;
@@ -673,8 +680,14 @@ export default function BirthdayMagicBox({
     setBgAudio(audio);
 
     const startBgAudio = () => {
-      if (audio.paused) {
-        audio.play().catch(e => console.log("Bg audio autoplay prevented", e));
+      if (isYt) {
+        if (ytPlayer && typeof ytPlayer.playVideo === "function") {
+          ytPlayer.playVideo();
+        }
+      } else {
+        if (audio.paused && customData.bg_song_url) {
+          audio.play().catch(e => console.log("Bg audio autoplay prevented", e));
+        }
       }
     };
     window.addEventListener("click", startBgAudio, { once: true });
@@ -684,29 +697,48 @@ export default function BirthdayMagicBox({
       audio.pause();
       audio.src = "";
     };
-  }, [editMode]);
+  }, [editMode, isYt, ytPlayer, customData.bg_song_url]);
 
   useEffect(() => {
     if (!bgAudio) return;
-    if (customData.bg_song_url && bgAudio.src !== customData.bg_song_url) {
+    if (!isYt && customData.bg_song_url && bgAudio.src !== customData.bg_song_url) {
       bgAudio.src = customData.bg_song_url;
     }
-  }, [bgAudio, customData.bg_song_url]);
+  }, [bgAudio, customData.bg_song_url, isYt]);
 
   useEffect(() => {
-    if (!bgAudio || editMode) return;
+    if (editMode) return;
     if (globalPlaying) {
-      bgAudio.pause();
+      bgAudio?.pause();
+      ytPlayer?.pauseVideo?.();
     } else {
       if (!globalMuted) {
-        bgAudio.play().catch(e => console.log("Bg audio play prevented", e));
+        if (isYt) {
+          ytPlayer?.playVideo?.();
+        } else {
+          bgAudio?.play().catch(e => console.log("Bg audio play prevented", e));
+        }
       }
     }
-  }, [globalPlaying, bgAudio, globalMuted, editMode]);
+  }, [globalPlaying, bgAudio, globalMuted, editMode, isYt, ytPlayer]);
 
   useEffect(() => {
     if (bgAudio) bgAudio.muted = globalMuted;
-  }, [globalMuted, bgAudio]);
+    if (ytPlayer && typeof ytPlayer.isMuted === "function") {
+      if (globalMuted) ytPlayer.mute(); else ytPlayer.unMute();
+    }
+  }, [globalMuted, bgAudio, ytPlayer]);
+
+  const onYtReady = (event: any) => {
+    setYtPlayer(event.target);
+    if (globalMuted) event.target.mute();
+  };
+
+  const onYtStateChange = (event: any) => {
+    if (event.data === 0) { // 0 = ended
+      event.target.playVideo();
+    }
+  };
 
   // Initialize Audio Object ONCE
   useEffect(() => {
@@ -836,6 +868,27 @@ export default function BirthdayMagicBox({
       {!editMode && (
         <div style={{ position:"fixed", bottom:8, left:0, right:0, textAlign:"center", fontSize:12, color:"#E91E8C", opacity:0.6, zIndex:20, fontWeight:600 }}>
           Preview — Purchase to personalise ✨
+        </div>
+      )}
+
+      {isYt && !editMode && (
+        <div style={{ position: "absolute", top: -9999, left: -9999, opacity: 0, pointerEvents: "none" }}>
+          <YouTube 
+            videoId={customData.bg_song_youtube_id} 
+            opts={{
+              height: '10',
+              width: '10',
+              playerVars: {
+                autoplay: 0,
+                loop: 1,
+                controls: 0,
+                start: parseInt(customData.bg_song_start || "0", 10) || undefined,
+                end: parseInt(customData.bg_song_end || "0", 10) || undefined,
+              },
+            }} 
+            onReady={onYtReady}
+            onStateChange={onYtStateChange}
+          />
         </div>
       )}
     </div>

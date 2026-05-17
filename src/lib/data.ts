@@ -67,6 +67,10 @@ export interface Song {
   name: string;
   description: string;
   url: string;
+  type?: "direct" | "youtube";
+  youtubeId?: string;
+  startTime?: number;
+  endTime?: number;
   createdAt: string;
 }
 

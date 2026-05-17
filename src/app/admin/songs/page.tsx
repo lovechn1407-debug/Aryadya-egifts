@@ -12,7 +12,11 @@ export default function AdminSongsPage() {
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [type, setType] = useState<"direct" | "youtube">("direct");
   const [url, setUrl] = useState("");
+  const [youtubeId, setYoutubeId] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   
   // Audio playback state
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -36,6 +40,10 @@ export default function AdminSongsPage() {
   }, [audioObj]);
 
   const togglePlay = (song: Song) => {
+    if (song.type === "youtube") {
+      alert("YouTube audio playback is only supported on the template preview and actual gift page. Please check the actual site to preview it.");
+      return;
+    }
     if (playingId === song.id) {
       audioObj?.pause();
       setPlayingId(null);
@@ -53,11 +61,31 @@ export default function AdminSongsPage() {
     }
   };
 
+  const extractYouTubeID = (url: string) => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : "";
+  };
+
   const handleCreateOrUpdate = async () => {
-    if (!name.trim() || !url.trim()) {
-      alert("Please provide at least a Song Name and Audio URL.");
+    if (!name.trim()) {
+      alert("Please provide a Song Name.");
       return;
     }
+    if (type === "direct" && !url.trim()) {
+      alert("Please provide an Audio URL for direct link.");
+      return;
+    }
+    
+    let finalYoutubeId = "";
+    if (type === "youtube") {
+      finalYoutubeId = extractYouTubeID(url);
+      if (!finalYoutubeId) {
+        alert("Invalid YouTube URL. Could not extract Video ID.");
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const isNew = !id;
@@ -67,7 +95,11 @@ export default function AdminSongsPage() {
         id: songId,
         name: name.trim(),
         description: description.trim(),
-        url: url.trim(),
+        url: url.trim(), // Keep URL just for reference/history
+        type,
+        youtubeId: finalYoutubeId,
+        startTime: startTime ? parseInt(startTime, 10) : undefined,
+        endTime: endTime ? parseInt(endTime, 10) : undefined,
         createdAt: isNew ? new Date().toISOString() : (songs.find(s => s.id === id)?.createdAt || new Date().toISOString()),
       };
 
@@ -83,14 +115,18 @@ export default function AdminSongsPage() {
   };
 
   const resetForm = () => {
-    setId(""); setName(""); setDescription(""); setUrl("");
+    setId(""); setName(""); setDescription(""); setUrl(""); setType("direct"); setYoutubeId(""); setStartTime(""); setEndTime("");
   };
 
   const editSong = (s: Song) => {
     setId(s.id);
     setName(s.name);
-    setDescription(s.description);
-    setUrl(s.url);
+    setDescription(s.description || "");
+    setType(s.type || "direct");
+    setUrl(s.url || (s.type === "youtube" ? `https://www.youtube.com/watch?v=${s.youtubeId}` : ""));
+    setYoutubeId(s.youtubeId || "");
+    setStartTime(s.startTime ? String(s.startTime) : "");
+    setEndTime(s.endTime ? String(s.endTime) : "");
     setShowCreate(true);
   };
 
@@ -142,15 +178,49 @@ export default function AdminSongsPage() {
           
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16, marginBottom: 16 }}>
             <div>
+              <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Upload Method *</label>
+              <div style={{ display: "flex", gap: 12 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, cursor: "pointer" }}>
+                  <input type="radio" name="uploadType" checked={type === "direct"} onChange={() => setType("direct")} /> Direct MP3 Link
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, cursor: "pointer" }}>
+                  <input type="radio" name="uploadType" checked={type === "youtube"} onChange={() => setType("youtube")} /> YouTube Link
+                </label>
+              </div>
+            </div>
+
+            <div>
               <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Song Name *</label>
               <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Happy Birthday Instrumental" style={inputStyle} />
             </div>
             
-            <div>
-              <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Audio URL (Direct Link) *</label>
-              <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com/audio.mp3" style={inputStyle} />
-              <p style={{ fontSize: 12, color: "#64748B", marginTop: 4 }}>Provide a direct link to an mp3 or audio file. Make sure it has CORS enabled.</p>
-            </div>
+            {type === "direct" && (
+              <div>
+                <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Audio URL (Direct Link) *</label>
+                <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com/audio.mp3" style={inputStyle} />
+                <p style={{ fontSize: 12, color: "#64748B", marginTop: 4 }}>Provide a direct link to an mp3 or audio file. Make sure it has CORS enabled.</p>
+              </div>
+            )}
+
+            {type === "youtube" && (
+              <div style={{ padding: 16, background: "#FEF2F2", borderRadius: 8, border: "1px solid #FECACA" }}>
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ fontSize: 13, color: "#991B1B", fontWeight: 600, display: "block", marginBottom: 6 }}>YouTube Video URL *</label>
+                  <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." style={{ ...inputStyle, borderColor: "#FECACA" }} />
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={{ fontSize: 13, color: "#991B1B", fontWeight: 600, display: "block", marginBottom: 6 }}>Start Time (Seconds)</label>
+                    <input type="number" value={startTime} onChange={e => setStartTime(e.target.value)} placeholder="e.g. 15" style={{ ...inputStyle, borderColor: "#FECACA" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 13, color: "#991B1B", fontWeight: 600, display: "block", marginBottom: 6 }}>End Time (Seconds)</label>
+                    <input type="number" value={endTime} onChange={e => setEndTime(e.target.value)} placeholder="e.g. 45" style={{ ...inputStyle, borderColor: "#FECACA" }} />
+                  </div>
+                </div>
+                <p style={{ fontSize: 12, color: "#B91C1C", marginTop: 8 }}>The YouTube player will be invisible to users but will automatically play this section of the video when they interact with the page.</p>
+              </div>
+            )}
 
             <div>
               <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Description (Optional)</label>
@@ -182,7 +252,12 @@ export default function AdminSongsPage() {
               </button>
               <div>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>{s.name}</h3>
-                {s.description && <p style={{ fontSize: 13, color: "#64748B", marginBottom: 4 }}>{s.description}</p>}
+                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 6px", borderRadius: 4, background: s.type === "youtube" ? "#FEE2E2" : "#E0E7FF", color: s.type === "youtube" ? "#991B1B" : "#3730A3" }}>
+                    {s.type === "youtube" ? "▶️ YouTube" : "🔗 Direct URL"}
+                  </span>
+                  {s.description && <span style={{ fontSize: 13, color: "#64748B" }}>{s.description}</span>}
+                </div>
                 <p style={{ fontSize: 11, color: "#94A3B8", fontFamily: "monospace" }}>ID: {s.id}</p>
               </div>
             </div>
