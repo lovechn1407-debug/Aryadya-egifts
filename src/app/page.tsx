@@ -751,52 +751,61 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
         {/* Header Content conditionally rendered based on headerStyle */}
         {section.headerStyle === "new" ? (
           <div style={{
-            padding: "32px clamp(14px,3vw,40px) 24px",
+            padding: "20px clamp(14px,3vw,40px) 16px",
             display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
-            position: "relative", zIndex: 2, overflow: "hidden", gap: 8
+            position: "relative", zIndex: 2, overflow: "hidden"
           }}>
-            <h2 style={{
-              fontSize: titleSize, fontWeight: 900,
-              color: "#fff", fontFamily: "'Playfair Display', serif", // Premium heading font
-              lineHeight: 1.2, margin: 0,
-              textShadow: "0 2px 16px rgba(0,0,0,0.3)",
-              letterSpacing: 0.5,
-            }}>
-              {section.title}
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ height: 1, width: 40, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6))" }} />
+              <h2 style={{
+                fontSize: `calc(${titleSize} + 4px)`, fontWeight: 700,
+                color: "#fff", fontFamily: "'Dancing Script', cursive",
+                lineHeight: 1.2, margin: 0,
+                textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+                letterSpacing: 0.5,
+              }}>
+                {section.title}
+              </h2>
+              <div style={{ height: 1, width: 40, background: "linear-gradient(270deg, transparent, rgba(255,255,255,0.6))" }} />
+            </div>
+            
             {section.subtitle && (
               <p style={{
-                fontSize: "clamp(13px,1.5vw,15px)", color: "rgba(255,255,255,0.9)",
-                marginTop: 4, lineHeight: 1.4,
+                fontSize: "clamp(10px,1.5vw,12px)", color: "rgba(255,255,255,0.85)",
+                marginTop: 6, lineHeight: 1.3,
                 fontFamily: "'Nunito', sans-serif",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase", fontWeight: 800
               }}>
                 {section.subtitle}
               </p>
             )}
+            
             {section.headerNoteEnabled && section.headerNote && (
               <div 
                 style={{
-                  marginTop: 12,
-                  padding: "6px 16px",
-                  background: "rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(6px)",
-                  borderRadius: 999,
-                  border: "1px solid rgba(255,255,255,0.4)",
-                  fontSize: "clamp(11px,1.5vw,13px)",
+                  marginTop: 10,
+                  padding: "4px 12px",
+                  background: "rgba(255,255,255,0.12)",
+                  backdropFilter: "blur(4px)",
+                  borderRadius: 6,
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  fontSize: "clamp(10px,1.5vw,12px)",
                   color: "#fff",
                   display: "inline-block",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
                 }}
                 dangerouslySetInnerHTML={{ __html: section.headerNote }}
               />
             )}
+            
             {timeLeft && (
-              <div style={{ display: "flex", gap: 8, marginTop: 16, alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "rgba(255,255,255,0.9)" }}>Ends In:</span>
-                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.2)" }}>{timeLeft.d}d</div>
-                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.2)" }}>{timeLeft.h}h</div>
-                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.2)" }}>{timeLeft.m}m</div>
-                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.2)" }}>{timeLeft.s}s</div>
+              <div style={{ display: "flex", gap: 6, marginTop: 12, alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "rgba(255,255,255,0.9)" }}>Ends In:</span>
+                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 4, padding: "2px 6px", color: "#fff", fontWeight: 800, fontSize: 11, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.d}d</div>
+                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 4, padding: "2px 6px", color: "#fff", fontWeight: 800, fontSize: 11, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.h}h</div>
+                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 4, padding: "2px 6px", color: "#fff", fontWeight: 800, fontSize: 11, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.m}m</div>
+                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 4, padding: "2px 6px", color: "#fff", fontWeight: 800, fontSize: 11, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.s}s</div>
               </div>
             )}
           </div>
