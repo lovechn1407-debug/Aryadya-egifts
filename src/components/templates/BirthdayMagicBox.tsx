@@ -672,6 +672,17 @@ export default function BirthdayMagicBox({
   const [bgAudio, setBgAudio] = useState<HTMLAudioElement | null>(null);
   const [ytPlayer, setYtPlayer] = useState<any>(null);
   const isYt = customData.bg_song_type === "youtube" && !!customData.bg_song_youtube_id;
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  useEffect(() => {
+    const onInteract = () => setHasInteracted(true);
+    window.addEventListener("click", onInteract);
+    window.addEventListener("touchstart", onInteract);
+    return () => {
+      window.removeEventListener("click", onInteract);
+      window.removeEventListener("touchstart", onInteract);
+    };
+  }, []);
 
   useEffect(() => {
     if (editMode) return;
@@ -679,25 +690,11 @@ export default function BirthdayMagicBox({
     audio.loop = true;
     setBgAudio(audio);
 
-    const startBgAudio = () => {
-      if (isYt) {
-        if (ytPlayer && typeof ytPlayer.playVideo === "function") {
-          ytPlayer.playVideo();
-        }
-      } else {
-        if (audio.paused && customData.bg_song_url) {
-          audio.play().catch(e => console.log("Bg audio autoplay prevented", e));
-        }
-      }
-    };
-    window.addEventListener("click", startBgAudio, { once: true });
-
     return () => {
-      window.removeEventListener("click", startBgAudio);
       audio.pause();
       audio.src = "";
     };
-  }, [editMode, isYt, ytPlayer, customData.bg_song_url]);
+  }, [editMode]);
 
   useEffect(() => {
     if (!bgAudio) return;
@@ -707,7 +704,8 @@ export default function BirthdayMagicBox({
   }, [bgAudio, customData.bg_song_url, isYt]);
 
   useEffect(() => {
-    if (editMode) return;
+    if (editMode || !hasInteracted) return;
+    
     if (globalPlaying) {
       bgAudio?.pause();
       ytPlayer?.pauseVideo?.();
@@ -720,7 +718,7 @@ export default function BirthdayMagicBox({
         }
       }
     }
-  }, [globalPlaying, bgAudio, globalMuted, editMode, isYt, ytPlayer]);
+  }, [globalPlaying, bgAudio, globalMuted, editMode, isYt, ytPlayer, hasInteracted]);
 
   useEffect(() => {
     if (bgAudio) bgAudio.muted = globalMuted;

@@ -580,6 +580,17 @@ export default function SweetApologyBox({
 
   const [globalMuted, setGlobalMuted] = useState(false);
   const [slideAudioPlaying, setSlideAudioPlaying] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  useEffect(() => {
+    const onInteract = () => setHasInteracted(true);
+    window.addEventListener("click", onInteract);
+    window.addEventListener("touchstart", onInteract);
+    return () => {
+      window.removeEventListener("click", onInteract);
+      window.removeEventListener("touchstart", onInteract);
+    };
+  }, []);
 
   useEffect(() => {
     if (editMode) return;
@@ -587,25 +598,11 @@ export default function SweetApologyBox({
     audio.loop = true;
     setBgAudio(audio);
 
-    const startBgAudio = () => {
-      if (isYt) {
-        if (ytPlayer && typeof ytPlayer.playVideo === "function") {
-          ytPlayer.playVideo();
-        }
-      } else {
-        if (audio.paused && customData.bg_song_url) {
-          audio.play().catch(e => console.log("Bg audio autoplay prevented", e));
-        }
-      }
-    };
-    window.addEventListener("click", startBgAudio, { once: true });
-
     return () => {
-      window.removeEventListener("click", startBgAudio);
       audio.pause();
       audio.src = "";
     };
-  }, [editMode, isYt, ytPlayer, customData.bg_song_url]);
+  }, [editMode]);
 
   useEffect(() => {
     if (!bgAudio) return;
@@ -615,7 +612,7 @@ export default function SweetApologyBox({
   }, [bgAudio, customData.bg_song_url, isYt]);
 
   useEffect(() => {
-    if (editMode) return;
+    if (editMode || !hasInteracted) return;
     if (slideAudioPlaying) {
       bgAudio?.pause();
       ytPlayer?.pauseVideo?.();
@@ -628,7 +625,7 @@ export default function SweetApologyBox({
         }
       }
     }
-  }, [slideAudioPlaying, bgAudio, globalMuted, editMode, isYt, ytPlayer]);
+  }, [slideAudioPlaying, bgAudio, globalMuted, editMode, isYt, ytPlayer, hasInteracted]);
 
   useEffect(() => {
     if (bgAudio) bgAudio.muted = globalMuted;
