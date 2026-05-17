@@ -271,6 +271,60 @@ export const PRODUCT_REGISTRY: Product[] = [
       },
     ],
   },
+  {
+    id: "birthday-bliss-microsite",
+    name: "Birthday Bliss Microsite ✨",
+    tagline: "A stunning, interactive birthday microsite with balloons, cake, music, and a sealed letter.",
+    category: "birthday" as const,
+    price: 9900,
+    visible: true,
+    thumbnail: "✨",
+    previewRoute: "/preview/birthday-bliss-microsite",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 0,
+        title: "Intro Screen",
+        description: "The welcoming screen",
+        fields: [
+          { id: "s0_recipient", label: "Recipient Name", type: "text", defaultValue: "Madam Ji" },
+          { id: "s0_sub", label: "Subtitle", type: "text", defaultValue: "it's your day to shine." },
+        ],
+      },
+      {
+        slideNumber: 1,
+        title: "Playlist & Memories",
+        description: "Songs and captions",
+        fields: [
+          { id: "p_song1", label: "Song 1 Title", type: "text", defaultValue: "Sia" },
+          { id: "p_artist1", label: "Song 1 Artist", type: "text", defaultValue: "Special Vibe" },
+          { id: "p_img1", label: "Song 1 Image URL", type: "text", defaultValue: "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=600" },
+          { id: "p_cap1", label: "Song 1 Caption", type: "textarea", defaultValue: "Happy Birthday to the one who knows all my secrets and still chooses to stay." },
+          { id: "p_url1", label: "Song 1 Audio URL (Optional)", type: "text", defaultValue: "" },
+          
+          { id: "p_song2", label: "Song 2 Title", type: "text", defaultValue: "Tum Hi Ho" },
+          { id: "p_artist2", label: "Song 2 Artist", type: "text", defaultValue: "Forever Mood" },
+          { id: "p_img2", label: "Song 2 Image URL", type: "text", defaultValue: "https://images.unsplash.com/photo-1518199266791-5375a83164ba?auto=format&fit=crop&w=600" },
+          { id: "p_cap2", label: "Song 2 Caption", type: "textarea", defaultValue: "My love will love you through every season, every reason." },
+          { id: "p_url2", label: "Song 2 Audio URL (Optional)", type: "text", defaultValue: "" },
+          
+          { id: "p_song3", label: "Song 3 Title", type: "text", defaultValue: "Whenever You Need" },
+          { id: "p_artist3", label: "Song 3 Artist", type: "text", defaultValue: "Always Yours" },
+          { id: "p_img3", label: "Song 3 Image URL", type: "text", defaultValue: "https://images.unsplash.com/photo-1478147424044-16b7eb0a006c?auto=format&fit=crop&w=600" },
+          { id: "p_cap3", label: "Song 3 Caption", type: "textarea", defaultValue: "Whenever you need me, I'll be right there. Always." },
+          { id: "p_url3", label: "Song 3 Audio URL (Optional)", type: "text", defaultValue: "" },
+        ],
+      },
+      {
+        slideNumber: 2,
+        title: "Final Letter",
+        description: "The sealed birthday letter",
+        fields: [
+          { id: "l_msg", label: "Final Message", type: "textarea", defaultValue: "Thanks for coming into my life and making it better with your presence." },
+        ],
+      },
+    ],
+  },
 ];
 
 // ─── LOCALSTORAGE HELPERS ─────────────────────────────────────────────────────
@@ -405,6 +459,8 @@ export function isAdminLoggedIn(): boolean {
 }
 
 // ─── DISPLAY SECTIONS (Blinkit-style occasion banners) ──────────────────────
+
+export type TemplateType = "sweet-apology" | "birthday-magic" | "birthday-bliss" | "valentine-love" | "anniversary-gold";
 
 export type SectionTheme =
   | "birthday"

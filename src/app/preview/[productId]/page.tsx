@@ -4,11 +4,14 @@ import { useSearchParams } from "next/navigation";
 import { getProduct } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
+import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 function renderTemplate(productId: string, customData: Record<string, string>, autoPlay?: boolean) {
   switch (productId) {
+    case "birthday-bliss-microsite":
+      return <BirthdayBliss customData={customData} autoPlay={autoPlay} />;
     case "birthday-magic-box":
       return <BirthdayMagicBox customData={customData} autoPlay={autoPlay} />;
     case "sweet-apology-box":
