@@ -72,6 +72,30 @@ export default function BirthdayBliss({ customData = {}, editMode = false, onFie
   );
 }
 
+// ── Editor Sub-Header ──
+function SubHeader({ tabs, activeKey, onSelect }: { tabs: {key:string|number, label:string}[], activeKey: string|number, onSelect: (k:any)=>void }) {
+  return (
+    <div style={{ display: "flex", gap: 6, padding: "16px", overflowX: "auto", position: "relative", zIndex: 50, width: "100%", justifyContent: "center", marginBottom: "2rem" }}>
+      {tabs.map(tab => (
+        <button
+          key={tab.key}
+          onClick={() => onSelect(tab.key)}
+          style={{
+            padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+            border: "1px solid",
+            borderColor: activeKey === tab.key ? "rgba(155,89,252,0.8)" : "rgba(255,255,255,0.1)",
+            background: activeKey === tab.key ? "rgba(155,89,252,0.25)" : "rgba(255,255,255,0.04)",
+            color: activeKey === tab.key ? "#C4A3FF" : "rgba(255,255,255,0.5)",
+            cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s",
+          }}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ── Editable Text ──
 function ET({ fid, d, onChange, multiline = false, editMode = false, def = "" }: {
   fid: string; d: Record<string, string>; onChange?: (id: string, v: string) => void;
@@ -176,23 +200,32 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
 
   const msg = msgs[Math.min(step, msgs.length - 1)];
 
+  const activeStepKey = confirmed ? "ready" : step;
+
   return (
-    <section className="min-h-screen bliss-gradient-bg flex flex-col items-center justify-center p-6 relative">
+    <section className="min-h-screen bliss-gradient-bg flex flex-col items-center justify-start p-6 relative">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8755, transparent 70%)" }} />
         <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff55, transparent 70%)", animationDelay: "1.5s" }} />
       </div>
 
       {editMode && (
-        <div className="w-full max-w-lg mx-auto mb-12 mt-10 md:mt-0 p-1.5 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-between shadow-2xl border border-white/10 z-50 relative">
-           <button onClick={() => { setConfirmed(false); setStep(0); setPhase("in"); }} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${!confirmed && step === 0 ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>Para 1</button>
-           <button onClick={() => { setConfirmed(false); setStep(1); setPhase("in"); }} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${!confirmed && step === 1 ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>Para 2</button>
-           <button onClick={() => { setConfirmed(false); setStep(2); setPhase("in"); }} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${!confirmed && step === 2 ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>Para 3</button>
-           <button onClick={() => { setConfirmed(true); }} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${confirmed ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>Ready</button>
-        </div>
+        <SubHeader
+          tabs={[
+            { key: 0, label: "Para 1" },
+            { key: 1, label: "Para 2" },
+            { key: 2, label: "Para 3" },
+            { key: "ready", label: "Ready Screen" },
+          ]}
+          activeKey={activeStepKey}
+          onSelect={(k) => {
+            if (k === "ready") { setConfirmed(true); }
+            else { setConfirmed(false); setStep(k as number); setPhase("in"); }
+          }}
+        />
       )}
 
-      <div className="relative z-10 max-w-2xl w-full text-center mt-12">
+      <div className="relative z-10 max-w-2xl w-full text-center mt-16 md:mt-24 flex-1 flex flex-col justify-center">
         {!confirmed ? (
           <div key={step} className={phase === "in" ? "animate-bliss-fade-in-up" : "animate-bliss-fade-out-up"}>
             <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-6 uppercase">{msg.icon} A Little Note {msg.icon}</div>
@@ -215,7 +248,9 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
             </div>
           </div>
         )}
-        <p className="bliss-font-script text-xl text-pink-200/60 mt-20">made with love</p>
+        <div className="mt-auto pb-10">
+          <p className="bliss-font-script text-xl text-pink-200/60 mt-20">made with love</p>
+        </div>
       </div>
     </section>
   );
@@ -319,23 +354,26 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
   };
 
   return (
-    <section className="min-h-screen bliss-gradient-bg p-4 md:p-12 flex flex-col items-center relative py-12">
+    <section className="min-h-screen bliss-gradient-bg p-4 md:p-12 flex flex-col items-center relative py-6">
+      
+      {editMode && (
+        <SubHeader
+          tabs={[
+            { key: 1, label: "Image 1" },
+            { key: 2, label: "Image 2" },
+            { key: 3, label: "Image 3" },
+          ]}
+          activeKey={activeSong}
+          onSelect={(k) => setActiveSong(k as number)}
+        />
+      )}
+
       <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-6 md:mt-2">✦ Slide Three ✦</div>
-      <h2 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm text-center mb-8 md:mb-12 flex items-center gap-3">
+      <h2 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm text-center mb-12 md:mb-16 flex items-center gap-3">
         Our memories <Sparkles className="inline text-pink-200" size={28} />
       </h2>
 
-      {editMode && (
-        <div className="w-full max-w-md mx-auto mb-10 p-1.5 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-between shadow-2xl border border-white/10 z-50">
-          {[1,2,3].map(i => (
-            <button key={i} onClick={() => setActiveSong(i)} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${activeSong === i ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>
-              Slide {i}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 max-w-5xl w-full px-4 items-center">
+      <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 max-w-5xl w-full px-4 items-center">
         
         {/* POLAROID SECTION */}
         <div className="flex flex-col items-center animate-bliss-fade-in-up" key={`polaroid-${song.id}`}>
@@ -400,7 +438,13 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
                   {editMode && (
                     <button
                       onClick={() => { setActiveSong(s.id); setBgModalOpen(true); }}
-                      className="px-4 py-2.5 rounded-xl text-xs font-bold shrink-0 bg-white/10 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 hover:text-white hover:border-transparent transition-all border border-white/20 shadow-sm"
+                      style={{
+                        padding: "5px 10px", borderRadius: 8, fontSize: 11, fontWeight: 600,
+                        border: "1px solid rgba(255,255,255,0.2)",
+                        background: "rgba(255,255,255,0.1)",
+                        color: "white", cursor: "pointer", transition: "all 0.2s",
+                        flexShrink: 0
+                      }}
                       title="Choose Song"
                     >
                       Choose Audio
