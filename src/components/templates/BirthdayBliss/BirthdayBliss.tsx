@@ -228,23 +228,23 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
       <div className="relative z-10 max-w-2xl w-full text-center mt-16 md:mt-24 flex-1 flex flex-col justify-center">
         {!confirmed ? (
           <div key={step} className={phase === "in" ? "animate-bliss-fade-in-up" : "animate-bliss-fade-out-up"}>
-            <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-6 uppercase">{msg.icon} A Little Note {msg.icon}</div>
-            <h1 className="text-4xl md:text-6xl bliss-font-display font-medium bliss-text-gradient-warm leading-[1.1]">
+            <div className="text-[10px] tracking-[0.4em] text-pink-200/70 mb-6 uppercase">{msg.icon} A Little Note {msg.icon}</div>
+            <h1 className="text-4xl md:text-[5rem] bliss-font-display font-normal bg-gradient-to-r from-pink-300 to-[#c175ff] text-transparent bg-clip-text leading-[1.1] pb-2">
               <ET fid={msg.textFid} d={d} onChange={onFieldChange} editMode={editMode} def={msg.defText} />{msg.isName && !editMode && ","}
             </h1>
-            <p className="mt-6 text-2xl md:text-3xl bliss-font-display italic text-pink-100/90">
+            <p className="mt-4 text-2xl md:text-3xl bliss-font-display italic text-white/90">
               <ET fid={msg.subFid} d={d} onChange={onFieldChange} editMode={editMode} def={msg.defSub} />
             </p>
           </div>
         ) : (
           <div className="animate-bliss-fade-in-up">
-            <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-6 uppercase">✦ Ready? ✦</div>
-            <h1 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm leading-[1.1] mb-10">
+            <div className="text-[10px] tracking-[0.4em] text-pink-200/70 mb-6 uppercase">✦ Ready? ✦</div>
+            <h1 className="text-4xl md:text-[5rem] bliss-font-display font-normal bg-gradient-to-r from-pink-300 to-[#c175ff] text-transparent bg-clip-text leading-[1.1] mb-12 pb-2">
               Shall we begin?
             </h1>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <button className="bliss-btn-pill bliss-btn-pill-pink" onClick={onDone}>Yes, please</button>
-              <button className="bliss-btn-pill" onClick={onDone}>Absolutely</button>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <button className="bg-[#e62e6e] text-white px-8 py-3.5 rounded-full font-medium shadow-[0_4px_20px_rgba(230,46,110,0.4)] hover:scale-105 transition-transform" onClick={onDone}>Yes, please</button>
+              <button className="bg-white/5 border border-white/20 text-white px-8 py-3.5 rounded-full font-medium hover:bg-white/10 transition-colors" onClick={onDone}>Absolutely</button>
             </div>
           </div>
         )}
@@ -316,11 +316,11 @@ function CakeSlide({ onComplete, d, editMode, onFieldChange }: { onComplete: ()=
       </div>
 
       <div className="relative z-10 flex flex-col items-center max-w-xl">
-        <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase">✦ Slide Two ✦</div>
-        <h2 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm text-center leading-tight mb-3">
+        <div className="text-[10px] tracking-[0.4em] text-pink-200/70 mb-4 uppercase">✦ Slide Two ✦</div>
+        <h2 className="text-4xl md:text-[5rem] bliss-font-display font-normal bg-gradient-to-r from-pink-300 to-[#c175ff] text-transparent bg-clip-text text-center leading-tight mb-4 pb-2">
           A cake, for you
         </h2>
-        <p className="text-sm text-pink-100/70 text-center mb-10 max-w-sm">
+        <p className="text-[15px] text-white/80 text-center mb-12 max-w-md font-sans">
           Light the candles, make a wish, then drag down to cut.
         </p>
         <Cake onComplete={onComplete} />
@@ -368,30 +368,36 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
         />
       )}
 
-      <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-6 md:mt-2">✦ Slide Three ✦</div>
-      <h2 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm text-center mb-12 md:mb-16 flex items-center gap-3">
-        Our memories <Sparkles className="inline text-pink-200" size={28} />
+      <div className="text-[10px] tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-6 md:mt-2">✦ Slide Three ✦</div>
+      <h2 className="text-4xl md:text-[5rem] bliss-font-display font-normal bg-gradient-to-r from-pink-300 to-[#c175ff] text-transparent bg-clip-text text-center mb-12 md:mb-16 flex items-center justify-center gap-3 pb-2">
+        Our memories <Sparkles className="inline text-pink-200" size={32} />
       </h2>
 
-      <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 max-w-5xl w-full px-4 items-center">
+      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 max-w-[65rem] w-full px-4 items-stretch justify-center">
         
-        {/* POLAROID SECTION */}
-        <div className="flex flex-col items-center animate-bliss-fade-in-up" key={`polaroid-${song.id}`}>
-          <div className="bg-[#fdfbf7] p-4 pb-12 md:p-5 md:pb-16 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-sm w-full max-w-[300px] md:max-w-[340px] rotate-[-3deg] transform transition-transform hover:rotate-0 duration-500 relative">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 backdrop-blur-sm shadow-sm rounded-sm z-10" style={{ transform: "rotate(2deg)" }}></div>
-            <img src={song.image} alt={song.title} className="w-full aspect-[4/5] object-cover rounded-sm shadow-inner" />
-            <div className="bliss-font-script text-2xl md:text-3xl text-center mt-6 text-slate-800 leading-snug px-2">
-              <ET fid={song.capFid} d={d} onChange={onFieldChange} editMode={editMode} def={song.caption} multiline />
+        {/* POLAROID CARD */}
+        <div className="bliss-glass-card p-6 md:p-10 rounded-[2rem] w-full max-w-md mx-auto flex flex-col items-center justify-center shadow-2xl border border-white/10 bg-white/5 backdrop-blur-2xl animate-bliss-fade-in-up" key={`polaroid-${song.id}`}>
+          <div className="bg-white p-3 pb-5 shadow-lg rounded-sm w-full rotate-[-2deg] transform transition-transform hover:rotate-0 duration-500">
+            <img src={song.image} alt={song.title} className="w-full aspect-[4/3] object-cover rounded-sm border border-slate-100" />
+            <div className="bliss-font-script text-3xl md:text-4xl text-center mt-5 mb-2 text-[#703b9c] leading-snug px-2">
+              <ET fid={song.titleFid} d={d} onChange={onFieldChange} editMode={editMode} def={song.title} />
             </div>
           </div>
-          {editMode && <div className="mt-8 w-full max-w-[300px] md:max-w-[340px]"><ImageUploader fid={song.imgFid} data={d} onChange={onFieldChange} defaultSrc={song.image} /></div>}
+          
+          <div className="mt-8 text-center text-white/80 italic font-serif text-[15px] leading-relaxed px-2">
+            "<ET fid={song.capFid} d={d} onChange={onFieldChange} editMode={editMode} def={song.caption} multiline />"
+          </div>
+          
+          {editMode && <div className="mt-6 w-full"><ImageUploader fid={song.imgFid} data={d} onChange={onFieldChange} defaultSrc={song.image} /></div>}
         </div>
 
-        {/* PLAYLIST SECTION */}
-        <div className="bliss-glass-card p-6 md:p-8 rounded-[2rem] w-full max-w-md mx-auto shadow-2xl border border-white/20 bg-white/5 backdrop-blur-2xl">
-          <div className="text-xs tracking-[0.3em] text-pink-200/60 uppercase mb-3">Our Playlist</div>
-          <h3 className="text-3xl md:text-4xl bliss-font-display font-medium text-white mb-8">Songs for you 🎵</h3>
-          <div className="space-y-2">
+        {/* PLAYLIST CARD */}
+        <div className="bliss-glass-card p-8 md:p-10 rounded-[2rem] w-full max-w-md mx-auto shadow-2xl border border-white/10 bg-white/5 backdrop-blur-2xl flex flex-col">
+          <div className="text-[11px] tracking-[0.3em] text-white/60 uppercase mb-3">Our Playlist</div>
+          <h3 className="text-3xl md:text-[2.2rem] bliss-font-display font-medium text-white mb-8 flex items-center gap-3">
+            Songs for you <span className="text-3xl">🎵</span>
+          </h3>
+          <div className="space-y-3 flex-1">
             {playlist.map((s) => {
               const active = s.id === activeSong;
               return (
@@ -410,26 +416,27 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
                         }
                       }
                     }}
-                    className="flex-1 text-left p-3 rounded-2xl flex items-center gap-3"
+                    className="flex-1 text-left p-4 rounded-2xl flex items-center gap-4 transition-all"
                     style={{
-                      background: active ? "linear-gradient(135deg, rgba(255,45,135,0.4), rgba(178,102,255,0.3))" : "rgba(255,255,255,0.05)",
-                      border: active ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.05)",
+                      background: active ? "linear-gradient(90deg, rgba(162,56,129,0.8), rgba(121,50,138,0.8))" : "rgba(255,255,255,0.03)",
+                      border: active ? "none" : "1px solid rgba(255,255,255,0.05)",
                     }}
                   >
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                         style={{ background: active ? "rgba(255,255,255,0.2)" : "rgba(255,45,135,0.8)", color: "white" }}>
-                      {active && playing ? <Pause size={16} /> : <Play size={16} />}
+                    <div className="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center shrink-0" style={{ background: "transparent" }}>
+                      {active && playing ? <Pause size={16} color="white" /> : <Play size={16} color="white" className="ml-0.5" />}
                     </div>
                     <div className="flex-1 min-w-0" onClick={(e) => editMode && e.stopPropagation()}>
-                      <ET fid={s.titleFid} d={d} onChange={onFieldChange} editMode={editMode} def={s.title} />
-                      <div className="text-xs text-pink-100/60 mt-1">
+                      <div className="font-semibold text-[15px] text-white">
+                        <ET fid={s.titleFid} d={d} onChange={onFieldChange} editMode={editMode} def={s.title} />
+                      </div>
+                      <div className="text-[13px] text-white/60 mt-0.5">
                         <ET fid={s.artistFid} d={d} onChange={onFieldChange} editMode={editMode} def={s.artist} />
                       </div>
                     </div>
                     {active && playing && (
-                      <div className="flex gap-0.5 items-end h-5 mr-2">
+                      <div className="flex gap-1 items-end h-5 mr-1">
                         {[1,2,3,4].map((i) => (
-                          <span key={i} className="w-0.5 bg-pink-200 rounded animate-pulse"
+                          <span key={i} className="w-[3px] bg-white rounded-full animate-pulse"
                                 style={{ height: `${30 + (i * 17) % 70}%`, animationDelay: `${i * 0.1}s` }} />
                         ))}
                       </div>
@@ -454,7 +461,7 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
               );
             })}
           </div>
-          <button onClick={() => !editMode && onContinue()} className="bliss-btn-pill bliss-btn-pill-pink w-full mt-8 py-4 text-lg">
+          <button onClick={() => !editMode && onContinue()} className="w-full mt-6 bg-[#e62e6e] text-white py-4 rounded-[1rem] font-medium text-[15px] shadow-[0_4px_15px_rgba(230,46,110,0.3)] hover:scale-[1.02] transition-transform">
             Continue →
           </button>
         </div>
