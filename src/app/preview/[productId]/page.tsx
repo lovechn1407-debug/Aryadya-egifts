@@ -13,6 +13,7 @@ function renderTemplate(productId: string, customData: Record<string, string>, a
     case "birthday-bliss-microsite":
       return <BirthdayBliss customData={customData} autoPlay={autoPlay} />;
     case "birthday-magic-box":
+      return <BirthdayMagicBox customData={customData} autoPlay={autoPlay} />;
     case "sweet-apology-box":
       return <SweetApologyBox customData={customData} autoPlay={autoPlay} />;
     default:
