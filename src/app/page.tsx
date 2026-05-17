@@ -748,88 +748,142 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
 
         <OccasionDecorators theme={theme} />
 
-        {/* Single compact row — never wraps */}
-        <div style={{
-          padding: "14px clamp(14px,3vw,40px)",
-          display: "flex", alignItems: "center", gap: 12, flexWrap: "nowrap",
-          position: "relative", zIndex: 2, overflow: "hidden",
-        }}>
-          {/* Icon orb */}
+        {/* Header Content conditionally rendered based on headerStyle */}
+        {section.headerStyle === "new" ? (
           <div style={{
-            width: 44, height: 44, borderRadius: 13, flexShrink: 0,
-            background: "rgba(255,255,255,0.22)",
-            backdropFilter: "blur(10px)",
-            border: "1.5px solid rgba(255,255,255,0.35)",
-            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "32px clamp(14px,3vw,40px) 24px",
+            display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
+            position: "relative", zIndex: 2, overflow: "hidden", gap: 8
           }}>
-            {(theme.id.startsWith("valentine") || theme.id.startsWith("love")) && <div className="heart-beat"><HeartSVG size={22} color="#fff" opacity={0.95} /></div>}
-            {theme.id.startsWith("birthday") && <StarSVG size={21} color="#fff" opacity={0.95} />}
-            {(theme.id.startsWith("anniversary") || theme.id.startsWith("wedding")) && <RingSVG size={22} color="#fff" opacity={0.95} />}
-            {theme.id.startsWith("friendship") && <SunRaySVG size={24} color="#fff" opacity={0.9} />}
-            {theme.id.startsWith("festival") && <SparkSVG size={20} color="#fff" opacity={0.95} />}
-            {theme.id.startsWith("general") && <DiamondSVG size={20} color="#fff" opacity={0.95} />}
-          </div>
-
-          {/* Title + subtitle — clipped if needed */}
-          <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
             <h2 style={{
               fontSize: titleSize, fontWeight: 900,
-              color: "#fff", fontFamily: "'Nunito',sans-serif",
+              color: "#fff", fontFamily: "'Playfair Display', serif", // Premium heading font
               lineHeight: 1.2, margin: 0,
-              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-              textShadow: "0 2px 8px rgba(0,0,0,0.18)",
+              textShadow: "0 2px 16px rgba(0,0,0,0.3)",
+              letterSpacing: 0.5,
             }}>
               {section.title}
             </h2>
-            <p style={{
-              fontSize: "clamp(11px,1.5vw,13px)", color: "rgba(255,255,255,0.82)",
-              marginTop: 2, lineHeight: 1.4,
-              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-            }}>
-              {section.subtitle}
-            </p>
+            {section.subtitle && (
+              <p style={{
+                fontSize: "clamp(13px,1.5vw,15px)", color: "rgba(255,255,255,0.9)",
+                marginTop: 4, lineHeight: 1.4,
+                fontFamily: "'Nunito', sans-serif",
+              }}>
+                {section.subtitle}
+              </p>
+            )}
             {section.headerNoteEnabled && section.headerNote && (
               <div 
                 style={{
-                  marginTop: 6,
-                  padding: "6px 12px",
-                  background: "rgba(0,0,0,0.15)",
-                  borderRadius: 8,
-                  borderLeft: "3px solid rgba(255,255,255,0.5)",
+                  marginTop: 12,
+                  padding: "6px 16px",
+                  background: "rgba(255,255,255,0.15)",
+                  backdropFilter: "blur(6px)",
+                  borderRadius: 999,
+                  border: "1px solid rgba(255,255,255,0.4)",
                   fontSize: "clamp(11px,1.5vw,13px)",
-                  color: "rgba(255,255,255,0.9)",
-                  display: "inline-block"
+                  color: "#fff",
+                  display: "inline-block",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
                 }}
                 dangerouslySetInnerHTML={{ __html: section.headerNote }}
               />
             )}
             {timeLeft && (
-              <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center" }}>
-                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "rgba(255,255,255,0.9)", marginRight: 4 }}>Ends In:</span>
-                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.d}d</div>
-                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.h}h</div>
-                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.m}m</div>
-                <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.s}s</div>
+              <div style={{ display: "flex", gap: 8, marginTop: 16, alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "rgba(255,255,255,0.9)" }}>Ends In:</span>
+                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.2)" }}>{timeLeft.d}d</div>
+                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.2)" }}>{timeLeft.h}h</div>
+                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.2)" }}>{timeLeft.m}m</div>
+                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.2)" }}>{timeLeft.s}s</div>
               </div>
             )}
           </div>
-
-          {/* Count pill — always visible */}
+        ) : (
           <div style={{
-            flexShrink: 0,
-            background: "rgba(255,255,255,0.22)",
-            border: "1.5px solid rgba(255,255,255,0.3)",
-            borderRadius: 10, padding: "6px 14px",
-            display: "flex", flexDirection: "column", alignItems: "center",
+            padding: "14px clamp(14px,3vw,40px)",
+            display: "flex", alignItems: "center", gap: 12, flexWrap: "nowrap",
+            position: "relative", zIndex: 2, overflow: "hidden",
           }}>
-            <span style={{ fontSize: 18, fontWeight: 900, color: "#fff", lineHeight: 1, fontFamily: "'Nunito',sans-serif" }}>
-              {sectionProducts.length}
-            </span>
-            <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.75)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
-              {sectionProducts.length === 1 ? "Gift" : "Gifts"}
-            </span>
+            {/* Icon orb */}
+            <div style={{
+              width: 44, height: 44, borderRadius: 13, flexShrink: 0,
+              background: "rgba(255,255,255,0.22)",
+              backdropFilter: "blur(10px)",
+              border: "1.5px solid rgba(255,255,255,0.35)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {(theme.id.startsWith("valentine") || theme.id.startsWith("love")) && <div className="heart-beat"><HeartSVG size={22} color="#fff" opacity={0.95} /></div>}
+              {theme.id.startsWith("birthday") && <StarSVG size={21} color="#fff" opacity={0.95} />}
+              {(theme.id.startsWith("anniversary") || theme.id.startsWith("wedding")) && <RingSVG size={22} color="#fff" opacity={0.95} />}
+              {theme.id.startsWith("friendship") && <SunRaySVG size={24} color="#fff" opacity={0.9} />}
+              {theme.id.startsWith("festival") && <SparkSVG size={20} color="#fff" opacity={0.95} />}
+              {theme.id.startsWith("general") && <DiamondSVG size={20} color="#fff" opacity={0.95} />}
+            </div>
+
+            {/* Title + subtitle — clipped if needed */}
+            <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+              <h2 style={{
+                fontSize: titleSize, fontWeight: 900,
+                color: "#fff", fontFamily: "'Nunito',sans-serif",
+                lineHeight: 1.2, margin: 0,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                textShadow: "0 2px 8px rgba(0,0,0,0.18)",
+              }}>
+                {section.title}
+              </h2>
+              <p style={{
+                fontSize: "clamp(11px,1.5vw,13px)", color: "rgba(255,255,255,0.82)",
+                marginTop: 2, lineHeight: 1.4,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              }}>
+                {section.subtitle}
+              </p>
+              {section.headerNoteEnabled && section.headerNote && (
+                <div 
+                  style={{
+                    marginTop: 6,
+                    padding: "6px 12px",
+                    background: "rgba(0,0,0,0.15)",
+                    borderRadius: 8,
+                    borderLeft: "3px solid rgba(255,255,255,0.5)",
+                    fontSize: "clamp(11px,1.5vw,13px)",
+                    color: "rgba(255,255,255,0.9)",
+                    display: "inline-block"
+                  }}
+                  dangerouslySetInnerHTML={{ __html: section.headerNote }}
+                />
+              )}
+              {timeLeft && (
+                <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center" }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "rgba(255,255,255,0.9)", marginRight: 4 }}>Ends In:</span>
+                  <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.d}d</div>
+                  <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.h}h</div>
+                  <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.m}m</div>
+                  <div style={{ background: "rgba(0,0,0,0.25)", borderRadius: 6, padding: "4px 8px", color: "#fff", fontWeight: 800, fontSize: 12, border: "1px solid rgba(255,255,255,0.15)" }}>{timeLeft.s}s</div>
+                </div>
+              )}
+            </div>
+
+            {/* Count pill — always visible */}
+            <div style={{
+              flexShrink: 0,
+              background: "rgba(255,255,255,0.22)",
+              backdropFilter: "blur(10px)",
+              border: "1.5px solid rgba(255,255,255,0.3)",
+              borderRadius: 10, padding: "6px 14px",
+              display: "flex", flexDirection: "column", alignItems: "center",
+            }}>
+              <span style={{ fontSize: 18, fontWeight: 900, color: "#fff", lineHeight: 1, fontFamily: "'Nunito',sans-serif" }}>
+                {sectionProducts.length}
+              </span>
+              <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.75)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
+                {sectionProducts.length === 1 ? "Gift" : "Gifts"}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── CARD SHELF — horizontal scroll with arrows ── */}

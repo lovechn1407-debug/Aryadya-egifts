@@ -467,6 +467,7 @@ export interface DisplaySection {
   countdownEnabled?: boolean;
   countdownEndTime?: string;
   titleSize?: "small" | "normal" | "medium" | "big" | "bigger";
+  headerStyle?: "normal" | "new";
   headerNote?: string;
   headerNoteEnabled?: boolean;
   createdAt: string;

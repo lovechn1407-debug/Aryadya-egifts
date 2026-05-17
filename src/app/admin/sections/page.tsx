@@ -22,6 +22,7 @@ export default function AdminSectionsPage() {
   const [countdownEndTime, setCountdownEndTime] = useState("");
   
   const [titleSize, setTitleSize] = useState<"small" | "normal" | "medium" | "big" | "bigger">("normal");
+  const [headerStyle, setHeaderStyle] = useState<"normal" | "new">("normal");
   const [headerNote, setHeaderNote] = useState("");
   const [headerNoteEnabled, setHeaderNoteEnabled] = useState(false);
 
@@ -61,6 +62,7 @@ export default function AdminSectionsPage() {
           countdownEnabled,
           countdownEndTime,
           titleSize,
+          headerStyle,
           headerNote,
           headerNoteEnabled
         });
@@ -78,6 +80,7 @@ export default function AdminSectionsPage() {
           countdownEnabled,
           countdownEndTime,
           titleSize,
+          headerStyle,
           headerNote,
           headerNoteEnabled,
           createdAt: new Date().toISOString(),
@@ -86,7 +89,7 @@ export default function AdminSectionsPage() {
       }
       
       setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
-      setTitleSize("normal"); setHeaderNote(""); setHeaderNoteEnabled(false);
+      setTitleSize("normal"); setHeaderStyle("normal"); setHeaderNote(""); setHeaderNoteEnabled(false);
       setShowCreate(false);
       setEditingSectionId(null);
       await reload();
@@ -106,6 +109,7 @@ export default function AdminSectionsPage() {
     setCountdownEnabled(sec.countdownEnabled || false);
     setCountdownEndTime(sec.countdownEndTime || "");
     setTitleSize(sec.titleSize || "normal");
+    setHeaderStyle(sec.headerStyle || "normal");
     setHeaderNote(sec.headerNote || "");
     setHeaderNoteEnabled(sec.headerNoteEnabled || false);
     setEditingSectionId(sec.id);
@@ -117,7 +121,7 @@ export default function AdminSectionsPage() {
     setShowCreate(false);
     setEditingSectionId(null);
     setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
-    setTitleSize("normal"); setHeaderNote(""); setHeaderNoteEnabled(false);
+    setTitleSize("normal"); setHeaderStyle("normal"); setHeaderNote(""); setHeaderNoteEnabled(false);
   };
 
   const toggleProduct = (id: string) => {
@@ -256,15 +260,31 @@ export default function AdminSectionsPage() {
               </div>
             )}
             
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Title Font Size</label>
-              <select value={titleSize} onChange={e => setTitleSize(e.target.value as any)} style={inputStyle}>
-                <option value="small">Small</option>
-                <option value="normal">Normal</option>
-                <option value="medium">Medium</option>
-                <option value="big">Big</option>
-                <option value="bigger">Bigger</option>
-              </select>
+            <div style={{ gridColumn: "1 / -1", display: "grid", gridTemplateColumns: theme.includes("_plus") ? "1fr 1fr" : "1fr", gap: 16 }}>
+              <div>
+                <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Title Font Size</label>
+                <select value={titleSize} onChange={e => setTitleSize(e.target.value as any)} style={inputStyle}>
+                  <option value="small">Small</option>
+                  <option value="normal">Normal</option>
+                  <option value="medium">Medium</option>
+                  <option value="big">Big</option>
+                  <option value="bigger">Bigger</option>
+                </select>
+              </div>
+              
+              {theme.includes("_plus") && (
+                <div>
+                  <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Plus+ Header Style</label>
+                  <div style={{ display: "flex", gap: 16, alignItems: "center", ...inputStyle }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 14 }}>
+                      <input type="radio" checked={headerStyle === "normal"} onChange={() => setHeaderStyle("normal")} /> Normal
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 14 }}>
+                      <input type="radio" checked={headerStyle === "new"} onChange={() => setHeaderStyle("new")} /> New (Centered)
+                    </label>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div style={{ gridColumn: "1 / -1" }}>
