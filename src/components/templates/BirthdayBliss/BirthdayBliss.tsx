@@ -4,6 +4,7 @@ import { Cake } from "./Cake";
 import { Confetti, Popper } from "./Confetti";
 import { Sparkles, Play, Pause, Share2, RotateCcw, Stamp, ChevronUp } from "lucide-react";
 import html2canvas from "html2canvas";
+import SongLibraryPopup from "../../SongLibraryPopup";
 
 function ET({
   fid, data, onChange, style, multiline = false, editMode = false,
@@ -36,7 +37,63 @@ function ET({
   );
 }
 
-type Stage = "intro" | "balloons" | "cake" | "memories" | "envelope" | "letter";
+const IMGBB_KEY = "83e3f88941efd1059a89f016ff302d9e";
+
+function ImageUploader({ fid, data, onChange, defaultSrc }: {
+  fid: string; data: Record<string, string>; onChange?: (id: string, v: string) => void; defaultSrc: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const currentSrc = data[fid] || "";
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
+      const json = await res.json();
+      if (json.success) {
+        onChange?.(fid, json.data.url);
+        setPreview(null);
+      }
+    } catch { /* ignore */ }
+    setUploading(false);
+  };
+
+  const useDefault = () => { onChange?.(fid, ""); setPreview(null); };
+
+  return (
+    <div style={{ padding: "8px 12px", background: "rgba(255,255,255,0.1)", borderRadius: 8, marginTop: 8 }}>
+      {preview && (
+        <div style={{ marginBottom: 6, textAlign: "center" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={preview} alt="Preview" style={{ maxHeight: 80, borderRadius: 8, border: "2px solid #e91e8c" }} />
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
+        <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{
+          background: "#e91e8c", color: "#fff", border: "none", borderRadius: 8,
+          padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+          opacity: uploading ? 0.6 : 1,
+        }}>{uploading ? "Uploading…" : "📷 Change Image"}</button>
+        {currentSrc && (
+          <button onClick={useDefault} style={{
+            background: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb",
+            borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 600, cursor: "pointer",
+          }}>↩ Use Default</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type Stage = "bg" | "intro" | "balloons" | "cake" | "memories" | "envelope" | "letter";
 
 export default function BirthdayBliss({
   customData = {}, editMode = false, onFieldChange, forcedSlide, autoPlay = false,
@@ -52,7 +109,9 @@ export default function BirthdayBliss({
 
   useEffect(() => {
     if (forcedSlide !== undefined) {
-      const slideMap: Stage[] = ["intro", "balloons", "cake", "memories", "envelope", "letter"];
+      const slideMap: Record<number, Stage> = {
+        "-1": "bg", 0: "intro", 1: "balloons", 2: "cake", 3: "memories", 4: "envelope", 5: "letter"
+      };
       if (slideMap[forcedSlide]) {
         setStage(slideMap[forcedSlide]);
       }
@@ -77,6 +136,20 @@ export default function BirthdayBliss({
 
   return (
     <div className="relative min-h-screen overflow-hidden text-left">
+      {customData?.bg_song_url && !editMode && (
+        <audio src={customData.bg_song_url} autoPlay loop />
+      )}
+      {stage === "bg" && editMode && (
+        <section className="min-h-screen bliss-gradient-bg flex items-center justify-center p-6 relative">
+          <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl w-full max-w-md border border-white/20">
+            <h2 className="text-2xl text-white font-medium mb-4 text-center">Background Music</h2>
+            <SongLibraryPopup
+              onClose={() => {}} // Not closable here, inline
+              onSelect={(song) => onFieldChange?.("bg_song_url", song.url)}
+            />
+          </div>
+        </section>
+      )}
       {stage === "intro" && <IntroSlide onDone={() => setStage("balloons")} customData={customData} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "balloons" && <BalloonsSlide onContinue={() => setStage("cake")} />}
       {stage === "cake" && <CakeSlide onComplete={() => setStage("memories")} />}
@@ -114,7 +187,9 @@ function IntroSlide({ onDone, customData, editMode, onFieldChange }: { onDone: (
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8755, transparent 70%)" }} />
         <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff55, transparent 70%)", animationDelay: "1.5s" }} />
-            <div className="relative z-10 max-w-2xl w-full text-center">
+      </div>
+
+      <div className="relative z-10 max-w-2xl w-full text-center">
         {!confirmed && !editMode ? (
           <div key={step} className={phase === "in" ? "animate-bliss-fade-in-up" : "animate-bliss-fade-out-up"}>
             <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-6 uppercase">✦ A Little Note ✦</div>
@@ -148,7 +223,7 @@ function IntroSlide({ onDone, customData, editMode, onFieldChange }: { onDone: (
           </div>
         )}
         <p className="font-script text-xl text-pink-200/60 mt-16">made with love</p>
-      </div>      </div>
+      </div>
     </section>
   );
 }
@@ -231,15 +306,27 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
   const [playing, setPlaying] = useState(false);
   
   const playlist = [
-    { id: 1, title: customData.p_song1 || "Sia", artist: customData.p_artist1 || "Special Vibe", image: customData.p_img1 || "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=600", caption: customData.p_cap1 || "Happy Birthday to the one who knows all my secrets and still chooses to stay." },
-    { id: 2, title: customData.p_song2 || "Tum Hi Ho", artist: customData.p_artist2 || "Forever Mood", image: customData.p_img2 || "https://images.unsplash.com/photo-1518199266791-5375a83164ba?auto=format&fit=crop&w=600", caption: customData.p_cap2 || "My love will love you through every season, every reason." },
-    { id: 3, title: customData.p_song3 || "Whenever You Need", artist: customData.p_artist3 || "Always Yours", image: customData.p_img3 || "https://images.unsplash.com/photo-1478147424044-16b7eb0a006c?auto=format&fit=crop&w=600", caption: customData.p_cap3 || "Whenever you need me, I'll be right there. Always." },
+    { id: 1, title: customData.p_song1 || "Sia", artist: customData.p_artist1 || "Special Vibe", image: customData.p_img1 || "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=600", caption: customData.p_cap1 || "Happy Birthday to the one who knows all my secrets and still chooses to stay.", url: customData.p_url1 || "" },
+    { id: 2, title: customData.p_song2 || "Tum Hi Ho", artist: customData.p_artist2 || "Forever Mood", image: customData.p_img2 || "https://images.unsplash.com/photo-1518199266791-5375a83164ba?auto=format&fit=crop&w=600", caption: customData.p_cap2 || "My love will love you through every season, every reason.", url: customData.p_url2 || "" },
+    { id: 3, title: customData.p_song3 || "Whenever You Need", artist: customData.p_artist3 || "Always Yours", image: customData.p_img3 || "https://images.unsplash.com/photo-1478147424044-16b7eb0a006c?auto=format&fit=crop&w=600", caption: customData.p_cap3 || "Whenever you need me, I'll be right there. Always.", url: customData.p_url3 || "" },
   ];
 
   const song = playlist.find((s) => s.id === activeSong)!;
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      if (playing && song.url) {
+        audioRef.current.play().catch(() => setPlaying(false));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [playing, song.url]);
 
   return (
     <section className="min-h-screen bliss-gradient-bg p-6 md:p-12 flex flex-col items-center">
+      {song.url && <audio ref={audioRef} src={song.url} onEnded={() => setPlaying(false)} loop />}
       <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-4">✦ Slide Three ✦</div>
       <h2 className="text-3xl md:text-5xl font-display font-medium text-gradient-warm text-center mb-12 flex items-center gap-3">
         Our memories <Sparkles className="inline text-pink-200" size={28} />
@@ -250,6 +337,14 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
         <div className="bliss-glass-card p-6 flex flex-col items-center animate-bliss-fade-in-up" key={song.id}>
           <div className="bg-white p-3 pb-5 shadow-2xl rounded-md w-full max-w-xs rotate-[-2deg]">
             <img src={song.image} alt={song.title} className="w-full h-56 object-cover rounded-sm" />
+            {editMode && (
+              <ImageUploader
+                fid={`p_img${song.id}`}
+                data={customData}
+                onChange={onFieldChange}
+                defaultSrc={song.image}
+              />
+            )}
             <p className="font-script text-2xl text-center mt-3 text-purple-800">
               <ET fid={`p_song${song.id}`} data={customData} editMode={editMode} onChange={onFieldChange} />
             </p>
@@ -296,6 +391,17 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
               );
             })}
           </div>
+
+          {editMode && (
+            <div className="mt-4 p-4 rounded-xl bg-white/10 border border-white/20">
+              <h4 className="text-sm font-medium text-white mb-2">Change Audio for "{song.title}"</h4>
+              <SongLibraryPopup
+                onClose={() => {}} // inline usage
+                onSelect={(selectedSong) => onFieldChange?.(`p_url${song.id}`, selectedSong.url)}
+              />
+            </div>
+          )}
+
           <button onClick={onContinue} className="bliss-btn-pill bliss-btn-pill-pink w-full mt-6">
             Continue →
           </button>

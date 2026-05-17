@@ -283,6 +283,15 @@ export const PRODUCT_REGISTRY: Product[] = [
     createdAt: new Date().toISOString(),
     slides: [
       {
+        slideNumber: -1,
+        title: "Background Music",
+        description: "Plays continuously throughout the website",
+        fields: [
+          { id: "bg_song_name", label: "Background Song Name", type: "text", defaultValue: "Background Music" },
+          { id: "bg_song_url", label: "Background Song URL", type: "text", defaultValue: "" },
+        ],
+      },
+      {
         slideNumber: 0,
         title: "Intro Screen",
         description: "The welcoming screen",

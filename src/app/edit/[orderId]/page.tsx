@@ -35,6 +35,7 @@ const APOLOGY_SLIDES = [
 ];
 
 const BLISS_SLIDES = [
+  { n: -1, label: "BG Music" },
   { n: 0, label: "Intro" },
   { n: 1, label: "Balloons" },
   { n: 2, label: "Cake" },
