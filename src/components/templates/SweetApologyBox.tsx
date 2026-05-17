@@ -582,15 +582,24 @@ export default function SweetApologyBox({
   const [slideAudioPlaying, setSlideAudioPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  // Store ytPlayer in a ref so the event listener always has the latest instance
+  const ytPlayerRef = useRef<any>(null);
+  useEffect(() => { ytPlayerRef.current = ytPlayer; }, [ytPlayer]);
+
   useEffect(() => {
-    const onInteract = () => setHasInteracted(true);
+    const onInteract = () => {
+      setHasInteracted(true);
+      if (isYt && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
+        ytPlayerRef.current.playVideo();
+      }
+    };
     window.addEventListener("click", onInteract);
     window.addEventListener("touchstart", onInteract);
     return () => {
       window.removeEventListener("click", onInteract);
       window.removeEventListener("touchstart", onInteract);
     };
-  }, []);
+  }, [isYt]);
 
   useEffect(() => {
     if (editMode) return;
@@ -612,11 +621,11 @@ export default function SweetApologyBox({
   }, [bgAudio, customData.bg_song_url, isYt]);
 
   useEffect(() => {
-    if (editMode || !hasInteracted) return;
+    if (editMode) return;
     if (slideAudioPlaying) {
       bgAudio?.pause();
       ytPlayer?.pauseVideo?.();
-    } else {
+    } else if (hasInteracted) {
       if (!globalMuted) {
         if (isYt) {
           ytPlayer?.playVideo?.();

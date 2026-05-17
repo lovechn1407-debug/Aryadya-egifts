@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import YouTube from "react-youtube";
 
 // ── Editable Text ────────────────────────────────────────────────────────
@@ -674,15 +674,25 @@ export default function BirthdayMagicBox({
   const isYt = customData.bg_song_type === "youtube" && !!customData.bg_song_youtube_id;
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  // Store ytPlayer in a ref so the event listener always has the latest instance
+  const ytPlayerRef = useRef<any>(null);
+  useEffect(() => { ytPlayerRef.current = ytPlayer; }, [ytPlayer]);
+
   useEffect(() => {
-    const onInteract = () => setHasInteracted(true);
+    const onInteract = () => {
+      setHasInteracted(true);
+      // SYNC CALL: Browsers require audio to be started inside the exact call stack of the interaction
+      if (isYt && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
+        ytPlayerRef.current.playVideo();
+      }
+    };
     window.addEventListener("click", onInteract);
     window.addEventListener("touchstart", onInteract);
     return () => {
       window.removeEventListener("click", onInteract);
       window.removeEventListener("touchstart", onInteract);
     };
-  }, []);
+  }, [isYt]);
 
   useEffect(() => {
     if (editMode) return;
@@ -704,14 +714,15 @@ export default function BirthdayMagicBox({
   }, [bgAudio, customData.bg_song_url, isYt]);
 
   useEffect(() => {
-    if (editMode || !hasInteracted) return;
+    if (editMode) return;
     
     if (globalPlaying) {
       bgAudio?.pause();
       ytPlayer?.pauseVideo?.();
-    } else {
+    } else if (hasInteracted) {
       if (!globalMuted) {
         if (isYt) {
+          // If we reach here, it might be unmuting or returning from slide playback
           ytPlayer?.playVideo?.();
         } else {
           bgAudio?.play().catch(e => console.log("Bg audio play prevented", e));
