@@ -800,6 +800,15 @@ textarea.input-field { resize: vertical; min-height: 100px; }
   100% { transform: translate(0, -25vh); opacity: 0; }
 }
 
+.bliss-gradient-bg {
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  color: #fff;
+}
+.bliss-gradient-soft {
+  background: linear-gradient(180deg, #1f1c2c 0%, #928dab 100%);
+  color: #fff;
+}
+
 @keyframes bliss-pop {
   0% { transform: scale(1); opacity: 1; }
   100% { transform: scale(1.6); opacity: 0; }

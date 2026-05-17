@@ -159,44 +159,49 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
   const [phase, setPhase] = useState<"in" | "out">("in");
   const [confirmed, setConfirmed] = useState(false);
   const msgs = [
-    { text: (d.s0_recipient || "Madam Ji") + ",", sub: d.s0_sub || "it's your day to shine.", icon: "✦" },
-    { text: d.s0_p1 || "I've set up something", sub: d.s0_p1_sub || "a little special — just for you.", icon: "✦" },
-    { text: d.s0_p2 || "Your light", sub: d.s0_p2_sub || "is pretty much your magic.", icon: "✦" },
+    { textFid: "s0_recipient", subFid: "s0_sub", icon: "✦", defText: "Madam Ji", defSub: "it's your day to shine.", isName: true },
+    { textFid: "s0_p1", subFid: "s0_p1_sub", icon: "✦", defText: "I've set up something", defSub: "a little special — just for you.", isName: false },
+    { textFid: "s0_p2", subFid: "s0_p2_sub", icon: "✦", defText: "Your light", defSub: "is pretty much your magic.", isName: false },
   ];
 
   useEffect(() => {
-    if (editMode || step >= msgs.length) return;
+    if (editMode || confirmed || step >= msgs.length) return;
     const inTimer = setTimeout(() => setPhase("out"), 2600);
     const outTimer = setTimeout(() => {
-      if (step < msgs.length - 1) { setStep(step + 1); setPhase("in"); }
+      if (step < msgs.length - 1) { setStep(s => s + 1); setPhase("in"); }
       else { setConfirmed(true); }
     }, 3200);
     return () => { clearTimeout(inTimer); clearTimeout(outTimer); };
-  }, [step, editMode]);
+  }, [step, editMode, confirmed]);
 
-  const msg = msgs[step];
+  const msg = msgs[Math.min(step, msgs.length - 1)];
 
   return (
-    <section className="min-h-screen gradient-bg flex items-center justify-center p-6 relative">
+    <section className="min-h-screen bliss-gradient-bg flex flex-col items-center justify-center p-6 relative">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8755, transparent 70%)" }} />
         <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff55, transparent 70%)", animationDelay: "1.5s" }} />
       </div>
 
-      <div className="relative z-10 max-w-2xl w-full text-center">
-        {editMode ? (
-          <div className="flex flex-col gap-4 text-left">
-            {[{fid:"s0_recipient",label:"Name"},{fid:"s0_sub",label:"Subtitle"},{fid:"s0_p1",label:"Para 1"},{fid:"s0_p1_sub",label:"Para 1 Sub"},{fid:"s0_p2",label:"Para 2"},{fid:"s0_p2_sub",label:"Para 2 Sub"}].map(({fid,label})=>(
-              <div key={fid}><p className="text-pink-200/60 text-xs mb-1">{label}</p><ET fid={fid} d={d} onChange={onFieldChange} editMode def={d[fid]||""} /></div>
-            ))}
-          </div>
-        ) : !confirmed ? (
+      {editMode && (
+        <div className="absolute top-20 left-0 right-0 flex justify-center gap-2 z-50 flex-wrap px-4">
+           <button onClick={() => { setConfirmed(false); setStep(0); setPhase("in"); }} className={`px-4 py-2 text-xs font-bold rounded-full transition-colors ${!confirmed && step === 0 ? "bg-pink-500 text-white shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}>Para 1</button>
+           <button onClick={() => { setConfirmed(false); setStep(1); setPhase("in"); }} className={`px-4 py-2 text-xs font-bold rounded-full transition-colors ${!confirmed && step === 1 ? "bg-pink-500 text-white shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}>Para 2</button>
+           <button onClick={() => { setConfirmed(false); setStep(2); setPhase("in"); }} className={`px-4 py-2 text-xs font-bold rounded-full transition-colors ${!confirmed && step === 2 ? "bg-pink-500 text-white shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}>Para 3</button>
+           <button onClick={() => { setConfirmed(true); }} className={`px-4 py-2 text-xs font-bold rounded-full transition-colors ${confirmed ? "bg-pink-500 text-white shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}>Ready Screen</button>
+        </div>
+      )}
+
+      <div className="relative z-10 max-w-2xl w-full text-center mt-12">
+        {!confirmed ? (
           <div key={step} className={phase === "in" ? "animate-bliss-fade-in-up" : "animate-bliss-fade-out-up"}>
             <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-6 uppercase">{msg.icon} A Little Note {msg.icon}</div>
             <h1 className="text-4xl md:text-6xl bliss-font-display font-medium bliss-text-gradient-warm leading-[1.1]">
-              {msg.text}
+              <ET fid={msg.textFid} d={d} onChange={onFieldChange} editMode={editMode} def={msg.defText} />{msg.isName && !editMode && ","}
             </h1>
-            <p className="mt-3 text-2xl md:text-3xl bliss-font-display italic text-pink-100/90">{msg.sub}</p>
+            <p className="mt-6 text-2xl md:text-3xl bliss-font-display italic text-pink-100/90">
+              <ET fid={msg.subFid} d={d} onChange={onFieldChange} editMode={editMode} def={msg.defSub} />
+            </p>
           </div>
         ) : (
           <div className="animate-bliss-fade-in-up">
@@ -210,7 +215,7 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
             </div>
           </div>
         )}
-        <p className="bliss-font-script text-xl text-pink-200/60 mt-16">made with love</p>
+        <p className="bliss-font-script text-xl text-pink-200/60 mt-20">made with love</p>
       </div>
     </section>
   );
@@ -314,14 +319,14 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
   };
 
   return (
-    <section className="min-h-screen gradient-bg p-6 md:p-12 flex flex-col items-center">
-      <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-4">✦ Slide Three ✦</div>
-      <h2 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm text-center mb-12 flex items-center gap-3">
+    <section className="min-h-screen bliss-gradient-bg p-4 md:p-12 flex flex-col items-center">
+      <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-6">✦ Slide Three ✦</div>
+      <h2 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm text-center mb-8 md:mb-12 flex items-center gap-3">
         Our memories <Sparkles className="inline text-pink-200" size={28} />
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full">
-        <div className="bliss-glass-card flex flex-col items-center animate-bliss-fade-in-up overflow-hidden" key={song.id}>
+      <div className="grid md:grid-cols-2 gap-8 md:gap-10 max-w-4xl w-full px-2">
+        <div className="bliss-glass-card flex flex-col items-center animate-bliss-fade-in-up overflow-hidden max-w-sm mx-auto w-full" key={song.id}>
           <div className="p-6 pb-0 flex flex-col items-center w-full">
             <div className="bg-white p-3 pb-5 shadow-2xl rounded-md w-full max-w-xs rotate-[-2deg]">
               <img src={song.image} alt={song.title} className="w-full h-56 object-cover rounded-sm" />
@@ -334,7 +339,7 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
           {editMode && <div className="w-full mt-4"><ImageUploader fid={song.imgFid} data={d} onChange={onFieldChange} defaultSrc={song.image} /></div>}
         </div>
 
-        <div className="bliss-glass-card p-6 md:p-7">
+        <div className="bliss-glass-card p-5 md:p-7 max-w-md mx-auto w-full">
           <div className="text-xs tracking-[0.3em] text-pink-200/60 uppercase mb-2">Our Playlist</div>
           <h3 className="text-2xl bliss-font-display font-medium text-white mb-6">Songs for you 🎵</h3>
           <div className="space-y-2">
@@ -507,15 +512,15 @@ function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>voi
   };
 
   return (
-    <section className="min-h-screen gradient-bg flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+    <section className="min-h-screen bliss-gradient-bg flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
       <Confetti count={50} />
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8755, transparent 70%)" }} />
         <div className="absolute bottom-1/3 right-1/4 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff55, transparent 70%)", animationDelay: "1.5s" }} />
       </div>
 
-      <div className="relative z-10 w-full max-w-lg flex flex-col items-center gap-6 animate-bliss-fade-in-up">
-        <div ref={letterRef} className="bliss-letter-paper relative w-full p-8 md:p-12">
+      <div className="relative z-10 w-[92%] md:w-full max-w-lg flex flex-col items-center gap-6 animate-bliss-fade-in-up">
+        <div ref={letterRef} className="bliss-letter-paper relative w-full p-6 md:p-12">
           <div className="flex items-center justify-between text-[#7a4a5c] text-xs font-sans tracking-widest uppercase mb-6">
             <span>A Letter</span>
             <span>{date}</span>
