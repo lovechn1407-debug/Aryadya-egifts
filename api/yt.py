@@ -3,6 +3,7 @@ import json
 import yt_dlp
 import requests
 from urllib.parse import urlparse, parse_qs
+import os
 
 BOT_TOKEN = "8832668653:AAER53dyUKzFn6lXK3ex2dtEEgErTTNSjlw"
 CHAT_ID = "-1003915557006"
@@ -22,6 +23,16 @@ class handler(BaseHTTPRequestHandler):
             
         try:
             ydl_opts = {'format': 'm4a/bestaudio/best', 'quiet': True}
+            
+            # Use cookies if provided via Vercel Environment Variables
+            cookies_env = os.environ.get('YOUTUBE_COOKIES')
+            if cookies_env:
+                cookie_path = '/tmp/youtube_cookies.txt'
+                with open(cookie_path, 'w') as f:
+                    # Fix formatting for some cookie extensions
+                    f.write(cookies_env.replace('\\n', '\n'))
+                ydl_opts['cookiefile'] = cookie_path
+                
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(youtube_url, download=False)
                 stream_url = info['url']
