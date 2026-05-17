@@ -77,26 +77,56 @@ export default function AdminSongsPage() {
       return;
     }
     
-    let finalYoutubeId = "";
-    if (type === "youtube") {
-      finalYoutubeId = extractYouTubeID(url);
-      if (!finalYoutubeId) {
-        alert("Invalid YouTube URL. Could not extract Video ID.");
-        return;
-      }
-    }
-
     setSaving(true);
     try {
       const isNew = !id;
       const songId = isNew ? `song_${Date.now()}_${Math.random().toString(36).substring(2, 7)}` : id;
       
+      let finalUrl = url.trim();
+      let finalType = type;
+      let finalYoutubeId = "";
+      
+      if (type === "youtube") {
+        finalYoutubeId = extractYouTubeID(url);
+        const wantsConversion = confirm("Would you like to permanently convert this YouTube video to an MP3 using your Python API? \n\n(Requires ytapi01 to be running on http://127.0.0.1:5000).\n\nIf you click Cancel, it will be saved as a standard YouTube link (which may be blocked by browsers).");
+        
+        if (wantsConversion) {
+          try {
+            const res = await fetch(`http://127.0.0.1:5000/?url=${encodeURIComponent(url.trim())}`);
+            if (!res.ok) throw new Error("API failed to generate token");
+            const data = await res.json();
+            if (!data.token) throw new Error("No token returned");
+            
+            const audioRes = await fetch(`http://127.0.0.1:5000/download?token=${data.token}`);
+            if (!audioRes.ok) throw new Error("API failed to serve audio file");
+            const blob = await audioRes.blob();
+            
+            const { storage } = await import("@/lib/firebase");
+            const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+            
+            const storageRef = ref(storage, `songs/${songId}.mp3`);
+            await uploadBytes(storageRef, blob, { contentType: "audio/mpeg" });
+            finalUrl = await getDownloadURL(storageRef);
+            finalType = "direct";
+            finalYoutubeId = ""; // Clear it since it's now direct
+            alert("Conversion and upload successful! Song has been saved as a permanent MP3.");
+          } catch (apiErr: any) {
+            console.error("API Conversion Error:", apiErr);
+            const proceed = confirm(`Conversion failed: ${apiErr.message}\n\nMake sure your Python API is running! Do you want to save it as a standard YouTube link anyway?`);
+            if (!proceed) {
+              setSaving(false);
+              return;
+            }
+          }
+        }
+      }
+      
       const song: Song = {
         id: songId,
         name: name.trim(),
         description: description.trim(),
-        url: url.trim(), // Keep URL just for reference/history
-        type,
+        url: finalUrl,
+        type: finalType,
         youtubeId: finalYoutubeId,
         startTime: startTime ? parseInt(startTime, 10) : undefined,
         endTime: endTime ? parseInt(endTime, 10) : undefined,

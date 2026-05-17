@@ -12,5 +12,8 @@ const firebaseConfig = {
   measurementId: "G-6TJJCNPGES",
 };
 
+import { getStorage } from "firebase/storage";
+
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const database = getDatabase(app);
+export const storage = getStorage(app);
