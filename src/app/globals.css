@@ -953,3 +953,6 @@ textarea.input-field { resize: vertical; min-height: 100px; }
   50% { transform: translateY(-10px); opacity: 1; }
 }
 .animate-bliss-slide-hint { animation: bliss-slide-hint 1.6s ease-in-out infinite; }
+
+.bliss-font-display { font-family: 'Fraunces', serif; }
+.bliss-font-script { font-family: 'Caveat', cursive; }

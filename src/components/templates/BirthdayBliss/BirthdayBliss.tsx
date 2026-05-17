@@ -113,8 +113,8 @@ function ET({ fid, d, onChange, multiline = false, editMode = false, def = "" }:
   }
   return (
     <div onClick={e=>{e.stopPropagation();setEditing(true);}} title="Click to edit" style={{position:"relative",cursor:"text",border:"2px dashed rgba(255,45,135,0.6)",borderRadius:8,padding:"8px 12px 22px",background:"rgba(255,45,135,0.05)",marginBottom:4,display:"inline-block",width:"100%"}}>
-      <span style={{display:"block"}}>{value||<em style={{opacity:0.4,fontSize:13}}>Click to edit</em>}</span>
-      <span style={{position:"absolute",bottom:3,right:8,fontSize:10,color:"#ff2d87",fontWeight:700}}>✏️ click to edit</span>
+      <span style={{display:"block", color: "rgba(255,255,255,0.95)", WebkitTextFillColor: "rgba(255,255,255,0.95)"}}>{value||<em style={{opacity:0.4,fontSize:13}}>Click to edit</em>}</span>
+      <span style={{position:"absolute",bottom:3,right:8,fontSize:10,color:"#ff2d87",fontWeight:700, WebkitTextFillColor: "#ff2d87"}}>✏️ click to edit</span>
     </div>
   );
 }
@@ -242,9 +242,9 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
             <h1 className="text-4xl md:text-[5rem] bliss-font-display font-normal bg-gradient-to-r from-pink-300 to-[#c175ff] text-transparent bg-clip-text leading-[1.1] mb-12 pb-2">
               Shall we begin?
             </h1>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <button className="bg-gradient-to-r from-[#ef417b] to-[#d81e5f] text-white px-10 py-3.5 rounded-[1.5rem] font-medium shadow-[0_4px_20px_rgba(230,46,110,0.4)] hover:scale-105 transition-transform" onClick={onDone}>Yes, please</button>
-              <button className="bg-transparent border border-white/20 text-white px-10 py-3.5 rounded-[1.5rem] font-medium hover:bg-white/10 transition-colors" onClick={onDone}>Absolutely</button>
+            <div className="flex flex-wrap gap-4 justify-center mt-12">
+              <button className="bg-gradient-to-r from-[#ef417b] to-[#d81e5f] text-white px-10 py-3.5 rounded-full font-medium shadow-[0_4px_20px_rgba(230,46,110,0.4)] hover:scale-105 transition-transform" onClick={onDone}>Yes, please</button>
+              <button className="bg-transparent border border-white/20 text-white px-10 py-3.5 rounded-full font-medium hover:bg-white/10 transition-colors" onClick={onDone}>Absolutely</button>
             </div>
           </div>
         )}
@@ -320,7 +320,7 @@ function CakeSlide({ onComplete, d, editMode, onFieldChange }: { onComplete: ()=
         <h2 className="text-4xl md:text-[5rem] bliss-font-display font-normal bg-gradient-to-r from-[#f9a8d4] to-[#c084fc] text-transparent bg-clip-text text-center leading-tight mb-4 pb-2">
           A cake, for you
         </h2>
-        <p className="text-[15px] text-white/80 text-center mb-12 max-w-md font-sans">
+        <p className="text-[15px] text-white/80 text-center mb-24 max-w-md font-sans">
           Light the candles, make a wish, then drag down to cut.
         </p>
         <Cake onComplete={onComplete} />
