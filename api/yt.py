@@ -22,7 +22,7 @@ class handler(BaseHTTPRequestHandler):
             return
             
         try:
-            ydl_opts = {'format': 'm4a/bestaudio/best', 'quiet': True}
+            ydl_opts = {'format': 'bestaudio/best', 'quiet': True}
             
             # Use cookies if provided via Vercel Environment Variables
             cookies_env = os.environ.get('YOUTUBE_COOKIES')
@@ -37,10 +37,12 @@ class handler(BaseHTTPRequestHandler):
                 info = ydl.extract_info(youtube_url, download=False)
                 stream_url = info['url']
                 title = info.get('title', 'Audio')
+                ext = info.get('ext', 'm4a')
                 
             audio_data = requests.get(stream_url).content
             
-            files = {'audio': (f"{title}.m4a", audio_data, 'audio/mp4')}
+            mime_type = 'audio/webm' if ext == 'webm' else 'audio/mp4'
+            files = {'audio': (f"{title}.{ext}", audio_data, mime_type)}
             data = {'chat_id': CHAT_ID, 'title': title}
             url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendAudio"
             resp = requests.post(url, data=data, files=files).json()
