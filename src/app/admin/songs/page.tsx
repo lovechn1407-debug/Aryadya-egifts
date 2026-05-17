@@ -93,7 +93,7 @@ export default function AdminSongsPage() {
       
       if (type === "youtube") {
         finalYoutubeId = extractYouTubeID(url);
-        const wantsConversion = confirm("Convert this YouTube video to MP3 and host it on Telegram database? \n\n(This uses the Vercel Python API. Ensure you are running 'vercel dev' if testing locally.)");
+        const wantsConversion = confirm("Convert this YouTube video to MP3 and host it on Telegram database? \n\n(This process happens entirely online on Vercel's servers!)");
         
         if (wantsConversion) {
           try {
