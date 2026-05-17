@@ -12,7 +12,8 @@ export default function AdminSongsPage() {
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [type, setType] = useState<"direct" | "youtube">("direct");
+  const [type, setType] = useState<"direct" | "youtube" | "upload">("direct");
+  const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
   const [youtubeId, setYoutubeId] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -76,6 +77,10 @@ export default function AdminSongsPage() {
       alert("Please provide an Audio URL for direct link.");
       return;
     }
+    if (type === "upload" && !file) {
+      alert("Please select an MP3 file to upload.");
+      return;
+    }
     
     setSaving(true);
     try {
@@ -83,41 +88,60 @@ export default function AdminSongsPage() {
       const songId = isNew ? `song_${Date.now()}_${Math.random().toString(36).substring(2, 7)}` : id;
       
       let finalUrl = url.trim();
-      let finalType = type;
+      let finalType: "direct" | "youtube" = type === "upload" ? "direct" : type;
       let finalYoutubeId = "";
       
       if (type === "youtube") {
         finalYoutubeId = extractYouTubeID(url);
-        const wantsConversion = confirm("Would you like to permanently convert this YouTube video to an MP3 using your Python API? \n\n(Requires ytapi01 to be running on http://127.0.0.1:5000).\n\nIf you click Cancel, it will be saved as a standard YouTube link (which may be blocked by browsers).");
+        const wantsConversion = confirm("Convert this YouTube video to MP3 and host it on Telegram database? \n\n(This uses the Vercel Python API. Ensure you are running 'vercel dev' if testing locally.)");
         
         if (wantsConversion) {
           try {
-            const res = await fetch(`http://127.0.0.1:5000/?url=${encodeURIComponent(url.trim())}`);
-            if (!res.ok) throw new Error("API failed to generate token");
+            const res = await fetch(`/api/yt?url=${encodeURIComponent(url.trim())}`);
+            if (!res.ok) throw new Error("Vercel Python API failed to process video");
             const data = await res.json();
-            if (!data.token) throw new Error("No token returned");
+            if (data.error) throw new Error(data.error);
+            if (!data.file_id) throw new Error("No file_id returned from Telegram");
             
-            const audioRes = await fetch(`http://127.0.0.1:5000/download?token=${data.token}`);
-            if (!audioRes.ok) throw new Error("API failed to serve audio file");
-            const blob = await audioRes.blob();
-            
-            const { storage } = await import("@/lib/firebase");
-            const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
-            
-            const storageRef = ref(storage, `songs/${songId}.mp3`);
-            await uploadBytes(storageRef, blob, { contentType: "audio/mpeg" });
-            finalUrl = await getDownloadURL(storageRef);
+            finalUrl = `/api/tg-audio/${data.file_id}`;
             finalType = "direct";
             finalYoutubeId = ""; // Clear it since it's now direct
-            alert("Conversion and upload successful! Song has been saved as a permanent MP3.");
+            alert("YouTube audio successfully converted and uploaded to Telegram database!");
           } catch (apiErr: any) {
             console.error("API Conversion Error:", apiErr);
-            const proceed = confirm(`Conversion failed: ${apiErr.message}\n\nMake sure your Python API is running! Do you want to save it as a standard YouTube link anyway?`);
+            const proceed = confirm(`Conversion failed: ${apiErr.message}\n\nDo you want to save it as a standard YouTube link anyway?`);
             if (!proceed) {
               setSaving(false);
               return;
             }
           }
+        }
+      } else if (type === "upload" && file) {
+        // Upload directly to Telegram from the browser
+        const BOT_TOKEN = "8832668653:AAER53dyUKzFn6lXK3ex2dtEEgErTTNSjlw";
+        const CHAT_ID = "-1003915557006";
+        
+        const formData = new FormData();
+        formData.append("chat_id", CHAT_ID);
+        formData.append("audio", file);
+        formData.append("title", name.trim());
+        
+        try {
+          const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (!data.ok) throw new Error(data.description || "Failed to upload to Telegram");
+          
+          const fileId = data.result.audio.file_id;
+          finalUrl = `/api/tg-audio/${fileId}`;
+          finalType = "direct";
+          finalYoutubeId = "";
+        } catch (uploadErr: any) {
+          alert(`Upload failed: ${uploadErr.message}`);
+          setSaving(false);
+          return;
         }
       }
       
@@ -145,7 +169,7 @@ export default function AdminSongsPage() {
   };
 
   const resetForm = () => {
-    setId(""); setName(""); setDescription(""); setUrl(""); setType("direct"); setYoutubeId(""); setStartTime(""); setEndTime("");
+    setId(""); setName(""); setDescription(""); setUrl(""); setType("direct"); setYoutubeId(""); setStartTime(""); setEndTime(""); setFile(null);
   };
 
   const editSong = (s: Song) => {
@@ -216,6 +240,9 @@ export default function AdminSongsPage() {
                 <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, cursor: "pointer" }}>
                   <input type="radio" name="uploadType" checked={type === "youtube"} onChange={() => setType("youtube")} /> YouTube Link
                 </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, cursor: "pointer" }}>
+                  <input type="radio" name="uploadType" checked={type === "upload"} onChange={() => setType("upload")} /> Upload MP3 (Telegram)
+                </label>
               </div>
             </div>
 
@@ -248,7 +275,15 @@ export default function AdminSongsPage() {
                     <input type="number" value={endTime} onChange={e => setEndTime(e.target.value)} placeholder="e.g. 45" style={{ ...inputStyle, borderColor: "#FECACA" }} />
                   </div>
                 </div>
-                <p style={{ fontSize: 12, color: "#B91C1C", marginTop: 8 }}>The YouTube player will be invisible to users but will automatically play this section of the video when they interact with the page.</p>
+                <p style={{ fontSize: 12, color: "#B91C1C", marginTop: 8 }}>This will be converted to an MP3 and stored in your Telegram database permanently.</p>
+              </div>
+            )}
+
+            {type === "upload" && (
+              <div style={{ padding: 16, background: "#F0F9FF", borderRadius: 8, border: "1px solid #BAE6FD" }}>
+                <label style={{ fontSize: 13, color: "#0369A1", fontWeight: 600, display: "block", marginBottom: 6 }}>Select Audio File (MP3, M4A) *</label>
+                <input type="file" accept="audio/*" onChange={e => setFile(e.target.files?.[0] || null)} style={{ ...inputStyle, borderColor: "#BAE6FD" }} />
+                <p style={{ fontSize: 12, color: "#0284C7", marginTop: 8 }}>File will be uploaded and hosted on Telegram permanently.</p>
               </div>
             )}
 
