@@ -97,9 +97,9 @@ function SubHeader({ tabs, activeKey, onSelect }: { tabs: {key:string|number, la
 }
 
 // ── Editable Text ──
-function ET({ fid, d, onChange, multiline = false, editMode = false, def = "" }: {
+function ET({ fid, d, onChange, multiline = false, editMode = false, def = "", darkText = false }: {
   fid: string; d: Record<string, string>; onChange?: (id: string, v: string) => void;
-  multiline?: boolean; editMode?: boolean; def?: string;
+  multiline?: boolean; editMode?: boolean; def?: string; darkText?: boolean;
 }) {
   const value = d[fid] || def;
   const [editing, setEditing] = useState(false);
@@ -112,8 +112,8 @@ function ET({ fid, d, onChange, multiline = false, editMode = false, def = "" }:
     return multiline ? <textarea value={draft} rows={3} autoFocus onChange={e=>setDraft(e.target.value)} onBlur={commit} style={{...s,resize:"vertical"}} /> : <input value={draft} autoFocus onChange={e=>setDraft(e.target.value)} onBlur={commit} onKeyDown={e=>e.key==="Enter"&&commit()} style={s} />;
   }
   return (
-    <div onClick={e=>{e.stopPropagation();setEditing(true);}} title="Click to edit" style={{position:"relative",cursor:"text",border:"2px dashed rgba(255,45,135,0.6)",borderRadius:8,padding:"8px 12px 22px",background:"rgba(255,45,135,0.05)",marginBottom:4,display:"inline-block",width:"100%"}}>
-      <span style={{display:"block", color: "rgba(255,255,255,0.95)", WebkitTextFillColor: "rgba(255,255,255,0.95)"}}>{value||<em style={{opacity:0.4,fontSize:13}}>Click to edit</em>}</span>
+    <div onClick={e=>{e.stopPropagation();setEditing(true);}} title="Click to edit" style={{position:"relative",cursor:"text",border:"2px dashed rgba(255,45,135,0.6)",borderRadius:8,padding:"8px 12px 22px",background: darkText ? "rgba(255,255,255,0.8)" : "rgba(255,45,135,0.05)",marginBottom:4,display:"inline-block",width:"100%"}}>
+      <span style={{display:"block", color: darkText ? "#333" : "rgba(255,255,255,0.95)", WebkitTextFillColor: darkText ? "#333" : "rgba(255,255,255,0.95)"}}>{value||<em style={{opacity:0.4,fontSize:13}}>Click to edit</em>}</span>
       <span style={{position:"absolute",bottom:3,right:8,fontSize:10,color:"#ff2d87",fontWeight:700, WebkitTextFillColor: "#ff2d87"}}>✏️ click to edit</span>
     </div>
   );
@@ -242,9 +242,9 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
             <h1 className="text-4xl md:text-[5rem] bliss-font-display font-normal bg-gradient-to-r from-pink-300 to-[#c175ff] text-transparent bg-clip-text leading-[1.1] mb-12 pb-2">
               Shall we begin?
             </h1>
-            <div className="flex flex-wrap gap-4 justify-center mt-12">
-              <button className="bg-gradient-to-r from-[#ef417b] to-[#d81e5f] text-white px-10 py-3.5 rounded-full font-medium shadow-[0_4px_20px_rgba(230,46,110,0.4)] hover:scale-105 transition-transform" onClick={onDone}>Yes, please</button>
-              <button className="bg-transparent border border-white/20 text-white px-10 py-3.5 rounded-full font-medium hover:bg-white/10 transition-colors" onClick={onDone}>Absolutely</button>
+            <div className="flex flex-wrap gap-5 justify-center mt-12">
+              <button className="bg-gradient-to-r from-[#ef417b] to-[#d81e5f] text-white px-12 py-4 text-[17px] rounded-full font-medium shadow-[0_4px_20px_rgba(230,46,110,0.4)] hover:scale-105 transition-transform" onClick={onDone}>Yes, please</button>
+              <button className="bg-transparent border border-white/20 text-white px-12 py-4 text-[17px] rounded-full font-medium hover:bg-white/10 transition-colors" onClick={onDone}>Absolutely</button>
             </div>
           </div>
         )}
@@ -320,7 +320,7 @@ function CakeSlide({ onComplete, d, editMode, onFieldChange }: { onComplete: ()=
         <h2 className="text-4xl md:text-[5rem] bliss-font-display font-normal bg-gradient-to-r from-[#f9a8d4] to-[#c084fc] text-transparent bg-clip-text text-center leading-tight mb-4 pb-2">
           A cake, for you
         </h2>
-        <p className="text-[15px] text-white/80 text-center mb-24 max-w-md font-sans">
+        <p className="text-[16px] text-white/80 text-center mb-32 max-w-md font-sans">
           Light the candles, make a wish, then drag down to cut.
         </p>
         <Cake onComplete={onComplete} />
@@ -373,7 +373,7 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
         Our memories <Sparkles className="inline text-pink-200" size={32} />
       </h2>
 
-      <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 max-w-[65rem] w-full px-4 items-stretch justify-center">
+      <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 max-w-[65rem] w-full px-4 items-center justify-center">
         
         {/* POLAROID CARD */}
         <div className="bliss-glass-card p-6 md:p-10 rounded-[2rem] w-full max-w-[28rem] mx-auto flex flex-col items-center justify-center shadow-2xl border border-white/10 bg-white/5 backdrop-blur-2xl animate-bliss-fade-in-up" key={`polaroid-${song.id}`}>
@@ -506,7 +506,7 @@ function EnvelopeSlide({ onOpen, editMode }: { onOpen: () => void; editMode: boo
   const end = () => { startY.current = null; if (!open) setDragY(0); };
 
   return (
-    <section className="min-h-screen gradient-bg flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <section className="min-h-screen bliss-gradient-bg flex flex-col items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8744, transparent 70%)" }} />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff44, transparent 70%)", animationDelay: "1.5s" }} />
@@ -582,22 +582,22 @@ function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>voi
       </div>
 
       <div className="relative z-10 w-[92%] md:w-full max-w-lg flex flex-col items-center gap-6 animate-bliss-fade-in-up">
-        <div ref={letterRef} className="bliss-letter-paper relative w-full p-6 md:p-12">
-          <div className="flex items-center justify-between text-[#7a4a5c] text-xs font-sans tracking-widest uppercase mb-6">
+        <div ref={letterRef} className="bliss-letter-paper relative w-full p-8 md:p-14">
+          <div className="flex items-center justify-between text-[#7a4a5c] text-[11px] font-sans tracking-widest uppercase mb-10">
             <span>A Letter</span>
             <span>{date}</span>
           </div>
-          <h1 className="bliss-font-display text-3xl md:text-4xl font-medium text-[#5a1d3a] mb-1">
-            <ET fid="l_greeting" d={d} onChange={onFieldChange} editMode={editMode} def={d.l_greeting||"Happy Birthday, my favorite person."} />
+          <h1 className="bliss-font-display text-4xl md:text-[2.75rem] font-medium text-[#5a1d3a] mb-2 leading-tight">
+            <ET darkText fid="l_greeting" d={d} onChange={onFieldChange} editMode={editMode} def={d.l_greeting||"Happy Birthday, my favorite person."} />
           </h1>
-          <div className="h-px bg-[#c0392b]/30 my-4" />
-          <p className="text-xl md:text-2xl leading-snug text-[#3a1d2a]">
-            <ET fid="l_msg" d={d} onChange={onFieldChange} editMode={editMode} multiline def={d.l_msg||"Thanks for coming into my life and making it better with your presence."} />
+          <div className="h-px bg-[#c0392b]/20 my-8" />
+          <p className="text-xl md:text-[1.35rem] leading-relaxed text-[#3a1d2a] mb-6">
+            <ET darkText fid="l_msg" d={d} onChange={onFieldChange} editMode={editMode} multiline def={d.l_msg||"Thanks for coming into my life and making it better with your presence."} />
           </p>
-          <p className="text-lg md:text-xl leading-relaxed text-[#3a1d2a] mt-3">
-            <ET fid="l_closing" d={d} onChange={onFieldChange} editMode={editMode} multiline def={d.l_closing||"Here's to your laughter, your light, and every wish I'm quietly making for you tonight."} />
+          <p className="text-xl md:text-[1.35rem] leading-relaxed text-[#3a1d2a] mb-10">
+            <ET darkText fid="l_closing" d={d} onChange={onFieldChange} editMode={editMode} multiline def={d.l_closing||"Here's to your laughter, your light, and every wish I'm quietly making for you tonight."} />
           </p>
-          <p className="text-2xl mt-6 text-[#5a1d3a]"><ET fid="l_signoff" d={d} onChange={onFieldChange} editMode={editMode} def={d.l_signoff||"— with all my heart ❤"} /></p>
+          <p className="text-2xl md:text-3xl text-[#5a1d3a]"><ET darkText fid="l_signoff" d={d} onChange={onFieldChange} editMode={editMode} def={d.l_signoff||"— with all my heart ❤"} /></p>
 
           {sealed && (
             <div className="bliss-stamp">
