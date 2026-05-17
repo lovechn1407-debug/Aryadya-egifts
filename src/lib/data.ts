@@ -469,7 +469,7 @@ export interface DisplaySection {
   titleSize?: "small" | "normal" | "medium" | "big" | "bigger";
   headerStyle?: "normal" | "new";
   headerFontFamily?: string;
-  headerCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular";
+  headerCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave";
   headerNote?: string;
   headerNoteEnabled?: boolean;
   createdAt: string;

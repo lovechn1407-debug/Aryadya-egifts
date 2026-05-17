@@ -24,7 +24,7 @@ export default function AdminSectionsPage() {
   const [titleSize, setTitleSize] = useState<"small" | "normal" | "medium" | "big" | "bigger">("normal");
   const [headerStyle, setHeaderStyle] = useState<"normal" | "new">("normal");
   const [headerFontFamily, setHeaderFontFamily] = useState<string>("'Dancing Script', cursive");
-  const [headerCutout, setHeaderCutout] = useState<"none" | "wavy" | "zigzag" | "wavy_stretched" | "circular">("none");
+  const [headerCutout, setHeaderCutout] = useState<"none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave">("none");
   const [headerNote, setHeaderNote] = useState("");
   const [headerNoteEnabled, setHeaderNoteEnabled] = useState(false);
 
@@ -317,6 +317,7 @@ export default function AdminSectionsPage() {
                     <option value="wavy_stretched">Wavy (Stretched)</option>
                     <option value="zigzag">Zigzag</option>
                     <option value="circular">Circular Spiral (Scallop)</option>
+                    <option value="liquid_wave">Liquid Wave (+/-)</option>
                   </select>
                 </div>
               </div>

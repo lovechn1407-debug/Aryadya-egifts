@@ -674,16 +674,25 @@ function getCutoutStyle(cutout?: string, color: string = "#ffffff"): React.CSSPr
   let width = 20;
   
   if (cutout === "zigzag") {
-    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,0 10,10 20,0" fill="${color}"/></svg>`;
+    // Sharp triangle edge
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,-5 10,10 20,-5" fill="${color}"/></svg>`;
   } else if (cutout === "wavy") {
-    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 10"><path d="M0 0 Q 10 10 20 0 T 40 0 L 40 0 L 0 0" fill="${color}"/></svg>`;
+    // Standard repeating bumps
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 10"><path d="M0 -5 L 0 0 Q 10 10 20 0 T 40 0 L 40 -5 Z" fill="${color}"/></svg>`;
     width = 40;
   } else if (cutout === "wavy_stretched") {
-    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 15"><path d="M0 0 Q 20 15 40 0 T 80 0 L 80 0 L 0 0" fill="${color}"/></svg>`;
+    // Longer stretched bumps
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 15"><path d="M0 -5 L 0 0 Q 20 15 40 0 T 80 0 L 80 -5 Z" fill="${color}"/></svg>`;
     width = 80;
     height = 15;
   } else if (cutout === "circular") {
-    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><path d="M0 0 A 10 10 0 0 0 20 0 Z" fill="${color}"/></svg>`;
+    // Scalloped cutouts
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><path d="M0 -5 L 0 0 A 10 10 0 0 0 20 0 L 20 -5 Z" fill="${color}"/></svg>`;
+  } else if (cutout === "liquid_wave") {
+    // Smooth oscillating liquid sine wave (positive and negative peaks)
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path d="M0 -5 L 0 10 C 25 25, 75 -5, 100 10 L 100 -5 Z" fill="${color}"/></svg>`;
+    width = 100;
+    height = 20;
   }
   
   if (!svg) return {};
