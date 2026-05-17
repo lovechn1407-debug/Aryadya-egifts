@@ -178,19 +178,19 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
 
   return (
     <section className="min-h-screen bliss-gradient-bg flex flex-col items-center justify-center p-6 relative">
+      {editMode && (
+        <div className="absolute top-0 left-0 right-0 p-3 bg-black/20 backdrop-blur-md border-b border-white/10 flex justify-center gap-3 z-50 flex-wrap">
+           <button onClick={() => { setConfirmed(false); setStep(0); setPhase("in"); }} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${!confirmed && step === 0 ? "bg-[#ff2d87] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Para 1</button>
+           <button onClick={() => { setConfirmed(false); setStep(1); setPhase("in"); }} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${!confirmed && step === 1 ? "bg-[#ff2d87] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Para 2</button>
+           <button onClick={() => { setConfirmed(false); setStep(2); setPhase("in"); }} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${!confirmed && step === 2 ? "bg-[#ff2d87] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Para 3</button>
+           <button onClick={() => { setConfirmed(true); }} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${confirmed ? "bg-[#ff2d87] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Ready Screen</button>
+        </div>
+      )}
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8755, transparent 70%)" }} />
         <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff55, transparent 70%)", animationDelay: "1.5s" }} />
       </div>
-
-      {editMode && (
-        <div className="absolute top-20 left-0 right-0 flex justify-center gap-2 z-50 flex-wrap px-4">
-           <button onClick={() => { setConfirmed(false); setStep(0); setPhase("in"); }} className={`px-4 py-2 text-xs font-bold rounded-full transition-colors ${!confirmed && step === 0 ? "bg-pink-500 text-white shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}>Para 1</button>
-           <button onClick={() => { setConfirmed(false); setStep(1); setPhase("in"); }} className={`px-4 py-2 text-xs font-bold rounded-full transition-colors ${!confirmed && step === 1 ? "bg-pink-500 text-white shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}>Para 2</button>
-           <button onClick={() => { setConfirmed(false); setStep(2); setPhase("in"); }} className={`px-4 py-2 text-xs font-bold rounded-full transition-colors ${!confirmed && step === 2 ? "bg-pink-500 text-white shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}>Para 3</button>
-           <button onClick={() => { setConfirmed(true); }} className={`px-4 py-2 text-xs font-bold rounded-full transition-colors ${confirmed ? "bg-pink-500 text-white shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}>Ready Screen</button>
-        </div>
-      )}
 
       <div className="relative z-10 max-w-2xl w-full text-center mt-12">
         {!confirmed ? (
@@ -239,7 +239,7 @@ function BalloonsSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
   };
 
   return (
-    <section className="min-h-screen relative overflow-hidden gradient-soft">
+    <section className="min-h-screen relative overflow-hidden bliss-gradient-soft">
       <div className="relative z-10 pt-12 px-6 text-center pointer-events-none">
         <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase">✦ Slide One ✦</div>
         <h2 className="text-4xl md:text-6xl bliss-font-display font-medium bliss-text-gradient-warm leading-tight">
@@ -274,7 +274,7 @@ function BalloonsSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
 /* ============ CAKE ============ */
 function CakeSlide({ onComplete, d, editMode, onFieldChange }: { onComplete: ()=>void; d: Record<string,string>; editMode: boolean; onFieldChange?: (id:string,v:string)=>void }) {
   return (
-    <section className="min-h-screen relative gradient-soft flex flex-col items-center justify-center p-6 overflow-hidden">
+    <section className="min-h-screen relative bliss-gradient-soft flex flex-col items-center justify-center p-6 overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-10 w-64 h-64 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8740, transparent 70%)" }} />
         <div className="absolute bottom-1/4 right-10 w-72 h-72 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff40, transparent 70%)", animationDelay: "2s" }} />
@@ -319,8 +319,16 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
   };
 
   return (
-    <section className="min-h-screen bliss-gradient-bg p-4 md:p-12 flex flex-col items-center">
-      <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-6">✦ Slide Three ✦</div>
+    <section className="min-h-screen bliss-gradient-bg p-4 md:p-12 flex flex-col items-center relative pt-20">
+      {editMode && (
+        <div className="absolute top-0 left-0 right-0 p-3 bg-black/20 backdrop-blur-md border-b border-white/10 flex justify-center gap-3 z-50 flex-wrap">
+          {[1,2,3].map(i => (
+            <button key={i} onClick={() => setActiveSong(i)} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${activeSong === i ? "bg-[#b266ff] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Slide {i}</button>
+          ))}
+        </div>
+      )}
+
+      <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-2">✦ Slide Three ✦</div>
       <h2 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm text-center mb-8 md:mb-12 flex items-center gap-3">
         Our memories <Sparkles className="inline text-pink-200" size={28} />
       </h2>
@@ -389,10 +397,10 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
                   {editMode && (
                     <button
                       onClick={() => { setActiveSong(s.id); setBgModalOpen(true); }}
-                      className="p-3 rounded-2xl shrink-0 bg-white/10 hover:bg-white/20 transition-colors"
+                      className="px-4 py-2 rounded-xl text-xs font-semibold shrink-0 bg-white/10 hover:bg-[#ff2d87] hover:text-white transition-colors border border-white/20"
                       title="Choose Song"
                     >
-                      🎵
+                      Choose Audio
                     </button>
                   )}
                 </div>
