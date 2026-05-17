@@ -5,6 +5,7 @@ import { getProductDB, getOrderDB, updateOrderCustomizationsDB, finalizeOrderDB 
 import type { Order, Product } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
+import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import QRSharePopup from "@/components/QRSharePopup";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
@@ -33,9 +34,20 @@ const APOLOGY_SLIDES = [
   { n: 5, label: "Final" },
 ];
 
+const BLISS_SLIDES = [
+  { n: -1, label: "BG Music" },
+  { n: 0, label: "Intro" },
+  { n: 1, label: "Balloons" },
+  { n: 2, label: "Cake" },
+  { n: 3, label: "Memories" },
+  { n: 4, label: "Envelope" },
+  { n: 5, label: "Letter" },
+];
+
 function getSlideList(productId: string) {
   if (productId === "birthday-magic-box") return BIRTHDAY_SLIDES;
   if (productId === "sweet-apology-box") return APOLOGY_SLIDES;
+  if (productId === "birthday-bliss-microsite") return BLISS_SLIDES;
   return [];
 }
 
@@ -45,6 +57,16 @@ function renderEditorTemplate(
   onFieldChange: (id: string, val: string) => void,
   forcedSlide: number
 ) {
+  if (productId === "birthday-bliss-microsite") {
+    return (
+      <BirthdayBliss
+        customData={customData}
+        editMode={true}
+        onFieldChange={onFieldChange}
+        forcedSlide={forcedSlide}
+      />
+    );
+  }
   if (productId === "birthday-magic-box") {
     return (
       <BirthdayMagicBox

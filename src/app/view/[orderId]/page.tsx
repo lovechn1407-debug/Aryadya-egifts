@@ -3,11 +3,14 @@ import { use, useEffect, useState } from "react";
 import { getOrderDB, getProductDB } from "@/lib/db";
 import type { Order, Product } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
+import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
 import Link from "next/link";
 
 function renderFinalTemplate(productId: string, customData: Record<string, string>) {
   switch (productId) {
+    case "birthday-bliss-microsite":
+      return <BirthdayBliss customData={customData} />;
     case "birthday-magic-box":
       return <BirthdayMagicBox customData={customData} />;
     case "sweet-apology-box":
