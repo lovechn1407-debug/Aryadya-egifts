@@ -178,19 +178,19 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: { onDone: () => void
 
   return (
     <section className="min-h-screen bliss-gradient-bg flex flex-col items-center justify-center p-6 relative">
-      {editMode && (
-        <div className="absolute top-0 left-0 right-0 p-3 bg-black/20 backdrop-blur-md border-b border-white/10 flex justify-center gap-3 z-50 flex-wrap">
-           <button onClick={() => { setConfirmed(false); setStep(0); setPhase("in"); }} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${!confirmed && step === 0 ? "bg-[#ff2d87] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Para 1</button>
-           <button onClick={() => { setConfirmed(false); setStep(1); setPhase("in"); }} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${!confirmed && step === 1 ? "bg-[#ff2d87] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Para 2</button>
-           <button onClick={() => { setConfirmed(false); setStep(2); setPhase("in"); }} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${!confirmed && step === 2 ? "bg-[#ff2d87] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Para 3</button>
-           <button onClick={() => { setConfirmed(true); }} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${confirmed ? "bg-[#ff2d87] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Ready Screen</button>
-        </div>
-      )}
-
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8755, transparent 70%)" }} />
         <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff55, transparent 70%)", animationDelay: "1.5s" }} />
       </div>
+
+      {editMode && (
+        <div className="w-full max-w-lg mx-auto mb-12 mt-10 md:mt-0 p-1.5 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-between shadow-2xl border border-white/10 z-50 relative">
+           <button onClick={() => { setConfirmed(false); setStep(0); setPhase("in"); }} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${!confirmed && step === 0 ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>Para 1</button>
+           <button onClick={() => { setConfirmed(false); setStep(1); setPhase("in"); }} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${!confirmed && step === 1 ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>Para 2</button>
+           <button onClick={() => { setConfirmed(false); setStep(2); setPhase("in"); }} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${!confirmed && step === 2 ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>Para 3</button>
+           <button onClick={() => { setConfirmed(true); }} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${confirmed ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>Ready</button>
+        </div>
+      )}
 
       <div className="relative z-10 max-w-2xl w-full text-center mt-12">
         {!confirmed ? (
@@ -319,37 +319,40 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
   };
 
   return (
-    <section className="min-h-screen bliss-gradient-bg p-4 md:p-12 flex flex-col items-center relative pt-20">
-      {editMode && (
-        <div className="absolute top-0 left-0 right-0 p-3 bg-black/20 backdrop-blur-md border-b border-white/10 flex justify-center gap-3 z-50 flex-wrap">
-          {[1,2,3].map(i => (
-            <button key={i} onClick={() => setActiveSong(i)} className={`px-5 py-2 text-xs font-semibold rounded-full transition-all ${activeSong === i ? "bg-[#b266ff] text-white shadow-lg" : "bg-white/10 text-white/80 hover:bg-white/20"}`}>Slide {i}</button>
-          ))}
-        </div>
-      )}
-
-      <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-2">✦ Slide Three ✦</div>
+    <section className="min-h-screen bliss-gradient-bg p-4 md:p-12 flex flex-col items-center relative py-12">
+      <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase mt-6 md:mt-2">✦ Slide Three ✦</div>
       <h2 className="text-3xl md:text-5xl bliss-font-display font-medium bliss-text-gradient-warm text-center mb-8 md:mb-12 flex items-center gap-3">
         Our memories <Sparkles className="inline text-pink-200" size={28} />
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-8 md:gap-10 max-w-4xl w-full px-2">
-        <div className="bliss-glass-card flex flex-col items-center animate-bliss-fade-in-up overflow-hidden max-w-sm mx-auto w-full" key={song.id}>
-          <div className="p-6 pb-0 flex flex-col items-center w-full">
-            <div className="bg-white p-3 pb-5 shadow-2xl rounded-md w-full max-w-xs rotate-[-2deg]">
-              <img src={song.image} alt={song.title} className="w-full h-56 object-cover rounded-sm" />
-              <p className="bliss-font-script text-2xl text-center mt-3 text-purple-800">{song.title}</p>
-            </div>
-            <div className="mt-6 w-full text-center">
+      {editMode && (
+        <div className="w-full max-w-md mx-auto mb-10 p-1.5 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-between shadow-2xl border border-white/10 z-50">
+          {[1,2,3].map(i => (
+            <button key={i} onClick={() => setActiveSong(i)} className={`flex-1 py-3 text-xs md:text-sm font-bold rounded-xl transition-all ${activeSong === i ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-[1.02]" : "text-white/60 hover:text-white hover:bg-white/5"}`}>
+              Slide {i}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 max-w-5xl w-full px-4 items-center">
+        
+        {/* POLAROID SECTION */}
+        <div className="flex flex-col items-center animate-bliss-fade-in-up" key={`polaroid-${song.id}`}>
+          <div className="bg-[#fdfbf7] p-4 pb-12 md:p-5 md:pb-16 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-sm w-full max-w-[300px] md:max-w-[340px] rotate-[-3deg] transform transition-transform hover:rotate-0 duration-500 relative">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 backdrop-blur-sm shadow-sm rounded-sm z-10" style={{ transform: "rotate(2deg)" }}></div>
+            <img src={song.image} alt={song.title} className="w-full aspect-[4/5] object-cover rounded-sm shadow-inner" />
+            <div className="bliss-font-script text-2xl md:text-3xl text-center mt-6 text-slate-800 leading-snug px-2">
               <ET fid={song.capFid} d={d} onChange={onFieldChange} editMode={editMode} def={song.caption} multiline />
             </div>
           </div>
-          {editMode && <div className="w-full mt-4"><ImageUploader fid={song.imgFid} data={d} onChange={onFieldChange} defaultSrc={song.image} /></div>}
+          {editMode && <div className="mt-8 w-full max-w-[300px] md:max-w-[340px]"><ImageUploader fid={song.imgFid} data={d} onChange={onFieldChange} defaultSrc={song.image} /></div>}
         </div>
 
-        <div className="bliss-glass-card p-5 md:p-7 max-w-md mx-auto w-full">
-          <div className="text-xs tracking-[0.3em] text-pink-200/60 uppercase mb-2">Our Playlist</div>
-          <h3 className="text-2xl bliss-font-display font-medium text-white mb-6">Songs for you 🎵</h3>
+        {/* PLAYLIST SECTION */}
+        <div className="bliss-glass-card p-6 md:p-8 rounded-[2rem] w-full max-w-md mx-auto shadow-2xl border border-white/20 bg-white/5 backdrop-blur-2xl">
+          <div className="text-xs tracking-[0.3em] text-pink-200/60 uppercase mb-3">Our Playlist</div>
+          <h3 className="text-3xl md:text-4xl bliss-font-display font-medium text-white mb-8">Songs for you 🎵</h3>
           <div className="space-y-2">
             {playlist.map((s) => {
               const active = s.id === activeSong;
@@ -397,7 +400,7 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
                   {editMode && (
                     <button
                       onClick={() => { setActiveSong(s.id); setBgModalOpen(true); }}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold shrink-0 bg-white/10 hover:bg-[#ff2d87] hover:text-white transition-colors border border-white/20"
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold shrink-0 bg-white/10 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 hover:text-white hover:border-transparent transition-all border border-white/20 shadow-sm"
                       title="Choose Song"
                     >
                       Choose Audio
@@ -407,7 +410,7 @@ function MemoriesSlide({ onContinue, d, editMode, onFieldChange }: { onContinue:
               );
             })}
           </div>
-          <button onClick={() => !editMode && onContinue()} className="bliss-btn-pill bliss-btn-pill-pink w-full mt-6">
+          <button onClick={() => !editMode && onContinue()} className="bliss-btn-pill bliss-btn-pill-pink w-full mt-8 py-4 text-lg">
             Continue →
           </button>
         </div>
