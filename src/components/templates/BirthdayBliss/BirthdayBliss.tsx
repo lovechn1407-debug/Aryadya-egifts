@@ -7,23 +7,24 @@ import html2canvas from "html2canvas";
 import SongLibraryPopup from "../../SongLibraryPopup";
 
 function ET({
-  fid, data, onChange, style, multiline = false, editMode = false,
+  fid, data, onChange, style, multiline = false, editMode = false, defaultText = "",
 }: {
   fid: string; data: Record<string, string>; onChange?: (id: string, v: string) => void;
-  style?: React.CSSProperties; multiline?: boolean; editMode?: boolean;
+  style?: React.CSSProperties; multiline?: boolean; editMode?: boolean; defaultText?: string;
 }) {
-  const value = data[fid] ?? "";
+  const value = data[fid] || defaultText;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(data[fid] ?? ""), [data, fid]);
+  useEffect(() => setDraft(data[fid] || defaultText), [data, fid, defaultText]);
   const commit = () => { onChange?.(fid, draft); setEditing(false); };
 
-  if (!editMode) return <>{value}</>;
+  if (!editMode) return <span style={style}>{value}</span>;
 
   if (editing) {
     const base: React.CSSProperties = {
-      display: "block", width: "100%", border: "1px solid #ff2d87", borderRadius: 4, padding: 4,
-      background: "rgba(255,255,255,0.1)", outline: "none", color: "inherit", zIndex: 1000, position: "relative"
+      display: "block", width: "100%", border: "2px solid #ff2d87", borderRadius: 8, padding: "8px 12px",
+      background: "rgba(255,255,255,0.9)", outline: "none", color: "#333", zIndex: 1000, position: "relative",
+      fontFamily: "sans-serif"
     };
     return multiline
       ? <textarea value={draft} rows={4} autoFocus onChange={e => setDraft(e.target.value)} onBlur={commit} style={{ ...style, ...base, resize: "vertical" }} />
@@ -31,9 +32,17 @@ function ET({
   }
 
   return (
-    <span onClick={(e) => { e.stopPropagation(); setEditing(true); }} style={{ cursor: "text", borderBottom: "1px dashed #ff2d87", minWidth: 20, display: "inline-block", position: "relative", zIndex: 50, ...style }}>
-      {value || <em style={{ opacity: 0.5 }}>Empty</em>}
-    </span>
+    <div onClick={(e) => { e.stopPropagation(); setEditing(true); }} title="Click to edit" style={{
+      position: "relative", cursor: "text", border: "2px dashed rgba(255,45,135,0.6)",
+      borderRadius: 8, padding: "8px 12px 24px", background: "rgba(255,45,135,0.05)",
+      marginBottom: 4, transition: "border-color 0.2s", display: "inline-block", width: "100%", ...style
+    }}>
+      <span style={{ display: "block" }}>
+        {value || <em style={{ opacity: 0.4, fontSize: 13 }}>Click to edit</em>}
+      </span>
+      <span style={{ position: "absolute", bottom: 3, right: 8, fontSize: 10, color: "#ff2d87",
+        fontWeight: 700, fontFamily: "'Inter',sans-serif", opacity: 0.9 }}>✏️ click to edit</span>
+    </div>
   );
 }
 
@@ -134,6 +143,8 @@ export default function BirthdayBliss({
     { text: "Your light", sub: "is pretty much your magic.", icon: "✦" },
   ];
 
+  const [bgModalOpen, setBgModalOpen] = useState(false);
+
   return (
     <div className="relative min-h-screen overflow-hidden text-left">
       {customData?.bg_song_url && !editMode && (
@@ -141,20 +152,31 @@ export default function BirthdayBliss({
       )}
       {stage === "bg" && editMode && (
         <section className="min-h-screen bliss-gradient-bg flex items-center justify-center p-6 relative">
-          <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl w-full max-w-md border border-white/20">
-            <h2 className="text-2xl text-white font-medium mb-4 text-center">Background Music</h2>
-            <SongLibraryPopup
-              onClose={() => {}} // Not closable here, inline
-              onSelect={(song) => onFieldChange?.("bg_song_url", song.url)}
-            />
+          <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl w-full max-w-md border border-white/20 text-center">
+            <h2 className="text-2xl text-white font-medium mb-4">Background Music</h2>
+            <p className="text-pink-100/70 mb-6 text-sm">Select the song that will play continuously in the background.</p>
+            <button onClick={() => setBgModalOpen(true)} className="bliss-btn-pill bliss-btn-pill-pink mx-auto">
+              🎵 Choose Background Music
+            </button>
+            {customData.bg_song_url && (
+              <p className="mt-4 text-xs text-green-300">✓ Music selected</p>
+            )}
           </div>
+          {bgModalOpen && (
+            <div className="fixed inset-0 z-[600] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+              <SongLibraryPopup
+                onClose={() => setBgModalOpen(false)}
+                onSelect={(song) => { onFieldChange?.("bg_song_url", song.url); setBgModalOpen(false); }}
+              />
+            </div>
+          )}
         </section>
       )}
       {stage === "intro" && <IntroSlide onDone={() => setStage("balloons")} customData={customData} editMode={editMode} onFieldChange={onFieldChange} />}
-      {stage === "balloons" && <BalloonsSlide onContinue={() => setStage("cake")} />}
-      {stage === "cake" && <CakeSlide onComplete={() => setStage("memories")} />}
+      {stage === "balloons" && <BalloonsSlide onContinue={() => setStage("cake")} customData={customData} editMode={editMode} onFieldChange={onFieldChange} />}
+      {stage === "cake" && <CakeSlide onComplete={() => setStage("memories")} customData={customData} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "memories" && <MemoriesSlide onContinue={() => setStage("envelope")} customData={customData} editMode={editMode} onFieldChange={onFieldChange} />}
-      {stage === "envelope" && <EnvelopeSlide onOpen={() => setStage("letter")} />}
+      {stage === "envelope" && <EnvelopeSlide onOpen={() => setStage("letter")} editMode={editMode} />}
       {stage === "letter" && <LetterSlide onReset={reset} customData={customData} editMode={editMode} onFieldChange={onFieldChange} />}
     </div>
   );
@@ -190,35 +212,47 @@ function IntroSlide({ onDone, customData, editMode, onFieldChange }: { onDone: (
       </div>
 
       <div className="relative z-10 max-w-2xl w-full text-center">
-        {!confirmed && !editMode ? (
+        {editMode ? (
+          <div className="w-full flex flex-col gap-8 bg-white/5 p-6 rounded-2xl border border-white/10">
+            <div>
+              <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-2 uppercase">✦ Recipient ✦</div>
+              <ET fid="s0_recipient" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="Madam Ji" />
+              <div className="mt-2"><ET fid="s0_sub" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="it's your day to shine." /></div>
+            </div>
+            <div>
+              <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-2 uppercase">✦ Paragraph 1 ✦</div>
+              <ET fid="s0_p1" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="I've set up something" />
+              <div className="mt-2"><ET fid="s0_p1_sub" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="a little special — just for you." /></div>
+            </div>
+            <div>
+              <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-2 uppercase">✦ Paragraph 2 ✦</div>
+              <ET fid="s0_p2" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="Your light" />
+              <div className="mt-2"><ET fid="s0_p2_sub" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="is pretty much your magic." /></div>
+            </div>
+          </div>
+        ) : !confirmed ? (
           <div key={step} className={phase === "in" ? "animate-bliss-fade-in-up" : "animate-bliss-fade-out-up"}>
             <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-6 uppercase">✦ A Little Note ✦</div>
             <h1 className="text-4xl md:text-6xl font-display font-medium text-gradient-warm leading-[1.1]">
-              {step === 0 && <>Hey {customData.s0_recipient || "Madam Ji"},</>}
-              {step === 1 && "I've set up something"}
-              {step === 2 && "Your light"}
+              {step === 0 && <>{customData.s0_recipient || "Madam Ji"},</>}
+              {step === 1 && <>{customData.s0_p1 || "I've set up something"}</>}
+              {step === 2 && <>{customData.s0_p2 || "Your light"}</>}
             </h1>
             <p className="mt-3 text-2xl md:text-3xl font-display italic text-pink-100/90">
               {step === 0 && <>{customData.s0_sub || "it's your day to shine."}</>}
-              {step === 1 && "a little special — just for you."}
-              {step === 2 && "is pretty much your magic."}
+              {step === 1 && <>{customData.s0_p1_sub || "a little special — just for you."}</>}
+              {step === 2 && <>{customData.s0_p2_sub || "is pretty much your magic."}</>}
             </p>
           </div>
         ) : (
           <div className="animate-bliss-fade-in-up">
             <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-6 uppercase">✦ Ready? ✦</div>
             <h1 className="text-3xl md:text-5xl font-display font-medium text-gradient-warm leading-[1.1] mb-4">
-              {editMode ? (
-                <>
-                  <ET fid="s0_recipient" data={customData} editMode={editMode} onChange={onFieldChange} />
-                  <br />
-                  <span className="text-2xl mt-2 block"><ET fid="s0_sub" data={customData} editMode={editMode} onChange={onFieldChange} /></span>
-                </>
-              ) : "Shall we begin?"}
+              Shall we begin?
             </h1>
             <div className="flex flex-wrap gap-3 justify-center mt-10">
-              <button className="bliss-btn-pill bliss-btn-pill-pink" onClick={onDone}>Yes, please</button>
-              <button className="bliss-btn-pill" onClick={onDone}>Absolutely</button>
+              <button className="bliss-btn-pill bliss-btn-pill-pink" onClick={() => !editMode && onDone()}>Yes, please</button>
+              <button className="bliss-btn-pill" onClick={() => !editMode && onDone()}>Absolutely</button>
             </div>
           </div>
         )}
@@ -229,13 +263,14 @@ function IntroSlide({ onDone, customData, editMode, onFieldChange }: { onDone: (
 }
 
 /* ============ BALLOONS ============ */
-function BalloonsSlide({ onContinue }: { onContinue: () => void }) {
+function BalloonsSlide({ onContinue, customData, editMode, onFieldChange }: { onContinue: () => void, customData: any, editMode: boolean, onFieldChange?: any }) {
   const balloons = useMemo(() => generateBalloons(22), []);
   const [popped, setPopped] = useState(0);
   const [poppers, setPoppers] = useState<{ id: number; x: number; y: number }[]>([]);
   const TARGET = 8;
 
   const handlePop = (e?: React.MouseEvent) => {
+    if (editMode) return;
     setPopped((p) => p + 1);
     if (e) {
       const id = Date.now() + Math.random();
@@ -248,14 +283,18 @@ function BalloonsSlide({ onContinue }: { onContinue: () => void }) {
     <section className="min-h-screen relative overflow-hidden bliss-gradient-soft">
       <div className="relative z-10 pt-12 px-6 text-center pointer-events-none">
         <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase">✦ Slide One ✦</div>
-        <h2 className="text-4xl md:text-6xl font-display font-medium text-gradient-warm leading-tight">
-          Pop a few balloons
+        <h2 className="text-4xl md:text-6xl font-display font-medium text-gradient-warm leading-tight pointer-events-auto">
+          <ET fid="b_title" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="Pop a few balloons" />
         </h2>
-        <p className="mt-4 text-sm text-pink-100/70 max-w-md mx-auto">Hover or tap. Get to {TARGET} to unlock the cake.</p>
-        <div className="mt-6 inline-flex items-center gap-3 px-5 py-2 rounded-full bliss-glass-card text-sm">
-          <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
-          <span className="text-pink-100">{popped} / {TARGET} popped</span>
-        </div>
+        <p className="mt-4 text-sm text-pink-100/70 max-w-md mx-auto pointer-events-auto">
+          <ET fid="b_sub" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="Hover or tap. Get to 8 to unlock the cake." multiline />
+        </p>
+        {!editMode && (
+          <div className="mt-6 inline-flex items-center gap-3 px-5 py-2 rounded-full bliss-glass-card text-sm">
+            <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
+            <span className="text-pink-100">{popped} / {TARGET} popped</span>
+          </div>
+        )}
       </div>
 
       <div className="absolute inset-0 z-0">
@@ -268,8 +307,8 @@ function BalloonsSlide({ onContinue }: { onContinue: () => void }) {
         <Popper key={p.id} x={p.x} y={p.y} />
       ))}
 
-      {popped >= TARGET && (
-        <button onClick={onContinue} className="bliss-btn-pill bliss-btn-pill-pink fixed bottom-8 left-1/2 -translate-x-1/2 z-30 animate-bliss-fade-in-up">
+      {(popped >= TARGET || editMode) && (
+        <button onClick={() => !editMode && onContinue()} className="bliss-btn-pill bliss-btn-pill-pink fixed bottom-8 left-1/2 -translate-x-1/2 z-30 animate-bliss-fade-in-up">
           Continue to the cake →
         </button>
       )}
@@ -278,7 +317,7 @@ function BalloonsSlide({ onContinue }: { onContinue: () => void }) {
 }
 
 /* ============ CAKE ============ */
-function CakeSlide({ onComplete }: { onComplete: () => void }) {
+function CakeSlide({ onComplete, customData, editMode, onFieldChange }: { onComplete: () => void, customData: any, editMode: boolean, onFieldChange?: any }) {
   return (
     <section className="min-h-screen relative bliss-gradient-soft flex flex-col items-center justify-center p-6 overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -286,15 +325,22 @@ function CakeSlide({ onComplete }: { onComplete: () => void }) {
         <div className="absolute bottom-1/4 right-10 w-72 h-72 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #b266ff40, transparent 70%)", animationDelay: "2s" }} />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center max-w-xl">
+      <div className="relative z-10 flex flex-col items-center max-w-xl w-full">
         <div className="text-xs tracking-[0.4em] text-pink-200/70 mb-3 uppercase">✦ Slide Two ✦</div>
-        <h2 className="text-3xl md:text-5xl font-display font-medium text-gradient-warm text-center leading-tight mb-3">
-          A cake, for you
+        <h2 className="text-3xl md:text-5xl font-display font-medium text-gradient-warm text-center leading-tight mb-3 w-full">
+          <ET fid="c_title" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="A cake, for you" />
         </h2>
-        <p className="text-sm text-pink-100/70 text-center mb-10 max-w-sm">
-          Light the candles, make a wish, then drag down to cut.
+        <p className="text-sm text-pink-100/70 text-center mb-10 max-w-sm w-full">
+          <ET fid="c_sub" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="Light the candles, make a wish, then drag down to cut." multiline />
         </p>
-        <Cake onComplete={onComplete} />
+        <div className={editMode ? "pointer-events-none opacity-80" : ""}>
+          <Cake onComplete={() => !editMode && onComplete()} />
+        </div>
+        {editMode && (
+          <button className="bliss-btn-pill bliss-btn-pill-pink mt-6 pointer-events-none">
+            Continue →
+          </button>
+        )}
       </div>
     </section>
   );
@@ -304,6 +350,7 @@ function CakeSlide({ onComplete }: { onComplete: () => void }) {
 function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { onContinue: () => void, customData: any, editMode: boolean, onFieldChange?: any }) {
   const [activeSong, setActiveSong] = useState(1);
   const [playing, setPlaying] = useState(false);
+  const [audioModalOpen, setAudioModalOpen] = useState(false);
   
   const playlist = [
     { id: 1, title: customData.p_song1 || "Sia", artist: customData.p_artist1 || "Special Vibe", image: customData.p_img1 || "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=600", caption: customData.p_cap1 || "Happy Birthday to the one who knows all my secrets and still chooses to stay.", url: customData.p_url1 || "" },
@@ -316,13 +363,13 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
 
   useEffect(() => {
     if (audioRef.current) {
-      if (playing && song.url) {
+      if (playing && song.url && !editMode) {
         audioRef.current.play().catch(() => setPlaying(false));
       } else {
         audioRef.current.pause();
       }
     }
-  }, [playing, song.url]);
+  }, [playing, song.url, editMode]);
 
   return (
     <section className="min-h-screen bliss-gradient-bg p-6 md:p-12 flex flex-col items-center">
@@ -346,11 +393,11 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
               />
             )}
             <p className="font-script text-2xl text-center mt-3 text-purple-800">
-              <ET fid={`p_song${song.id}`} data={customData} editMode={editMode} onChange={onFieldChange} />
+              <ET fid={`p_song${song.id}`} data={customData} editMode={editMode} onChange={onFieldChange} defaultText={song.title} />
             </p>
           </div>
           <p className="text-pink-100/80 text-center mt-6 text-sm italic px-4 leading-relaxed">
-            "<ET fid={`p_cap${song.id}`} data={customData} editMode={editMode} onChange={onFieldChange} multiline />"
+            "<ET fid={`p_cap${song.id}`} data={customData} editMode={editMode} onChange={onFieldChange} multiline defaultText={song.caption} />"
           </p>
         </div>
 
@@ -365,7 +412,7 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
                 <button
                   key={s.id}
                   onClick={() => { setActiveSong(s.id); if (!playing) setPlaying(true); }}
-                  className="w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-all"
+                  className={`w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-all ${editMode ? "pointer-events-none" : ""}`}
                   style={{
                     background: active ? "linear-gradient(135deg, rgba(255,45,135,0.4), rgba(178,102,255,0.3))" : "rgba(255,255,255,0.05)",
                     border: active ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.05)",
@@ -375,9 +422,9 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
                        style={{ background: active ? "rgba(255,255,255,0.2)" : "rgba(255,45,135,0.8)", color: "white" }}>
                     {active && playing ? <Pause size={16} /> : <Play size={16} />}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-white truncate"><ET fid={`p_song${s.id}`} data={customData} editMode={editMode} onChange={onFieldChange} /></p>
-                    <p className="text-xs text-pink-100/60"><ET fid={`p_artist${s.id}`} data={customData} editMode={editMode} onChange={onFieldChange} /></p>
+                  <div className="flex-1 min-w-0 pointer-events-auto">
+                    <p className="font-medium text-sm text-white truncate"><ET fid={`p_song${s.id}`} data={customData} editMode={editMode} onChange={onFieldChange} defaultText={s.title} /></p>
+                    <p className="text-xs text-pink-100/60"><ET fid={`p_artist${s.id}`} data={customData} editMode={editMode} onChange={onFieldChange} defaultText={s.artist} /></p>
                   </div>
                   {active && (
                     <div className="flex gap-0.5 items-end h-5">
@@ -393,16 +440,24 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
           </div>
 
           {editMode && (
-            <div className="mt-4 p-4 rounded-xl bg-white/10 border border-white/20">
-              <h4 className="text-sm font-medium text-white mb-2">Change Audio for "{song.title}"</h4>
+            <div className="mt-4 p-4 rounded-xl bg-white/10 border border-white/20 text-center">
+              <h4 className="text-sm font-medium text-white mb-3">Change Audio for "{song.title}"</h4>
+              <button onClick={() => setAudioModalOpen(true)} className="bliss-btn-pill bg-purple-500 hover:bg-purple-600 text-white border-none py-1.5 px-4 text-xs">
+                Select Audio from Library
+              </button>
+            </div>
+          )}
+
+          {audioModalOpen && (
+            <div className="fixed inset-0 z-[600] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
               <SongLibraryPopup
-                onClose={() => {}} // inline usage
-                onSelect={(selectedSong) => onFieldChange?.(`p_url${song.id}`, selectedSong.url)}
+                onClose={() => setAudioModalOpen(false)}
+                onSelect={(selectedSong) => { onFieldChange?.(`p_url${song.id}`, selectedSong.url); setAudioModalOpen(false); }}
               />
             </div>
           )}
 
-          <button onClick={onContinue} className="bliss-btn-pill bliss-btn-pill-pink w-full mt-6">
+          <button onClick={() => !editMode && onContinue()} className="bliss-btn-pill bliss-btn-pill-pink w-full mt-6" style={{ opacity: editMode ? 0.5 : 1 }}>
             Continue →
           </button>
         </div>
@@ -412,7 +467,7 @@ function MemoriesSlide({ onContinue, customData, editMode, onFieldChange }: { on
 }
 
 /* ============ ENVELOPE ============ */
-function EnvelopeSlide({ onOpen }: { onOpen: () => void }) {
+function EnvelopeSlide({ onOpen, editMode }: { onOpen: () => void, editMode: boolean }) {
   const [open, setOpen] = useState(false);
   const startY = useRef<number | null>(null);
   const [dragY, setDragY] = useState(0);
@@ -443,24 +498,24 @@ function EnvelopeSlide({ onOpen }: { onOpen: () => void }) {
         </h2>
 
         <div
-          className="bliss-envelope-wrap flex justify-center select-none touch-none cursor-grab active:cursor-grabbing"
-          onMouseDown={(e) => begin(e.clientY)}
+          className={`bliss-envelope-wrap flex justify-center select-none touch-none ${editMode ? "pointer-events-none" : "cursor-grab active:cursor-grabbing"}`}
+          onMouseDown={(e) => !editMode && begin(e.clientY)}
           onMouseMove={(e) => startY.current !== null && move(e.clientY)}
           onMouseUp={end}
           onMouseLeave={end}
-          onTouchStart={(e) => begin(e.touches[0].clientY)}
-          onTouchMove={(e) => move(e.touches[0].clientY)}
+          onTouchStart={(e) => !editMode && begin(e.touches[0].clientY)}
+          onTouchMove={(e) => !editMode && move(e.touches[0].clientY)}
           onTouchEnd={end}
-          style={{ transform: open ? "none" : `translateY(${dragY * 0.4}px)`, transition: open ? "none" : "transform 0.2s" }}
+          style={{ transform: open || editMode ? "none" : `translateY(${dragY * 0.4}px)`, transition: open ? "none" : "transform 0.2s" }}
         >
-          <div className={`bliss-envelope ${open ? "open" : ""}`}>
+          <div className={`bliss-envelope ${open || editMode ? "open" : ""}`}>
             <div className="bliss-envelope-letter-peek" />
             <div className="bliss-envelope-body-front" />
             <div className="bliss-envelope-flap" />
           </div>
         </div>
 
-        <div className={`mt-10 flex flex-col items-center gap-1 text-pink-100/80 ${open ? "opacity-0" : "animate-slide-hint"}`}>
+        <div className={`mt-10 flex flex-col items-center gap-1 text-pink-100/80 ${open || editMode ? "opacity-0" : "animate-slide-hint"}`}>
           <ChevronUp size={22} />
           <p className="text-sm tracking-[0.2em] uppercase">Slide up to open</p>
         </div>
@@ -512,19 +567,18 @@ function LetterSlide({ onReset, customData, editMode, onFieldChange }: { onReset
             <span>{date}</span>
           </div>
           <h1 className="font-display text-3xl md:text-4xl font-medium text-[#5a1d3a] mb-1">
-            Dear <ET fid="s0_recipient" data={customData} editMode={editMode} onChange={onFieldChange} />,
+            <ET fid="l_greeting" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="Happy Birthday, my favorite person." />
           </h1>
           <div className="h-px bg-[#c0392b]/30 my-4" />
           <p className="text-xl md:text-2xl leading-snug text-[#3a1d2a]">
-            Happy Birthday, my favorite person.
+            <ET fid="l_msg" data={customData} editMode={editMode} onChange={onFieldChange} multiline defaultText="Thanks for coming into my life and making it better with your presence." />
           </p>
           <p className="text-lg md:text-xl leading-relaxed text-[#3a1d2a] mt-3">
-            <ET fid="l_msg" data={customData} editMode={editMode} onChange={onFieldChange} multiline /> You make every ordinary day feel like a celebration, and today the whole world gets to celebrate <em>you</em>.
+            <ET fid="l_closing" data={customData} editMode={editMode} onChange={onFieldChange} multiline defaultText="Here's to your laughter, your light, and every wish I'm quietly making for you tonight." />
           </p>
-          <p className="text-lg md:text-xl leading-relaxed text-[#3a1d2a] mt-3">
-            Here's to your laughter, your light, and every wish I'm quietly making for you tonight.
+          <p className="text-2xl mt-6 text-[#5a1d3a]">
+            <ET fid="l_signoff" data={customData} editMode={editMode} onChange={onFieldChange} defaultText="— with all my heart ❤" />
           </p>
-          <p className="text-2xl mt-6 text-[#5a1d3a]">— with all my heart ❤</p>
 
           {sealed && (
             <div className="bliss-stamp">
@@ -535,16 +589,16 @@ function LetterSlide({ onReset, customData, editMode, onFieldChange }: { onReset
           )}
         </div>
 
-        <div className="flex flex-wrap gap-3 justify-center">
-          <button onClick={onReset} className="bliss-btn-pill inline-flex items-center gap-2">
+        <div className={`flex flex-wrap gap-3 justify-center ${editMode ? "opacity-50 pointer-events-none" : ""}`}>
+          <button onClick={() => !editMode && onReset()} className="bliss-btn-pill inline-flex items-center gap-2">
             <RotateCcw size={14} /> Experience again
           </button>
           {!sealed ? (
-            <button onClick={() => setSealed(true)} className="bliss-btn-pill bliss-btn-pill-pink inline-flex items-center gap-2">
+            <button onClick={() => !editMode && setSealed(true)} className="bliss-btn-pill bliss-btn-pill-pink inline-flex items-center gap-2">
               <Stamp size={14} /> Seal the letter
             </button>
           ) : (
-            <button onClick={handleShare} disabled={sharing} className="bliss-btn-pill bliss-btn-pill-pink inline-flex items-center gap-2">
+            <button onClick={() => !editMode && handleShare()} disabled={sharing || editMode} className="bliss-btn-pill bliss-btn-pill-pink inline-flex items-center gap-2">
               <Share2 size={14} /> {sharing ? "Preparing…" : "Share"}
             </button>
           )}

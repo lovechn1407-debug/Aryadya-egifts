@@ -298,10 +298,32 @@ export const PRODUCT_REGISTRY: Product[] = [
         fields: [
           { id: "s0_recipient", label: "Recipient Name", type: "text", defaultValue: "Madam Ji" },
           { id: "s0_sub", label: "Subtitle", type: "text", defaultValue: "it's your day to shine." },
+          { id: "s0_p1", label: "Paragraph 1", type: "textarea", defaultValue: "I've set up something" },
+          { id: "s0_p1_sub", label: "Paragraph 1 Subtitle", type: "textarea", defaultValue: "a little special — just for you." },
+          { id: "s0_p2", label: "Paragraph 2", type: "textarea", defaultValue: "Your light" },
+          { id: "s0_p2_sub", label: "Paragraph 2 Subtitle", type: "textarea", defaultValue: "is pretty much your magic." },
         ],
       },
       {
         slideNumber: 1,
+        title: "Balloons Slide",
+        description: "Interactive balloons",
+        fields: [
+          { id: "b_title", label: "Balloons Title", type: "text", defaultValue: "Pop a few balloons" },
+          { id: "b_sub", label: "Balloons Subtitle", type: "textarea", defaultValue: "Hover or tap. Get to 8 to unlock the cake." },
+        ],
+      },
+      {
+        slideNumber: 2,
+        title: "Cake Slide",
+        description: "Interactive birthday cake",
+        fields: [
+          { id: "c_title", label: "Cake Title", type: "text", defaultValue: "A cake, for you" },
+          { id: "c_sub", label: "Cake Subtitle", type: "textarea", defaultValue: "Light the candles, make a wish, then drag down to cut." },
+        ],
+      },
+      {
+        slideNumber: 3,
         title: "Playlist & Memories",
         description: "Songs and captions",
         fields: [
@@ -325,11 +347,14 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 2,
+        slideNumber: 5,
         title: "Final Letter",
         description: "The sealed birthday letter",
         fields: [
+          { id: "l_greeting", label: "Greeting (e.g. Happy Birthday...)", type: "textarea", defaultValue: "Happy Birthday, my favorite person." },
           { id: "l_msg", label: "Final Message", type: "textarea", defaultValue: "Thanks for coming into my life and making it better with your presence." },
+          { id: "l_closing", label: "Closing Paragraph", type: "textarea", defaultValue: "Here's to your laughter, your light, and every wish I'm quietly making for you tonight." },
+          { id: "l_signoff", label: "Sign Off", type: "text", defaultValue: "— with all my heart ❤" },
         ],
       },
     ],
