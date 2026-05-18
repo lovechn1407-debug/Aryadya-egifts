@@ -93,7 +93,7 @@ export async function getSectionsDB(): Promise<DisplaySection[]> {
 
 export async function getVisibleSectionsDB(): Promise<DisplaySection[]> {
   const all = await getSectionsDB();
-  return all.filter(s => s.visible).sort((a, b) => a.order - b.order);
+  return all.filter(s => s.visible).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
 export async function saveSectionDB(section: DisplaySection): Promise<void> {
