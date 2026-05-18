@@ -1544,7 +1544,7 @@ function Footer({ settings }: { settings: Settings | null }) {
           color: "#64748B"
         }}>
           <div>
-            <span>© {new Date().getFullYear()} A Product of<strong>AS-STUDIOS</strong>. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} A Product of <strong>AS-STUDIOS</strong></span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span>Made with</span>
