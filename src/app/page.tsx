@@ -225,8 +225,9 @@ function HowItWorks() {
                     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 }}>🎂</div>
                   </div>
                   <div style={{ padding: 12 }}>
-                    <div style={{ width: "80%", height: 12, background: "#E2E8F0", borderRadius: 4, marginBottom: 8 }} />
-                    <div style={{ width: "50%", height: 10, background: "#F1F5F9", borderRadius: 4 }} />
+                    <div style={{ fontSize: 13, fontWeight: 800, color: "#1A1A2E", marginBottom: 2 }}>Birthday Site 1</div>
+                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 8 }}>₹99.00</div>
+                    <div style={{ width: "100%", padding: "4px 0", background: "#F1F5F9", color: "#475569", fontSize: 10, fontWeight: 700, textAlign: "center", borderRadius: 4 }}>Live Preview</div>
                   </div>
                 </div>
                 <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #F1F5F9" }}>
@@ -235,8 +236,9 @@ function HowItWorks() {
                     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 }}>💌</div>
                   </div>
                   <div style={{ padding: 12 }}>
-                    <div style={{ width: "90%", height: 12, background: "#E2E8F0", borderRadius: 4, marginBottom: 8 }} />
-                    <div style={{ width: "60%", height: 10, background: "#F1F5F9", borderRadius: 4 }} />
+                    <div style={{ fontSize: 13, fontWeight: 800, color: "#1A1A2E", marginBottom: 2 }}>Love Letter</div>
+                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 8 }}>₹149.00</div>
+                    <div style={{ width: "100%", padding: "4px 0", background: "#F1F5F9", color: "#475569", fontSize: 10, fontWeight: 700, textAlign: "center", borderRadius: 4 }}>Live Preview</div>
                   </div>
                 </div>
               </div>
@@ -266,17 +268,20 @@ function HowItWorks() {
           <div style={{ flex: "1 1 400px", order: 1, position: "relative" }}>
             <div style={{ background: "#fff", borderRadius: 20, padding: 30, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)", border: "1px solid #E2E8F0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed #E2E8F0", paddingBottom: 20, marginBottom: 20 }}>
-                <div style={{ width: "40%", height: 16, background: "#1A1A2E", borderRadius: 4 }} />
-                <div style={{ width: "20%", height: 24, background: "#10B981", borderRadius: 6 }} />
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#1A1A2E" }}>Order Total</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: "#10B981" }}>₹99</div>
               </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#64748B", marginBottom: 8, textTransform: "uppercase" }}>Payment Method</div>
               <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-                <div style={{ width: 40, height: 30, background: "#F1F5F9", borderRadius: 4, border: "1px solid #E2E8F0" }} />
-                <div style={{ width: 40, height: 30, background: "#F1F5F9", borderRadius: 4, border: "1px solid #E2E8F0" }} />
-                <div style={{ width: 40, height: 30, background: "#F1F5F9", borderRadius: 4, border: "1px solid #E2E8F0" }} />
+                <div style={{ flex: 1, height: 36, background: "#F1F5F9", borderRadius: 6, border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#334155" }}>UPI</div>
+                <div style={{ flex: 1, height: 36, background: "#F1F5F9", borderRadius: 6, border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#334155" }}>Card</div>
+                <div style={{ flex: 1, height: 36, background: "#F1F5F9", borderRadius: 6, border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#334155" }}>NetBank</div>
               </div>
-              <div style={{ width: "100%", height: 44, background: "#F1F5F9", borderRadius: 8, marginBottom: 12 }} />
-              <div style={{ width: "100%", height: 44, background: "#1A1A2E", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ width: "30%", height: 12, background: "#fff", borderRadius: 4 }} />
+              <div style={{ width: "100%", height: 44, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0", display: "flex", alignItems: "center", padding: "0 12px", boxSizing: "border-box", marginBottom: 16, fontSize: 13, color: "#94A3B8" }}>
+                name@example.com
+              </div>
+              <div style={{ width: "100%", height: 48, background: "#1A1A2E", color: "#fff", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 800, boxShadow: "0 4px 12px rgba(26,26,46,0.3)" }}>
+                Pay Securely
               </div>
             </div>
             <div style={{ position: "absolute", bottom: -20, left: -20, width: 200, height: 200, background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)", zIndex: -1, pointerEvents: "none" }} />
@@ -304,30 +309,28 @@ function HowItWorks() {
           <div style={{ flex: "1 1 400px", order: 2, position: "relative" }}>
             <div style={{ display: "flex", gap: 16 }}>
               <div style={{ flex: 1, background: "#fff", borderRadius: 20, padding: 20, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)", border: "1px solid #E2E8F0" }}>
-                <div style={{ width: "40%", height: 14, background: "#94A3B8", borderRadius: 4, marginBottom: 20 }} />
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ width: "30%", height: 10, background: "#CBD5E1", borderRadius: 4, marginBottom: 8 }} />
-                  <div style={{ width: "100%", height: 36, background: "#F1F5F9", borderRadius: 8, border: "1px solid #E2E8F0", padding: "10px", boxSizing: "border-box" }}>
-                    <div style={{ width: "50%", height: "100%", background: "#94A3B8", borderRadius: 4 }} />
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#1A1A2E", marginBottom: 16 }}>Live Editor</div>
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 4 }}>Main Heading</div>
+                  <div style={{ width: "100%", background: "#F8FAFC", borderRadius: 6, border: "1px solid #E2E8F0", padding: "8px 10px", boxSizing: "border-box", fontSize: 12, color: "#0F172A", fontWeight: 600 }}>
+                    Happy Birthday Love!
                   </div>
                 </div>
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ width: "40%", height: 10, background: "#CBD5E1", borderRadius: 4, marginBottom: 8 }} />
-                  <div style={{ width: "100%", height: 60, background: "#F1F5F9", borderRadius: 8, border: "1px solid #E2E8F0", padding: "10px", boxSizing: "border-box" }}>
-                    <div style={{ width: "80%", height: 8, background: "#94A3B8", borderRadius: 4, marginBottom: 6 }} />
-                    <div style={{ width: "60%", height: 8, background: "#94A3B8", borderRadius: 4 }} />
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 4 }}>Personal Message</div>
+                  <div style={{ width: "100%", height: 60, background: "#F8FAFC", borderRadius: 6, border: "1px solid #E2E8F0", padding: "8px 10px", boxSizing: "border-box", fontSize: 11, color: "#475569", lineHeight: 1.5 }}>
+                    Wishing you the most amazing day ever. You mean the world to me.
                   </div>
                 </div>
-                <div style={{ width: "100%", height: 36, background: "#6366F1", borderRadius: 8 }} />
+                <div style={{ width: "100%", padding: "10px 0", background: "#6366F1", color: "#fff", borderRadius: 8, textAlign: "center", fontSize: 13, fontWeight: 700 }}>Save Changes</div>
               </div>
               <div style={{ width: 140, flexShrink: 0, background: "#0F172A", borderRadius: 24, padding: 6, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.3)" }}>
                 <div style={{ width: "100%", height: "100%", background: "#fff", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                   <div style={{ height: 60, background: "#FF9A9E", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 24 }}>🎂</span></div>
-                  <div style={{ padding: 12, flex: 1 }}>
-                    <div style={{ width: "80%", height: 8, background: "#64748B", borderRadius: 4, margin: "0 auto 8px" }} />
-                    <div style={{ width: "100%", height: 6, background: "#CBD5E1", borderRadius: 4, marginBottom: 4 }} />
-                    <div style={{ width: "90%", height: 6, background: "#CBD5E1", borderRadius: 4, marginBottom: 12 }} />
-                    <div style={{ width: "60%", height: 24, background: "#E91E8C", borderRadius: 99, margin: "0 auto" }} />
+                  <div style={{ padding: "16px 10px", flex: 1, textAlign: "center" }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: "#0F172A", marginBottom: 8, lineHeight: 1.2 }}>Happy Birthday Love!</div>
+                    <div style={{ fontSize: 7, color: "#64748B", marginBottom: 12, lineHeight: 1.4 }}>Wishing you the most amazing day ever. You mean the world to me.</div>
+                    <div style={{ width: "80%", padding: "6px 0", background: "#E91E8C", color: "#fff", borderRadius: 99, margin: "0 auto", fontSize: 8, fontWeight: 700 }}>Open Gift</div>
                   </div>
                 </div>
               </div>
@@ -356,33 +359,30 @@ function HowItWorks() {
           <div style={{ flex: "1 1 400px", order: 1, position: "relative" }}>
             <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)", border: "1px solid #E2E8F0", overflow: "hidden" }}>
               <div style={{ padding: "16px 20px", background: "linear-gradient(135deg, #F8FAFC, #F1F5F9)", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: 800, color: "#0F172A" }}>Audio Library</span>
+                <span style={{ fontWeight: 800, color: "#0F172A", fontSize: 15 }}>Audio Library</span>
                 <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#fff", border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B", fontSize: 12 }}>✕</div>
               </div>
               <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ border: "2px solid #D946EF", borderRadius: 12, padding: "12px", background: "#FDF4FF", display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#D946EF", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ width: 10, height: 10, background: "#fff", borderRadius: 2 }} />
-                  </div>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#D946EF", color: "#fff", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>❚❚</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ width: "60%", height: 12, background: "#A21CAF", borderRadius: 4, marginBottom: 6 }} />
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#701A75", marginBottom: 4 }}>A Thousand Years</div>
                     <div style={{ width: "100%", height: 4, background: "#F5D0FE", borderRadius: 4, position: "relative" }}>
                       <div style={{ width: "40%", height: "100%", background: "#D946EF", borderRadius: 4 }} />
                     </div>
                   </div>
                   <div style={{ padding: "6px 12px", background: "#A21CAF", color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: 6 }}>Select</div>
                 </div>
-                <div style={{ border: "2px solid #F1F5F9", borderRadius: 12, padding: "12px", background: "#fff", display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#F1F5F9", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ width: 0, height: 0, borderTop: "6px solid transparent", borderBottom: "6px solid transparent", borderLeft: "8px solid #64748B", marginLeft: 3 }} />
-                  </div>
+                <div style={{ border: "2px solid #E2E8F0", borderRadius: 12, padding: "12px", background: "#fff", display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#F1F5F9", color: "#64748B", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, paddingLeft: 2 }}>▶</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
-                      <div style={{ width: "50%", height: 12, background: "#0F172A", borderRadius: 4 }} />
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 2 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#0F172A" }}>Birthday Mashup</div>
                       <div style={{ padding: "2px 6px", background: "#FDF4FF", color: "#A21CAF", fontSize: 8, fontWeight: 800, borderRadius: 99 }}>🎶 3 Parts</div>
                     </div>
-                    <div style={{ width: "70%", height: 8, background: "#94A3B8", borderRadius: 4 }} />
+                    <div style={{ fontSize: 11, color: "#64748B" }}>Lo-fi Beats</div>
                   </div>
+                  <div style={{ padding: "6px 12px", background: "#EEF2FF", color: "#4338CA", fontSize: 10, fontWeight: 700, borderRadius: 6 }}>Parts ▼</div>
                 </div>
               </div>
             </div>
@@ -435,8 +435,8 @@ function HowItWorks() {
               </div>
               
               <div style={{ display: "flex", gap: 12 }}>
-                <div style={{ flex: 1, height: 44, background: "#F1F5F9", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B", fontWeight: 700, fontSize: 14 }}>Copy Link</div>
-                <div style={{ flex: 1, height: 44, background: "#25D366", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14 }}>WhatsApp</div>
+                <div style={{ flex: 1, height: 44, background: "#F1F5F9", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B", fontWeight: 700, fontSize: 13 }}>🔗 Copy Link</div>
+                <div style={{ flex: 1, height: 44, background: "#25D366", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13 }}>WhatsApp</div>
               </div>
             </div>
             <div style={{ position: "absolute", bottom: -20, right: -20, width: 200, height: 200, background: "radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)", zIndex: -1, pointerEvents: "none" }} />
