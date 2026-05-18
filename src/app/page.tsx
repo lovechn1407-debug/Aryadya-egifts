@@ -6,6 +6,70 @@ import type { Product, DisplaySection, SectionThemeConfig } from "@/lib/data";
 import type { Order } from "@/lib/data";
 import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB, Settings } from "@/lib/db";
 
+/* ── Modern UI SVG Icons ── */
+function GiftSVG({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <polyline points="20 12 20 22 4 22 4 12" />
+      <rect x="2" y="7" width="20" height="5" />
+      <line x1="12" y1="22" x2="12" y2="7" />
+      <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+      <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+    </svg>
+  );
+}
+
+function LockSVG({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function LightningSVG({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  );
+}
+
+function CustomizeSVG({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />
+    </svg>
+  );
+}
+
+function FireSVG({ size = 12, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+    </svg>
+  );
+}
+
+function SparklesSVG({ size = 12, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M12 3l1.912 5.813 6.088.087-4.872 3.652 1.83 5.861L12 14.838l-4.958 3.575 1.83-5.861L4 8.9l6.088-.087L12 3z" />
+    </svg>
+  );
+}
+
+function PremiumSVG({ size = 12, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M6 3h12l4 6-10 12L2 9z" />
+      <path d="M11 3 8 9l4 12 4-12-3-6" />
+      <path d="M2 9h20" />
+    </svg>
+  );
+}
+
 /* ── Marquee Bar ── */
 function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -145,7 +209,7 @@ function Hero() {
             textDecoration: "none", boxShadow: "0 8px 24px rgba(233,30,140,0.25)",
             transition: "transform 0.2s",
           }}>
-            Browse Gifts 🎁
+            Browse Gifts <GiftSVG size={18} color="#fff" />
           </a>
           <a href="#how" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
@@ -161,12 +225,12 @@ function Hero() {
         {/* Trust indicators */}
         <div style={{ display: "flex", gap: 28, justifyContent: "center", marginTop: 36, flexWrap: "wrap" }}>
           {[
-            { icon: "🔒", text: "Secure Payments" },
-            { icon: "⚡", text: "Instant Delivery" },
-            { icon: "✨", text: "Fully Customisable" },
+            { icon: <LockSVG size={16} color="#E91E8C" />, text: "Secure Payments" },
+            { icon: <LightningSVG size={16} color="#7C3AED" />, text: "Instant Delivery" },
+            { icon: <CustomizeSVG size={16} color="#6366F1" />, text: "Fully Customisable" },
           ].map(t => (
             <div key={t.text} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#9CA3AF", fontWeight: 500 }}>
-              <span>{t.icon}</span> {t.text}
+              <span style={{ display: "inline-flex", alignItems: "center" }}>{t.icon}</span> {t.text}
             </div>
           ))}
         </div>
@@ -474,8 +538,20 @@ function ProductCard({ product, accent, onCardClick }: { product: Product; accen
       onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${color}12`; }}
     >
       {product.badge && (
-        <div style={{ position: "absolute", top: 8, left: 8, zIndex: 10, padding: "4px 8px", background: product.badge === "hot" ? "#EF4444" : product.badge === "new" ? "#3B82F6" : product.badge === "specials" ? "#10B981" : "#F59E0B", color: "#fff", fontSize: 10, fontWeight: 900, borderRadius: 6, textTransform: "uppercase", letterSpacing: 0.5, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-          {product.badge === "hot" ? "🔥 HOT" : product.badge === "new" ? "✨ NEW" : product.badge === "specials" ? "🎁 SPECIAL" : "💎 PREMIUM"}
+        <div style={{
+          position: "absolute", top: 8, left: 8, zIndex: 10,
+          padding: "4px 8px",
+          background: product.badge === "hot" ? "#EF4444" : product.badge === "new" ? "#3B82F6" : product.badge === "specials" ? "#10B981" : "#F59E0B",
+          color: "#fff", fontSize: 10, fontWeight: 900, borderRadius: 6,
+          textTransform: "uppercase", letterSpacing: 0.5,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          display: "flex", alignItems: "center", gap: 5
+        }}>
+          {product.badge === "hot" && <FireSVG size={11} color="#fff" />}
+          {product.badge === "new" && <SparklesSVG size={11} color="#fff" />}
+          {product.badge === "specials" && <GiftSVG size={11} color="#fff" />}
+          {product.badge === "premium" && <PremiumSVG size={11} color="#fff" />}
+          {product.badge === "hot" ? "HOT" : product.badge === "new" ? "NEW" : product.badge === "specials" ? "SPECIAL" : "PREMIUM"}
         </div>
       )}
       {(product as any).showStock && (product as any).stockLeft > 0 && (
@@ -1274,7 +1350,7 @@ function AllGifts({ products, onCardClick }: { products: Product[]; onCardClick:
     <section id="gifts" style={{ padding: "60px clamp(16px,4vw,48px)" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <h2 style={{ fontSize: 28, fontWeight: 800, fontFamily: "'Nunito',sans-serif", color: "#1A1A2E" }}>
-          🎁 All Gift Pages
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}><GiftSVG size={28} color="#1A1A2E" /> All Gift Pages</span>
         </h2>
         <p style={{ fontSize: 15, color: "#9CA3AF", marginTop: 6 }}>Browse our complete collection</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 20, marginTop: 28 }}>
