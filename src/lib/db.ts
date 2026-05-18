@@ -24,6 +24,11 @@ export interface Settings {
     countdownTarget: string;
   };
   marquees?: Marquee[];
+  contactEmail?: string;
+  contactPhone?: string;
+  contactAddress?: string;
+  emailServiceBuy?: boolean;
+  emailServiceFinalize?: boolean;
 }
 
 export async function getSettingsDB(): Promise<Settings> {
@@ -37,7 +42,12 @@ export async function getSettingsDB(): Promise<Settings> {
       note: "",
       countdownEnabled: false,
       countdownTarget: ""
-    }
+    },
+    contactEmail: "lovechn1407@gmail.com",
+    contactPhone: "8383090874",
+    contactAddress: "main site :",
+    emailServiceBuy: true,
+    emailServiceFinalize: true
   };
 }
 

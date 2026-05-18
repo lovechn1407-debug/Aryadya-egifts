@@ -279,6 +279,54 @@ export default function SettingsPage() {
           {mqs.length === 0 && <p style={{ fontSize: 14, color: "#64748B", textAlign: "center", padding: "24px 0" }}>No announcements added.</p>}
         </div>
       </div>
+      <div style={{ background: "#fff", padding: 32, borderRadius: 16, border: "1px solid #E2E8F0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginTop: 24 }}>
+        <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Contact & Email Settings</h2>
+          <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>Configure your public contact details and email notifications.</p>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div>
+            <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Contact Email</label>
+            <input type="email" value={settings.contactEmail || ""} onChange={e => setSettings(s => ({ ...s, contactEmail: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} />
+          </div>
+          <div>
+            <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Contact Number</label>
+            <input type="text" value={settings.contactPhone || ""} onChange={e => setSettings(s => ({ ...s, contactPhone: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} />
+          </div>
+          <div>
+            <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Address / Main Site</label>
+            <input type="text" value={settings.contactAddress || ""} onChange={e => setSettings(s => ({ ...s, contactAddress: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} />
+          </div>
+          
+          <div style={{ background: "#F8FAFC", padding: 20, borderRadius: 12, border: "1px solid #E2E8F0", display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <label style={{ fontSize: 14, fontWeight: 700, color: "#1E293B" }}>Buy Notification Email</label>
+                <p style={{ fontSize: 12, color: "#64748B", marginTop: 4 }}>Send an email when a user makes a purchase.</p>
+              </div>
+              <label style={{ position: "relative", display: "inline-block", width: 50, height: 28 }}>
+                <input type="checkbox" checked={settings.emailServiceBuy ?? true} onChange={e => setSettings(s => ({ ...s, emailServiceBuy: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
+                <span style={{ position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0, background: (settings.emailServiceBuy ?? true) ? "#10B981" : "#CBD5E1", transition: "0.4s", borderRadius: 34 }}>
+                  <span style={{ position: "absolute", content: "''", height: 20, width: 20, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: (settings.emailServiceBuy ?? true) ? "translateX(22px)" : "none" }}></span>
+                </span>
+              </label>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <label style={{ fontSize: 14, fontWeight: 700, color: "#1E293B" }}>Finalize Notification Email</label>
+                <p style={{ fontSize: 12, color: "#64748B", marginTop: 4 }}>Send an email when a user finalizes their customization.</p>
+              </div>
+              <label style={{ position: "relative", display: "inline-block", width: 50, height: 28 }}>
+                <input type="checkbox" checked={settings.emailServiceFinalize ?? true} onChange={e => setSettings(s => ({ ...s, emailServiceFinalize: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
+                <span style={{ position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0, background: (settings.emailServiceFinalize ?? true) ? "#10B981" : "#CBD5E1", transition: "0.4s", borderRadius: 34 }}>
+                  <span style={{ position: "absolute", content: "''", height: 20, width: 20, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: (settings.emailServiceFinalize ?? true) ? "translateX(22px)" : "none" }}></span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

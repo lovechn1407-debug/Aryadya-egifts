@@ -71,15 +71,23 @@ function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> 
 }
 
 /* ── Navbar ── */
-function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
+function Navbar({ onLoginClick, settings }: { onLoginClick: () => void, settings: Settings | null }) {
   return (
-    <nav style={{
-      position: "sticky", top: 0, zIndex: 100,
-      background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)",
-      borderBottom: "1px solid rgba(0,0,0,0.06)",
-      padding: "0 clamp(16px,4vw,48px)",
-      display: "flex", alignItems: "center", height: 60, gap: 10,
-    }}>
+    <>
+      {settings && (settings.contactEmail || settings.contactPhone || settings.contactAddress) && (
+        <div style={{ background: "#1F2937", color: "#fff", padding: "8px 16px", fontSize: 12, display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 24, textAlign: "center" }}>
+          {settings.contactEmail && <span>📧 {settings.contactEmail}</span>}
+          {settings.contactPhone && <span>📞 {settings.contactPhone}</span>}
+          {settings.contactAddress && <span>📍 {settings.contactAddress}</span>}
+        </div>
+      )}
+      <nav style={{
+        position: "sticky", top: 0, zIndex: 100,
+        background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)",
+        borderBottom: "1px solid rgba(0,0,0,0.06)",
+        padding: "0 clamp(16px,4vw,48px)",
+        display: "flex", alignItems: "center", height: 60, gap: 10,
+      }}>
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
         <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 44, objectFit: "contain" }} />
       </Link>
@@ -96,6 +104,7 @@ function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
         padding: "7px 14px", borderRadius: 999, border: "1px solid rgba(0,0,0,0.08)",
       }}>Admin</Link>
     </nav>
+    </>
   );
 }
 
@@ -1041,9 +1050,11 @@ function Footer() {
       background: "#FAFAFA", borderTop: "1px solid rgba(0,0,0,0.06)",
       textAlign: "center",
     }}>
-      <p style={{ fontSize: 15, fontWeight: 700, color: "#E91E8C", fontFamily: "'Nunito',sans-serif" }}>
-        🎁 Aradhya E-Gifts
-      </p>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+        <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 36, objectFit: "contain" }} />
+        <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 600 }}>is a product of</span>
+        <img src="/as-studios.png" alt="AS Studios" style={{ height: 30, objectFit: "contain" }} />
+      </div>
       <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 8 }}>
         Personalised digital surprises for every occasion. Made with ❤️ in India.
       </p>
@@ -1088,7 +1099,7 @@ export default function HomePage() {
   return (
     <div>
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
-      <Navbar onLoginClick={() => setShowLogin(true)} />
+      <Navbar onLoginClick={() => setShowLogin(true)} settings={settings} />
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {selectedProduct && <ProductModal product={selectedProduct} accent={selectedAccent} onClose={() => setSelectedProduct(null)} />}
       <Hero />
