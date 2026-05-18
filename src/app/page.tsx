@@ -209,10 +209,6 @@ function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
       }}>
         My Orders
       </Link>
-      <Link href="/admin" style={{
-        fontSize: 12, fontWeight: 600, color: "#4A4A68", textDecoration: "none",
-        padding: "7px 14px", borderRadius: 999, border: "1px solid rgba(0,0,0,0.08)",
-      }}>Admin</Link>
     </nav>
   );
 }
@@ -298,7 +294,7 @@ function HowItWorks() {
   return (
     <section id="how" style={{ padding: "100px clamp(16px,4vw,48px)", background: "#FAFAFA", overflow: "hidden" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        
+
         <div style={{ textAlign: "center", marginBottom: 70 }}>
           <span style={{ background: "linear-gradient(135deg, #E91E8C 0%, #7C3AED 100%)", WebkitBackgroundClip: "text", color: "transparent", fontWeight: 800, fontSize: 13, textTransform: "uppercase", letterSpacing: 2 }}>
             The Process
@@ -531,7 +527,7 @@ function HowItWorks() {
               <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#10B981", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 24 }}>✓</div>
               <h4 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", margin: "0 0 8px" }}>Gift Ready!</h4>
               <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 24px" }}>Your custom digital gift is finalized.</p>
-              
+
               <div style={{ border: "2px dashed #E2E8F0", borderRadius: 16, padding: 16, background: "#F8FAFC", marginBottom: 20 }}>
                 {/* QR Code Mockup */}
                 <div style={{ width: 140, height: 140, background: "#fff", borderRadius: 8, margin: "0 auto", padding: 8, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4 }}>
@@ -551,7 +547,7 @@ function HowItWorks() {
                   <div style={{ background: "#0F172A", borderRadius: 4 }} />
                 </div>
               </div>
-              
+
               <div style={{ display: "flex", gap: 12 }}>
                 <div style={{ flex: 1, height: 44, background: "#F1F5F9", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B", fontWeight: 700, fontSize: 13 }}>🔗 Copy Link</div>
                 <div style={{ flex: 1, height: 44, background: "#25D366", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13 }}>WhatsApp</div>
@@ -623,7 +619,7 @@ function ProductCard({ product, accent, onCardClick }: { product: Product; accen
           {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 2, marginTop: 5 }}>
-          {[1,2,3,4,5].map(i => <span key={i} style={{ color: i <= Math.round(rating) ? "#F59E0B" : "#E5E7EB", fontSize: 11 }}>★</span>)}
+          {[1, 2, 3, 4, 5].map(i => <span key={i} style={{ color: i <= Math.round(rating) ? "#F59E0B" : "#E5E7EB", fontSize: 11 }}>★</span>)}
           <span style={{ fontSize: 10, color: "#9CA3AF", marginLeft: 2 }}>{rating.toFixed(1)}</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 7 }}>
@@ -697,7 +693,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
             {finalized.map(o => (
               <div key={o.id} style={{ background: "#F0FDF4", borderRadius: 12, padding: 16, border: "1px solid #BBF7D0", marginBottom: 10 }}>
                 <p style={{ fontWeight: 700, color: "#1F2937", fontSize: 14 }}>{o.productName}</p>
-                <p style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>For: {o.buyerName} · ₹{Math.floor(o.amount/100)}</p>
+                <p style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>For: {o.buyerName} · ₹{Math.floor(o.amount / 100)}</p>
                 <Link href={`/view/${o.id}`} onClick={onClose} style={{ display: "inline-block", marginTop: 10, background: "#10B981", color: "#fff", padding: "8px 18px", borderRadius: 999, textDecoration: "none", fontSize: 13, fontWeight: 700 }}>View Your Page 🔗</Link>
               </div>
             ))}
@@ -733,23 +729,23 @@ function ProductModal({ product, accent, onClose }: { product: Product; accent: 
         {/* Details pane */}
         <div style={{ flex: "1 1 260px", padding: "28px 24px" }}>
           <button onClick={onClose} style={{ float: "right", background: "#F3F4F6", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 18, color: "#6B7280" }}>×</button>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", lineHeight: 1.3, marginTop: 4, paddingRight: 36 }}>{product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu,"").trim()}</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", lineHeight: 1.3, marginTop: 4, paddingRight: 36 }}>{product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}</h2>
           <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 10 }}>
-            {[1,2,3,4,5].map(i => <span key={i} style={{ color: i <= Math.round(rating) ? "#F59E0B" : "#E5E7EB", fontSize: 18 }}>★</span>)}
+            {[1, 2, 3, 4, 5].map(i => <span key={i} style={{ color: i <= Math.round(rating) ? "#F59E0B" : "#E5E7EB", fontSize: 18 }}>★</span>)}
             <span style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", marginLeft: 4 }}>{rating.toFixed(1)}{reviewCount ? ` (${reviewCount})` : ""}</span>
           </div>
           <p style={{ fontSize: 13, color: "#6B7280", marginTop: 14, lineHeight: 1.7 }}>{product.tagline}</p>
-          <div style={{ marginTop: 16 }}>{product.slides.slice(0,5).map(s => <div key={s.slideNumber} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><div style={{ width: 7, height: 7, borderRadius: "50%", background: accent, flexShrink: 0 }} /><span style={{ fontSize: 13, color: "#374151" }}>{s.title}</span></div>)}</div>
+          <div style={{ marginTop: 16 }}>{product.slides.slice(0, 5).map(s => <div key={s.slideNumber} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><div style={{ width: 7, height: 7, borderRadius: "50%", background: accent, flexShrink: 0 }} /><span style={{ fontSize: 13, color: "#374151" }}>{s.title}</span></div>)}</div>
           <div style={{ margin: "20px 0", padding: "14px 0", borderTop: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "baseline", gap: 8 }}>
-            <span style={{ fontSize: 30, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price/100)}</span>
+            <span style={{ fontSize: 30, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
             {product.cuttedPrice && <span style={{ fontSize: 16, color: "#9CA3AF", textDecoration: "line-through", fontWeight: 600 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
             <span style={{ fontSize: 13, color: "#9CA3AF" }}>one-time</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <Link href={`/order/${product.id}`} style={{ display: "block", textAlign: "center", background: `linear-gradient(135deg,${accent},${accent}BB)`, color: "#fff", padding: "15px", borderRadius: 13, textDecoration: "none", fontWeight: 900, fontSize: 15, fontFamily: "'Nunito',sans-serif", boxShadow: `0 8px 24px ${accent}35` }}>Buy &amp; Personalise ₹{Math.floor(product.price/100)} →</Link>
+            <Link href={`/order/${product.id}`} style={{ display: "block", textAlign: "center", background: `linear-gradient(135deg,${accent},${accent}BB)`, color: "#fff", padding: "15px", borderRadius: 13, textDecoration: "none", fontWeight: 900, fontSize: 15, fontFamily: "'Nunito',sans-serif", boxShadow: `0 8px 24px ${accent}35` }}>Buy &amp; Personalise ₹{Math.floor(product.price / 100)} →</Link>
             <Link href={`/preview/${product.id}`} style={{ display: "block", textAlign: "center", background: "#F9FAFB", color: "#374151", padding: "12px", borderRadius: 13, textDecoration: "none", fontWeight: 700, fontSize: 13, border: "1px solid #E5E7EB" }}>🔍 View Full Preview</Link>
           </div>
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 16 }}>{["🔒 Secure","📩 Instant","💌 Shareable"].map(b => <span key={b} style={{ fontSize: 11, color: "#9CA3AF" }}>{b}</span>)}</div>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 16 }}>{["🔒 Secure", "📩 Instant", "💌 Shareable"].map(b => <span key={b} style={{ fontSize: 11, color: "#9CA3AF" }}>{b}</span>)}</div>
         </div>
       </div>
     </>
@@ -800,7 +796,7 @@ function SunRaySVG({ size = 44, color = "#fff", opacity = 0.25 }: { size?: numbe
   return (
     <svg width={size} height={size} viewBox="0 0 44 44" fill="none" style={{ opacity }}>
       <circle cx="22" cy="22" r="8" fill={color} />
-      {[0,45,90,135,180,225,270,315].map((deg, i) => (
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
         <line key={i} x1="22" y1="22"
           x2={22 + 16 * Math.cos(deg * Math.PI / 180)}
           y2={22 + 16 * Math.sin(deg * Math.PI / 180)}
@@ -820,7 +816,7 @@ function SparkSVG({ size = 20, color = "#fff", opacity = 1 }: { size?: number; c
 /* Theme → decorator renderer */
 function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionTheme> }) {
   const c = "rgba(255,255,255,0.9)";
-  
+
   if (theme.isPremium) {
     if (theme.id === "festival_plus") {
       // Rangoli / Mandala inspired background
@@ -893,7 +889,7 @@ function OccasionDecorators({ theme }: { theme: ReturnType<typeof getSectionThem
               {/* Wires */}
               <path d="M-10 10 Q 40 40 100 10 T 210 10" stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" fill="none" />
               <path d="M-10 20 Q 60 55 120 15 T 210 20" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" />
-              
+
               {/* Glowing LED Bulbs */}
               <circle cx="20" cy="18" r="2.5" fill="#fff" filter="drop-shadow(0 0 4px #fff)" className="twinkle-1" />
               <circle cx="60" cy="28" r="2.5" fill="#fff" filter="drop-shadow(0 0 4px #fff)" className="twinkle-2" />
@@ -1026,11 +1022,11 @@ function ArrowBtn({ dir, accent, onClick }: { dir: "left" | "right"; accent: str
 /* ── Cutout Style Helper ── */
 function getCutoutStyle(cutout?: string, color: string = "#ffffff"): React.CSSProperties {
   if (!cutout || cutout === "none") return { display: "none" };
-  
+
   let svg = "";
   let height = 10;
   let width = 20;
-  
+
   if (cutout === "zigzag") {
     // Sharp triangle edge
     svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,-5 10,10 20,-5" fill="${color}"/></svg>`;
@@ -1052,9 +1048,9 @@ function getCutoutStyle(cutout?: string, color: string = "#ffffff"): React.CSSPr
     width = 100;
     height = 20;
   }
-  
+
   if (!svg) return {};
-  
+
   const encoded = "data:image/svg+xml;utf8," + encodeURIComponent(svg);
   return {
     position: "absolute",
@@ -1087,13 +1083,13 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
-  
-  const [timeLeft, setTimeLeft] = useState<{d: number, h: number, m: number, s: number} | null>(null);
+
+  const [timeLeft, setTimeLeft] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
 
   useEffect(() => {
     if (!section.countdownEnabled || !section.countdownEndTime) return;
     const end = new Date(section.countdownEndTime).getTime();
-    
+
     const update = () => {
       const now = Date.now();
       const diff = end - now;
@@ -1152,7 +1148,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
         }} />
 
         <OccasionDecorators theme={theme} />
-        
+
         {/* Top Cutout */}
         {section.headerStyle === "new" && section.headerCutout && section.headerCutout !== "none" && (
           <div style={getCutoutStyle(section.headerCutout, "#ffffff")} />
@@ -1178,7 +1174,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
               </h2>
               <div style={{ height: 1, width: 40, background: "linear-gradient(270deg, transparent, rgba(255,255,255,0.6))" }} />
             </div>
-            
+
             {section.subtitle && (
               <p style={{
                 fontSize: "clamp(10px,1.5vw,12px)", color: "rgba(255,255,255,0.85)",
@@ -1190,9 +1186,9 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
                 {section.subtitle}
               </p>
             )}
-            
+
             {section.headerNoteEnabled && section.headerNote && (
-              <div 
+              <div
                 style={{
                   marginTop: 10,
                   padding: "4px 12px",
@@ -1208,7 +1204,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
                 dangerouslySetInnerHTML={{ __html: section.headerNote }}
               />
             )}
-            
+
             {timeLeft && (
               <div style={{ display: "flex", gap: 6, marginTop: 12, alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "rgba(255,255,255,0.9)" }}>Ends In:</span>
@@ -1260,7 +1256,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
                 {section.subtitle}
               </p>
               {section.headerNoteEnabled && section.headerNote && (
-                <div 
+                <div
                   style={{
                     marginTop: 6,
                     padding: "6px 12px",
@@ -1307,7 +1303,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
 
       {/* ── CARD SHELF — horizontal scroll with arrows ── */}
       <div style={{ background: theme.isPremium ? "transparent" : theme.bgLight, position: "relative" }}>
-        
+
         {/* Premium Background Effects */}
         {theme.isPremium && (
           <div style={{
@@ -1324,7 +1320,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
             pointerEvents: "none", zIndex: 0,
           }} />
         )}
-        
+
         {/* Glitter effect for Wedding++ */}
         {theme.id === "wedding_plus" && (
           <div className="twinkle-1" style={{
@@ -1369,7 +1365,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
             </div>
           ))}
         </div>
-        
+
         {/* Bottom Fade Effect for Plus Themes */}
         {section.theme.includes("_plus") && section.fadeEnabled && (
           <div style={{
@@ -1442,7 +1438,7 @@ function Footer({ settings }: { settings: Settings | null }) {
       }} />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 2 }}>
-        
+
         {/* Top footer grid */}
         <div style={{
           display: "grid",
@@ -1451,7 +1447,7 @@ function Footer({ settings }: { settings: Settings | null }) {
           textAlign: "left",
           marginBottom: 48
         }}>
-          
+
           {/* Column 1: Brand & Info (Both logos paired) */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -1490,11 +1486,6 @@ function Footer({ settings }: { settings: Settings | null }) {
               <li>
                 <a href="/my-orders" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 8 }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>
                   <PencilSVG size={14} color="currentColor" /> Personalise Drafts
-                </a>
-              </li>
-              <li>
-                <a href="/admin" style={{ color: "#64748B", textDecoration: "none", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 8 }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#64748B"}>
-                  <ShieldKeySVG size={14} color="currentColor" /> Admin Panel
                 </a>
               </li>
             </ul>
@@ -1559,7 +1550,8 @@ function Footer({ settings }: { settings: Settings | null }) {
 
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes heartbeat {
           0% { transform: scale(1); }
           50% { transform: scale(1.15); }
@@ -1608,7 +1600,7 @@ export default function HomePage() {
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {selectedProduct && <ProductModal product={selectedProduct} accent={selectedAccent} onClose={() => setSelectedProduct(null)} />}
       <Hero />
-      
+
       {loading ? (
         <section style={{ padding: "60px clamp(16px,4vw,48px)" }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -1619,7 +1611,7 @@ export default function HomePage() {
                 <div key={i} className="animate-pulse" style={{ width: "clamp(160px, calc(50vw - 26px), 260px)", height: 340, background: "#f9fafb", borderRadius: 24, border: "1px solid rgba(0,0,0,0.04)" }} />
               ))}
             </div>
-            
+
             <div style={{ marginTop: 80 }}>
               <div className="animate-pulse" style={{ width: 240, height: 32, background: "#e5e7eb", borderRadius: 8, marginBottom: 8 }} />
               <div className="animate-pulse" style={{ width: 340, height: 16, background: "#f3f4f6", borderRadius: 8, marginBottom: 32 }} />
