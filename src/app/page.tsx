@@ -71,23 +71,15 @@ function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> 
 }
 
 /* ── Navbar ── */
-function Navbar({ onLoginClick, settings }: { onLoginClick: () => void, settings: Settings | null }) {
+function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
   return (
-    <>
-      {settings && (settings.contactEmail || settings.contactPhone || settings.contactAddress) && (
-        <div style={{ background: "#1F2937", color: "#fff", padding: "8px 16px", fontSize: 12, display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 24, textAlign: "center" }}>
-          {settings.contactEmail && <span>📧 {settings.contactEmail}</span>}
-          {settings.contactPhone && <span>📞 {settings.contactPhone}</span>}
-          {settings.contactAddress && <span>📍 {settings.contactAddress}</span>}
-        </div>
-      )}
-      <nav style={{
-        position: "sticky", top: 0, zIndex: 100,
-        background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)",
-        borderBottom: "1px solid rgba(0,0,0,0.06)",
-        padding: "0 clamp(16px,4vw,48px)",
-        display: "flex", alignItems: "center", height: 60, gap: 10,
-      }}>
+    <nav style={{
+      position: "sticky", top: 0, zIndex: 100,
+      background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)",
+      borderBottom: "1px solid rgba(0,0,0,0.06)",
+      padding: "0 clamp(16px,4vw,48px)",
+      display: "flex", alignItems: "center", height: 60, gap: 10,
+    }}>
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
         <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 44, objectFit: "contain" }} />
       </Link>
@@ -104,7 +96,6 @@ function Navbar({ onLoginClick, settings }: { onLoginClick: () => void, settings
         padding: "7px 14px", borderRadius: 999, border: "1px solid rgba(0,0,0,0.08)",
       }}>Admin</Link>
     </nav>
-    </>
   );
 }
 
@@ -1043,7 +1034,7 @@ function AllGifts({ products, onCardClick }: { products: Product[]; onCardClick:
 }
 
 /* ── Footer ── */
-function Footer() {
+function Footer({ settings }: { settings: Settings | null }) {
   return (
     <footer style={{
       padding: "40px clamp(16px,4vw,48px) 24px",
@@ -1055,7 +1046,17 @@ function Footer() {
         <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 600 }}>is a product of</span>
         <img src="/as-studios.png" alt="AS Studios" style={{ height: 30, objectFit: "contain" }} />
       </div>
-      <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 8 }}>
+      
+      {settings && (settings.contactEmail || settings.contactPhone || settings.contactAddress) && (
+        <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: "#6B7280" }}>
+          <div style={{ fontWeight: 700, color: "#4B5563", marginBottom: 4 }}>Contact Us</div>
+          {settings.contactEmail && <div>📧 {settings.contactEmail}</div>}
+          {settings.contactPhone && <div>📞 {settings.contactPhone}</div>}
+          {settings.contactAddress && <div>📍 {settings.contactAddress}</div>}
+        </div>
+      )}
+
+      <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 24 }}>
         Personalised digital surprises for every occasion. Made with ❤️ in India.
       </p>
       <p style={{ fontSize: 12, color: "#D1D5DB", marginTop: 16 }}>
@@ -1099,7 +1100,7 @@ export default function HomePage() {
   return (
     <div>
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
-      <Navbar onLoginClick={() => setShowLogin(true)} settings={settings} />
+      <Navbar onLoginClick={() => setShowLogin(true)} />
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {selectedProduct && <ProductModal product={selectedProduct} accent={selectedAccent} onClose={() => setSelectedProduct(null)} />}
       <Hero />
@@ -1133,7 +1134,7 @@ export default function HomePage() {
         </>
       )}
       <HowItWorks />
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 }
