@@ -62,6 +62,11 @@ export interface Coupon {
   createdAt: string;
 }
 
+export interface SongPart {
+  label: string; // e.g. "Part 1", "Chorus", etc.
+  url: string;
+}
+
 export interface Song {
   id: string;
   name: string;
@@ -71,6 +76,8 @@ export interface Song {
   youtubeId?: string;
   startTime?: number;
   endTime?: number;
+  isMultiPart?: boolean;       // true for multi-part songs
+  parts?: SongPart[];          // array of parts (only when isMultiPart = true)
   createdAt: string;
 }
 
