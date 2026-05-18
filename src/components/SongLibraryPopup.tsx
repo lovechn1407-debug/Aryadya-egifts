@@ -131,12 +131,12 @@ export default function SongLibraryPopup({
     <div style={{
       position: "fixed", inset: 0, zIndex: 9999,
       background: "rgba(15,23,42,0.65)", backdropFilter: "blur(12px)",
-      display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
+      display: "flex", alignItems: "center", justifyContent: "center", padding: 12,
       fontFamily: "'Inter',sans-serif"
     }}>
       <div style={{
         background: "#fff", borderRadius: 20, width: "100%", maxWidth: 680,
-        maxHeight: "90vh", display: "flex", flexDirection: "column",
+        height: "85vh", maxHeight: 800, display: "flex", flexDirection: "column",
         boxShadow: "0 25px 50px -12px rgba(0,0,0,0.3)", overflow: "hidden"
       }}>
         {/* Header */}
