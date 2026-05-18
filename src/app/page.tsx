@@ -1291,31 +1291,144 @@ function AllGifts({ products, onCardClick }: { products: Product[]; onCardClick:
 function Footer({ settings }: { settings: Settings | null }) {
   return (
     <footer style={{
-      padding: "40px clamp(16px,4vw,48px) 24px",
-      background: "#FAFAFA", borderTop: "1px solid rgba(0,0,0,0.06)",
-      textAlign: "center",
+      background: "linear-gradient(to bottom, #0F172A, #020617)",
+      color: "#94A3B8",
+      padding: "60px clamp(16px,4vw,48px) 30px",
+      borderTop: "1px solid rgba(255,255,255,0.06)",
+      fontFamily: "'Nunito', sans-serif",
+      position: "relative",
+      overflow: "hidden"
     }}>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-        <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 36, objectFit: "contain" }} />
-        <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 600 }}>is a product of</span>
-        <img src="/as-studios.png" alt="AS Studios" style={{ height: 30, objectFit: "contain" }} />
-      </div>
-      
-      {settings && (settings.contactEmail || settings.contactPhone || settings.contactAddress) && (
-        <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: "#6B7280" }}>
-          <div style={{ fontWeight: 700, color: "#4B5563", marginBottom: 4 }}>Contact Us</div>
-          {settings.contactEmail && <div>📧 {settings.contactEmail}</div>}
-          {settings.contactPhone && <div>📞 {settings.contactPhone}</div>}
-          {settings.contactAddress && <div>📍 {settings.contactAddress}</div>}
-        </div>
-      )}
+      {/* Decorative Radial glow effect */}
+      <div style={{
+        position: "absolute",
+        top: -150,
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "min(600px, 100vw)",
+        height: 300,
+        background: "radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%)",
+        pointerEvents: "none"
+      }} />
 
-      <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 24 }}>
-        Personalised digital surprises for every occasion. Made with ❤️ in India.
-      </p>
-      <p style={{ fontSize: 12, color: "#D1D5DB", marginTop: 16 }}>
-        © {new Date().getFullYear()} Aradhya E-Gifts. All rights reserved.
-      </p>
+      <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 2 }}>
+        
+        {/* Top footer grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 40,
+          textAlign: "left",
+          marginBottom: 48
+        }}>
+          
+          {/* Column 1: Brand & Info */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 36, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+            </div>
+            <p style={{ fontSize: 13, lineHeight: 1.6, color: "#64748B" }}>
+              Crafting premium, custom-designed digital surprise web microsites that bring immense joy to your loved ones. Make their day magical in one single click.
+            </p>
+            {/* Badges/Info */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", background: "rgba(16, 185, 129, 0.1)", color: "#10B981", padding: "4px 8px", borderRadius: 4, letterSpacing: 0.5 }}>🔒 Secure Checkout</span>
+              <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", background: "rgba(124, 58, 237, 0.1)", color: "#A78BFA", padding: "4px 8px", borderRadius: 4, letterSpacing: 0.5 }}>⚡ Instant Live</span>
+            </div>
+          </div>
+
+          {/* Column 2: Quick Links */}
+          <div>
+            <h4 style={{ color: "#F8FAFC", fontSize: 15, fontWeight: 800, marginBottom: 16, textTransform: "uppercase", letterSpacing: 0.5 }}>Quick Navigation</h4>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
+              <li>
+                <a href="#" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>🏠 Home Page</a>
+              </li>
+              <li>
+                <a href="#gifts" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>🎁 Explore Surprises</a>
+              </li>
+              <li>
+                <a href="/my-orders" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>🛍️ Personalise Drafts</a>
+              </li>
+              <li>
+                <a href="/admin" style={{ color: "#64748B", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#64748B"}>🔐 Admin Panel</a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Contact Details */}
+          <div>
+            <h4 style={{ color: "#F8FAFC", fontSize: 15, fontWeight: 800, marginBottom: 16, textTransform: "uppercase", letterSpacing: 0.5 }}>Get In Touch</h4>
+            {settings && (settings.contactEmail || settings.contactPhone || settings.contactAddress) ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 13 }}>
+                {settings.contactEmail && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 15 }}>📧</span>
+                    <a href={`mailto:${settings.contactEmail}`} style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>{settings.contactEmail}</a>
+                  </div>
+                )}
+                {settings.contactPhone && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 15 }}>📞</span>
+                    <a href={`tel:${settings.contactPhone}`} style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>{settings.contactPhone}</a>
+                  </div>
+                )}
+                {settings.contactAddress && (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <span style={{ fontSize: 15, marginTop: 2 }}>📍</span>
+                    <span style={{ color: "#94A3B8", lineHeight: 1.4 }}>{settings.contactAddress}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p style={{ fontSize: 13, color: "#64748B" }}>Support available 24/7. Reach out via email or phone for order queries.</p>
+            )}
+          </div>
+
+          {/* Column 4: Studio Info */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <h4 style={{ color: "#F8FAFC", fontSize: 15, fontWeight: 800, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Created By</h4>
+            <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 12, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+              <span style={{ fontSize: 10, color: "#64748B", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>A Proud Product of</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <img src="/as-studios.png" alt="AS Studios" style={{ height: 26, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom copyright / India love bar */}
+        <div style={{
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          paddingTop: 24,
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 16,
+          fontSize: 12,
+          color: "#64748B"
+        }}>
+          <div>
+            <span>© {new Date().getFullYear()} <strong>Aradhya E-Gifts</strong>. All rights reserved.</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span>Made with</span>
+            <span style={{ color: "#EF4444", display: "inline-block", animation: "heartbeat 1.5s infinite" }}>❤️</span>
+            <span>in India</span>
+          </div>
+        </div>
+
+      </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes heartbeat {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.15); }
+          100% { transform: scale(1); }
+        }
+      `}} />
     </footer>
   );
 }
