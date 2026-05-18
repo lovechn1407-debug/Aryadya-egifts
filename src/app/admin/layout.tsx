@@ -46,12 +46,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {/* Logo */}
         <div style={{ padding: "24px 20px 20px" }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #0F172A, #334155)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 16, fontWeight: 900 }}>
-              A
-            </div>
+            <img src="/logo.png" alt="Aradhya E-Gifts Admin" style={{ height: 40, objectFit: "contain" }} />
             <div>
-              <span style={{ fontSize: 16, fontWeight: 800, color: "#0F172A", display: "block", lineHeight: 1 }}>Aradhya</span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5 }}>Admin Workspace</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4, display: "block" }}>Admin Workspace</span>
             </div>
           </Link>
         </div>

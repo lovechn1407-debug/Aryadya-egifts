@@ -34,8 +34,8 @@ export default function AdminLoginPage() {
     }}>
       <div className="fade-in-up" style={{ maxWidth: 420, width: "100%", padding: "0 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: "linear-gradient(135deg, #0F172A, #334155)", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 24, fontWeight: 900, marginBottom: 16 }}>
-            A
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+            <img src="/logo.png" alt="Admin Logo" style={{ height: 48, objectFit: "contain" }} />
           </div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: "#0F172A", letterSpacing: -0.5 }}>
             Welcome back

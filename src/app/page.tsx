@@ -80,10 +80,8 @@ function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
       padding: "0 clamp(16px,4vw,48px)",
       display: "flex", alignItems: "center", height: 60, gap: 10,
     }}>
-      <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 24 }}>🎁</span>
-        <span style={{ fontSize: 18, fontWeight: 900, fontFamily: "'Nunito',sans-serif", color: "#E91E8C" }}>Aradhya</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "#9CA3AF" }}>E-Gifts</span>
+      <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+        <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 44, objectFit: "contain" }} />
       </Link>
       <div style={{ flex: 1 }} />
       <Link href="/my-orders" style={{
