@@ -96,6 +96,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
 
   const [order, setOrder] = useState<Order | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [customizations, setCustomizations] = useState<Record<string, string>>({});
   const [activeSlide, setActiveSlide] = useState(-1);
   const [locked, setLocked] = useState(false);
@@ -108,21 +109,34 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
 
   useEffect(() => {
     (async () => {
-      const o = await getOrderDB(orderId);
-      if (!o) return;
-      setOrder(o);
-      if (o.status === "finalized") setLocked(true);
-      const p = await getProductDB(o.productId);
-      if (!p) return;
-      setProduct(p);
-      const defaults: Record<string, string> = {};
-      const cust = o.customizations || {};
-      p.slides.forEach(sl => sl.fields.forEach(f => {
-        defaults[f.id] = cust[f.id] ?? f.defaultValue;
-      }));
-      setCustomizations(defaults);
-      const slides = getSlideList(o.productId);
-      if (slides.length > 0) setActiveSlide(slides[0].n);
+      setLoading(true);
+      try {
+        const o = await getOrderDB(orderId);
+        if (!o) {
+          setLoading(false);
+          return;
+        }
+        setOrder(o);
+        if (o.status === "finalized") setLocked(true);
+        const p = await getProductDB(o.productId);
+        if (!p) {
+          setLoading(false);
+          return;
+        }
+        setProduct(p);
+        const defaults: Record<string, string> = {};
+        const cust = o.customizations || {};
+        p.slides.forEach(sl => sl.fields.forEach(f => {
+          defaults[f.id] = cust[f.id] ?? f.defaultValue;
+        }));
+        setCustomizations(defaults);
+        const slides = getSlideList(o.productId);
+        if (slides.length > 0) setActiveSlide(slides[0].n);
+      } catch (err) {
+        console.error("Error loading editor:", err);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [orderId]);
 
@@ -161,13 +175,41 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
     }, 1200);
   };
 
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0A0A0F", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
+        <div style={{
+          width: 50,
+          height: 50,
+          border: "4px solid rgba(155, 89, 252, 0.15)",
+          borderTop: "4px solid #9B59FC",
+          borderRadius: "50%",
+          animation: "spin 1s linear infinite"
+        }} />
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}} />
+        <p style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: 16, fontWeight: 600, letterSpacing: 0.5 }}>Loading Web Editor...</p>
+      </div>
+    );
+  }
+
   if (!order || !product) {
     return (
       <div style={{ minHeight: "100vh", background: "#0A0A0F", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ textAlign: "center", color: "#fff" }}>
-          <p style={{ fontSize: 48 }}>🔍</p>
-          <h2 style={{ fontWeight: 700, marginTop: 12 }}>Order not found</h2>
-          <Link href="/" className="btn-primary" style={{ display: "inline-flex", marginTop: 20 }}>Go Home</Link>
+        <div style={{ textAlign: "center", color: "#fff", maxWidth: 440, padding: 24 }}>
+          <p style={{ fontSize: 56, marginBottom: 16 }}>🔍</p>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: "#fff", marginBottom: 12 }}>Order Not Found</h2>
+          <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+            We couldn't retrieve the details for this order. It might be due to a slow network or an incorrect link. Please check your order history.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <Link href="/" className="btn-primary" style={{ display: "inline-flex", justifyContent: "center", padding: "12px 24px", fontWeight: 700, textDecoration: "none", borderRadius: 10 }}>Go Home</Link>
+            <Link href="/my-orders" style={{ display: "inline-flex", justifyContent: "center", background: "rgba(255, 255, 255, 0.08)", color: "#fff", border: "1px solid rgba(255, 255, 255, 0.15)", padding: "12px 24px", fontWeight: 700, borderRadius: 10, textDecoration: "none", transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.15)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}>Go to Order Section</Link>
+          </div>
         </div>
       </div>
     );
