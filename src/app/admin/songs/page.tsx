@@ -6,10 +6,26 @@ import { getSongsDB, saveSongDB, deleteSongDB } from "@/lib/db";
 const BOT_TOKEN = "8832668653:AAER53dyUKzFn6lXK3ex2dtEEgErTTNSjlw";
 const CHAT_ID = "-1003915557006";
 
+interface MassEntry {
+  name: string;
+  description: string;
+  uploadType: "direct" | "upload";
+  url: string;
+  file: File | null;
+}
+
 export default function AdminSongsPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Mass upload
+  const [showMass, setShowMass] = useState(false);
+  const [massEntries, setMassEntries] = useState<MassEntry[]>([
+    { name: "", description: "", uploadType: "direct", url: "", file: null }
+  ]);
+  const [massSaving, setMassSaving] = useState(false);
+  const [massProgress, setMassProgress] = useState<string[]>([]);
 
   // Meta
   const [id, setId] = useState("");
@@ -220,6 +236,60 @@ export default function AdminSongsPage() {
     reload();
   };
 
+  // ── Mass Upload ───────────────────────────────────────────
+  const updateMassEntry = (idx: number, field: keyof MassEntry, value: any) => {
+    setMassEntries(prev => prev.map((e, i) => i === idx ? { ...e, [field]: value } : e));
+  };
+
+  const addMassEntry = () => {
+    setMassEntries(prev => [...prev, { name: "", description: "", uploadType: "direct", url: "", file: null }]);
+  };
+
+  const removeMassEntry = (idx: number) => {
+    setMassEntries(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleMassSave = async () => {
+    for (let i = 0; i < massEntries.length; i++) {
+      const e = massEntries[i];
+      if (!e.name.trim()) { alert(`Song ${i + 1}: Please provide a name.`); return; }
+      if (e.uploadType === "direct" && !e.url.trim()) { alert(`Song ${i + 1}: Please provide a URL.`); return; }
+      if (e.uploadType === "upload" && !e.file) { alert(`Song ${i + 1}: Please select a file.`); return; }
+    }
+    setMassSaving(true);
+    const progress: string[] = [];
+    for (let i = 0; i < massEntries.length; i++) {
+      const e = massEntries[i];
+      try {
+        let finalUrl = e.url.trim();
+        if (e.uploadType === "upload" && e.file) {
+          finalUrl = await uploadToTelegram(e.file, e.name.trim());
+        }
+        const song: Song = {
+          id: `song_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          name: e.name.trim(),
+          description: e.description.trim(),
+          url: finalUrl,
+          type: "direct",
+          isMultiPart: false,
+          createdAt: new Date().toISOString(),
+        };
+        await saveSongDB(song);
+        progress.push(`✅ ${e.name}`);
+      } catch (err: any) {
+        progress.push(`❌ ${e.name}: ${err.message}`);
+      }
+      setMassProgress([...progress]);
+    }
+    setMassSaving(false);
+    reload();
+    setTimeout(() => {
+      setShowMass(false);
+      setMassEntries([{ name: "", description: "", uploadType: "direct", url: "", file: null }]);
+      setMassProgress([]);
+    }, 2000);
+  };
+
   const inp: React.CSSProperties = {
     width: "100%", padding: "10px 14px", borderRadius: 8,
     border: "1px solid #CBD5E1", background: "#fff",
@@ -232,16 +302,85 @@ export default function AdminSongsPage() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: "#0F172A" }}>Audio Library</h1>
           <p style={{ color: "#64748B", fontSize: 14, marginTop: 4 }}>Manage background music and audio tracks for templates</p>
         </div>
-        <button onClick={() => { resetForm(); setShowCreate(!showCreate); }}
-          style={{ background: "#0F172A", color: "#fff", border: "none", borderRadius: 8, padding: "10px 16px", fontWeight: 600, cursor: "pointer" }}>
-          {showCreate ? "✕ Cancel" : "+ Add Song"}
-        </button>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={() => { setShowMass(!showMass); setShowCreate(false); }}
+            style={{ background: showMass ? "#6366F1" : "#EEF2FF", color: showMass ? "#fff" : "#4338CA", border: "none", borderRadius: 8, padding: "10px 16px", fontWeight: 600, cursor: "pointer" }}>
+            {showMass ? "✕ Cancel Mass" : "📦 Mass Upload"}
+          </button>
+          <button onClick={() => { resetForm(); setShowCreate(!showCreate); setShowMass(false); }}
+            style={{ background: "#0F172A", color: "#fff", border: "none", borderRadius: 8, padding: "10px 16px", fontWeight: 600, cursor: "pointer" }}>
+            {showCreate ? "✕ Cancel" : "+ Add Song"}
+          </button>
+        </div>
+        </div>
       </div>
+
+      {showMass && (
+        <div style={{ ...card, marginBottom: 24, border: "1px solid #6366F1" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#4338CA", margin: 0 }}>Mass Upload Audio</h3>
+              <p style={{ fontSize: 13, color: "#64748B", margin: "4px 0 0" }}>Add multiple songs quickly without clicking save every time.</p>
+            </div>
+            <button onClick={addMassEntry} style={{ background: "#4338CA", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
+              + Add Row
+            </button>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {massEntries.map((entry, idx) => (
+              <div key={idx} style={{ display: "flex", gap: 12, alignItems: "flex-start", background: "#F8FAFC", padding: 16, borderRadius: 10, border: "1px solid #E2E8F0" }}>
+                <div style={{ flex: 1, display: "grid", gap: 12 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <input value={entry.name} onChange={e => updateMassEntry(idx, "name", e.target.value)} placeholder="Song Title *" style={inp} />
+                    <input value={entry.description} onChange={e => updateMassEntry(idx, "description", e.target.value)} placeholder="Artist / Description" style={inp} />
+                  </div>
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
+                      <label style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                        <input type="radio" checked={entry.uploadType === "direct"} onChange={() => updateMassEntry(idx, "uploadType", "direct")} /> URL
+                      </label>
+                      <label style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                        <input type="radio" checked={entry.uploadType === "upload"} onChange={() => updateMassEntry(idx, "uploadType", "upload")} /> File
+                      </label>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      {entry.uploadType === "direct" ? (
+                        <input type="url" value={entry.url} onChange={e => updateMassEntry(idx, "url", e.target.value)} placeholder="https://..." style={inp} />
+                      ) : (
+                        <input type="file" accept="audio/*" onChange={e => updateMassEntry(idx, "file", e.target.files?.[0] || null)} style={{ ...inp, padding: "7px 14px" }} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {massEntries.length > 1 && (
+                  <button onClick={() => removeMassEntry(idx)} style={{ background: "#FEE2E2", color: "#EF4444", border: "none", borderRadius: 8, padding: "10px", cursor: "pointer", flexShrink: 0 }}>
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 24, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            <div style={{ flex: 1, marginRight: 20 }}>
+              {massProgress.length > 0 && (
+                <div style={{ fontSize: 12, display: "flex", flexDirection: "column", gap: 4, maxHeight: 100, overflowY: "auto", background: "#F1F5F9", padding: 10, borderRadius: 8 }}>
+                  {massProgress.map((p, i) => <div key={i}>{p}</div>)}
+                </div>
+              )}
+            </div>
+            <button onClick={handleMassSave} disabled={massSaving} style={{ background: massSaving ? "#94A3B8" : "#10B981", color: "#fff", border: "none", borderRadius: 8, padding: "12px 24px", fontWeight: 700, cursor: "pointer", fontSize: 15, flexShrink: 0 }}>
+              {massSaving ? "Saving All..." : `Save All ${massEntries.length} Songs`}
+            </button>
+          </div>
+        </div>
+      )}
 
       {showCreate && (
         <div style={{ ...card, marginBottom: 24, border: "1px solid #CBD5E1" }}>
