@@ -317,7 +317,6 @@ export default function AdminSongsPage() {
             {showCreate ? "✕ Cancel" : "+ Add Song"}
           </button>
         </div>
-        </div>
       </div>
 
       {showMass && (
