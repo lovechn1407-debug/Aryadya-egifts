@@ -183,6 +183,7 @@ export default function SongLibraryPopup({
                   background: isThisPlaying ? "#F5F3FF" : isExpanded ? "#FAFAFE" : "#fff",
                   transition: "border-color 0.2s, background 0.2s",
                   overflow: "hidden",
+                  flexShrink: 0,
                 }}>
                   {/* Top row */}
                   <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px" }}>
