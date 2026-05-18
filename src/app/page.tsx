@@ -1241,7 +1241,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
         </div>
         
         {/* Bottom Fade Effect for Plus Themes */}
-        {theme.includes("_plus") && section.fadeEnabled && (
+        {section.theme.includes("_plus") && section.fadeEnabled && (
           <div style={{
             position: "absolute",
             bottom: 0, left: 0, width: "100%",
