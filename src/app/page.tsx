@@ -1519,7 +1519,7 @@ function Footer({ settings }: { settings: Settings | null }) {
                 )}
                 {settings.contactAddress && (
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <MapPinSVG size={14} color="#A78BFA" style={{ marginTop: 2 }} />
+                    <span style={{ display: "inline-flex", marginTop: 2 }}><MapPinSVG size={14} color="#A78BFA" /></span>
                     <span style={{ color: "#94A3B8", lineHeight: 1.4 }}>{settings.contactAddress}</span>
                   </div>
                 )}
