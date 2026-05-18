@@ -189,14 +189,14 @@ function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> 
 }
 
 /* ── Navbar ── */
-function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
+function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 100,
       background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)",
       borderBottom: "1px solid rgba(0,0,0,0.06)",
       padding: "0 clamp(16px,4vw,48px)",
-      display: "flex", alignItems: "center", height: 60, gap: 10,
+      display: "flex", alignItems: "center", height: 60, gap: 14,
     }}>
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
         <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 44, objectFit: "contain" }} />
@@ -206,9 +206,44 @@ function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
         fontSize: 13, fontWeight: 700, color: "#7C3AED", cursor: "pointer",
         padding: "8px 16px", borderRadius: 999, border: "1.5px solid #7C3AED",
         background: "transparent", textDecoration: "none", whiteSpace: "nowrap",
-      }}>
+      }} className="nav-my-orders-btn">
         My Orders
       </Link>
+
+      {/* Hamburger Menu Icon */}
+      <button 
+        onClick={onMenuClick}
+        aria-label="Toggle navigation menu"
+        style={{
+          background: "rgba(124, 58, 237, 0.08)",
+          border: "none",
+          borderRadius: 10,
+          width: 40,
+          height: 40,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          color: "#7C3AED",
+          transition: "background 0.2s"
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.15)"}
+        onMouseLeave={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.08)"}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 580px) {
+          .nav-my-orders-btn {
+            display: none !important;
+          }
+        }
+      `}} />
     </nav>
   );
 }
@@ -1121,7 +1156,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
   };
 
   return (
-    <section className="occasion-banner-reveal" style={{
+    <section id={`section-${section.id}`} className="occasion-banner-reveal" style={{
       width: "100%",
       background: theme.isPremium ? theme.gradient : theme.bgLight,
       position: "relative",
@@ -1562,6 +1597,248 @@ function Footer({ settings }: { settings: Settings | null }) {
   );
 }
 
+/* ── Menu Drawer (Slide-out Sidebar Navigation) ── */
+function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: () => void; sections: DisplaySection[] }) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  return (
+    <>
+      {/* Backdrop overlay */}
+      <div 
+        onClick={onClose}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(2, 6, 23, 0.4)",
+          backdropFilter: "blur(4px)",
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? "auto" : "none",
+          transition: "opacity 0.3s ease",
+          zIndex: 1000,
+        }} 
+      />
+
+      {/* Slide-out Drawer Panel */}
+      <div 
+        style={{
+          position: "fixed",
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: "min(340px, 85vw)",
+          background: "linear-gradient(135deg, #0F172A, #020617)",
+          borderLeft: "1px solid rgba(255, 255, 255, 0.08)",
+          boxShadow: "-10px 0 40px rgba(0, 0, 0, 0.5)",
+          transform: isOpen ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          zIndex: 1001,
+          display: "flex",
+          flexDirection: "column",
+          padding: "24px 28px",
+          overflowY: "auto",
+          fontFamily: "'Nunito', sans-serif"
+        }}
+      >
+        {/* Top Header Row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <span style={{ color: "#F8FAFC", fontSize: 16, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.5, display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ color: "#A78BFA" }}>✦</span> Navigation Menu
+          </span>
+          <button 
+            onClick={onClose}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.03)",
+              color: "#94A3B8",
+              fontSize: 20,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 0,
+              transition: "all 0.2s"
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.color = "#94A3B8"; }}
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Separator */}
+        <div style={{ height: 1, background: "rgba(255, 255, 255, 0.08)", marginBottom: 24 }} />
+
+        {/* Navigation Content Block */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 28, flex: 1 }}>
+          
+          {/* Group 1: Sections categories */}
+          <div>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#64748B", textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 12 }}>
+              📂 Browse Occasions
+            </span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {sections.map(s => {
+                const theme = getSectionTheme(s.theme);
+                return (
+                  <a 
+                    key={s.id} 
+                    href={`#section-${s.id}`} 
+                    onClick={onClose}
+                    style={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: 12, 
+                      padding: "10px 12px", 
+                      borderRadius: 10, 
+                      color: "#CBD5E1", 
+                      textDecoration: "none", 
+                      fontSize: 14, 
+                      fontWeight: 700,
+                      transition: "all 0.2s" 
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "#F8FAFC"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#CBD5E1"; }}
+                  >
+                    <span style={{ display: "inline-flex", width: 22, height: 22, borderRadius: 6, background: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center", fontSize: 12 }}>
+                      {theme.emoji ? theme.emoji.substring(0, 2) : "✨"}
+                    </span>
+                    <span>{s.title}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Group 2: Action Buttons */}
+          <div>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#64748B", textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 12 }}>
+              ⚙️ Quick Navigation
+            </span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {/* My Orders Button */}
+              <Link
+                href="/my-orders"
+                onClick={onClose}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  background: "linear-gradient(135deg, #7C3AED, #4F46E5)",
+                  color: "#fff",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: 800,
+                  boxShadow: "0 4px 12px rgba(124, 58, 237, 0.25)",
+                  transition: "transform 0.2s"
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+              >
+                <span style={{ display: "inline-flex" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                  </svg>
+                </span>
+                My Orders
+              </Link>
+
+              {/* How it Works Button */}
+              <a
+                href="#how"
+                onClick={onClose}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1.5px solid rgba(255, 255, 255, 0.15)",
+                  background: "transparent",
+                  color: "#F1F5F9",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  transition: "all 0.2s"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+              >
+                <span style={{ display: "inline-flex" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </span>
+                How It Works
+              </a>
+
+              {/* Contact Info Button */}
+              <a
+                href="#footer"
+                onClick={(e) => {
+                  onClose();
+                  const footer = document.querySelector("footer");
+                  if (footer) {
+                    e.preventDefault();
+                    footer.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1.5px solid rgba(255, 255, 255, 0.15)",
+                  background: "transparent",
+                  color: "#F1F5F9",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  transition: "all 0.2s"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)"; }}
+              >
+                <span style={{ display: "inline-flex" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                </span>
+                Contact Support
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer Brand Logo Section */}
+        <div style={{ marginTop: "auto", paddingTop: 28, borderTop: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+          <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 32, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+          <span style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Aradhya E-Gifting</span>
+        </div>
+      </div>
+    </>
+  );
+}
+
 /* ── Main Page ── */
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -1569,6 +1846,7 @@ export default function HomePage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedAccent, setSelectedAccent] = useState("#E91E8C");
   const [showLogin, setShowLogin] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -1596,7 +1874,8 @@ export default function HomePage() {
   return (
     <div>
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
-      <Navbar onLoginClick={() => setShowLogin(true)} />
+      <Navbar onMenuClick={() => setShowMenu(true)} />
+      <MenuDrawer isOpen={showMenu} onClose={() => setShowMenu(false)} sections={sections} />
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {selectedProduct && <ProductModal product={selectedProduct} accent={selectedAccent} onClose={() => setSelectedProduct(null)} />}
       <Hero />
