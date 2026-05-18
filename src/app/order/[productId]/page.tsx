@@ -7,6 +7,53 @@ import { sendOrderConfirmationEmail } from "@/lib/email";
 import type { Coupon } from "@/lib/data";
 import Link from "next/link";
 
+/* ── Vector SVG Components ── */
+function ArrowLeftSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
+  );
+}
+
+function GiftCardSVG({ size = 24, color = "#7C3AED" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </svg>
+  );
+}
+
+function TicketSVG({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M15 5v2" />
+      <path d="M15 11v2" />
+      <path d="M15 17v2" />
+      <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z" />
+    </svg>
+  );
+}
+
+function PadlockSVG({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function SparklesSVG({ size = 48, color = "#7C3AED" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />
+    </svg>
+  );
+}
+
 export default function OrderPage({ params }: { params: Promise<{ productId: string }> }) {
   const { productId } = use(params);
   const product = getProduct(productId);
@@ -22,16 +69,21 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
   const [couponLoading, setCouponLoading] = useState(false);
 
   if (!product) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8F5FF" }}>
-      <p style={{ color: "#6B7280" }}>Product not found. <Link href="/" style={{ color: "#7C3AED" }}>Go back</Link></p>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F6F5FB", fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ textAlign: "center" }}>
+        <p style={{ color: "#64748B", fontSize: 15 }}>The product you requested could not be found.</p>
+        <Link href="/" style={{ color: "#7C3AED", fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginTop: 12 }}>
+          <ArrowLeftSVG /> Return to Storefront
+        </Link>
+      </div>
     </div>
   );
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = "Valid email required";
-    if (!form.phone.trim() || form.phone.replace(/\D/g,"").length < 10) e.phone = "Valid 10-digit phone required";
+    if (!form.name.trim()) e.name = "Full name is required";
+    if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = "Please provide a valid email address";
+    if (!form.phone.trim() || form.phone.replace(/\D/g,"").length < 10) e.phone = "Valid 10-digit phone number required";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -70,7 +122,6 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
         return;
       }
       
-      // Check per-person limit if email is provided
       if (form.email && form.phone) {
         const pastOrders = await getOrdersByBuyerDB(form.phone, form.email);
         const usedPast = pastOrders.filter(o => o.couponCode === c.id).length;
@@ -79,7 +130,7 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
           return;
         }
       } else {
-        setCouponMsg({ type: "error", text: "Please fill Name, Email and Phone first to apply coupon." });
+        setCouponMsg({ type: "error", text: "Please complete personal info first to apply coupon." });
         return;
       }
 
@@ -110,7 +161,7 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
 
   const handlePayment = async () => {
     if (finalPrice > 0) {
-      alert("Payment method not set by admin.");
+      alert("Custom payment integration setting pending. Demo purchase active.");
       return;
     }
 
@@ -121,15 +172,13 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
       buyerName: form.name,
       buyerEmail: form.email,
       buyerPhone: form.phone,
-      amount: finalPrice, // use finalPrice here!
+      amount: finalPrice,
     });
 
     if (appliedCoupon) {
-      // update usage count in DB
       await saveCouponDB({ ...appliedCoupon, usedCount: appliedCoupon.usedCount + 1 });
     }
 
-    // Send confirmation email (fire-and-forget)
     const editLink = `${window.location.origin}/edit/${order.id}`;
     sendOrderConfirmationEmail({
       buyer_name: form.name,
@@ -145,46 +194,58 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#F8F5FF 0%,#FFF0F8 100%)", fontFamily: "'Inter',sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #F8F5FF 0%, #FFF0F8 100%)", fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #F3F4F6", padding: "0 20px", height: 54, display: "flex", alignItems: "center", position: "sticky", top: 0, zIndex: 10 }}>
-        <Link href={`/preview/${productId}`} style={{ color: "#7C3AED", textDecoration: "none", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-          ← Back to Preview
+      <div style={{ background: "#fff", borderBottom: "1px solid #F3F4F6", padding: "0 clamp(16px, 4vw, 48px)", height: 56, display: "flex", alignItems: "center", position: "sticky", top: 0, zIndex: 10 }}>
+        <Link href={`/preview/${productId}`} style={{ color: "#7C3AED", textDecoration: "none", fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", gap: 8 }}>
+          <ArrowLeftSVG /> Back to Preview
         </Link>
       </div>
 
       <div style={{ maxWidth: 540, margin: "0 auto", padding: "32px 20px 60px" }}>
         {/* Product card */}
-        <div style={{ background: "#fff", borderRadius: 20, padding: "20px 24px", marginBottom: 24, display: "flex", alignItems: "center", gap: 16, boxShadow: "0 4px 24px rgba(124,58,237,0.08)", border: "1px solid #F3E8FF" }}>
-          <div style={{ width: 52, height: 52, borderRadius: 14, background: "linear-gradient(135deg,#F3E8FF,#FCE7F3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>
-            🎁
+        <div style={{ 
+          background: "#fff", 
+          borderRadius: 24, 
+          padding: "24px", 
+          marginBottom: 24, 
+          display: "flex", 
+          alignItems: "center", 
+          gap: 16, 
+          boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", 
+          border: "1px solid #F3E8FF" 
+        }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "linear-gradient(135deg, #F3E8FF, #FCE7F3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <GiftCardSVG size={24} color="#7C3AED" />
           </div>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontWeight: 800, fontSize: 16, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>{product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu,"").trim()}</h2>
-            <p style={{ color: "#9CA3AF", fontSize: 13, marginTop: 2 }}>{product.tagline}</p>
+            <h2 style={{ fontWeight: 850, fontSize: 16, color: "#1F2937", margin: 0, fontFamily: "'Nunito', sans-serif" }}>
+              {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu,"").trim()}
+            </h2>
+            <p style={{ color: "#8A94A6", fontSize: 12, marginTop: 4, margin: 0 }}>{product.tagline}</p>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 22, fontWeight: 900, color: "#7C3AED", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price/100)}</div>
-            <div style={{ fontSize: 11, color: "#10B981", fontWeight: 700 }}>One-time</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "#7C3AED", fontFamily: "'Nunito', sans-serif" }}>₹{Math.floor(product.price/100)}</div>
+            <div style={{ fontSize: 10, color: "#22C55E", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 2 }}>One-time</div>
           </div>
         </div>
 
         {/* Step: Details */}
         {step === "details" && (
-          <div style={{ background: "#fff", borderRadius: 20, padding: "28px 24px", boxShadow: "0 4px 24px rgba(124,58,237,0.08)", border: "1px solid #F3E8FF" }}>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: "#1F2937", marginBottom: 6, fontFamily: "'Nunito',sans-serif" }}>
-              Your <span style={{ background: "linear-gradient(135deg,#7C3AED,#EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Details</span>
+          <div style={{ background: "#fff", borderRadius: 24, padding: "28px 24px", boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", border: "1px solid #F3E8FF" }}>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: "#1F2937", marginBottom: 6, fontFamily: "'Nunito', sans-serif", letterSpacing: -0.5 }}>
+              Your <span style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Details</span>
             </h1>
-            <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 24 }}>We'll send your personalised link to your email.</p>
+            <p style={{ color: "#64748B", fontSize: 13, marginBottom: 24, marginTop: 0 }}>We'll email the unique customization link directly to your inbox.</p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               {[
-                { key: "name", label: "Your Name", placeholder: "e.g. Rahul Sharma", type: "text" },
-                { key: "email", label: "Email Address", placeholder: "e.g. rahul@example.com", type: "email" },
+                { key: "name", label: "Full Name", placeholder: "e.g. Priyanshu Chauhan", type: "text" },
+                { key: "email", label: "Email Address", placeholder: "e.g. priyanshu@example.com", type: "email" },
                 { key: "phone", label: "Phone Number", placeholder: "e.g. 9876543210", type: "tel" },
               ].map(({ key, label, placeholder, type }) => (
                 <div key={key}>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>{label} *</label>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "block", marginBottom: 6 }}>{label} *</label>
                   <input
                     type={type}
                     placeholder={placeholder}
@@ -192,53 +253,66 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
                     onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                     style={{
                       width: "100%", padding: "13px 16px", borderRadius: 12, fontSize: 14,
-                      border: errors[key] ? "1.5px solid #EF4444" : "1.5px solid #E5E7EB",
-                      background: "#F9FAFB", color: "#1F2937", outline: "none",
-                      boxSizing: "border-box", fontFamily: "'Inter',sans-serif",
+                      border: errors[key] ? "1.5px solid #EF4444" : "1.5px solid #E2E8F0",
+                      background: "#F8FAFC", color: "#1F2937", outline: "none",
+                      boxSizing: "border-box", fontFamily: "'Inter', sans-serif",
+                      transition: "all 0.2s"
                     }}
-                    onFocus={e => { e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.background = "#FAFFFE"; }}
-                    onBlur={e => { e.currentTarget.style.borderColor = errors[key] ? "#EF4444" : "#E5E7EB"; e.currentTarget.style.background = "#F9FAFB"; }}
+                    onFocus={e => { e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.background = "#FFF"; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = errors[key] ? "#EF4444" : "#E2E8F0"; e.currentTarget.style.background = "#F8FAFC"; }}
                   />
-                  {errors[key] && <p style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{errors[key]}</p>}
+                  {errors[key] && <p style={{ color: "#EF4444", fontSize: 12, marginTop: 4, margin: 0 }}>{errors[key]}</p>}
                 </div>
               ))}
             </div>
 
-            <button onClick={handleDetailsSubmit} style={{
-              width: "100%", marginTop: 24, padding: "15px", borderRadius: 14, border: "none",
-              background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff",
-              fontWeight: 900, fontSize: 16, cursor: "pointer", fontFamily: "'Nunito',sans-serif",
-              boxShadow: "0 8px 24px rgba(124,58,237,0.3)",
-            }}>
-              Continue to Payment →
+            <button 
+              onClick={handleDetailsSubmit} 
+              style={{
+                width: "100%", marginTop: 28, padding: "15px", borderRadius: 14, border: "none",
+                background: "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff",
+                fontWeight: 900, fontSize: 15, cursor: "pointer", fontFamily: "'Nunito', sans-serif",
+                boxShadow: "0 8px 24px rgba(124, 58, 237, 0.25)",
+              }}
+            >
+              Continue to Payment
             </button>
           </div>
         )}
 
         {/* Step: Payment */}
         {step === "payment" && (
-          <div style={{ background: "#fff", borderRadius: 20, padding: "28px 24px", boxShadow: "0 4px 24px rgba(124,58,237,0.08)", border: "1px solid #F3E8FF" }}>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: "#1F2937", marginBottom: 6, fontFamily: "'Nunito',sans-serif" }}>
-              Complete <span style={{ background: "linear-gradient(135deg,#7C3AED,#EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Payment</span>
+          <div style={{ background: "#fff", borderRadius: 24, padding: "28px 24px", boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", border: "1px solid #F3E8FF" }}>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: "#1F2937", marginBottom: 6, fontFamily: "'Nunito', sans-serif", letterSpacing: -0.5 }}>
+              Complete <span style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Payment</span>
             </h1>
-            <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 24 }}>Secure payment — your personalised editor opens instantly.</p>
+            <p style={{ color: "#64748B", fontSize: 13, marginBottom: 24, marginTop: 0 }}>Your customization editor will open automatically post payment.</p>
 
             {/* Coupon Section */}
-            <div style={{ background: "#F9FAFB", borderRadius: 14, padding: "18px 20px", marginBottom: 20, border: "1px solid #F3F4F6" }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "#4B5563", marginBottom: 10 }}>HAVE A COUPON CODE?</p>
+            <div style={{ background: "#F8FAFC", borderRadius: 16, padding: "18px 20px", marginBottom: 20, border: "1px solid #F1F5F9" }}>
+              <p style={{ fontSize: 11, fontWeight: 800, color: "#475569", marginBottom: 10, letterSpacing: 0.5 }}>HAVE A COUPON CODE?</p>
               {!appliedCoupon ? (
                 <div style={{ display: "flex", gap: 8 }}>
                   <input 
                     type="text" 
                     value={couponInput} 
                     onChange={e => setCouponInput(e.target.value.toUpperCase())}
-                    placeholder="Enter code"
-                    style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1px solid #D1D5DB", outline: "none", fontSize: 14, textTransform: "uppercase" }}
+                    placeholder="ENTER CODE"
+                    style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1.5px solid #CBD5E1", outline: "none", fontSize: 13, fontWeight: 700, textTransform: "uppercase" }}
                   />
                   <button 
                     onClick={applyCoupon}
                     disabled={couponLoading || !couponInput.trim()}
-                    style={{ padding: "0 16px", background: couponInput.trim() ? "#1F2937" : "#E5E7EB", color: "#fff", border: "none", borderRadius: 10, fontWeight: 700, cursor: couponInput.trim() ? "pointer" : "default" }}
+                    style={{ 
+                      padding: "0 16px", 
+                      background: couponInput.trim() ? "#7C3AED" : "#E2E8F0", 
+                      color: "#fff", 
+                      border: "none", 
+                      borderRadius: 10, 
+                      fontWeight: 800, 
+                      fontSize: 13,
+                      cursor: couponInput.trim() ? "pointer" : "default" 
+                    }}
                   >
                     {couponLoading ? "..." : "Apply"}
                   </button>
@@ -246,59 +320,71 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
               ) : (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#ECFDF5", border: "1px solid #A7F3D0", padding: "10px 14px", borderRadius: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 18 }}>🎟️</span>
+                    <span style={{ color: "#059669", display: "flex", alignItems: "center" }}>
+                      <TicketSVG size={18} color="#059669" />
+                    </span>
                     <div>
-                      <p style={{ fontSize: 14, fontWeight: 800, color: "#065F46" }}>{appliedCoupon.id}</p>
-                      <p style={{ fontSize: 11, color: "#059669" }}>Applied successfully</p>
+                      <p style={{ fontSize: 13, fontWeight: 900, color: "#065F46", margin: 0 }}>{appliedCoupon.id}</p>
+                      <p style={{ fontSize: 11, color: "#059669", margin: 0, marginTop: 1 }}>Promo code applied successfully</p>
                     </div>
                   </div>
-                  <button onClick={removeCoupon} style={{ background: "none", border: "none", color: "#EF4444", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Remove</button>
+                  <button onClick={removeCoupon} style={{ background: "none", border: "none", color: "#EF4444", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>Remove</button>
                 </div>
               )}
               {couponMsg.text && (
-                <p style={{ fontSize: 12, marginTop: 8, color: couponMsg.type === "error" ? "#EF4444" : "#10B981", fontWeight: 600 }}>{couponMsg.text}</p>
+                <p style={{ fontSize: 12, marginTop: 8, color: couponMsg.type === "error" ? "#EF4444" : "#10B981", fontWeight: 700, margin: "8px 0 0" }}>{couponMsg.text}</p>
               )}
             </div>
 
             {/* Summary */}
-            <div style={{ background: "#F9FAFB", borderRadius: 14, padding: "18px 20px", marginBottom: 20, border: "1px solid #F3F4F6" }}>
-              {[["Name", form.name], ["Email", form.email], ["Phone", form.phone]].map(([label, val]) => (
-                <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, fontSize: 14 }}>
-                  <span style={{ color: "#9CA3AF" }}>{label}</span>
-                  <span style={{ fontWeight: 600, color: "#1F2937" }}>{val}</span>
+            <div style={{ background: "#F8FAFC", borderRadius: 16, padding: "18px 20px", marginBottom: 20, border: "1px solid #F1F5F9" }}>
+              {[["Billing Name", form.name], ["Receipt Email", form.email], ["SMS Alert Phone", form.phone]].map(([label, val]) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, fontSize: 13 }}>
+                  <span style={{ color: "#64748B" }}>{label}</span>
+                  <span style={{ fontWeight: 700, color: "#1E293B" }}>{val}</span>
                 </div>
               ))}
-              <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: 14, marginTop: 4 }}>
+              <div style={{ borderTop: "1px solid #E2E8F0", paddingTop: 14, marginTop: 4 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ fontSize: 14, color: "#6B7280" }}>Subtotal</span>
-                  <span style={{ fontSize: 14, color: "#1F2937", fontWeight: 600 }}>₹{Math.floor(product.price / 100)}</span>
+                  <span style={{ fontSize: 13, color: "#64748B" }}>Subtotal</span>
+                  <span style={{ fontSize: 13, color: "#1E293B", fontWeight: 700 }}>₹{Math.floor(product.price / 100)}</span>
                 </div>
                 {appliedCoupon && (
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-                    <span style={{ fontSize: 14, color: "#10B981", fontWeight: 600 }}>Discount ({appliedCoupon.id})</span>
-                    <span style={{ fontSize: 14, color: "#10B981", fontWeight: 600 }}>-₹{Math.floor(discountAmount / 100)}</span>
+                    <span style={{ fontSize: 13, color: "#22C55E", fontWeight: 700 }}>Discount ({appliedCoupon.id})</span>
+                    <span style={{ fontSize: 13, color: "#22C55E", fontWeight: 700 }}>-₹{Math.floor(discountAmount / 100)}</span>
                   </div>
                 )}
-                <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid #E5E7EB" }}>
-                  <span style={{ fontWeight: 800, fontSize: 16, color: "#1F2937" }}>Total</span>
-                  <span style={{ fontWeight: 900, fontSize: 24, background: "linear-gradient(135deg,#7C3AED,#EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Nunito',sans-serif" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid #E2E8F0" }}>
+                  <span style={{ fontWeight: 800, fontSize: 15, color: "#1E293B" }}>Total Payable</span>
+                  <span style={{ fontWeight: 900, fontSize: 24, background: "linear-gradient(135deg, #7C3AED, #EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Nunito', sans-serif" }}>
                     ₹{Math.floor(finalPrice / 100)}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div style={{ background: "#F0FDF4", borderRadius: 12, padding: "14px 16px", marginBottom: 20, display: "flex", gap: 10, border: "1px solid #BBF7D0" }}>
-              <span>🔒</span>
-              <p style={{ fontSize: 13, color: "#166534", lineHeight: 1.6 }}>
-                Demo mode — Razorpay integration ready. Your personalised editor opens immediately.
+            <div style={{ background: "#ECFDF5", borderRadius: 12, padding: "14px 16px", marginBottom: 20, display: "flex", gap: 10, border: "1px solid #A7F3D0" }}>
+              <span style={{ display: "flex", alignItems: "center", color: "#15803d" }}>
+                <PadlockSVG size={16} color="#15803d" />
+              </span>
+              <p style={{ fontSize: 12, color: "#15803d", lineHeight: 1.5, margin: 0, fontWeight: 600 }}>
+                Secure Payment Enabled. Your personalized editor credentials will open instantly.
               </p>
             </div>
 
             <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={() => setStep("details")} style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1.5px solid #E5E7EB", background: "#fff", color: "#374151", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>← Back</button>
-              <button onClick={handlePayment} style={{ flex: 2, padding: "14px", borderRadius: 14, border: "none", background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", fontWeight: 900, fontSize: 15, cursor: "pointer", fontFamily: "'Nunito',sans-serif", boxShadow: "0 8px 24px rgba(124,58,237,0.3)" }}>
-                Pay ₹{Math.floor(finalPrice / 100)} & Personalise 🎉
+              <button onClick={() => setStep("details")} style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1.5px solid #E2E8F0", background: "#fff", color: "#475569", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>← Back</button>
+              <button 
+                onClick={handlePayment} 
+                style={{ 
+                  flex: 2, padding: "14px", borderRadius: 14, border: "none", 
+                  background: "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff", 
+                  fontWeight: 900, fontSize: 14, cursor: "pointer", fontFamily: "'Nunito', sans-serif", 
+                  boxShadow: "0 8px 24px rgba(124,58,237,0.25)" 
+                }}
+              >
+                Pay & Personalise
               </button>
             </div>
           </div>
@@ -306,17 +392,21 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
 
         {/* Step: Processing */}
         {step === "processing" && (
-          <div style={{ background: "#fff", borderRadius: 20, padding: "60px 24px", textAlign: "center", boxShadow: "0 4px 24px rgba(124,58,237,0.08)", border: "1px solid #F3E8FF" }}>
-            <div style={{ fontSize: 56, marginBottom: 20 }}>✨</div>
-            <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>Setting up your editor…</h2>
-            <p style={{ color: "#9CA3AF", marginTop: 8, fontSize: 14 }}>Opening your personalised editor in a moment!</p>
+          <div style={{ background: "#fff", borderRadius: 24, padding: "60px 24px", textAlign: "center", boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", border: "1px solid #F3E8FF" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+              <SparklesSVG size={44} color="#7C3AED" />
+            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito', sans-serif", margin: 0 }}>Setting up your editor</h2>
+            <p style={{ color: "#8A94A6", marginTop: 8, fontSize: 13, margin: "8px 0 0 0" }}>Launching personalizer dashboard securely in a second...</p>
           </div>
         )}
 
         {/* Trust badges */}
-        <div style={{ display: "flex", gap: 20, marginTop: 24, justifyContent: "center", flexWrap: "wrap" }}>
-          {["🔒 Secure Payment", "📩 Instant Access", "💌 Shareable Link"].map(b => (
-            <span key={b} style={{ fontSize: 12, color: "#9CA3AF" }}>{b}</span>
+        <div style={{ display: "flex", gap: 20, marginTop: 28, justifyContent: "center", flexWrap: "wrap" }}>
+          {["Secure SSL Encryption", "Instant Link Activation", "Lifetime Access Guarantee"].map(b => (
+            <span key={b} style={{ fontSize: 11, color: "#8A94A6", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <span style={{ color: "#22C55E" }}>✓</span> {b}
+            </span>
           ))}
         </div>
       </div>

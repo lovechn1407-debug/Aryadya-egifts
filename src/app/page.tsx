@@ -1847,6 +1847,66 @@ function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: (
                 How It Works
               </a>
 
+              {/* Reviews Button */}
+              <a
+                href="#reviews"
+                onClick={onClose}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1.5px solid rgba(255, 255, 255, 0.15)",
+                  background: "transparent",
+                  color: "#F1F5F9",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  transition: "all 0.2s"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+              >
+                <span style={{ display: "inline-flex" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                </span>
+                Customer Reviews
+              </a>
+
+              {/* FAQs Button */}
+              <a
+                href="#faqs"
+                onClick={onClose}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1.5px solid rgba(255, 255, 255, 0.15)",
+                  background: "transparent",
+                  color: "#F1F5F9",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  transition: "all 0.2s"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+              >
+                <span style={{ display: "inline-flex" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </span>
+                FAQs
+              </a>
+
               {/* Contact Info Button */}
               <a
                 href="#footer"
