@@ -1000,6 +1000,7 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
       background: theme.isPremium ? theme.gradient : theme.bgLight,
       position: "relative",
       overflow: "hidden",
+      marginBottom: section.bottomSpaceEnabled ? `${section.bottomSpacePx || 40}px` : undefined,
     }}>
       {/* ── GRADIENT HEADER — full width, no radius ── */}
       <div style={{
@@ -1238,7 +1239,30 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
             </div>
           ))}
         </div>
+        
+        {/* Bottom Fade Effect for Plus Themes */}
+        {theme.includes("_plus") && section.fadeEnabled && (
+          <div style={{
+            position: "absolute",
+            bottom: 0, left: 0, width: "100%",
+            height: section.fadeLength || 100,
+            background: "linear-gradient(to top, #FFFFFF, transparent)",
+            pointerEvents: "none",
+            zIndex: 10
+          }} />
+        )}
       </div>
+
+      {/* Bottom Cutout */}
+      {section.headerStyle === "new" && section.bottomCutout && section.bottomCutout !== "none" && (
+        <div style={{
+          ...getCutoutStyle(section.bottomCutout, "#FFFFFF"),
+          top: "auto",
+          bottom: -1,
+          transform: "scaleY(-1)",
+          zIndex: 10
+        }} />
+      )}
     </section>
   );
 }

@@ -27,6 +27,11 @@ export default function AdminSectionsPage() {
   const [headerCutout, setHeaderCutout] = useState<"none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave">("none");
   const [headerNote, setHeaderNote] = useState("");
   const [headerNoteEnabled, setHeaderNoteEnabled] = useState(false);
+  const [bottomCutout, setBottomCutout] = useState<"none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave">("none");
+  const [fadeEnabled, setFadeEnabled] = useState(false);
+  const [fadeLength, setFadeLength] = useState(100);
+  const [bottomSpaceEnabled, setBottomSpaceEnabled] = useState(false);
+  const [bottomSpacePx, setBottomSpacePx] = useState(40);
 
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
 
@@ -68,7 +73,12 @@ export default function AdminSectionsPage() {
           headerFontFamily,
           headerCutout,
           headerNote,
-          headerNoteEnabled
+          headerNoteEnabled,
+          bottomCutout,
+          fadeEnabled,
+          fadeLength,
+          bottomSpaceEnabled,
+          bottomSpacePx
         });
       } else {
         // Create new section (at the top)
@@ -89,6 +99,11 @@ export default function AdminSectionsPage() {
           headerCutout,
           headerNote,
           headerNoteEnabled,
+          bottomCutout,
+          fadeEnabled,
+          fadeLength,
+          bottomSpaceEnabled,
+          bottomSpacePx,
           createdAt: new Date().toISOString(),
         };
         await saveSectionDB(newSection);
@@ -96,6 +111,7 @@ export default function AdminSectionsPage() {
       
       setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
       setTitleSize("normal"); setHeaderStyle("normal"); setHeaderFontFamily("'Dancing Script', cursive"); setHeaderCutout("none"); setHeaderNote(""); setHeaderNoteEnabled(false);
+      setBottomCutout("none"); setFadeEnabled(false); setFadeLength(100); setBottomSpaceEnabled(false); setBottomSpacePx(40);
       setShowCreate(false);
       setEditingSectionId(null);
       await reload();
@@ -120,6 +136,11 @@ export default function AdminSectionsPage() {
     setHeaderCutout((sec.headerCutout as any) || "none");
     setHeaderNote(sec.headerNote || "");
     setHeaderNoteEnabled(sec.headerNoteEnabled || false);
+    setBottomCutout((sec.bottomCutout as any) || "none");
+    setFadeEnabled(sec.fadeEnabled || false);
+    setFadeLength(sec.fadeLength ?? 100);
+    setBottomSpaceEnabled(sec.bottomSpaceEnabled || false);
+    setBottomSpacePx(sec.bottomSpacePx ?? 40);
     setEditingSectionId(sec.id);
     setShowCreate(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -130,6 +151,7 @@ export default function AdminSectionsPage() {
     setEditingSectionId(null);
     setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
     setTitleSize("normal"); setHeaderStyle("normal"); setHeaderFontFamily("'Dancing Script', cursive"); setHeaderCutout("none"); setHeaderNote(""); setHeaderNoteEnabled(false);
+    setBottomCutout("none"); setFadeEnabled(false); setFadeLength(100); setBottomSpaceEnabled(false); setBottomSpacePx(40);
   };
 
   const toggleProduct = (id: string) => {
@@ -322,6 +344,56 @@ export default function AdminSectionsPage() {
                 </div>
               </div>
             )}
+            
+            {theme.includes("_plus") && (
+              <div style={{ gridColumn: "1 / -1", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div>
+                  <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Bottom Outline Cutout</label>
+                  <select value={bottomCutout} onChange={e => setBottomCutout(e.target.value as any)} style={inputStyle}>
+                    <option value="none">None (Standard)</option>
+                    <option value="wavy">Wavy</option>
+                    <option value="wavy_stretched">Wavy (Stretched)</option>
+                    <option value="zigzag">Zigzag</option>
+                    <option value="circular">Circular Spiral (Scallop)</option>
+                    <option value="liquid_wave">Liquid Wave (+/-)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                    <input type="checkbox" checked={fadeEnabled} onChange={e => setFadeEnabled(e.target.checked)} style={{ width: 16, height: 16, accentColor: "#0F172A" }} />
+                    Enable Bottom Fade
+                  </label>
+                  {fadeEnabled && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <input type="range" min="10" max="500" value={fadeLength} onChange={e => setFadeLength(parseInt(e.target.value))} style={{ flex: 1 }} />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B", width: 40 }}>{fadeLength}px</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: 10 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#334155" }}>
+                <input type="checkbox" checked={bottomSpaceEnabled} onChange={e => setBottomSpaceEnabled(e.target.checked)} style={{ width: 16, height: 16, accentColor: "#0F172A" }} />
+                Enable Bottom Space (Spacing Adder)
+              </label>
+              {bottomSpaceEnabled && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "#F8FAFC", padding: 12, borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <input type="range" min="0" max="500" value={bottomSpacePx} onChange={e => setBottomSpacePx(parseInt(e.target.value))} style={{ flex: 1 }} />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#0F172A", width: 50 }}>{bottomSpacePx} px</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[20, 40, 60, 100, 150].map(px => (
+                      <button key={px} onClick={(e) => { e.preventDefault(); setBottomSpacePx(px); }} style={{ padding: "4px 10px", fontSize: 11, background: bottomSpacePx === px ? "#0F172A" : "#FFFFFF", color: bottomSpacePx === px ? "#FFFFFF" : "#334155", border: "1px solid #CBD5E1", borderRadius: 4, cursor: "pointer", fontWeight: 600 }}>
+                        {px}px
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 10 }}>

@@ -519,19 +519,27 @@ export function getSectionTheme(id: SectionTheme): SectionThemeConfig {
 export interface DisplaySection {
   id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   theme: SectionTheme;
-  productIds: string[]; // which products appear in this section
+  productIds: string[]; // which products to show
   visible: boolean;
-  order: number; // sort order
+  order?: number; // for reordering
+
+  // Plus features
   countdownEnabled?: boolean;
-  countdownEndTime?: string;
+  countdownEndTime?: string; // ISO string
   titleSize?: "small" | "normal" | "medium" | "big" | "bigger";
   headerStyle?: "normal" | "new";
   headerFontFamily?: string;
   headerCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave";
+  bottomCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave";
+  fadeEnabled?: boolean;
+  fadeLength?: number;
+  bottomSpaceEnabled?: boolean;
+  bottomSpacePx?: number;
   headerNote?: string;
   headerNoteEnabled?: boolean;
+
   createdAt: string;
 }
 
