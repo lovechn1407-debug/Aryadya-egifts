@@ -4,7 +4,8 @@ import Link from "next/link";
 import { getSectionTheme } from "@/lib/data";
 import type { Product, DisplaySection, SectionThemeConfig } from "@/lib/data";
 import type { Order } from "@/lib/data";
-import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB, Settings } from "@/lib/db";
+import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB, Settings, getFAQsDB, getReviewsDB } from "@/lib/db";
+import type { FAQItem, CustomerReview } from "@/lib/db";
 
 /* ── Modern UI SVG Icons ── */
 function GiftSVG({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
@@ -216,18 +217,12 @@ function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 8,
         transition: "all 0.2s"
       }}
       className="nav-my-orders-btn"
       onMouseEnter={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.15)"}
       onMouseLeave={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.08)"}
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <path d="M16 10a4 4 0 0 1-8 0" />
-        </svg>
         <span className="nav-my-orders-text">My Orders</span>
       </Link>
 
@@ -260,12 +255,10 @@ function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
 
       <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 480px) {
-          .nav-my-orders-text {
-            display: none !important;
-          }
           .nav-my-orders-btn {
-            padding: 0 !important;
-            width: 40px !important;
+            padding: 0 10px !important;
+            font-size: 11px !important;
+            height: 36px !important;
           }
         }
       `}} />
@@ -1904,6 +1897,220 @@ function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: (
   );
 }
 
+/* ── Reviews Showcase ── */
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div style={{ display: "flex", gap: 3, alignItems: "center" }}>
+      {[1, 2, 3, 4, 5].map((s) => (
+        <svg 
+          key={s} 
+          width="13" 
+          height="13" 
+          viewBox="0 0 24 24" 
+          fill={s <= rating ? "#F59E0B" : "none"} 
+          stroke={s <= rating ? "#F59E0B" : "#CBD5E1"} 
+          strokeWidth="2.5" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+        >
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+function ReviewsShowcase({ reviews }: { reviews: CustomerReview[] }) {
+  if (reviews.length === 0) return null;
+
+  return (
+    <section id="reviews" style={{ padding: "80px clamp(16px,4vw,48px)", background: "linear-gradient(to bottom, #FFFFFF, #FAF8FF)" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <span style={{ 
+            fontSize: 11, 
+            fontWeight: 900, 
+            color: "#7C3AED", 
+            textTransform: "uppercase", 
+            letterSpacing: 1.5, 
+            background: "rgba(124, 58, 237, 0.08)", 
+            padding: "6px 12px", 
+            borderRadius: 99, 
+            display: "inline-block", 
+            marginBottom: 12 
+          }}>
+            ⭐ WALL OF LOVE
+          </span>
+          <h2 style={{ fontSize: "clamp(24px, 4vw, 36px)", fontWeight: 900, color: "#0F172A", margin: 0, letterSpacing: -0.5 }}>
+            Happy Recipient Reviews
+          </h2>
+          <p style={{ color: "#64748B", fontSize: 15, marginTop: 8, maxWidth: 600, marginInline: "auto" }}>
+            Real screenshots of magical feedback and emotional reactions shared by our happy buyers and recipients!
+          </p>
+        </div>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: 24,
+        }}>
+          {reviews.map(rev => (
+            <div 
+              key={rev.id}
+              style={{
+                background: "#FFF",
+                border: "1px solid rgba(0,0,0,0.06)",
+                borderRadius: 24,
+                overflow: "hidden",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.02)",
+                display: "flex",
+                flexDirection: "column",
+                transition: "transform 0.3s"
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+            >
+              {/* Chat Screenshot Image container */}
+              <div style={{ position: "relative", padding: 12, background: "#0F172A", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 280 }}>
+                <img 
+                  src={rev.screenshotUrl} 
+                  alt={`Feedback from ${rev.buyerName}`}
+                  style={{ width: "100%", height: "auto", maxHeight: 340, objectFit: "contain", borderRadius: 12 }} 
+                />
+              </div>
+              
+              {/* Reviewer Meta info */}
+              <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 6, borderTop: "1px solid rgba(0,0,0,0.03)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 800, color: "#1E293B", margin: 0 }}>
+                    {rev.buyerName}
+                  </h3>
+                  <StarRating rating={rev.rating} />
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#8A94A6", display: "flex", alignItems: "center", gap: 4 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Verified Purchase & Personalization
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── FAQ Showcase ── */
+function FAQShowcase({ faqs }: { faqs: FAQItem[] }) {
+  const [openId, setOpenId] = useState<string | null>(null);
+
+  if (faqs.length === 0) return null;
+
+  return (
+    <section id="faqs" style={{ padding: "80px clamp(16px,4vw,48px)", background: "linear-gradient(to bottom, #FAF8FF, #FFFFFF)", borderTop: "1px solid rgba(0,0,0,0.03)" }}>
+      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <span style={{ 
+            fontSize: 11, 
+            fontWeight: 900, 
+            color: "#7C3AED", 
+            textTransform: "uppercase", 
+            letterSpacing: 1.5, 
+            background: "rgba(124, 58, 237, 0.08)", 
+            padding: "6px 12px", 
+            borderRadius: 99, 
+            display: "inline-block", 
+            marginBottom: 12 
+          }}>
+            ❓ COMMON QUESTIONS
+          </span>
+          <h2 style={{ fontSize: "clamp(24px, 4vw, 36px)", fontWeight: 900, color: "#0F172A", margin: 0, letterSpacing: -0.5 }}>
+            Frequently Asked Questions
+          </h2>
+          <p style={{ color: "#64748B", fontSize: 15, marginTop: 8 }}>
+            Everything you need to know about purchasing, customizing, and sharing our interactive virtual gift sites!
+          </p>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {faqs.map(faq => {
+            const isOpen = openId === faq.id;
+            return (
+              <div 
+                key={faq.id}
+                style={{
+                  background: "#FFF",
+                  border: "1.5px solid rgba(124, 58, 237, 0.06)",
+                  borderRadius: 18,
+                  overflow: "hidden",
+                  boxShadow: isOpen ? "0 10px 25px rgba(124, 58, 237, 0.05)" : "0 2px 8px rgba(0,0,0,0.01)",
+                  transition: "all 0.3s ease"
+                }}
+              >
+                {/* Accordion Toggle Header */}
+                <button
+                  onClick={() => setOpenId(isOpen ? null : faq.id)}
+                  style={{
+                    width: "100%",
+                    padding: "20px 24px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 16,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left"
+                  }}
+                >
+                  <span style={{ fontSize: 15, fontWeight: 800, color: isOpen ? "#7C3AED" : "#1E293B", transition: "color 0.2s" }}>
+                    {faq.question}
+                  </span>
+                  <span style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    background: isOpen ? "#7C3AED" : "rgba(124, 58, 237, 0.05)",
+                    color: isOpen ? "#FFF" : "#7C3AED",
+                    fontSize: 10,
+                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "all 0.3s ease",
+                  }}>
+                    ▼
+                  </span>
+                </button>
+
+                {/* Collapsible Answer Div */}
+                <div style={{
+                  maxHeight: isOpen ? "400px" : "0px",
+                  opacity: isOpen ? 1 : 0,
+                  transition: "all 0.3s ease-in-out",
+                  overflow: "hidden"
+                }}>
+                  <div style={{
+                    padding: "0 24px 24px 24px",
+                    color: "#475569",
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    borderTop: "1px solid rgba(124, 58, 237, 0.04)"
+                  }}>
+                    {faq.answer}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── Main Page ── */
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -1915,16 +2122,22 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [faqs, setFaqs] = useState<FAQItem[]>([]);
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
 
   useEffect(() => {
     Promise.all([
       getProductsDB(),
       getVisibleSectionsDB(),
-      getSettingsDB()
-    ]).then(([allProds, visibleSecs, fetchedSettings]) => {
+      getSettingsDB(),
+      getFAQsDB(),
+      getReviewsDB()
+    ]).then(([allProds, visibleSecs, fetchedSettings, fetchedFaqs, fetchedReviews]) => {
       setProducts(allProds.filter(p => p.visible));
       setSections(visibleSecs);
       setSettings(fetchedSettings);
+      setFaqs(fetchedFaqs.filter(f => f.visible));
+      setReviews(fetchedReviews.filter(r => r.visible));
       setLoading(false);
     });
   }, []);
@@ -1974,6 +2187,8 @@ export default function HomePage() {
         </>
       )}
       <HowItWorks />
+      <ReviewsShowcase reviews={reviews} />
+      <FAQShowcase faqs={faqs} />
       <Footer settings={settings} />
     </div>
   );

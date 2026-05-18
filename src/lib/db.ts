@@ -211,3 +211,110 @@ export async function saveSongDB(song: Song): Promise<void> {
 export async function deleteSongDB(id: string): Promise<void> {
   await remove(ref(database, `songs/${id}`));
 }
+
+// ── FAQ DATABASE FUNCTIONS ───────────────────────────────────────────────────
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  order: number;
+  visible: boolean;
+  createdAt: string;
+}
+
+export async function getFAQsDB(): Promise<FAQItem[]> {
+  const snap = await get(ref(database, "faqs"));
+  if (!snap.exists()) {
+    // Default seeded FAQs
+    const defaultFaqs: FAQItem[] = [
+      {
+        id: "faq_1",
+        question: "How do I personalize my purchased e-gift?",
+        answer: "After completing your order, you will instantly access our premium Web Editor. Here, you can change images, write paragraphs, customize greetings, choose music tracks, and play with cute templates! When finalized, you'll receive a live shareable link to send to your loved ones.",
+        order: 1,
+        visible: true,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "faq_2",
+        question: "How does the recipient open and view the gift?",
+        answer: "The gift lives on a beautiful, secure, live URL (e.g., aradhya-egifts.com/view/order_id). You can copy the unique link and share it over WhatsApp, Instagram, Email, or SMS. When they click it, the customized web experience opens instantly with smooth animations, dynamic slide pages, interactive matches, and sweet background music playing automatically!",
+        order: 2,
+        visible: true,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "faq_3",
+        question: "Can I edit the customizations later even after sharing?",
+        answer: "Yes, absolutely! You can go to the 'My Orders' portal in the header at any time, log in using your phone and email, and re-open the Web Editor to make edits to any slide, photo, or music track. The changes will update instantly on the live link without needing a new URL!",
+        order: 3,
+        visible: true,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "faq_4",
+        question: "Is the music playing fully supported on mobile phones?",
+        answer: "Yes! Our platform uses highly optimized, cross-device HTML5 audio players that run smoothly on all iOS Safari browsers, Android Chrome versions, iPads, and desktops, ensuring zero silent experiences.",
+        order: 4,
+        visible: true,
+        createdAt: new Date().toISOString()
+      }
+    ];
+    // Write defaults to database so it exists
+    for (const faq of defaultFaqs) {
+      await set(ref(database, `faqs/${faq.id}`), faq);
+    }
+    return defaultFaqs;
+  }
+  return Object.values(snap.val() as Record<string, FAQItem>).sort((a, b) => a.order - b.order);
+}
+
+export async function saveFAQDB(faq: FAQItem): Promise<void> {
+  await set(ref(database, `faqs/${faq.id}`), faq);
+}
+
+export async function deleteFAQDB(id: string): Promise<void> {
+  await remove(ref(database, `faqs/${id}`));
+}
+
+// ── CUSTOMER REVIEWS DATABASE FUNCTIONS ───────────────────────────────────────
+export interface CustomerReview {
+  id: string;
+  buyerName: string;
+  rating: number; // 1 to 5 stars
+  screenshotUrl: string; // Dynamic message screenshot
+  order: number;
+  visible: boolean;
+  createdAt: string;
+}
+
+export async function getReviewsDB(): Promise<CustomerReview[]> {
+  const snap = await get(ref(database, "reviews"));
+  if (!snap.exists()) {
+    // Standard default seeded review
+    const defaultReviews: CustomerReview[] = [
+      {
+        id: "rev_1",
+        buyerName: "Rahul Sharma",
+        rating: 5,
+        screenshotUrl: "https://images.unsplash.com/photo-1596524430615-b46475ddff6e?auto=format&fit=crop&w=600",
+        order: 1,
+        visible: true,
+        createdAt: new Date().toISOString()
+      }
+    ];
+    for (const r of defaultReviews) {
+      await set(ref(database, `reviews/${r.id}`), r);
+    }
+    return defaultReviews;
+  }
+  return Object.values(snap.val() as Record<string, CustomerReview>).sort((a, b) => a.order - b.order);
+}
+
+export async function saveReviewDB(review: CustomerReview): Promise<void> {
+  await set(ref(database, `reviews/${review.id}`), review);
+}
+
+export async function deleteReviewDB(id: string): Promise<void> {
+  await remove(ref(database, `reviews/${id}`));
+}

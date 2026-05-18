@@ -11,6 +11,8 @@ const NAV = [
   { href: "/admin/coupons", icon: "🎟️", label: "Coupons" },
   { href: "/admin/sections", icon: "📂", label: "Sections" },
   { href: "/admin/songs", icon: "🎵", label: "Songs" },
+  { href: "/admin/faqs", icon: "❓", label: "FAQs" },
+  { href: "/admin/reviews", icon: "⭐", label: "Reviews" },
   { href: "/admin/settings", icon: "⚙️", label: "Settings" },
 ];
 
