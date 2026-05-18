@@ -699,58 +699,201 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    if (!phone.trim() || !email.trim()) { setError("Enter both phone and email."); return; }
+    if (!phone.trim() || !email.trim()) { setError("Please enter both phone and email."); return; }
     setLoading(true); setError("");
     try {
       const found = await getOrdersByBuyerDB(phone, email);
       setOrders(found);
-      if (found.length === 0) setError("No orders found. Check your details.");
-    } catch { setError("Something went wrong. Try again."); }
+      if (found.length === 0) setError("No orders found matching these details.");
+    } catch { setError("Something went wrong. Please try again."); }
     setLoading(false);
   };
 
-  const inputStyle: React.CSSProperties = { width: "100%", padding: "12px 14px", borderRadius: 10, border: "1.5px solid #E5E7EB", fontSize: 14, color: "#1F2937", background: "#F9FAFB", outline: "none", boxSizing: "border-box" };
+  const inputStyle: React.CSSProperties = { 
+    width: "100%", 
+    padding: "13px 16px", 
+    borderRadius: 12, 
+    border: "1.5px solid #E2E8F0", 
+    fontSize: 14, 
+    color: "#1F2937", 
+    background: "#F8FAFC", 
+    outline: "none", 
+    boxSizing: "border-box",
+    transition: "all 0.2s"
+  };
+
   const drafts = orders?.filter(o => o.status === "paid" || o.status === "editing") ?? [];
   const finalized = orders?.filter(o => o.status === "finalized") ?? [];
 
   return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", zIndex: 1000 }} />
-      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 1001, width: "min(460px,92vw)", background: "#fff", borderRadius: 22, padding: "28px 24px", boxShadow: "0 32px 80px rgba(0,0,0,0.22)", maxHeight: "85vh", overflowY: "auto" }}>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.4)", backdropFilter: "blur(8px)", zIndex: 1000 }} />
+      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 1001, width: "min(460px,92vw)", background: "#fff", borderRadius: 24, padding: "32px 28px", boxShadow: "0 32px 80px rgba(15,23,42,0.18)", maxHeight: "85vh", overflowY: "auto", fontFamily: "'Inter', sans-serif" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>My Orders</h2>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#9CA3AF" }}>×</button>
+          <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+            </svg>
+            Track My Orders
+          </h2>
+          <button onClick={onClose} style={{ background: "#F1F5F9", border: "none", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 18, color: "#64748B" }}>×</button>
         </div>
+
         {orders === null ? (
           <>
-            <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 20, lineHeight: 1.6 }}>Enter the phone & email you used when purchasing.</p>
+            <p style={{ fontSize: 13, color: "#64748B", marginBottom: 24, marginTop: 0, lineHeight: 1.6 }}>Enter the phone number and email address you used when placing your purchase.</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <input style={inputStyle} placeholder="Phone (e.g. 9876543210)" value={phone} onChange={e => setPhone(e.target.value)} />
-              <input style={inputStyle} type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} />
-              {error && <p style={{ color: "#EF4444", fontSize: 13 }}>{error}</p>}
-              <button onClick={handleLogin} disabled={loading} style={{ padding: "14px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", fontWeight: 900, fontSize: 15, cursor: "pointer", opacity: loading ? 0.7 : 1 }}>
-                {loading ? "Looking up…" : "Find My Orders →"}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 750, color: "#475569", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Phone Number</label>
+                <input 
+                  style={inputStyle} 
+                  placeholder="e.g. 9876543210" 
+                  value={phone} 
+                  onChange={e => setPhone(e.target.value)} 
+                  onFocus={e => { e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.background = "#FFF"; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = "#E2E8F0"; e.currentTarget.style.background = "#F8FAFC"; }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 750, color: "#475569", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Email Address</label>
+                <input 
+                  style={inputStyle} 
+                  type="email" 
+                  placeholder="e.g. rahul@example.com" 
+                  value={email} 
+                  onChange={e => setEmail(e.target.value)} 
+                  onFocus={e => { e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.background = "#FFF"; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = "#E2E8F0"; e.currentTarget.style.background = "#F8FAFC"; }}
+                />
+              </div>
+
+              {error && <p style={{ color: "#EF4444", fontSize: 12, fontWeight: 700, margin: "4px 0 0" }}>{error}</p>}
+              
+              <button 
+                onClick={handleLogin} 
+                disabled={loading} 
+                style={{ 
+                  padding: "14px", 
+                  borderRadius: 12, 
+                  border: "none", 
+                  background: "linear-gradient(135deg,#7C3AED,#EC4899)", 
+                  color: "#fff", 
+                  fontWeight: 900, 
+                  fontSize: 14, 
+                  cursor: "pointer", 
+                  opacity: loading ? 0.7 : 1,
+                  fontFamily: "'Nunito', sans-serif",
+                  boxShadow: "0 6px 20px rgba(124, 58, 237, 0.2)"
+                }}
+              >
+                {loading ? "Locating orders..." : "Locate Orders"}
               </button>
             </div>
           </>
         ) : (
           <>
-            {drafts.length > 0 && (<div style={{ background: "#FEF3C7", borderRadius: 12, padding: "12px 16px", marginBottom: 14, border: "1px solid #FCD34D" }}><p style={{ fontWeight: 700, color: "#92400E", fontSize: 13 }}>⚠️ {drafts.length} draft{drafts.length > 1 ? "s" : ""} awaiting personalisation</p></div>)}
-            {drafts.map(o => (
-              <div key={o.id} style={{ background: "#F5F3FF", borderRadius: 12, padding: 16, border: "1px solid #DDD6FE", marginBottom: 10 }}>
-                <p style={{ fontWeight: 700, color: "#1F2937", fontSize: 14 }}>{o.productName}</p>
-                <p style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{new Date(o.createdAt).toLocaleDateString("en-IN")}</p>
-                <Link href={`/edit/${o.id}`} onClick={onClose} style={{ display: "inline-block", marginTop: 10, background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", padding: "8px 18px", borderRadius: 999, textDecoration: "none", fontSize: 13, fontWeight: 700 }}>Continue Editing ✍️</Link>
+            {drafts.length > 0 && (
+              <div style={{ background: "#FFFBEB", borderRadius: 12, padding: "10px 14px", marginBottom: 16, border: "1px solid #FCD34D", display: "flex", gap: 8, alignItems: "center" }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="2.5">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <p style={{ fontWeight: 800, color: "#B45309", fontSize: 12, margin: 0 }}>
+                  {drafts.length} order draft{drafts.length > 1 ? "s" : ""} awaiting personalization
+                </p>
               </div>
-            ))}
-            {finalized.map(o => (
-              <div key={o.id} style={{ background: "#F0FDF4", borderRadius: 12, padding: 16, border: "1px solid #BBF7D0", marginBottom: 10 }}>
-                <p style={{ fontWeight: 700, color: "#1F2937", fontSize: 14 }}>{o.productName}</p>
-                <p style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>For: {o.buyerName} · ₹{Math.floor(o.amount / 100)}</p>
-                <Link href={`/view/${o.id}`} onClick={onClose} style={{ display: "inline-block", marginTop: 10, background: "#10B981", color: "#fff", padding: "8px 18px", borderRadius: 999, textDecoration: "none", fontSize: 13, fontWeight: 700 }}>View Your Page 🔗</Link>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {drafts.map(o => (
+                <div key={o.id} style={{ background: "#F8FAFC", borderRadius: 16, padding: 18, border: "1px solid #E2E8F0" }}>
+                  <p style={{ fontWeight: 850, color: "#1E293B", fontSize: 14, margin: 0, fontFamily: "'Nunito', sans-serif" }}>{o.productName}</p>
+                  <p style={{ fontSize: 11, color: "#64748B", marginTop: 4, margin: 0, fontWeight: 600 }}>{new Date(o.createdAt).toLocaleDateString("en-IN")}</p>
+                  <Link 
+                    href={`/edit/${o.id}`} 
+                    onClick={onClose} 
+                    style={{ 
+                      display: "inline-flex", 
+                      alignItems: "center",
+                      gap: 6,
+                      marginTop: 12, 
+                      background: "linear-gradient(135deg,#7C3AED,#EC4899)", 
+                      color: "#fff", 
+                      padding: "8px 16px", 
+                      borderRadius: 8, 
+                      textDecoration: "none", 
+                      fontSize: 12, 
+                      fontWeight: 800 
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                    Personalise Draft
+                  </Link>
+                </div>
+              ))}
+
+              {finalized.map(o => (
+                <div key={o.id} style={{ background: "#F0FDF4", borderRadius: 16, padding: 18, border: "1px solid #DCFCE7" }}>
+                  <p style={{ fontWeight: 850, color: "#1E293B", fontSize: 14, margin: 0, fontFamily: "'Nunito', sans-serif" }}>{o.productName}</p>
+                  <p style={{ fontSize: 11, color: "#15803D", marginTop: 4, margin: 0, fontWeight: 600 }}>For: {o.buyerName} · ₹{Math.floor(o.amount / 100)}</p>
+                  <Link 
+                    href={`/view/${o.id}`} 
+                    onClick={onClose} 
+                    style={{ 
+                      display: "inline-flex", 
+                      alignItems: "center",
+                      gap: 6,
+                      marginTop: 12, 
+                      background: "#10B981", 
+                      color: "#fff", 
+                      padding: "8px 16px", 
+                      borderRadius: 8, 
+                      textDecoration: "none", 
+                      fontSize: 12, 
+                      fontWeight: 800 
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                    </svg>
+                    View Surprise
+                  </Link>
+                </div>
+              ))}
+            </div>
+
+            {drafts.length === 0 && finalized.length === 0 && (
+              <div style={{ textAlign: "center", padding: "24px 0" }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="22" y1="12" x2="2" y2="12" />
+                  <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                </svg>
+                <p style={{ fontSize: 13, fontWeight: 800, color: "#475569", marginTop: 12, margin: "12px 0 0 0" }}>No orders found matching details.</p>
               </div>
-            ))}
-            <button onClick={() => setOrders(null)} style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: 13, marginTop: 8 }}>← Try different details</button>
+            )}
+
+            <button 
+              onClick={() => setOrders(null)} 
+              style={{ 
+                background: "none", 
+                border: "none", 
+                color: "#7C3AED", 
+                cursor: "pointer", 
+                fontSize: 12, 
+                fontWeight: 800,
+                display: "block",
+                margin: "20px auto 0 auto"
+              }}
+            >
+              ← Search with different details
+            </button>
           </>
         )}
       </div>
@@ -762,43 +905,139 @@ function LoginModal({ onClose }: { onClose: () => void }) {
 function ProductModal({ product, accent, onClose }: { product: Product; accent: string; onClose: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const u = () => setScale(el.offsetWidth / 390);
-    u(); const ro = new ResizeObserver(u); ro.observe(el); return () => ro.disconnect();
+    u(); 
+    const ro = new ResizeObserver(u); 
+    ro.observe(el); 
+    return () => ro.disconnect();
   }, []);
+
   const IW = 390, IH = IW * 4 / 3;
   const rating = (product as any).rating ?? 4.5;
   const reviewCount = (product as any).reviewCount;
+
   return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", zIndex: 900 }} />
-      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 901, width: "min(860px,95vw)", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: 22, boxShadow: "0 40px 100px rgba(0,0,0,0.28)", display: "flex", flexWrap: "wrap" }}>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.4)", backdropFilter: "blur(8px)", zIndex: 900 }} />
+      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 901, width: "min(860px,95vw)", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: 24, boxShadow: "0 40px 100px rgba(15,23,42,0.22)", display: "flex", flexWrap: "wrap", fontFamily: "'Inter', sans-serif" }}>
         {/* Preview pane */}
-        <div ref={containerRef} style={{ flex: "1 1 300px", minHeight: 280, position: "relative", overflow: "hidden", borderRadius: "22px 0 0 22px", background: `${accent}10` }}>
+        <div ref={containerRef} style={{ flex: "1 1 300px", minHeight: 280, position: "relative", overflow: "hidden", borderRadius: "24px 0 0 24px", background: `${accent}05` }}>
           <iframe src={`/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
         </div>
         {/* Details pane */}
-        <div style={{ flex: "1 1 260px", padding: "28px 24px" }}>
-          <button onClick={onClose} style={{ float: "right", background: "#F3F4F6", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 18, color: "#6B7280" }}>×</button>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", lineHeight: 1.3, marginTop: 4, paddingRight: 36 }}>{product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}</h2>
-          <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 10 }}>
-            {[1, 2, 3, 4, 5].map(i => <span key={i} style={{ color: i <= Math.round(rating) ? "#F59E0B" : "#E5E7EB", fontSize: 18 }}>★</span>)}
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", marginLeft: 4 }}>{rating.toFixed(1)}{reviewCount ? ` (${reviewCount})` : ""}</span>
+        <div style={{ flex: "1 1 260px", padding: "32px 28px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div>
+            <button onClick={onClose} style={{ float: "right", background: "#F1F5F9", border: "none", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 18, color: "#64748B" }}>×</button>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif", lineHeight: 1.3, marginTop: 4, paddingRight: 36, letterSpacing: -0.5, marginInline: 0 }}>
+              {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
+            </h2>
+            
+            <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 10 }}>
+              {[1, 2, 3, 4, 5].map((s) => (
+                <svg 
+                  key={s} 
+                  width="13" 
+                  height="13" 
+                  viewBox="0 0 24 24" 
+                  fill={s <= Math.round(rating) ? "#F59E0B" : "none"} 
+                  stroke={s <= Math.round(rating) ? "#F59E0B" : "#CBD5E1"} 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              ))}
+              <span style={{ fontSize: 12, fontWeight: 800, color: "#64748B", marginLeft: 6 }}>{rating.toFixed(1)}{reviewCount ? ` (${reviewCount} Reviews)` : ""}</span>
+            </div>
+            
+            <p style={{ fontSize: 13, color: "#64748B", marginTop: 14, lineHeight: 1.6, marginInline: 0 }}>{product.tagline}</p>
+            
+            <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 8 }}>
+              {product.slides.slice(0, 5).map(s => (
+                <div key={s.slideNumber} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span style={{ fontSize: 12, color: "#334155", fontWeight: 600 }}>{s.title}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <p style={{ fontSize: 13, color: "#6B7280", marginTop: 14, lineHeight: 1.7 }}>{product.tagline}</p>
-          <div style={{ marginTop: 16 }}>{product.slides.slice(0, 5).map(s => <div key={s.slideNumber} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><div style={{ width: 7, height: 7, borderRadius: "50%", background: accent, flexShrink: 0 }} /><span style={{ fontSize: 13, color: "#374151" }}>{s.title}</span></div>)}</div>
-          <div style={{ margin: "20px 0", padding: "14px 0", borderTop: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "baseline", gap: 8 }}>
-            <span style={{ fontSize: 30, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
-            {product.cuttedPrice && <span style={{ fontSize: 16, color: "#9CA3AF", textDecoration: "line-through", fontWeight: 600 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
-            <span style={{ fontSize: 13, color: "#9CA3AF" }}>one-time</span>
+
+          <div>
+            <div style={{ margin: "24px 0 16px", padding: "16px 0 0 0", borderTop: "1px solid #F1F5F9", display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontSize: 30, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
+              {product.cuttedPrice && <span style={{ fontSize: 15, color: "#94A3B8", textDecoration: "line-through", fontWeight: 700 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
+              <span style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600 }}>one-time</span>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Link 
+                href={`/order/${product.id}`} 
+                style={{ 
+                  display: "flex", 
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  background: `linear-gradient(135deg,${accent},${accent}DD)`, 
+                  color: "#fff", 
+                  padding: "14px", 
+                  borderRadius: 12, 
+                  textDecoration: "none", 
+                  fontWeight: 900, 
+                  fontSize: 14, 
+                  fontFamily: "'Nunito',sans-serif", 
+                  boxShadow: `0 8px 24px ${accent}25` 
+                }}
+              >
+                Buy &amp; Personalise
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </Link>
+              <Link 
+                href={`/preview/${product.id}`} 
+                style={{ 
+                  display: "flex", 
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  background: "#F8FAFC", 
+                  color: "#475569", 
+                  padding: "12px", 
+                  borderRadius: 12, 
+                  textDecoration: "none", 
+                  fontWeight: 800, 
+                  fontSize: 12, 
+                  border: "1.5px solid #E2E8F0" 
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                View Full Live Preview
+              </Link>
+            </div>
+
+            <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 20 }}>
+              {[
+                { label: "Secure Pay", icon: <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> },
+                { label: "Instant Access", icon: <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg> },
+                { label: "Shareable Link", icon: <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" /></svg> }
+              ].map(b => (
+                <span key={b.label} style={{ fontSize: 10, color: "#94A3B8", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
+                  {b.icon} {b.label}
+                </span>
+              ))}
+            </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <Link href={`/order/${product.id}`} style={{ display: "block", textAlign: "center", background: `linear-gradient(135deg,${accent},${accent}BB)`, color: "#fff", padding: "15px", borderRadius: 13, textDecoration: "none", fontWeight: 900, fontSize: 15, fontFamily: "'Nunito',sans-serif", boxShadow: `0 8px 24px ${accent}35` }}>Buy &amp; Personalise ₹{Math.floor(product.price / 100)} →</Link>
-            <Link href={`/preview/${product.id}`} style={{ display: "block", textAlign: "center", background: "#F9FAFB", color: "#374151", padding: "12px", borderRadius: 13, textDecoration: "none", fontWeight: 700, fontSize: 13, border: "1px solid #E5E7EB" }}>🔍 View Full Preview</Link>
-          </div>
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 16 }}>{["🔒 Secure", "📩 Instant", "💌 Shareable"].map(b => <span key={b} style={{ fontSize: 11, color: "#9CA3AF" }}>{b}</span>)}</div>
         </div>
       </div>
     </>
