@@ -189,11 +189,11 @@ function HowItWorks() {
             How the Magic Works
           </h2>
           <p style={{ fontSize: 16, color: "#64748B", maxWidth: 500, margin: "0 auto" }}>
-            Create an unforgettable, personalized digital experience for your loved ones in just three simple steps.
+            Create an unforgettable, personalized digital experience for your loved ones in 5 simple steps.
           </p>
         </div>
 
-        {/* Step 1 */}
+        {/* Step 1: Browse */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5vw", marginBottom: 100 }}>
           <div style={{ flex: "1 1 400px", order: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
@@ -212,7 +212,6 @@ function HowItWorks() {
             </ul>
           </div>
           <div style={{ flex: "1 1 400px", order: 2, position: "relative" }}>
-            {/* CSS Mockup: Storefront Grid */}
             <div style={{ background: "#fff", borderRadius: 24, padding: 24, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.1)", border: "1px solid #E2E8F0", position: "relative", zIndex: 2 }}>
               <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
                 <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#EF4444" }} />
@@ -220,7 +219,6 @@ function HowItWorks() {
                 <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#10B981" }} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                {/* Mock Card 1 */}
                 <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #F1F5F9" }}>
                   <div style={{ height: 120, background: "linear-gradient(135deg, #FF9A9E, #FECFEF)", position: "relative" }}>
                     <div style={{ position: "absolute", top: 8, left: 8, background: "#EF4444", color: "#fff", fontSize: 8, fontWeight: 800, padding: "4px 8px", borderRadius: 4 }}>🔥 HOT</div>
@@ -231,7 +229,6 @@ function HowItWorks() {
                     <div style={{ width: "50%", height: 10, background: "#F1F5F9", borderRadius: 4 }} />
                   </div>
                 </div>
-                {/* Mock Card 2 */}
                 <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #F1F5F9" }}>
                   <div style={{ height: 120, background: "linear-gradient(135deg, #A18CD1, #FBC2EB)", position: "relative" }}>
                     <div style={{ position: "absolute", top: 8, left: 8, background: "#8B5CF6", color: "#fff", fontSize: 8, fontWeight: 800, padding: "4px 8px", borderRadius: 4 }}>✨ NEW</div>
@@ -248,28 +245,64 @@ function HowItWorks() {
           </div>
         </div>
 
-        {/* Step 2 */}
+        {/* Step 2: Payment */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5vw", marginBottom: 100 }}>
           <div style={{ flex: "1 1 400px", order: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 16, background: "#EEF2FF", color: "#6366F1", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800 }}>2</div>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Pay & Personalize</h3>
+              <div style={{ width: 48, height: 48, borderRadius: 16, background: "#FFFBEB", color: "#F59E0B", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800 }}>2</div>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Secure Checkout</h3>
             </div>
             <p style={{ fontSize: 16, color: "#64748B", lineHeight: 1.7, marginBottom: 24 }}>
-              Make a secure one-time payment. After checkout, you get instant access to the Live Editor. Customize every single text, message, and name to make the gift truly yours.
+              Make a secure one-time payment. Once completed, your order is locked in and you get instant access to the Live Editor.
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-              {["Secure UPI & Card payments", "Real-time Live Editor", "Save progress anytime"].map((t, i) => (
+              {["100% Secure UPI & Card payments", "No hidden fees or subscriptions", "Instant editor access"].map((t, i) => (
                 <li key={i} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 15, color: "#334155", fontWeight: 600 }}>
-                  <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#10B981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>✓</div> {t}
+                  <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#F59E0B", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>✓</div> {t}
                 </li>
               ))}
             </ul>
           </div>
           <div style={{ flex: "1 1 400px", order: 1, position: "relative" }}>
-            {/* CSS Mockup: Live Editor */}
+            <div style={{ background: "#fff", borderRadius: 20, padding: 30, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)", border: "1px solid #E2E8F0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed #E2E8F0", paddingBottom: 20, marginBottom: 20 }}>
+                <div style={{ width: "40%", height: 16, background: "#1A1A2E", borderRadius: 4 }} />
+                <div style={{ width: "20%", height: 24, background: "#10B981", borderRadius: 6 }} />
+              </div>
+              <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+                <div style={{ width: 40, height: 30, background: "#F1F5F9", borderRadius: 4, border: "1px solid #E2E8F0" }} />
+                <div style={{ width: 40, height: 30, background: "#F1F5F9", borderRadius: 4, border: "1px solid #E2E8F0" }} />
+                <div style={{ width: 40, height: 30, background: "#F1F5F9", borderRadius: 4, border: "1px solid #E2E8F0" }} />
+              </div>
+              <div style={{ width: "100%", height: 44, background: "#F1F5F9", borderRadius: 8, marginBottom: 12 }} />
+              <div style={{ width: "100%", height: 44, background: "#1A1A2E", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: "30%", height: 12, background: "#fff", borderRadius: 4 }} />
+              </div>
+            </div>
+            <div style={{ position: "absolute", bottom: -20, left: -20, width: 200, height: 200, background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)", zIndex: -1, pointerEvents: "none" }} />
+          </div>
+        </div>
+
+        {/* Step 3: Edit Texts */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5vw", marginBottom: 100 }}>
+          <div style={{ flex: "1 1 400px", order: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 16, background: "#EEF2FF", color: "#6366F1", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800 }}>3</div>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Edit Texts & Details</h3>
+            </div>
+            <p style={{ fontSize: 16, color: "#64748B", lineHeight: 1.7, marginBottom: 24 }}>
+              Use our Live Editor to customize every single text, message, and name. Watch the preview update instantly as you type to make the gift truly yours.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+              {["Real-time Live Preview", "Change names & paragraphs", "Save progress anytime"].map((t, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 15, color: "#334155", fontWeight: 600 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#6366F1", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>✓</div> {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ flex: "1 1 400px", order: 2, position: "relative" }}>
             <div style={{ display: "flex", gap: 16 }}>
-              {/* Sidebar Edit Panel */}
               <div style={{ flex: 1, background: "#fff", borderRadius: 20, padding: 20, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)", border: "1px solid #E2E8F0" }}>
                 <div style={{ width: "40%", height: 14, background: "#94A3B8", borderRadius: 4, marginBottom: 20 }} />
                 <div style={{ marginBottom: 16 }}>
@@ -287,7 +320,6 @@ function HowItWorks() {
                 </div>
                 <div style={{ width: "100%", height: 36, background: "#6366F1", borderRadius: 8 }} />
               </div>
-              {/* Preview Phone */}
               <div style={{ width: 140, flexShrink: 0, background: "#0F172A", borderRadius: 24, padding: 6, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.3)" }}>
                 <div style={{ width: "100%", height: "100%", background: "#fff", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                   <div style={{ height: 60, background: "#FF9A9E", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 24 }}>🎂</span></div>
@@ -303,47 +335,43 @@ function HowItWorks() {
           </div>
         </div>
 
-        {/* Step 3 */}
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5vw" }}>
-          <div style={{ flex: "1 1 400px", order: 1 }}>
+        {/* Step 4: Music */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5vw", marginBottom: 100 }}>
+          <div style={{ flex: "1 1 400px", order: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 16, background: "#F0FDF4", color: "#10B981", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800 }}>3</div>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Custom Audio & Delivery</h3>
+              <div style={{ width: 48, height: 48, borderRadius: 16, background: "#FDF4FF", color: "#D946EF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800 }}>4</div>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Select Background Music</h3>
             </div>
             <p style={{ fontSize: 16, color: "#64748B", lineHeight: 1.7, marginBottom: 24 }}>
-              Set the perfect mood by assigning custom background music. Choose from our audio library or use multi-part songs. Finally, click "Finalize" to generate a permanent link and share it directly via WhatsApp!
+              Set the perfect mood by assigning custom background music. Choose from our audio library, upload your own MP3, or use multi-part songs.
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-              {["Custom MP3 uploads & YouTube links", "Multi-part playlist support", "Permanent sharable URL generation"].map((t, i) => (
+              {["Custom MP3 uploads & YouTube links", "Multi-part playlist support", "Live audio preview"].map((t, i) => (
                 <li key={i} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 15, color: "#334155", fontWeight: 600 }}>
-                  <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#10B981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>✓</div> {t}
+                  <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#D946EF", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>✓</div> {t}
                 </li>
               ))}
             </ul>
           </div>
-          <div style={{ flex: "1 1 400px", order: 2, position: "relative" }}>
-            {/* CSS Mockup: Audio Library */}
+          <div style={{ flex: "1 1 400px", order: 1, position: "relative" }}>
             <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)", border: "1px solid #E2E8F0", overflow: "hidden" }}>
               <div style={{ padding: "16px 20px", background: "linear-gradient(135deg, #F8FAFC, #F1F5F9)", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontWeight: 800, color: "#0F172A" }}>Audio Library</span>
                 <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#fff", border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B", fontSize: 12 }}>✕</div>
               </div>
               <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-                {/* Playing Item */}
-                <div style={{ border: "2px solid #6366F1", borderRadius: 12, padding: "12px", background: "#F5F3FF", display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#6366F1", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ border: "2px solid #D946EF", borderRadius: 12, padding: "12px", background: "#FDF4FF", display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#D946EF", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <div style={{ width: 10, height: 10, background: "#fff", borderRadius: 2 }} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ width: "60%", height: 12, background: "#4338CA", borderRadius: 4, marginBottom: 6 }} />
-                    {/* Fake Seek bar */}
-                    <div style={{ width: "100%", height: 4, background: "#E0E7FF", borderRadius: 4, position: "relative" }}>
-                      <div style={{ width: "40%", height: "100%", background: "#6366F1", borderRadius: 4 }} />
+                    <div style={{ width: "60%", height: 12, background: "#A21CAF", borderRadius: 4, marginBottom: 6 }} />
+                    <div style={{ width: "100%", height: 4, background: "#F5D0FE", borderRadius: 4, position: "relative" }}>
+                      <div style={{ width: "40%", height: "100%", background: "#D946EF", borderRadius: 4 }} />
                     </div>
                   </div>
-                  <div style={{ padding: "6px 12px", background: "#4338CA", color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: 6 }}>Select</div>
+                  <div style={{ padding: "6px 12px", background: "#A21CAF", color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: 6 }}>Select</div>
                 </div>
-                {/* Multi-part Item */}
                 <div style={{ border: "2px solid #F1F5F9", borderRadius: 12, padding: "12px", background: "#fff", display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#F1F5F9", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <div style={{ width: 0, height: 0, borderTop: "6px solid transparent", borderBottom: "6px solid transparent", borderLeft: "8px solid #64748B", marginLeft: 3 }} />
@@ -351,14 +379,67 @@ function HowItWorks() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
                       <div style={{ width: "50%", height: 12, background: "#0F172A", borderRadius: 4 }} />
-                      <div style={{ padding: "2px 6px", background: "#EEF2FF", color: "#4338CA", fontSize: 8, fontWeight: 800, borderRadius: 99 }}>🎶 3 Parts</div>
+                      <div style={{ padding: "2px 6px", background: "#FDF4FF", color: "#A21CAF", fontSize: 8, fontWeight: 800, borderRadius: 99 }}>🎶 3 Parts</div>
                     </div>
                     <div style={{ width: "70%", height: 8, background: "#94A3B8", borderRadius: 4 }} />
                   </div>
                 </div>
               </div>
             </div>
-            <div style={{ position: "absolute", bottom: -20, left: -20, width: 200, height: 200, background: "radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%)", zIndex: -1, pointerEvents: "none" }} />
+            <div style={{ position: "absolute", bottom: -20, left: -20, width: 200, height: 200, background: "radial-gradient(circle, rgba(217,70,239,0.1) 0%, transparent 70%)", zIndex: -1, pointerEvents: "none" }} />
+          </div>
+        </div>
+
+        {/* Step 5: Finalize & Share */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5vw" }}>
+          <div style={{ flex: "1 1 400px", order: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 16, background: "#F0FDF4", color: "#10B981", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800 }}>5</div>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Finalize & Share</h3>
+            </div>
+            <p style={{ fontSize: 16, color: "#64748B", lineHeight: 1.7, marginBottom: 24 }}>
+              Click "Finalize" to generate a permanent link and a scannable QR code! Send it via WhatsApp, email, or print it out on a physical gift.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+              {["Permanent sharable URL generation", "High-quality scannable QR Code", "One-click share to WhatsApp"].map((t, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 15, color: "#334155", fontWeight: 600 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#10B981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>✓</div> {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ flex: "1 1 400px", order: 2, position: "relative", display: "flex", justifyContent: "center" }}>
+            <div style={{ background: "#fff", borderRadius: 24, padding: 32, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.1)", border: "1px solid #E2E8F0", textAlign: "center", width: "100%", maxWidth: 320 }}>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#10B981", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 24 }}>✓</div>
+              <h4 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", margin: "0 0 8px" }}>Gift Ready!</h4>
+              <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 24px" }}>Your custom digital gift is finalized.</p>
+              
+              <div style={{ border: "2px dashed #E2E8F0", borderRadius: 16, padding: 16, background: "#F8FAFC", marginBottom: 20 }}>
+                {/* QR Code Mockup */}
+                <div style={{ width: 140, height: 140, background: "#fff", borderRadius: 8, margin: "0 auto", padding: 8, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4 }}>
+                  <div style={{ background: "#0F172A", borderRadius: 4, gridColumn: "span 2", gridRow: "span 2" }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4, gridColumn: "span 2" }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4, gridColumn: "span 2", gridRow: "span 2" }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                  <div style={{ background: "#0F172A", borderRadius: 4 }} />
+                </div>
+              </div>
+              
+              <div style={{ display: "flex", gap: 12 }}>
+                <div style={{ flex: 1, height: 44, background: "#F1F5F9", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748B", fontWeight: 700, fontSize: 14 }}>Copy Link</div>
+                <div style={{ flex: 1, height: 44, background: "#25D366", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14 }}>WhatsApp</div>
+              </div>
+            </div>
+            <div style={{ position: "absolute", bottom: -20, right: -20, width: 200, height: 200, background: "radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)", zIndex: -1, pointerEvents: "none" }} />
           </div>
         </div>
 
