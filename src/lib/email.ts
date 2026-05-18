@@ -22,7 +22,10 @@ export async function sendOrderConfirmationEmail(params: {
   order_id: string;
   product_name: string;
   product_emoji: string;
+  subtotal: string;
+  discount: string;
   amount: string;
+  coupon_code: string;
   edit_link: string;
 }) {
   try {
@@ -35,7 +38,10 @@ export async function sendOrderConfirmationEmail(params: {
       order_id: params.order_id,
       product_name: params.product_name,
       product_emoji: params.product_emoji,
+      subtotal: params.subtotal,
+      discount: params.discount,
       amount: params.amount,
+      coupon_code: params.coupon_code,
       edit_link: params.edit_link,
     });
     console.log("✅ Order confirmation email sent to", params.email, "Status:", result.status, result.text);

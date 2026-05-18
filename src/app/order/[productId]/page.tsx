@@ -186,7 +186,10 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
       order_id: order.id,
       product_name: product.name,
       product_emoji: product.thumbnail || "🎁",
+      subtotal: String(Math.floor(product.price / 100)),
+      discount: String(Math.floor(discountAmount / 100)),
       amount: String(Math.floor(finalPrice / 100)),
+      coupon_code: appliedCoupon ? appliedCoupon.id : "NONE",
       edit_link: editLink,
     });
 
