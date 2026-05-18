@@ -203,11 +203,32 @@ function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
       </Link>
       <div style={{ flex: 1 }} />
       <Link href="/my-orders" style={{
-        fontSize: 13, fontWeight: 700, color: "#7C3AED", cursor: "pointer",
-        padding: "8px 16px", borderRadius: 999, border: "1.5px solid #7C3AED",
-        background: "transparent", textDecoration: "none", whiteSpace: "nowrap",
-      }} className="nav-my-orders-btn">
-        My Orders
+        fontSize: 13,
+        fontWeight: 800,
+        color: "#7C3AED",
+        cursor: "pointer",
+        padding: "0 16px",
+        height: 40,
+        borderRadius: 10,
+        background: "rgba(124, 58, 237, 0.08)",
+        textDecoration: "none",
+        whiteSpace: "nowrap",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        transition: "all 0.2s"
+      }}
+      className="nav-my-orders-btn"
+      onMouseEnter={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.15)"}
+      onMouseLeave={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.08)"}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+        <span className="nav-my-orders-text">My Orders</span>
       </Link>
 
       {/* Hamburger Menu Icon */}
@@ -238,9 +259,13 @@ function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
       </button>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        @media (max-width: 580px) {
-          .nav-my-orders-btn {
+        @media (max-width: 480px) {
+          .nav-my-orders-text {
             display: none !important;
+          }
+          .nav-my-orders-btn {
+            padding: 0 !important;
+            width: 40px !important;
           }
         }
       `}} />
