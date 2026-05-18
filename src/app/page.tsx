@@ -70,6 +70,60 @@ function PremiumSVG({ size = 12, color = "currentColor" }: { size?: number; colo
   );
 }
 
+function HomeSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  );
+}
+
+function MailSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  );
+}
+
+function PhoneSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  );
+}
+
+function MapPinSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function PencilSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function ShieldKeySVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M12 2a5 5 0 0 0-5 5v4h10V7a5 5 0 0 0-5-5z" />
+      <circle cx="12" cy="16" r="1.5" />
+    </svg>
+  );
+}
+
 /* ── Marquee Bar ── */
 function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -1392,42 +1446,56 @@ function Footer({ settings }: { settings: Settings | null }) {
         {/* Top footer grid */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
           gap: 40,
           textAlign: "left",
           marginBottom: 48
         }}>
           
-          {/* Column 1: Brand & Info */}
+          {/* Column 1: Brand & Info (Both logos paired) */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 36, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+              <span style={{ fontSize: 13, color: "#334155", fontWeight: 700 }}>×</span>
+              <img src="/as-studios.png" alt="AS Studios" style={{ height: 26, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.6, color: "#64748B" }}>
               Crafting premium, custom-designed digital surprise web microsites that bring immense joy to your loved ones. Make their day magical in one single click.
             </p>
             {/* Badges/Info */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-              <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", background: "rgba(16, 185, 129, 0.1)", color: "#10B981", padding: "4px 8px", borderRadius: 4, letterSpacing: 0.5 }}>🔒 Secure Checkout</span>
-              <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", background: "rgba(124, 58, 237, 0.1)", color: "#A78BFA", padding: "4px 8px", borderRadius: 4, letterSpacing: 0.5 }}>⚡ Instant Live</span>
+              <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", background: "rgba(16, 185, 129, 0.1)", color: "#10B981", padding: "4px 8px", borderRadius: 4, letterSpacing: 0.5, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <LockSVG size={10} color="#10B981" /> Secure Checkout
+              </span>
+              <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", background: "rgba(124, 58, 237, 0.1)", color: "#A78BFA", padding: "4px 8px", borderRadius: 4, letterSpacing: 0.5, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <LightningSVG size={10} color="#A78BFA" /> Instant Live
+              </span>
             </div>
           </div>
 
           {/* Column 2: Quick Links */}
           <div>
             <h4 style={{ color: "#F8FAFC", fontSize: 15, fontWeight: 800, marginBottom: 16, textTransform: "uppercase", letterSpacing: 0.5 }}>Quick Navigation</h4>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12, fontSize: 13 }}>
               <li>
-                <a href="#" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>🏠 Home Page</a>
+                <a href="#" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 8 }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>
+                  <HomeSVG size={14} color="currentColor" /> Home Page
+                </a>
               </li>
               <li>
-                <a href="#gifts" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>🎁 Explore Surprises</a>
+                <a href="#gifts" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 8 }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>
+                  <GiftSVG size={14} color="currentColor" /> Explore Surprises
+                </a>
               </li>
               <li>
-                <a href="/my-orders" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>🛍️ Personalise Drafts</a>
+                <a href="/my-orders" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 8 }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>
+                  <PencilSVG size={14} color="currentColor" /> Personalise Drafts
+                </a>
               </li>
               <li>
-                <a href="/admin" style={{ color: "#64748B", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#64748B"}>🔐 Admin Panel</a>
+                <a href="/admin" style={{ color: "#64748B", textDecoration: "none", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 8 }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#64748B"}>
+                  <ShieldKeySVG size={14} color="currentColor" /> Admin Panel
+                </a>
               </li>
             </ul>
           </div>
@@ -1436,22 +1504,22 @@ function Footer({ settings }: { settings: Settings | null }) {
           <div>
             <h4 style={{ color: "#F8FAFC", fontSize: 15, fontWeight: 800, marginBottom: 16, textTransform: "uppercase", letterSpacing: 0.5 }}>Get In Touch</h4>
             {settings && (settings.contactEmail || settings.contactPhone || settings.contactAddress) ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 13 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 13 }}>
                 {settings.contactEmail && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 15 }}>📧</span>
+                    <MailSVG size={14} color="#A78BFA" />
                     <a href={`mailto:${settings.contactEmail}`} style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>{settings.contactEmail}</a>
                   </div>
                 )}
                 {settings.contactPhone && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 15 }}>📞</span>
+                    <PhoneSVG size={14} color="#A78BFA" />
                     <a href={`tel:${settings.contactPhone}`} style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>{settings.contactPhone}</a>
                   </div>
                 )}
                 {settings.contactAddress && (
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <span style={{ fontSize: 15, marginTop: 2 }}>📍</span>
+                    <MapPinSVG size={14} color="#A78BFA" style={{ marginTop: 2 }} />
                     <span style={{ color: "#94A3B8", lineHeight: 1.4 }}>{settings.contactAddress}</span>
                   </div>
                 )}
@@ -1459,17 +1527,6 @@ function Footer({ settings }: { settings: Settings | null }) {
             ) : (
               <p style={{ fontSize: 13, color: "#64748B" }}>Support available 24/7. Reach out via email or phone for order queries.</p>
             )}
-          </div>
-
-          {/* Column 4: Studio Info */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <h4 style={{ color: "#F8FAFC", fontSize: 15, fontWeight: 800, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Created By</h4>
-            <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 12, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-              <span style={{ fontSize: 10, color: "#64748B", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>A Proud Product of</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <img src="/as-studios.png" alt="AS Studios" style={{ height: 26, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
-              </div>
-            </div>
           </div>
 
         </div>
@@ -1491,7 +1548,11 @@ function Footer({ settings }: { settings: Settings | null }) {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span>Made with</span>
-            <span style={{ color: "#EF4444", display: "inline-block", animation: "heartbeat 1.5s infinite" }}>❤️</span>
+            <span style={{ display: "inline-flex", color: "#EF4444", animation: "heartbeat 1.5s infinite" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </span>
             <span>in India</span>
           </div>
         </div>
