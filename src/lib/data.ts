@@ -557,7 +557,7 @@ function saveSections(sections: DisplaySection[]) {
 }
 
 export function getSections(): DisplaySection[] {
-  return getSectionsRaw().sort((a, b) => a.order - b.order);
+  return getSectionsRaw().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
 export function getVisibleSections(): DisplaySection[] {
