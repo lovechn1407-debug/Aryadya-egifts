@@ -68,9 +68,9 @@ export default function AdminSongsPage() {
   };
 
   const extractYouTubeID = (url: string) => {
-    const regExp = /^.*((youtu.be\/)|(v\/)|(\\/u\\/\\w\\/)|(embed\\/)|(watch\\?))\\??v?=?([^#&?]*).*/;
+    const regExp = /^.*(youtu\.be\/|v\/|e\/|u\/\w+\/|embed\/|watch\?v=|watch\?.+&v=)([^#&?]{11}).*/;
     const match = url.match(regExp);
-    return (match && match[7].length === 11) ? match[7] : "";
+    return match ? match[2] : "";
   };
 
   const uploadToTelegram = async (f: File, title: string): Promise<string> => {
