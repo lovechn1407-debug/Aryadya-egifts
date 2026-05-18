@@ -1597,6 +1597,46 @@ function Footer({ settings }: { settings: Settings | null }) {
   );
 }
 
+/* ── Menu Helpers (Folder SVG, Gear SVG, and Dynamic Category SVGs) ── */
+function FolderSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function GearSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
+
+function getCategorySVG(themeId: string, color = "currentColor", size = 12) {
+  if (themeId.includes("birthday")) {
+    return <SparklesSVG size={size} color={color} />;
+  } else if (themeId.includes("proposal")) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+      </svg>
+    );
+  } else if (themeId.includes("anniversary")) {
+    return <PremiumSVG size={size} color={color} />;
+  } else if (themeId.includes("wedding")) {
+    return <LockSVG size={size} color={color} />;
+  } else if (themeId.includes("friendship")) {
+    return <CustomizeSVG size={size} color={color} />;
+  } else if (themeId.includes("festival")) {
+    return <FireSVG size={size} color={color} />;
+  } else {
+    return <GiftSVG size={size} color={color} />;
+  }
+}
+
 /* ── Menu Drawer (Slide-out Sidebar Navigation) ── */
 function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: () => void; sections: DisplaySection[] }) {
   useEffect(() => {
@@ -1637,9 +1677,10 @@ function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: (
           width: "min(340px, 85vw)",
           background: "linear-gradient(135deg, #0F172A, #020617)",
           borderLeft: "1px solid rgba(255, 255, 255, 0.08)",
-          boxShadow: "-10px 0 40px rgba(0, 0, 0, 0.5)",
+          boxShadow: isOpen ? "-10px 0 40px rgba(0, 0, 0, 0.5)" : "none",
+          visibility: isOpen ? "visible" : "hidden",
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s",
           zIndex: 1001,
           display: "flex",
           flexDirection: "column",
@@ -1686,11 +1727,10 @@ function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: (
           {/* Group 1: Sections categories */}
           <div>
             <span style={{ fontSize: 11, fontWeight: 800, color: "#64748B", textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 12 }}>
-              📂 Browse Occasions
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><FolderSVG size={14} color="#64748B" /> Browse Occasions</span>
             </span>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {sections.map(s => {
-                const theme = getSectionTheme(s.theme);
                 return (
                   <a 
                     key={s.id} 
@@ -1711,8 +1751,8 @@ function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: (
                     onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "#F8FAFC"; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#CBD5E1"; }}
                   >
-                    <span style={{ display: "inline-flex", width: 22, height: 22, borderRadius: 6, background: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center", fontSize: 12 }}>
-                      {theme.emoji ? theme.emoji.substring(0, 2) : "✨"}
+                    <span style={{ display: "inline-flex", width: 22, height: 22, borderRadius: 6, background: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" }}>
+                      {getCategorySVG(s.theme, "#A78BFA", 13)}
                     </span>
                     <span>{s.title}</span>
                   </a>
@@ -1724,7 +1764,7 @@ function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: (
           {/* Group 2: Action Buttons */}
           <div>
             <span style={{ fontSize: 11, fontWeight: 800, color: "#64748B", textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 12 }}>
-              ⚙️ Quick Navigation
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><GearSVG size={14} color="#64748B" /> Quick Navigation</span>
             </span>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {/* My Orders Button */}
