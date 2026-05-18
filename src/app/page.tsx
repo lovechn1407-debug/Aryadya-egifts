@@ -1456,7 +1456,7 @@ function Footer({ settings }: { settings: Settings | null }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 36, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
-              <span style={{ fontSize: 13, color: "#334155", fontWeight: 700 }}>×</span>
+              <span style={{ fontSize: 13, color: "#334155", fontWeight: 700 }}>|</span>
               <img src="/as-studios.png" alt="AS Studios" style={{ height: 26, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.6, color: "#64748B" }}>
@@ -1544,7 +1544,7 @@ function Footer({ settings }: { settings: Settings | null }) {
           color: "#64748B"
         }}>
           <div>
-            <span>© {new Date().getFullYear()} <strong>Aradhya E-Gifts</strong>. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} A Product of<strong>AS-STUDIOS</strong>. All rights reserved.</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span>Made with</span>
