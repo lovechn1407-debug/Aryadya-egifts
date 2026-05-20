@@ -1182,7 +1182,7 @@ function S6({ d, em, oc, onBack, onReset }: {
           scale: 2,
           backgroundColor: "#060c1e", // Cosmic dark background matching My Love's Universe
           logging: false,
-          allowTaint: true,
+          
           onclone: (_clonedDoc, clonedEl) => {
             // Force the seal overlay fully visible in html2canvas cloned DOM.
             // html2canvas re-applies CSS in the clone which can reset running
