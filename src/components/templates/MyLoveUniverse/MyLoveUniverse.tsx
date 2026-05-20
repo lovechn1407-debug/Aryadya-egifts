@@ -1184,6 +1184,16 @@ function S6({ d, em, oc, onBack, onReset }: {
           logging: false,
           
           onclone: (_clonedDoc, clonedEl) => {
+            // iOS Safari crash fix: backdrop-filter often causes SecurityError or blank canvas
+            clonedEl.style.setProperty('backdrop-filter', 'none', 'important');
+            clonedEl.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+            // Give it a solid background since the blur is gone
+            clonedEl.style.setProperty('background-color', '#120509', 'important');
+
+            // Remove any ignored elements from the clone so Safari doesn't attempt to load them
+            const ignored = clonedEl.querySelectorAll('.no-screenshot');
+            ignored.forEach(el => el.remove());
+
             // Force the seal overlay fully visible in html2canvas cloned DOM.
             // html2canvas re-applies CSS in the clone which can reset running
             // animations to their initial frame (opacity:0). Overriding here
