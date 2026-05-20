@@ -148,19 +148,19 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
   };
 
   const shareQR = async () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      const file = new File([blob], "gift-qr.png", { type: "image/png" });
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: "My Gift Page 🎁", text: "Check out this surprise I made for you! ✨", url, files: [file] });
-        } catch { /* cancelled */ }
-      } else {
-        downloadQR();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "My Gift Page 🎁",
+          text: "Check out this surprise I made for you! ✨",
+          url: url
+        });
+      } catch (err) {
+        /* share cancelled */
       }
-    });
+    } else {
+      copyLink();
+    }
   };
 
   const copyLink = () => {

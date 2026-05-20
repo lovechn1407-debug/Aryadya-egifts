@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSectionTheme } from "@/lib/data";
 import type { Product, DisplaySection, SectionThemeConfig } from "@/lib/data";
@@ -691,7 +692,7 @@ function ProductCard({ product, accent, onCardClick }: { product: Product; accen
 
 
 /* ── Login Modal ── */
-function LoginModal({ onClose }: { onClose: () => void }) {
+function LoginModal({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (url: string) => void }) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [orders, setOrders] = useState<Order[] | null>(null);
@@ -814,7 +815,11 @@ function LoginModal({ onClose }: { onClose: () => void }) {
                   <p style={{ fontSize: 11, color: "#64748B", marginTop: 4, margin: 0, fontWeight: 600 }}>{new Date(o.createdAt).toLocaleDateString("en-IN")}</p>
                   <Link 
                     href={`/edit/${o.id}`} 
-                    onClick={onClose} 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onClose();
+                      onNavigate?.(`/edit/${o.id}`);
+                    }}
                     style={{ 
                       display: "inline-flex", 
                       alignItems: "center",
@@ -844,7 +849,11 @@ function LoginModal({ onClose }: { onClose: () => void }) {
                   <p style={{ fontSize: 11, color: "#15803D", marginTop: 4, margin: 0, fontWeight: 600 }}>For: {o.buyerName} · ₹{Math.floor(o.amount / 100)}</p>
                   <Link 
                     href={`/view/${o.id}`} 
-                    onClick={onClose} 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onClose();
+                      onNavigate?.(`/view/${o.id}`);
+                    }}
                     style={{ 
                       display: "inline-flex", 
                       alignItems: "center",
@@ -902,7 +911,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
 }
 
 /* ── Product Quick-View Modal ── */
-function ProductModal({ product, accent, onClose }: { product: Product; accent: string; onClose: () => void }) {
+function ProductModal({ product, accent, onClose, onNavigate }: { product: Product; accent: string; onClose: () => void; onNavigate?: (url: string) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
 
@@ -979,6 +988,11 @@ function ProductModal({ product, accent, onClose }: { product: Product; accent: 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <Link 
                 href={`/order/${product.id}`} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  onClose();
+                  onNavigate?.(`/order/${product.id}`);
+                }}
                 style={{ 
                   display: "flex", 
                   alignItems: "center",
@@ -1003,6 +1017,11 @@ function ProductModal({ product, accent, onClose }: { product: Product; accent: 
               </Link>
               <Link 
                 href={`/preview/${product.id}`} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  onClose();
+                  onNavigate?.(`/preview/${product.id}`);
+                }}
                 style={{ 
                   display: "flex", 
                   alignItems: "center",
@@ -2412,6 +2431,8 @@ function FAQShowcase({ faqs }: { faqs: FAQItem[] }) {
 
 /* ── Main Page ── */
 export default function HomePage() {
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [sections, setSections] = useState<DisplaySection[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -2450,11 +2471,100 @@ export default function HomePage() {
 
   return (
     <div>
+      {/* ── Page Loader Overlay ── */}
+      {isNavigating && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 99999,
+          background: "rgba(10, 10, 18, 0.75)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          animation: "fadeIn 0.3s ease both",
+          fontFamily: "'Nunito', 'Inter', sans-serif"
+        }}>
+          <style>{`
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            @keyframes pulse-heart {
+              0%, 100% { transform: scale(1) translate(-50%, -50%); opacity: 0.9; filter: drop-shadow(0 0 10px rgba(255,45,120,0.6)); }
+              50% { transform: scale(1.15) translate(-50%, -50%); opacity: 0.55; filter: drop-shadow(0 0 24px rgba(233,30,140,0.9)); }
+            }
+            @keyframes textGlow {
+              0%, 100% { opacity: 0.8; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+              50% { opacity: 1; text-shadow: 0 0 20px rgba(255,45,120,0.4); }
+            }
+          `}</style>
+          <div style={{ position: "relative", width: 140, height: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{
+              position: "absolute",
+              width: 100,
+              height: 100,
+              borderRadius: "50%",
+              border: "4px solid rgba(255, 45, 120, 0.15)",
+              borderTopColor: "#FF2D78",
+              borderBottomColor: "#9B59FC",
+              animation: "spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite"
+            }} />
+            <div style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              width: 48,
+              height: 48,
+              transformOrigin: "top left",
+              animation: "pulse-heart 1.5s ease-in-out infinite"
+            }}>
+              <svg viewBox="0 0 24 24" fill="#FF2D78" width="48" height="48">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </div>
+          </div>
+          <h3 style={{
+            color: "#fff",
+            fontSize: 18,
+            fontWeight: 800,
+            marginTop: 24,
+            letterSpacing: "0.5px",
+            animation: "textGlow 2s ease-in-out infinite",
+            textAlign: "center"
+          }}>
+            Opening Magic...
+          </h3>
+          <p style={{
+            color: "rgba(255, 255, 255, 0.5)",
+            fontSize: 13,
+            marginTop: 6,
+            fontWeight: 500,
+            textAlign: "center"
+          }}>
+            Preparing your personalised space
+          </p>
+        </div>
+      )}
+
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
       <Navbar onMenuClick={() => setShowMenu(true)} />
       <MenuDrawer isOpen={showMenu} onClose={() => setShowMenu(false)} sections={sections} />
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
-      {selectedProduct && <ProductModal product={selectedProduct} accent={selectedAccent} onClose={() => setSelectedProduct(null)} />}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onNavigate={(url) => { setIsNavigating(true); router.push(url); }} />}
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct} 
+          accent={selectedAccent} 
+          onClose={() => setSelectedProduct(null)} 
+          onNavigate={(url) => { setIsNavigating(true); router.push(url); }} 
+        />
+      )}
       <Hero />
 
       {loading ? (
