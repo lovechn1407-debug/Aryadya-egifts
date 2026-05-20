@@ -6,6 +6,7 @@ import type { Order, Product } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
 import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
+import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse";
 import QRSharePopup from "@/components/QRSharePopup";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
@@ -44,10 +45,22 @@ const BLISS_SLIDES = [
   { n: 5, label: "Letter" },
 ];
 
+const UNIVERSE_SLIDES = [
+  { n: -1, label: "BG Music" },
+  { n: 0, label: "Welcome" },
+  { n: 1, label: "Envelope" },
+  { n: 2, label: "Puzzle" },
+  { n: 3, label: "Jar" },
+  { n: 4, label: "Playlist" },
+  { n: 5, label: "Stars" },
+  { n: 6, label: "Finale" },
+];
+
 function getSlideList(productId: string) {
   if (productId === "birthday-magic-box") return BIRTHDAY_SLIDES;
   if (productId === "sweet-apology-box") return APOLOGY_SLIDES;
   if (productId === "birthday-bliss-microsite") return BLISS_SLIDES;
+  if (productId === "my-love-s-universe") return UNIVERSE_SLIDES;
   return [];
 }
 
@@ -57,6 +70,16 @@ function renderEditorTemplate(
   onFieldChange: (id: string, val: string) => void,
   forcedSlide: number
 ) {
+  if (productId === "my-love-s-universe") {
+    return (
+      <MyLoveUniverse
+        customData={customData}
+        editMode={true}
+        onFieldChange={onFieldChange}
+        forcedSlide={forcedSlide}
+      />
+    );
+  }
   if (productId === "birthday-bliss-microsite") {
     return (
       <BirthdayBliss

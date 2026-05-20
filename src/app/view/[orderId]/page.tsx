@@ -5,6 +5,7 @@ import type { Order, Product } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
+import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse";
 import Link from "next/link";
 
 /* ── Vector SVG Components ── */
@@ -59,6 +60,8 @@ function AlertTriangleSVG({ size = 48, color = "#EF4444" }: { size?: number; col
 
 function renderFinalTemplate(productId: string, customData: Record<string, string>) {
   switch (productId) {
+    case "my-love-s-universe":
+      return <MyLoveUniverse customData={customData} />;
     case "birthday-bliss-microsite":
       return <BirthdayBliss customData={customData} />;
     case "birthday-magic-box":
