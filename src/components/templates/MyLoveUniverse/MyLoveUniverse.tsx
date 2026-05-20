@@ -842,7 +842,16 @@ function S4({ d, ch, em, oc, onBack, onPlayStateChange }: {
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 24, marginBottom: 20 }}>
           <button onClick={() => setCurrent(c => (c - 1 + songs.length) % songs.length)}
             style={{ background: "none", border: "none", cursor: "pointer", color: "#2A1A1F", fontSize: 22 }}>⏮</button>
-          <button onClick={() => setPlaying(p => !p)}
+          <button onClick={() => {
+            setPlaying(p => {
+              const next = !p;
+              if (audioObj) {
+                if (next) audioObj.play().catch(console.error);
+                else audioObj.pause();
+              }
+              return next;
+            });
+          }}
             style={{
               width: 56, height: 56, borderRadius: "50%",
               background: "#C0395A", border: "2px solid #D4AF37",

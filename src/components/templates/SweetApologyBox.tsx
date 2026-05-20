@@ -470,7 +470,16 @@ function S4({ d, ch, em, oc, onPlayStateChange }: { d: Record<string,string>; ch
           }}>
             <SkipBack size={18} fill="currentColor" />
           </button>
-          <button onClick={() => setPlaying(p => !p)} style={{
+          <button onClick={() => {
+            setPlaying(p => {
+              const next = !p;
+              if (audioObj) {
+                if (next) audioObj.play().catch(console.error);
+                else audioObj.pause();
+              }
+              return next;
+            });
+          }} style={{
             width: 56, height: 56, borderRadius: "50%", border: "none",
             background: "#e91e8c", color: "#fff", cursor: "pointer",
             boxShadow: "0 6px 16px rgba(233,30,140,0.35)", display: "flex", alignItems: "center", justifyContent: "center"
@@ -954,14 +963,19 @@ export default function SweetApologyBox({
       if (isYt && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         ytPlayerRef.current.playVideo();
       }
+      if (bgAudio && bgAudio.paused) {
+        bgAudio.play().then(() => {
+          if (document.visibilityState === 'hidden') bgAudio.pause();
+        }).catch(e => console.log("Initial bg audio play prevented", e));
+      }
     };
-    window.addEventListener("click", onInteract);
-    window.addEventListener("touchstart", onInteract);
+    window.addEventListener("click", onInteract, { once: true });
+    window.addEventListener("touchstart", onInteract, { once: true });
     return () => {
       window.removeEventListener("click", onInteract);
       window.removeEventListener("touchstart", onInteract);
     };
-  }, [isYt]);
+  }, [isYt, bgAudio]);
 
   useEffect(() => {
     if (editMode) return;

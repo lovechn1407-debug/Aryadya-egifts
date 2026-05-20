@@ -1042,14 +1042,19 @@ export default function BirthdayMagicBox({
       if (isYt && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         ytPlayerRef.current.playVideo();
       }
+      if (bgAudio && bgAudio.paused) {
+        bgAudio.play().then(() => {
+          if (document.visibilityState === 'hidden') bgAudio.pause();
+        }).catch(e => console.log("Initial bg audio play prevented", e));
+      }
     };
-    window.addEventListener("click", onInteract);
-    window.addEventListener("touchstart", onInteract);
+    window.addEventListener("click", onInteract, { once: true });
+    window.addEventListener("touchstart", onInteract, { once: true });
     return () => {
       window.removeEventListener("click", onInteract);
       window.removeEventListener("touchstart", onInteract);
     };
-  }, [isYt]);
+  }, [isYt, bgAudio]);
 
   useEffect(() => {
     if (editMode) return;
@@ -1195,12 +1200,18 @@ export default function BirthdayMagicBox({
   const toggleGlobalPlay = (url: string) => {
     if (!globalAudio) return;
     if (activeUrl === url) {
-      setGlobalPlaying(!globalPlaying);
+      setGlobalPlaying(p => {
+        const next = !p;
+        if (next) globalAudio.play().catch(() => {});
+        else globalAudio.pause();
+        return next;
+      });
     } else {
       globalAudio.src = url;
       globalAudio.currentTime = 0;
       setActiveUrl(url);
       setGlobalPlaying(true);
+      globalAudio.play().catch(() => {});
     }
   };
 
