@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useMemo, FC } from "react";
-import { DndContext, useDraggable, useDroppable, DragEndEvent, closestCenter, DragOverlay, DragStartEvent } from "@dnd-kit/core";
+import { DndContext, useDraggable, useDroppable, DragEndEvent, DragOverEvent, closestCenter, DragOverlay, DragStartEvent } from "@dnd-kit/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSpring, animated } from "@react-spring/web";
 import confetti from "canvas-confetti";
@@ -311,22 +311,21 @@ function S1({ d, ch, em, oc, onBack }: {
 
 // ── Slide 2: Heart Puzzle ─────────────────────────────────────────────────────
 // Pieces defined in SVG coordinate space (viewBox 0 0 70 70)
-// clipPoints are polygon points that together cover the entire heart
 interface PieceData {
   id: string;
   color: string;
-  clipPoints: string; // polygon points in SVG 70x70 coordinate space
-  dropX: number;      // % of 300px board for drop zone
-  dropY: number;
+  clipPoints: string;
+  slotLeft: string;
+  slotTop: string;
+  slotWidth: string;
+  slotHeight: string;
 }
 
 const PUZZLE_PIECES: PieceData[] = [
-  { id: "p1", color: "#C0395A", clipPoints: "0,0 35,0 35,24.5 24.5,29.4 0,29.4",            dropX: 25, dropY: 20 },
-  { id: "p2", color: "#8B1A3A", clipPoints: "35,0 70,0 70,29.4 24.5,29.4 35,24.5",           dropX: 75, dropY: 20 },
-  { id: "p3", color: "#C0395A", clipPoints: "0,29.4 24.5,29.4 35,24.5 35,45.5 45.5,49 0,49",  dropX: 20, dropY: 55 },
-  { id: "p4", color: "#8B1A3A", clipPoints: "70,29.4 24.5,29.4 35,24.5 35,45.5 45.5,49 70,49",dropX: 80, dropY: 55 },
-  { id: "p5", color: "#C0395A", clipPoints: "0,49 45.5,49 35,45.5 35,70 0,70",               dropX: 28, dropY: 82 },
-  { id: "p6", color: "#8B1A3A", clipPoints: "70,49 45.5,49 35,45.5 35,70 70,70",              dropX: 72, dropY: 82 },
+  { id: "p1", color: "#C0395A", clipPoints: "0,0 35,0 35,33 0,33",   slotLeft: "0%",  slotTop: "0%",  slotWidth: "50%", slotHeight: "50%" },
+  { id: "p2", color: "#8B1A3A", clipPoints: "35,0 70,0 70,33 35,33", slotLeft: "50%", slotTop: "0%",  slotWidth: "50%", slotHeight: "50%" },
+  { id: "p3", color: "#C0395A", clipPoints: "0,33 35,33 35,70 0,70", slotLeft: "0%",  slotTop: "50%", slotWidth: "50%", slotHeight: "50%" },
+  { id: "p4", color: "#8B1A3A", clipPoints: "35,33 70,33 70,70 35,70",slotLeft: "50%", slotTop: "50%", slotWidth: "50%", slotHeight: "50%" },
 ];
 
 // Transparent heart-slice draggable — NO box, NO border, purely the SVG shape
@@ -356,20 +355,15 @@ function JigsawPiece({ p }: { p: PieceData }) {
   );
 }
 
-// Transparent drop slot — just an invisible hit-area
-function JigsawSlot({ id, p, isOver }: { id: string; p: PieceData; isOver: boolean }) {
-  const { setNodeRef, isOver: over } = useDroppable({ id });
-  const active = over || isOver;
+// Invisible Drop Zone
+function DropZone({ p }: { p: PieceData }) {
+  const { setNodeRef } = useDroppable({ id: p.id });
   return (
     <div ref={setNodeRef} style={{
       position: "absolute",
-      left: `${p.dropX}%`, top: `${p.dropY}%`,
-      width: 70, height: 70,
-      transform: "translate(-50%, -50%)",
+      left: p.slotLeft, top: p.slotTop,
+      width: p.slotWidth, height: p.slotHeight,
       zIndex: 12, pointerEvents: "all",
-      background: active ? "rgba(212,175,55,0.15)" : "transparent",
-      borderRadius: "50%",
-      transition: "background 0.2s",
     }} />
   );
 }
@@ -381,6 +375,7 @@ function S2({ d, ch, em, oc, onBack, ap }: {
   const [previewSolved, setPreviewSolved] = useState(em);
   const [filled, setFilled] = useState<Record<string, boolean>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
   const trayOrder = useMemo(() => [...PUZZLE_PIECES].sort(() => Math.random() - 0.5), []);
   const won = previewSolved || Object.keys(filled).length === PUZZLE_PIECES.length || ap;
 
@@ -397,8 +392,10 @@ function S2({ d, ch, em, oc, onBack, ap }: {
   }, [won, ch, em, ap]);
 
   const handleDragStart = (event: DragStartEvent) => setActiveId(String(event.active.id));
+  const handleDragOver = (event: DragOverEvent) => setOverId(event.over ? String(event.over.id) : null);
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
+    setOverId(null);
     if (event.over && event.over.id === event.active.id) {
       setFilled(p => ({ ...p, [String(event.active.id)]: true }));
     }
@@ -422,95 +419,97 @@ function S2({ d, ch, em, oc, onBack, ap }: {
 
       {em && (
         <div style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          background: "rgba(93, 18, 38, 0.6)",
-          border: "1px solid #D4AF37",
-          borderRadius: 999,
-          padding: "4px 6px",
-          marginBottom: 24,
-          boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-          backdropFilter: "blur(8px)",
+          display: "inline-flex", alignItems: "center", gap: 8,
+          background: "rgba(93, 18, 38, 0.6)", border: "1px solid #D4AF37",
+          borderRadius: 999, padding: "4px 6px", marginBottom: 24,
+          boxShadow: "0 4px 15px rgba(0,0,0,0.2)", backdropFilter: "blur(8px)",
         }}>
-          <button
-            onClick={() => setPreviewSolved(true)}
+          <button onClick={() => setPreviewSolved(true)}
             style={{
-              background: previewSolved ? "#C0395A" : "transparent",
-              color: "#FFF8F0",
-              border: "none",
-              borderRadius: 999,
-              padding: "6px 16px",
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
+              background: previewSolved ? "#C0395A" : "transparent", color: "#FFF8F0",
+              border: "none", borderRadius: 999, padding: "6px 16px",
+              fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600,
+              cursor: "pointer", transition: "all 0.2s ease",
               boxShadow: previewSolved ? "0 2px 8px rgba(192, 57, 90, 0.4)" : "none",
-            }}
-          >
+            }}>
             👁️ Preview Solved
           </button>
-          <button
-            onClick={() => setPreviewSolved(false)}
+          <button onClick={() => setPreviewSolved(false)}
             style={{
-              background: !previewSolved ? "#C0395A" : "transparent",
-              color: "#FFF8F0",
-              border: "none",
-              borderRadius: 999,
-              padding: "6px 16px",
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
+              background: !previewSolved ? "#C0395A" : "transparent", color: "#FFF8F0",
+              border: "none", borderRadius: 999, padding: "6px 16px",
+              fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600,
+              cursor: "pointer", transition: "all 0.2s ease",
               boxShadow: !previewSolved ? "0 2px 8px rgba(192, 57, 90, 0.4)" : "none",
-            }}
-          >
+            }}>
             🧩 Edit/Test Puzzle
           </button>
         </div>
       )}
 
-      <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         {/* Heart board — 300x300, pure SVG slices, no boxes */}
         <div style={{ position: "relative", width: 300, height: 300, margin: "0 auto 20px" }}>
 
-          {/* All 6 slices rendered as SVG clipPath — transparent shapes only */}
-          {PUZZLE_PIECES.map(p => {
-            const isFilled = won ? true : !!filled[p.id];
-            return (
-              <svg key={p.id} width="300" height="300" viewBox="0 0 70 70"
-                style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
-                <defs>
-                  <clipPath id={`bclip-${p.id}`}><polygon points={p.clipPoints} /></clipPath>
-                  <linearGradient id={`bgrad-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor={p.color} />
-                    <stop offset="100%" stopColor={p.color + "cc"} />
-                  </linearGradient>
-                </defs>
-                {isFilled ? (
-                  <path d={HEART_PATH}
-                    fill={`url(#bgrad-${p.id})`}
-                    stroke="#D4AF37" strokeWidth="1.8"
-                    clipPath={`url(#bclip-${p.id})`}
-                    style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.35))" }}
-                  />
-                ) : (
-                  <path d={HEART_PATH}
-                    fill="rgba(212,175,55,0.06)"
-                    stroke="rgba(212,175,55,0.45)" strokeWidth="1.5" strokeDasharray="3.5 3"
-                    clipPath={`url(#bclip-${p.id})`}
-                  />
-                )}
-              </svg>
-            );
-          })}
+          {/* When won, display a solid, unified red heart without any piece cracks */}
+          {won ? (
+            <svg width="300" height="300" viewBox="0 0 70 70"
+              style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+              <path d={HEART_PATH}
+                fill="#C0395A"
+                stroke="#D4AF37" strokeWidth="1.8"
+                style={{ filter: "drop-shadow(0 4px 16px rgba(192, 57, 90, 0.6))" }}
+              />
+            </svg>
+          ) : (
+            <>
+              {/* Background trace grid */}
+              {PUZZLE_PIECES.map(p => (
+                <svg key={`bg-${p.id}`} width="300" height="300" viewBox="0 0 70 70"
+                  style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
+                  <defs>
+                    <clipPath id={`bclip-${p.id}`}><polygon points={p.clipPoints} /></clipPath>
+                  </defs>
+                  {filled[p.id] ? (
+                    <path d={HEART_PATH}
+                      fill={p.color}
+                      stroke="#D4AF37" strokeWidth="1.8"
+                      clipPath={`url(#bclip-${p.id})`}
+                      style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.35))" }}
+                    />
+                  ) : (
+                    <path d={HEART_PATH}
+                      fill="rgba(212,175,55,0.06)"
+                      stroke="rgba(212,175,55,0.45)" strokeWidth="1.5" strokeDasharray="3.5 3"
+                      clipPath={`url(#bclip-${p.id})`}
+                    />
+                  )}
+                </svg>
+              ))}
 
-          {/* Invisible drop zones */}
-          {!won && PUZZLE_PIECES.map(p => (
-            <JigsawSlot key={p.id} id={p.id} p={p} isOver={false} />
-          ))}
+              {/* Glowing piece trace for active drop zone */}
+              {overId && (
+                <svg width="300" height="300" viewBox="0 0 70 70"
+                  style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none", zIndex: 11 }}>
+                  <defs>
+                    <clipPath id="hover-clip">
+                      <polygon points={PUZZLE_PIECES.find(p => p.id === overId)?.clipPoints} />
+                    </clipPath>
+                  </defs>
+                  <path d={HEART_PATH}
+                    fill="rgba(255, 248, 240, 0.4)"
+                    clipPath="url(#hover-clip)"
+                    style={{ filter: "drop-shadow(0 0 10px rgba(255, 248, 240, 0.6))" }}
+                  />
+                </svg>
+              )}
+
+              {/* Invisible drop zones */}
+              {PUZZLE_PIECES.map(p => (
+                <DropZone key={p.id} p={p} />
+              ))}
+            </>
+          )}
 
           <AnimatePresence>
             {won && (
@@ -583,7 +582,6 @@ function S2({ d, ch, em, oc, onBack, ap }: {
     </section>
   );
 }
-
 // ── Slide 3: Memory Jar ───────────────────────────────────────────────────────
 function S3({ d, ch, em, oc, onBack }: {
   d: Record<string, string>; ch: () => void; em: boolean;
