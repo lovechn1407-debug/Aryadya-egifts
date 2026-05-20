@@ -51,7 +51,7 @@ export default function BirthdayBliss({ customData = {}, editMode = false, onFie
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {d.bg_song_url && !editMode && <audio src={d.bg_song_url} autoPlay loop />}
+      {d.bg_song_url && !editMode && <audio id="bliss-bg-audio" src={d.bg_song_url} autoPlay loop />}
       
       {stage === "intro" && <IntroSlide onDone={() => go("balloons")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "balloons" && <BalloonsSlide onContinue={() => go("cake")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}

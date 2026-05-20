@@ -1757,6 +1757,21 @@ export default function MyLoveUniverse({
     };
   }, [isAudible, bgAudio, ytPlayer, isYt, globalMuted]);
 
+  useEffect(() => {
+    const forceAudio = () => {
+      if (isAudible && bgAudio && bgAudio.paused) {
+        bgAudio.play().catch(() => {});
+      }
+    };
+    window.addEventListener('click', forceAudio);
+    window.addEventListener('touchstart', forceAudio);
+    return () => {
+      window.removeEventListener('click', forceAudio);
+      window.removeEventListener('touchstart', forceAudio);
+    };
+  }, [isAudible, bgAudio]);
+
+
   // Auto-play preview cycling
   useEffect(() => {
     if (!autoPlay || editMode) return;
