@@ -307,78 +307,66 @@ function S1({ d, ch, em, oc, onBack }: {
 }
 
 // ── Slide 2: Heart Puzzle ─────────────────────────────────────────────────────
+// Pieces defined in SVG coordinate space (viewBox 0 0 70 70)
+// clipPoints are polygon points that together cover the entire heart
 interface PieceData {
   id: string;
-  clip: string;
   color: string;
-  cx: number;
-  cy: number;
+  clipPoints: string; // polygon points in SVG 70x70 coordinate space
+  dropX: number;      // % of 300px board for drop zone
+  dropY: number;
 }
 
 const PUZZLE_PIECES: PieceData[] = [
-  { id: "p1", color: "#C0395A", clip: "polygon(0% 0%, 50% 0%, 50% 35%, 35% 42%, 0% 42%)", cx: 25, cy: 20 },
-  { id: "p2", color: "#8B1A3A", clip: "polygon(50% 0%, 100% 0%, 100% 42%, 35% 42%, 50% 35%)", cx: 75, cy: 20 },
-  { id: "p3", color: "#8B1A3A", clip: "polygon(0% 42%, 35% 42%, 50% 35%, 50% 65%, 65% 70%, 0% 70%)", cx: 25, cy: 50 },
-  { id: "p4", color: "#C0395A", clip: "polygon(100% 42%, 35% 42%, 50% 35%, 50% 65%, 65% 70%, 100% 70%)", cx: 75, cy: 50 },
-  { id: "p5", color: "#C0395A", clip: "polygon(0% 70%, 65% 70%, 50% 65%, 50% 100%, 0% 100%)", cx: 30, cy: 80 },
-  { id: "p6", color: "#8B1A3A", clip: "polygon(100% 70%, 65% 70%, 50% 65%, 50% 100%, 100% 100%)", cx: 70, cy: 80 },
+  { id: "p1", color: "#C0395A", clipPoints: "0,0 35,0 35,24.5 24.5,29.4 0,29.4",            dropX: 25, dropY: 20 },
+  { id: "p2", color: "#8B1A3A", clipPoints: "35,0 70,0 70,29.4 24.5,29.4 35,24.5",           dropX: 75, dropY: 20 },
+  { id: "p3", color: "#C0395A", clipPoints: "0,29.4 24.5,29.4 35,24.5 35,45.5 45.5,49 0,49",  dropX: 20, dropY: 55 },
+  { id: "p4", color: "#8B1A3A", clipPoints: "70,29.4 24.5,29.4 35,24.5 35,45.5 45.5,49 70,49",dropX: 80, dropY: 55 },
+  { id: "p5", color: "#C0395A", clipPoints: "0,49 45.5,49 35,45.5 35,70 0,70",               dropX: 28, dropY: 82 },
+  { id: "p6", color: "#8B1A3A", clipPoints: "70,49 45.5,49 35,45.5 35,70 70,70",              dropX: 72, dropY: 82 },
 ];
 
+// Transparent heart-slice draggable — NO box, NO border, purely the SVG shape
 function JigsawPiece({ p }: { p: PieceData }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: p.id });
-  const leftOffset = 40 - (p.cx * 260 / 100);
-  const topOffset = 40 - (p.cy * 260 / 100);
-
   return (
     <div ref={setNodeRef} {...listeners} {...attributes}
       style={{
-        width: 80, height: 80,
-        position: "relative",
-        overflow: "hidden",
-        borderRadius: 12,
-        background: "rgba(255,248,240,0.05)",
-        border: "1.5px solid rgba(212,175,55,0.25)",
-        cursor: "grab",
-        touchAction: "none",
-        opacity: isDragging ? 0 : 1,
-        flexShrink: 0,
+        cursor: "grab", touchAction: "none",
+        opacity: isDragging ? 0 : 1, flexShrink: 0,
+        filter: "drop-shadow(0 4px 14px rgba(0,0,0,0.55))",
+        userSelect: "none",
       }}>
-      <div style={{
-        position: "absolute",
-        left: leftOffset, top: topOffset,
-        width: 260, height: 260,
-        clipPath: p.clip,
-      }}>
-        <svg width="260" height="260" viewBox="0 0 70 70">
-          <defs>
-            <linearGradient id={`piece-grad-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={p.color} />
-              <stop offset="100%" stopColor={p.color + "dd"} />
-            </linearGradient>
-          </defs>
-          <path d={HEART_PATH} fill={`url(#piece-grad-${p.id})`} stroke="#D4AF37" strokeWidth="2.5" />
-        </svg>
-      </div>
+      <svg width="100" height="100" viewBox="0 0 70 70" style={{ display: "block", overflow: "visible" }}>
+        <defs>
+          <clipPath id={`tclip-${p.id}`}><polygon points={p.clipPoints} /></clipPath>
+          <linearGradient id={`tgrad-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={p.color} />
+            <stop offset="100%" stopColor={p.color + "cc"} />
+          </linearGradient>
+        </defs>
+        <path d={HEART_PATH} fill={`url(#tgrad-${p.id})`} stroke="#D4AF37" strokeWidth="1.8"
+              clipPath={`url(#tclip-${p.id})`} />
+      </svg>
     </div>
   );
 }
 
-function JigsawSlot({ id, p, filled }: { id: string; p: PieceData; filled: boolean }) {
-  const { setNodeRef, isOver } = useDroppable({ id });
+// Transparent drop slot — just an invisible hit-area
+function JigsawSlot({ id, p, isOver }: { id: string; p: PieceData; isOver: boolean }) {
+  const { setNodeRef, isOver: over } = useDroppable({ id });
+  const active = over || isOver;
   return (
     <div ref={setNodeRef} style={{
       position: "absolute",
-      left: `${p.cx}%`, top: `${p.cy}%`,
-      width: 76, height: 76,
+      left: `${p.dropX}%`, top: `${p.dropY}%`,
+      width: 70, height: 70,
       transform: "translate(-50%, -50%)",
+      zIndex: 12, pointerEvents: "all",
+      background: active ? "rgba(212,175,55,0.15)" : "transparent",
       borderRadius: "50%",
-      background: isOver ? "rgba(212,175,55,0.2)" : "transparent",
-      border: isOver ? "2px dashed #D4AF37" : "none",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 10,
-    }}>
-      {isOver && <span style={{ fontSize: 9, color: "#D4AF37", fontWeight: 700 }}>SNAP</span>}
-    </div>
+      transition: "background 0.2s",
+    }} />
   );
 }
 
@@ -428,44 +416,43 @@ function S2({ d, ch, em, oc, onBack, ap }: {
       }} />
 
       <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        {/* Heart board */}
-        <div style={{ position: "relative", width: 260, height: 260, margin: "0 auto 20px" }}>
-          {/* Target dashed silhouettes for unfilled slots */}
+        {/* Heart board — 300x300, pure SVG slices, no boxes */}
+        <div style={{ position: "relative", width: 300, height: 300, margin: "0 auto 20px" }}>
+
+          {/* All 6 slices rendered as SVG clipPath — transparent shapes only */}
           {PUZZLE_PIECES.map(p => {
             const isFilled = won ? true : !!filled[p.id];
-            return isFilled ? (
-              <motion.div key={p.id} initial={{ scale: 1.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                style={{
-                  position: "absolute", inset: 0,
-                  clipPath: p.clip,
-                  filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.3))",
-                }}>
-                <svg width="260" height="260" viewBox="0 0 70 70">
-                  <defs>
-                    <linearGradient id={`slot-grad-filled-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor={p.color} />
-                      <stop offset="100%" stopColor={p.color + "dd"} />
-                    </linearGradient>
-                  </defs>
-                  <path d={HEART_PATH} fill={`url(#slot-grad-filled-${p.id})`} stroke="#D4AF37" strokeWidth="2.5" />
-                </svg>
-              </motion.div>
-            ) : (
-              <div key={p.id} style={{
-                position: "absolute", inset: 0,
-                clipPath: p.clip,
-                opacity: 0.25,
-              }}>
-                <svg width="260" height="260" viewBox="0 0 70 70">
-                  <path d={HEART_PATH} fill="none" stroke="#D4AF37" strokeWidth="2.5" strokeDasharray="4 3" />
-                </svg>
-              </div>
+            return (
+              <svg key={p.id} width="300" height="300" viewBox="0 0 70 70"
+                style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
+                <defs>
+                  <clipPath id={`bclip-${p.id}`}><polygon points={p.clipPoints} /></clipPath>
+                  <linearGradient id={`bgrad-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={p.color} />
+                    <stop offset="100%" stopColor={p.color + "cc"} />
+                  </linearGradient>
+                </defs>
+                {isFilled ? (
+                  <path d={HEART_PATH}
+                    fill={`url(#bgrad-${p.id})`}
+                    stroke="#D4AF37" strokeWidth="1.8"
+                    clipPath={`url(#bclip-${p.id})`}
+                    style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.35))" }}
+                  />
+                ) : (
+                  <path d={HEART_PATH}
+                    fill="rgba(212,175,55,0.06)"
+                    stroke="rgba(212,175,55,0.45)" strokeWidth="1.5" strokeDasharray="3.5 3"
+                    clipPath={`url(#bclip-${p.id})`}
+                  />
+                )}
+              </svg>
             );
           })}
 
-          {/* Dynamic drop-zone targets */}
+          {/* Invisible drop zones */}
           {!won && PUZZLE_PIECES.map(p => (
-            <JigsawSlot key={p.id} id={p.id} p={p} filled={!!filled[p.id]} />
+            <JigsawSlot key={p.id} id={p.id} p={p} isOver={false} />
           ))}
 
           <AnimatePresence>
@@ -480,54 +467,48 @@ function S2({ d, ch, em, oc, onBack, ap }: {
           </AnimatePresence>
         </div>
 
-        {/* Tray */}
+        {/* Tray — transparent floating heart slices, no boxes */}
         {!won && (
           <div style={{
             marginTop: 16,
-            background: "rgba(255,248,240,0.08)",
-            border: "1.5px solid rgba(212,175,55,0.3)",
-            borderRadius: 20, padding: "16px 20px",
+            background: "rgba(255,248,240,0.06)",
+            border: "1.5px solid rgba(212,175,55,0.25)",
+            borderRadius: 20, padding: "20px 20px",
             display: "flex", flexWrap: "wrap",
-            alignItems: "center", justifyContent: "center", gap: 12,
-            minHeight: 100, width: "100%", maxWidth: 380,
+            alignItems: "center", justifyContent: "center", gap: 16,
+            width: "100%", maxWidth: 420,
             boxSizing: "border-box",
           }}>
             {trayOrder.map(p =>
               filled[p.id] ? (
-                <div key={p.id} style={{ width: 80, height: 80, opacity: 0.1, border: "1px dashed rgba(212,175,55,0.2)", borderRadius: 12 }} />
+                <div key={p.id} style={{ width: 100, height: 100, opacity: 0.12 }}>
+                  <svg width="100" height="100" viewBox="0 0 70 70" style={{ overflow: "visible" }}>
+                    <defs><clipPath id={`ph-${p.id}`}><polygon points={p.clipPoints} /></clipPath></defs>
+                    <path d={HEART_PATH} fill="none" stroke="rgba(212,175,55,0.5)" strokeWidth="1.5"
+                          strokeDasharray="3 3" clipPath={`url(#ph-${p.id})`} />
+                  </svg>
+                </div>
               ) : (
                 <JigsawPiece key={p.id} p={p} />
               )
             )}
           </div>
         )}
-        {won && <div style={{ height: 100 }} />}
+        {won && <div style={{ height: 80 }} />}
 
         <DragOverlay>
           {activeId ? (() => {
-            const activePiece = PUZZLE_PIECES.find(p => p.id === activeId);
-            if (!activePiece) return null;
+            const ap2 = PUZZLE_PIECES.find(p => p.id === activeId);
+            if (!ap2) return null;
             return (
-              <div style={{
-                width: 80, height: 80,
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: 12,
-                background: "rgba(255,248,240,0.1)",
-                border: "2px solid #D4AF37",
-                boxShadow: "0 12px 28px rgba(0,0,0,0.6)",
-              }}>
-                <div style={{
-                  position: "absolute",
-                  left: 40 - (activePiece.cx * 260 / 100),
-                  top: 40 - (activePiece.cy * 260 / 100),
-                  width: 260, height: 260,
-                  clipPath: activePiece.clip,
-                }}>
-                  <svg width="260" height="260" viewBox="0 0 70 70">
-                    <path d={HEART_PATH} fill={activePiece.color} stroke="#D4AF37" strokeWidth="2.5" />
-                  </svg>
-                </div>
+              <div style={{ filter: "drop-shadow(0 10px 24px rgba(0,0,0,0.7))", cursor: "grabbing" }}>
+                <svg width="100" height="100" viewBox="0 0 70 70" style={{ display: "block", overflow: "visible" }}>
+                  <defs>
+                    <clipPath id={`oclip-${ap2.id}`}><polygon points={ap2.clipPoints} /></clipPath>
+                  </defs>
+                  <path d={HEART_PATH} fill={ap2.color} stroke="#D4AF37" strokeWidth="1.8"
+                        clipPath={`url(#oclip-${ap2.id})`} />
+                </svg>
               </div>
             );
           })() : null}
@@ -1010,43 +991,30 @@ function S5({ d, ch, em, oc, onBack, ap }: {
             );
           })}
 
-          {/* Tooltip for clicked star */}
+          {/* Tooltip for clicked star — clamped so it never goes off either edge */}
           <AnimatePresence>
-            {activeIdx !== null && (() => {
-              const isRight = STAR_POSITIONS[activeIdx].x > 70;
-              const isLeft = STAR_POSITIONS[activeIdx].x < 30;
-              let tooltipStyle: React.CSSProperties = {
-                position: "absolute",
-                top: `calc(${STAR_POSITIONS[activeIdx].y}% + 28px)`,
-                width: 200, zIndex: 20,
-                background: "#FFF8F0",
-                border: "1.5px solid #D4AF37",
-                borderRadius: 16, padding: "14px 16px",
-                boxShadow: "0 12px 30px rgba(0,0,0,0.4)",
-              };
-              if (isRight) {
-                tooltipStyle.right = `calc(${100 - STAR_POSITIONS[activeIdx].x}% - 18px)`;
-                tooltipStyle.transform = "none";
-              } else if (isLeft) {
-                tooltipStyle.left = `calc(${STAR_POSITIONS[activeIdx].x}% - 18px)`;
-                tooltipStyle.transform = "none";
-              } else {
-                tooltipStyle.left = `${STAR_POSITIONS[activeIdx].x}%`;
-                tooltipStyle.transform = "translateX(-50%)";
-              }
-              return (
-                <motion.div key={activeIdx}
-                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  style={tooltipStyle}>
-                  <p style={{ textAlign: "center", color: "#C0395A", marginBottom: 4, fontSize: 16 }}>♡</p>
-                  <p style={{ fontFamily: "'Lora', serif", fontStyle: "italic", textAlign: "center", fontSize: 13, color: "#8B1A3A", lineHeight: 1.5 }}>
-                    {starReasons[activeIdx]}
-                  </p>
-                </motion.div>
-              );
-            })()}
+            {activeIdx !== null && (
+              <motion.div key={activeIdx}
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                style={{
+                  position: "absolute",
+                  // clamp centers tooltip on star but keeps it fully inside the container
+                  left: `clamp(4px, calc(${STAR_POSITIONS[activeIdx].x}% - 100px), calc(100% - 204px))`,
+                  top: `calc(${STAR_POSITIONS[activeIdx].y}% + 28px)`,
+                  width: 200, zIndex: 20,
+                  background: "#FFF8F0",
+                  border: "1.5px solid #D4AF37",
+                  borderRadius: 16, padding: "14px 16px",
+                  boxShadow: "0 12px 30px rgba(0,0,0,0.4)",
+                }}>
+                <p style={{ textAlign: "center", color: "#C0395A", marginBottom: 4, fontSize: 16 }}>♡</p>
+                <p style={{ fontFamily: "'Lora', serif", fontStyle: "italic", textAlign: "center", fontSize: 13, color: "#8B1A3A", lineHeight: 1.5 }}>
+                  {starReasons[activeIdx]}
+                </p>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
 
