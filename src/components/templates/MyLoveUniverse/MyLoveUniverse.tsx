@@ -1113,6 +1113,7 @@ function S6({ d, em, oc, onBack, onReset }: {
 }) {
   const emberRef = useRef<HTMLDivElement>(null);
   const [sealed, setSealed] = useState(false);
+  const [animationDone, setAnimationDone] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const [screenshotData, setScreenshotData] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
@@ -1152,6 +1153,12 @@ function S6({ d, em, oc, onBack, onReset }: {
     fire(0.1, 0.5); fire(0.9, 0.5); fire(0.5, 0.4);
 
     setSealed(true);
+    setAnimationDone(false);
+
+    // After animation completes (1000ms), remove animation class to make stamp static
+    setTimeout(() => {
+      setAnimationDone(true);
+    }, 1000);
 
     // Wait for stamp pressing animation to complete, then capture screenshot
     setTimeout(async () => {
@@ -1390,16 +1397,17 @@ function S6({ d, em, oc, onBack, onReset }: {
         {/* Sealed heart overlay inside the card wrapper so it gets screenshotted */}
         {sealed && (
           <div
-            className="seal-backdrop"
+            className={animationDone ? "" : "seal-backdrop"}
             style={{
               position: "absolute", inset: 0, display: "flex",
               alignItems: "center", justifyContent: "center", zIndex: 20,
               background: "rgba(18, 5, 9, 0.96)", borderRadius: 22,
               pointerEvents: "none",
             }}>
-            <div className="seal-pressing" style={{
+            <div className={animationDone ? "" : "seal-pressing"} style={{
               width: 220, height: 220,
               filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.6))",
+              transform: "rotate(-12deg)",
             }}>
               <svg width="220" height="220" viewBox="0 0 200 200">
                 <defs>

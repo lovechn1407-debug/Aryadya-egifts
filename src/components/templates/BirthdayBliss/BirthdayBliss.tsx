@@ -561,9 +561,18 @@ function EnvelopeSlide({ onOpen, editMode }: { onOpen: () => void; editMode: boo
 /* ============ LETTER ============ */
 function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>void; d: Record<string,string>; editMode: boolean; onFieldChange?: (id:string,v:string)=>void }) {
   const [sealed, setSealed] = useState(false);
+  const [animationDone, setAnimationDone] = useState(false);
   const [sharing, setSharing] = useState(false);
   const letterRef = useRef<HTMLDivElement>(null);
   const date = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+
+  const handleSeal = () => {
+    setSealed(true);
+    setAnimationDone(false);
+    setTimeout(() => {
+      setAnimationDone(true);
+    }, 1000);
+  };
 
   const handleShare = async () => {
     if (!letterRef.current) return;
@@ -613,7 +622,14 @@ function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>voi
           <p className="text-2xl md:text-3xl text-[#5a1d3a]"><ET darkText fid="l_signoff" d={d} onChange={onFieldChange} editMode={editMode} def={d.l_signoff||"— with all my heart ❤"} /></p>
 
           {sealed && (
-            <div className="bliss-stamp">
+            <div
+              className="bliss-stamp"
+              style={animationDone ? {
+                animation: "none",
+                transform: "translate(-50%, -50%) rotate(-12deg) scale(1)",
+                opacity: 1
+              } : {}}
+            >
               Seen by {d.s0_recipient||"Madam Ji"}<br />
               <span className="text-[10px] opacity-80">on {date}</span><br />
               <span className="text-[10px] opacity-80">Made by ARADHYA E-GIFT</span>
@@ -626,7 +642,7 @@ function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>voi
             <RotateCcw size={14} /> Experience again
           </button>
           {!sealed ? (
-            <button onClick={() => setSealed(true)} className="bliss-btn-pill bliss-btn-pill-pink inline-flex items-center gap-2">
+            <button onClick={handleSeal} className="bliss-btn-pill bliss-btn-pill-pink inline-flex items-center gap-2">
               <Stamp size={14} /> Seal the letter
             </button>
           ) : (
