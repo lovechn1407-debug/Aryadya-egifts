@@ -1161,7 +1161,9 @@ function S6({ d, em, oc, onBack, onReset }: {
       const element = document.getElementById("my-love-universe-card-to-capture");
       if (!element) {
         console.error("Capture element not found");
-        setScreenshotData("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23060c1e'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23d4af37' font-size='16'>Sealed with Love! 💖</text></svg>");
+        const fallbackSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23060c1e'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23d4af37' font-size='16'>Sealed with Love! 💖</text></svg>`;
+        const fallbackData = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(fallbackSvg)))}`;
+        setScreenshotData(fallbackData);
         setOpenModal(true);
         return;
       }
@@ -1183,7 +1185,9 @@ function S6({ d, em, oc, onBack, onReset }: {
       } catch (err) {
         console.error("Screenshot capture failed", err);
         // Fallback so the share modal is never blocked from opening
-        setScreenshotData("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23060c1e'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23d4af37' font-size='16'>Sealed with Love! 💖</text></svg>");
+        const fallbackSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23060c1e'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23d4af37' font-size='16'>Sealed with Love! 💖</text></svg>`;
+        const fallbackData = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(fallbackSvg)))}`;
+        setScreenshotData(fallbackData);
         setOpenModal(true);
       }
     }, 1500);
@@ -1384,62 +1388,53 @@ function S6({ d, em, oc, onBack, onReset }: {
         }} />
 
         {/* Sealed heart overlay inside the card wrapper so it gets screenshotted */}
-        <AnimatePresence>
-          {sealed && (
-            <div
-              className="seal-backdrop"
-              style={{
-                position: "absolute", inset: 0, display: "flex",
-                alignItems: "center", justifyContent: "center", zIndex: 20,
-                background: "rgba(18, 5, 9, 0.96)", borderRadius: 22,
-                pointerEvents: "none",
-              }}>
-              <div className="seal-pressing" style={{
-                width: 220, height: 220,
-                filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.6))",
-              }}>
-                <svg width="220" height="220" viewBox="0 0 200 200">
-                  <defs>
-                    <path id="outer-text-path" d="M 100, 100 m -78, 0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0" fill="none" />
-                    
-                    <radialGradient id="gold-wax" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
-                      <stop offset="0%" stopColor="#FFFDD0" />
-                      <stop offset="40%" stopColor="#D4AF37" />
-                      <stop offset="100%" stopColor="#AA7C11" />
-                    </radialGradient>
-                    
-                    <linearGradient id="gold-metallic" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#AA7C11" />
-                      <stop offset="30%" stopColor="#D4AF37" />
-                      <stop offset="50%" stopColor="#FFFDD0" />
-                      <stop offset="70%" stopColor="#D4AF37" />
-                      <stop offset="100%" stopColor="#AA7C11" />
-                    </linearGradient>
-                  </defs>
-                  
-                  {/* Irregular scalloped circle edge for a hyper-realistic hot wax look */}
-                  <path d="M 100, 12 A 88,88 0 0,0 12, 105 A 82,88 0 0,0 100, 188 A 88,82 0 0,0 188, 95 A 88,88 0 0,0 100, 12 Z" fill="url(#gold-wax)" stroke="url(#gold-metallic)" strokeWidth="4" />
-                  <circle cx="100" cy="100" r="82" fill="none" stroke="#FFF8F0" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.5" />
-                  <circle cx="100" cy="100" r="64" fill="#6A1B29" stroke="url(#gold-metallic)" strokeWidth="3" />
-                  
-                  <text fill="#FFF8F0" fontSize="8.2" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="1.2">
-                    <textPath href="#outer-text-path" startOffset="0%">
-                      {stampText}
-                    </textPath>
-                  </text>
-                  
-                  <text x="100" y="94" textAnchor="middle" fill="#FFF8F0" fontSize="22" fontFamily="'Sacramento', cursive" fontWeight="bold">
-                    {viewerName}
-                  </text>
-                  <text x="100" y="118" textAnchor="middle" fill="#D4AF37" fontSize="8" fontFamily="'Inter', sans-serif" fontWeight="700" letterSpacing="1">
-                    FOREVER & ALWAYS
-                  </text>
-                  <circle cx="100" cy="130" r="3" fill="#D4AF37" />
-                </svg>
-              </div>
+        {sealed && (
+          <div
+            className="seal-backdrop"
+            style={{
+              position: "absolute", inset: 0, display: "flex",
+              alignItems: "center", justifyContent: "center", zIndex: 20,
+              background: "rgba(18, 5, 9, 0.96)", borderRadius: 22,
+              pointerEvents: "none",
+            }}>
+            <div className="seal-pressing" style={{
+              width: 220, height: 220,
+              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.6))",
+            }}>
+              <svg width="220" height="220" viewBox="0 0 200 200">
+                <defs>
+                  <path id="universe-stamp-top-path" d="M 30, 100 A 70,70 0 0,1 170, 100" fill="none" />
+                  <path id="universe-stamp-bottom-path" d="M 170, 100 A 70,70 0 0,1 30, 100" fill="none" />
+                </defs>
+                
+                {/* Irregular scalloped circle edge for a hyper-realistic solid wax look */}
+                <path d="M 100, 12 A 88,88 0 0,0 12, 105 A 82,88 0 0,0 100, 188 A 88,82 0 0,0 188, 95 A 88,88 0 0,0 100, 12 Z" fill="#D4AF37" stroke="#AA7C11" strokeWidth="4" />
+                <circle cx="100" cy="100" r="82" fill="none" stroke="#FFF8F0" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.5" />
+                <circle cx="100" cy="100" r="64" fill="#6A1B29" stroke="#D4AF37" strokeWidth="3" />
+                
+                <text fill="#FFF8F0" fontSize="8.2" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="1">
+                  <textPath href="#universe-stamp-top-path" startOffset="50%" textAnchor="middle">
+                    {`★ ARADHYA EGIFTS ★ SEEN BY ${viewerName.toUpperCase()} ★`}
+                  </textPath>
+                </text>
+                
+                <text fill="#FFF8F0" fontSize="7.8" fontFamily="'Inter', sans-serif" fontWeight="800" letterSpacing="0.8">
+                  <textPath href="#universe-stamp-bottom-path" startOffset="50%" textAnchor="middle">
+                    {`★ ${currentDate.toUpperCase()} ★ FOREVER & ALWAYS ★`}
+                  </textPath>
+                </text>
+                
+                <text x="100" y="94" textAnchor="middle" fill="#FFF8F0" fontSize="22" fontFamily="'Sacramento', cursive" fontWeight="bold">
+                  {viewerName}
+                </text>
+                <text x="100" y="118" textAnchor="middle" fill="#D4AF37" fontSize="8" fontFamily="'Inter', sans-serif" fontWeight="700" letterSpacing="1">
+                  FOREVER & ALWAYS
+                </text>
+                <circle cx="100" cy="130" r="3" fill="#D4AF37" />
+              </svg>
             </div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
       </div>
 
       <div className="no-screenshot" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 32, position: "relative", zIndex: 10 }}>

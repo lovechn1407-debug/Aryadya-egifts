@@ -655,7 +655,9 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
       const element = document.getElementById("birthday-magic-card-to-capture");
       if (!element) {
         console.error("Capture element not found");
-        setScreenshotData("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23fff5f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23e91e8c' font-size='16'>Sealed with Love! 💖</text></svg>");
+        const fallbackSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23fff5f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23e91e8c' font-size='16'>Sealed with Love! 💖</text></svg>`;
+        const fallbackData = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(fallbackSvg)))}`;
+        setScreenshotData(fallbackData);
         setOpenModal(true);
         return;
       }
@@ -677,7 +679,9 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
       } catch (err) {
         console.error("Screenshot capture failed", err);
         // Fallback so the share modal is never blocked from opening
-        setScreenshotData("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23fff5f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23e91e8c' font-size='16'>Sealed with Love! 💖</text></svg>");
+        const fallbackSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23fff5f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23e91e8c' font-size='16'>Sealed with Love! 💖</text></svg>`;
+        const fallbackData = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(fallbackSvg)))}`;
+        setScreenshotData(fallbackData);
         setOpenModal(true);
       }
     }, 1500);
