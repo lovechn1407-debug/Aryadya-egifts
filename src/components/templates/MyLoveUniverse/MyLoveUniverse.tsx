@@ -1182,8 +1182,28 @@ function S6({ d, em, oc, onBack, onReset }: {
           scale: 2,
           backgroundColor: "#060c1e", // Cosmic dark background matching My Love's Universe
           logging: false,
+          allowTaint: true,
+          onclone: (_clonedDoc, clonedEl) => {
+            // Force the seal overlay fully visible in html2canvas cloned DOM.
+            // html2canvas re-applies CSS in the clone which can reset running
+            // animations to their initial frame (opacity:0). Overriding here
+            // with setProperty guarantees the stamp is always captured.
+            const backdrop = clonedEl.querySelector('.seal-backdrop') as HTMLElement | null;
+            if (backdrop) {
+              backdrop.style.setProperty('animation', 'none', 'important');
+              backdrop.style.setProperty('opacity', '1', 'important');
+              backdrop.style.setProperty('visibility', 'visible', 'important');
+            }
+            const stamp = clonedEl.querySelector('.seal-pressing') as HTMLElement | null;
+            if (stamp) {
+              stamp.style.setProperty('animation', 'none', 'important');
+              stamp.style.setProperty('transform', 'rotate(-12deg) scale(1)', 'important');
+              stamp.style.setProperty('opacity', '1', 'important');
+              stamp.style.setProperty('visibility', 'visible', 'important');
+            }
+          },
           ignoreElements: (el) => {
-            return el.classList.contains("no-screenshot") || el.tagName === "BUTTON";
+            return el.classList.contains('no-screenshot') || el.tagName === 'BUTTON';
           }
         });
         const dataUrl = canvas.toDataURL("image/png");
@@ -1197,7 +1217,7 @@ function S6({ d, em, oc, onBack, onReset }: {
         setScreenshotData(fallbackData);
         setOpenModal(true);
       }
-    }, 1500);
+    }, 2000);
   };
 
   const handleShare = async () => {
