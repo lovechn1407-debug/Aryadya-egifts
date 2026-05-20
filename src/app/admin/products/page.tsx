@@ -10,6 +10,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   proposal: "💍 Proposal",
   anniversary: "💑 Anniversary",
   friendship: "🤝 Friendship",
+  love: "❤️ Love",
 };
 
 export default function AdminProductsPage() {
