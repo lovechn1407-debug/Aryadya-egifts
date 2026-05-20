@@ -61,6 +61,7 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
 
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [step, setStep] = useState<"details" | "payment" | "processing">("details");
+  const [isNavigating, setIsNavigating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [couponInput, setCouponInput] = useState("");
@@ -166,6 +167,9 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
     }
 
     setStep("processing");
+    await new Promise(r => setTimeout(r, 1200));
+    setIsNavigating(true);
+
     const order = await createOrderDB({
       productId: product.id,
       productName: product.name,
@@ -394,13 +398,14 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
         )}
 
         {/* Step: Processing */}
+        {/* Step: Processing/Success */}
         {step === "processing" && (
           <div style={{ background: "#fff", borderRadius: 24, padding: "60px 24px", textAlign: "center", boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", border: "1px solid #F3E8FF" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-              <SparklesSVG size={44} color="#7C3AED" />
+            <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+               <span style={{ fontSize: 40 }}>✓</span>
             </div>
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito', sans-serif", margin: 0 }}>Setting up your editor</h2>
-            <p style={{ color: "#8A94A6", marginTop: 8, fontSize: 13, margin: "8px 0 0 0" }}>Launching personalizer dashboard securely in a second...</p>
+            <h2 style={{ fontSize: 24, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito', sans-serif", margin: 0 }}>Payment Successful!</h2>
+            <p style={{ color: "#64748B", marginTop: 12, fontSize: 15, margin: "12px 0 0 0" }}>Your payment was processed successfully. We are redirecting you to your editor now.</p>
           </div>
         )}
 

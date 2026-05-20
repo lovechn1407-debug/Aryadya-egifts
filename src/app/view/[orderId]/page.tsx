@@ -272,9 +272,17 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
           <button
             onClick={async () => {
               try {
-                await navigator.share({ title: `A gift for you`, url: pageUrl });
+                if (navigator.share) {
+                  await navigator.share({ 
+                    title: `A gift for you`, 
+                    text: `Check out this surprise I made for you! ✨`,
+                    url: pageUrl 
+                  });
+                } else {
+                  copyLink();
+                }
               } catch {
-                copyLink();
+                // Ignore AbortError if user closes the sheet
               }
             }}
             style={{
