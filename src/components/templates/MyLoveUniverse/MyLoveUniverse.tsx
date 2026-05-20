@@ -331,6 +331,7 @@ function JigsawPiece({ p }: { p: PieceData }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: p.id });
   return (
     <div ref={setNodeRef} {...listeners} {...attributes}
+      className="jigsaw-piece"
       style={{
         cursor: "grab", touchAction: "none",
         opacity: isDragging ? 0 : 1, flexShrink: 0,
@@ -374,10 +375,11 @@ function S2({ d, ch, em, oc, onBack, ap }: {
   d: Record<string, string>; ch: () => void; em: boolean;
   oc?: (id: string, v: string) => void; onBack: () => void; ap?: boolean;
 }) {
+  const [previewSolved, setPreviewSolved] = useState(em);
   const [filled, setFilled] = useState<Record<string, boolean>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const trayOrder = useMemo(() => [...PUZZLE_PIECES].sort(() => Math.random() - 0.5), []);
-  const won = Object.keys(filled).length === PUZZLE_PIECES.length || em || ap;
+  const won = previewSolved || Object.keys(filled).length === PUZZLE_PIECES.length || ap;
 
   useEffect(() => {
     if (won && !em && !ap) {
@@ -412,8 +414,60 @@ function S2({ d, ch, em, oc, onBack, ap }: {
       }} />
       <ET fid="s3_subtitle" data={d} onChange={oc} editMode={em} style={{
         fontFamily: "'Lora', serif", fontStyle: "italic", fontSize: 14,
-        color: "#F2C4CE", marginBottom: 28, textAlign: "center", display: "block",
+        color: "#F2C4CE", marginBottom: 20, textAlign: "center", display: "block",
       }} />
+
+      {em && (
+        <div style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          background: "rgba(93, 18, 38, 0.6)",
+          border: "1px solid #D4AF37",
+          borderRadius: 999,
+          padding: "4px 6px",
+          marginBottom: 24,
+          boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+          backdropFilter: "blur(8px)",
+        }}>
+          <button
+            onClick={() => setPreviewSolved(true)}
+            style={{
+              background: previewSolved ? "#C0395A" : "transparent",
+              color: "#FFF8F0",
+              border: "none",
+              borderRadius: 999,
+              padding: "6px 16px",
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: previewSolved ? "0 2px 8px rgba(192, 57, 90, 0.4)" : "none",
+            }}
+          >
+            👁️ Preview Solved
+          </button>
+          <button
+            onClick={() => setPreviewSolved(false)}
+            style={{
+              background: !previewSolved ? "#C0395A" : "transparent",
+              color: "#FFF8F0",
+              border: "none",
+              borderRadius: 999,
+              padding: "6px 16px",
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: !previewSolved ? "0 2px 8px rgba(192, 57, 90, 0.4)" : "none",
+            }}
+          >
+            🧩 Edit/Test Puzzle
+          </button>
+        </div>
+      )}
 
       <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* Heart board — 300x300, pure SVG slices, no boxes */}
@@ -458,10 +512,11 @@ function S2({ d, ch, em, oc, onBack, ap }: {
           <AnimatePresence>
             {won && (
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-                style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", zIndex: 20 }}>
-                <p style={{ fontFamily: "'Sacramento', cursive", fontSize: "2.2rem", color: "#FFF8F0", textShadow: "0 0 20px #C0395A", textAlign: "center" }}>
-                  {d.s3_win_text || "You complete me. ♡"}
-                </p>
+                style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: em ? "all" : "none", zIndex: 20 }}>
+                <ET fid="s3_win_text" data={d} onChange={oc} editMode={em} style={{
+                  fontFamily: "'Sacramento', cursive", fontSize: "2.2rem", color: "#FFF8F0",
+                  textShadow: "0 0 20px #C0395A", textAlign: "center", display: "block"
+                }} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -470,14 +525,15 @@ function S2({ d, ch, em, oc, onBack, ap }: {
         {/* Tray — transparent floating heart slices, no boxes */}
         {!won && (
           <div style={{
-            marginTop: 16,
-            background: "rgba(255,248,240,0.06)",
-            border: "1.5px solid rgba(212,175,55,0.25)",
-            borderRadius: 20, padding: "20px 20px",
+            marginTop: 20,
+            background: "linear-gradient(145deg, #5D1226 0%, #2A040E 100%)",
+            border: "2px dashed #D4AF37",
+            borderRadius: 24, padding: "24px 20px",
             display: "flex", flexWrap: "wrap",
-            alignItems: "center", justifyContent: "center", gap: 16,
-            width: "100%", maxWidth: 420,
+            alignItems: "center", justifyContent: "center", gap: 20,
+            width: "100%", maxWidth: 440,
             boxSizing: "border-box",
+            boxShadow: "inset 0 10px 30px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.4)",
           }}>
             {trayOrder.map(p =>
               filled[p.id] ? (
@@ -501,7 +557,12 @@ function S2({ d, ch, em, oc, onBack, ap }: {
             const ap2 = PUZZLE_PIECES.find(p => p.id === activeId);
             if (!ap2) return null;
             return (
-              <div style={{ filter: "drop-shadow(0 10px 24px rgba(0,0,0,0.7))", cursor: "grabbing" }}>
+              <div style={{
+                cursor: "grabbing",
+                transform: "scale(1.18) rotate(-6deg)",
+                transition: "transform 0.1s ease",
+                filter: "drop-shadow(0 15px 30px rgba(212, 175, 55, 0.6))",
+              }}>
                 <svg width="100" height="100" viewBox="0 0 70 70" style={{ display: "block", overflow: "visible" }}>
                   <defs>
                     <clipPath id={`oclip-${ap2.id}`}><polygon points={ap2.clipPoints} /></clipPath>
@@ -1209,6 +1270,7 @@ export default function MyLoveUniverse({
   const [slideAudioPlaying, setSlideAudioPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const ytPlayerRef = useRef<any>(null);
+  const fadeIntervalRef = useRef<any>(null);
 
   useEffect(() => { ytPlayerRef.current = ytPlayer; }, [ytPlayer]);
 
@@ -1235,23 +1297,85 @@ export default function MyLoveUniverse({
     if (bgAudio.src !== customData.bg_song_url) bgAudio.src = customData.bg_song_url;
   }, [bgAudio, customData.bg_song_url, isYt]);
 
-  useEffect(() => {
-    if (editMode) return;
-    if (slideAudioPlaying) {
-      bgAudio?.pause();
-      ytPlayer?.pauseVideo?.();
-    } else if (hasInteracted && !globalMuted) {
-      if (isYt) ytPlayer?.playVideo?.();
-      else bgAudio?.play().catch(() => {});
-    }
-  }, [slideAudioPlaying, bgAudio, globalMuted, editMode, isYt, ytPlayer, hasInteracted]);
+  const isAudible = !editMode && hasInteracted && !globalMuted && !slideAudioPlaying;
 
   useEffect(() => {
-    if (bgAudio) bgAudio.muted = globalMuted;
-    if (ytPlayer?.isMuted) {
-      if (globalMuted) ytPlayer.mute(); else ytPlayer.unMute();
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
     }
-  }, [globalMuted, bgAudio, ytPlayer]);
+
+    if (editMode) return;
+
+    if (isAudible) {
+      if (isYt) {
+        if (ytPlayer && typeof ytPlayer.playVideo === "function") {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(0);
+          ytPlayer.playVideo();
+          
+          let currentVol = 0;
+          fadeIntervalRef.current = setInterval(() => {
+            currentVol = Math.min(currentVol + 5, 100);
+            if (ytPlayer && typeof ytPlayer.setVolume === "function") {
+              ytPlayer.setVolume(currentVol);
+            }
+            if (currentVol >= 100) {
+              if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
+              }
+            }
+          }, 100);
+        }
+      } else {
+        if (bgAudio) {
+          bgAudio.muted = false;
+          bgAudio.volume = 0;
+          bgAudio.play().catch(e => console.log("Bg audio play prevented", e));
+          
+          let currentVol = 0;
+          fadeIntervalRef.current = setInterval(() => {
+            currentVol = Math.min(currentVol + 0.05, 1.0);
+            bgAudio.volume = currentVol;
+            if (currentVol >= 1.0) {
+              if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
+              }
+            }
+          }, 100);
+        }
+      }
+    } else {
+      if (isYt) {
+        if (ytPlayer) {
+          if (globalMuted) {
+            ytPlayer.mute();
+          } else {
+            ytPlayer.pauseVideo?.();
+          }
+          ytPlayer.setVolume?.(0);
+        }
+      } else {
+        if (bgAudio) {
+          if (globalMuted) {
+            bgAudio.muted = true;
+          } else {
+            bgAudio.pause();
+          }
+          bgAudio.volume = 0;
+        }
+      }
+    }
+
+    return () => {
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
+    };
+  }, [isAudible, bgAudio, ytPlayer, isYt, globalMuted]);
 
   // Auto-play preview cycling
   useEffect(() => {
@@ -1290,6 +1414,8 @@ export default function MyLoveUniverse({
         .animate-bob { animation: bob 2.5s ease-in-out infinite; }
         .pulse-star { animation: pulse-star 2s ease-in-out infinite; }
         .petal { position: fixed; pointer-events: none; z-index: 0; border-radius: 50% 0 50% 0; }
+        .jigsaw-piece { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .jigsaw-piece:hover { transform: translateY(-8px) scale(1.1); filter: drop-shadow(0 12px 20px rgba(212,175,55,0.7)) !important; }
       `}</style>
 
       {/* Rose petals (not on starfield slide) */}

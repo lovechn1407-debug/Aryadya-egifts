@@ -129,6 +129,9 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
   const [finalizing, setFinalizing] = useState(false);
   const [showFinalPanel, setShowFinalPanel] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  
+  // Tutorial State
+  const [tutorialStep, setTutorialStep] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -163,6 +166,15 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
     })();
   }, [orderId]);
 
+  useEffect(() => {
+    if (!loading && order && !locked) {
+      const hasSeen = localStorage.getItem(`hasSeenTutorial_${orderId}`);
+      if (!hasSeen) {
+        setTutorialStep(0);
+      }
+    }
+  }, [loading, order, locked, orderId]);
+
   const handleFieldChange = (id: string, val: string) => {
     setCustomizations(prev => ({ ...prev, [id]: val }));
     setSaved(false);
@@ -196,6 +208,159 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       setLocked(true);
       setShowQR(true);
     }, 1200);
+  };
+
+  const renderTutorial = () => {
+    if (tutorialStep === null) return null;
+
+    const handleNext = () => {
+      if (tutorialStep < 3) {
+        setTutorialStep(tutorialStep + 1);
+      } else {
+        handleCloseTutorial();
+      }
+    };
+
+    const handleCloseTutorial = () => {
+      localStorage.setItem(`hasSeenTutorial_${orderId}`, "true");
+      setTutorialStep(null);
+    };
+
+    const steps = [
+      {
+        title: "Welcome to your Web Editor! 🪄",
+        text: "Let's take a quick 1-minute tour to show you how to customise this magical gift box and make it unforgettable.",
+        btnText: "Let's Go! 🚀",
+        style: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "90%", maxWidth: 400, zIndex: 1000 } as React.CSSProperties,
+        hasBackdrop: true,
+      },
+      {
+        title: "Step 1: Page Navigation Tabs 📁",
+        text: "Click these tabs to cycle through all the slides. Customize everything—from envelope letters to interactive card choices!",
+        btnText: "Next Slide ➜",
+        style: { position: "fixed", top: "150px", left: "20px", width: "90%", maxWidth: 360, zIndex: 1000 } as React.CSSProperties,
+        hasBackdrop: false,
+        arrow: "up-left",
+      },
+      {
+        title: "Step 2: Interactive Customization ✍️",
+        text: "Click on any text or image area inside the box workspace that has a dashed-pink outline to edit its text in real-time. Simply click outside to save!",
+        btnText: "Next Step ➜",
+        style: { position: "fixed", top: "55%", left: "50%", transform: "translate(-50%, -50%)", width: "90%", maxWidth: 360, zIndex: 1000 } as React.CSSProperties,
+        hasBackdrop: false,
+        arrow: "down",
+      },
+      {
+        title: "Step 3: Save & Finalise! 🎁",
+        text: "Your edits are saved automatically, but you can also click 'Save' manually. Once you are 100% happy, click 'Finalise' to seal the box forever and generate your permanent link!",
+        btnText: "Got It! 🎉",
+        style: { position: "fixed", top: "100px", right: "20px", width: "90%", maxWidth: 360, zIndex: 1000 } as React.CSSProperties,
+        hasBackdrop: false,
+        arrow: "up-right",
+      }
+    ];
+
+    const currentStep = steps[tutorialStep];
+
+    return (
+      <>
+        {/* Backdrop for welcome/workspace steps to focus attention */}
+        {(currentStep.hasBackdrop || tutorialStep === 2) && (
+          <div
+            onClick={handleCloseTutorial}
+            style={{
+              position: "fixed", inset: 0, zIndex: 990,
+              background: currentStep.hasBackdrop ? "rgba(10, 10, 15, 0.85)" : "rgba(10, 10, 15, 0.4)",
+              backdropFilter: "blur(4px)",
+              transition: "all 0.3s"
+            }}
+          />
+        )}
+
+        {/* Floating tooltip/card */}
+        <div
+          style={{
+            background: "linear-gradient(145deg, #1A1A26 0%, #11111A 100%)",
+            border: "1.5px solid rgba(155, 89, 252, 0.5)",
+            borderRadius: 20,
+            padding: 24,
+            boxShadow: "0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(155, 89, 252, 0.15)",
+            color: "#fff",
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            transition: "all 0.3s ease",
+            ...currentStep.style
+          }}
+        >
+          {/* Arrow visual */}
+          {currentStep.arrow === "up-left" && (
+            <div className="tutorial-arrow-bounce" style={{ position: "absolute", top: -20, left: 30, color: "#9B59FC", fontSize: 24, textShadow: "0 0 10px #9B59FC" }}>▲</div>
+          )}
+          {currentStep.arrow === "up-right" && (
+            <div className="tutorial-arrow-bounce" style={{ position: "absolute", top: -20, right: 30, color: "#9B59FC", fontSize: 24, textShadow: "0 0 10px #9B59FC" }}>▲</div>
+          )}
+          {currentStep.arrow === "down" && (
+            <div className="tutorial-arrow-bounce" style={{ position: "absolute", bottom: -20, left: "50%", transform: "translateX(-50%)", color: "#9B59FC", fontSize: 24, textShadow: "0 0 10px #9B59FC" }}>▼</div>
+          )}
+
+          <div>
+            <h4 style={{ fontSize: 17, fontWeight: 800, color: "#C4A3FF", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+              {currentStep.title}
+            </h4>
+            <p style={{ fontSize: 13.5, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, margin: "10px 0 0 0" }}>
+              {currentStep.text}
+            </p>
+          </div>
+
+          {/* Dots Indicator */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+            <div style={{ display: "flex", gap: 6 }}>
+              {[0, 1, 2, 3].map(i => (
+                <div
+                  key={i}
+                  style={{
+                    width: 8, height: 8, borderRadius: "50%",
+                    background: tutorialStep === i ? "#9B59FC" : "rgba(255,255,255,0.15)",
+                    transition: "all 0.3s"
+                  }}
+                />
+              ))}
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              {tutorialStep < 3 && (
+                <button
+                  onClick={handleCloseTutorial}
+                  style={{
+                    background: "none", border: "none", color: "rgba(255,255,255,0.4)",
+                    fontSize: 12, cursor: "pointer", fontWeight: 600, padding: "6px 12px",
+                    borderRadius: 8, transition: "color 0.2s"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
+                  onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
+                >
+                  Skip
+                </button>
+              )}
+              <button
+                onClick={handleNext}
+                style={{
+                  background: "linear-gradient(135deg, #9B59FC 0%, #7928CA 100%)",
+                  color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px",
+                  fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(155,89,252,0.3)", transition: "transform 0.2s"
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "none"}
+              >
+                {currentStep.btnText}
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
   };
 
   if (loading) {
@@ -242,6 +407,24 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
 
   return (
     <div style={{ minHeight: "100vh", position: "relative" }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes pulse-glow {
+          0% { box-shadow: 0 0 0 0 rgba(155, 89, 252, 0.7); }
+          70% { box-shadow: 0 0 0 12px rgba(155, 89, 252, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(155, 89, 252, 0); }
+        }
+        .tutorial-pulse {
+          animation: pulse-glow 1.6s infinite;
+          border: 1.5px solid #9B59FC !important;
+        }
+        @keyframes bounce-arrow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        .tutorial-arrow-bounce {
+          animation: bounce-arrow 1.2s infinite ease-in-out;
+        }
+      `}} />
 
       {/* ── FLOATING TOP TOOLBAR ── */}
       <div style={{
@@ -268,7 +451,21 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
             </span>
           )}
 
-          <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
+          <div
+            id="editor-tutorial-actions"
+            className={tutorialStep === 3 ? "tutorial-pulse" : ""}
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              gap: 6,
+              alignItems: "center",
+              flexShrink: 0,
+              padding: tutorialStep === 3 ? "4px 8px" : undefined,
+              borderRadius: tutorialStep === 3 ? "8px" : undefined,
+              background: tutorialStep === 3 ? "rgba(155, 89, 252, 0.15)" : undefined,
+              transition: "all 0.3s"
+            }}
+          >
             {saved && !saving && (
               <span style={{ color: "#00D9A0", fontSize: 12, fontWeight: 600 }}>✓ Saved</span>
             )}
@@ -297,7 +494,20 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
 
         {/* Row 2: slide tabs */}
         {slides.length > 0 && (
-          <div style={{ display: "flex", gap: 6, paddingBottom: 10, overflowX: "auto" }}>
+          <div
+            id="editor-tutorial-tabs"
+            className={tutorialStep === 1 ? "tutorial-pulse" : ""}
+            style={{
+              display: "flex",
+              gap: 6,
+              padding: "4px 8px 10px 8px",
+              margin: "0 -8px",
+              borderRadius: tutorialStep === 1 ? "8px" : undefined,
+              background: tutorialStep === 1 ? "rgba(155, 89, 252, 0.15)" : undefined,
+              overflowX: "auto",
+              transition: "all 0.3s"
+            }}
+          >
             {slides.map(sl => (
               <button
                 key={sl.n}
@@ -368,7 +578,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       )}
 
       {/* ── TEMPLATE (full page, offset top for toolbar) ── */}
-      <div style={{ paddingTop: slides.length > 0 ? 88 : 48, pointerEvents: locked ? "none" : "auto" }}>
+      <div style={{ paddingTop: slides.length > 0 ? 100 : 48, pointerEvents: locked ? "none" : "auto" }}>
         {renderEditorTemplate(product.id, customizations, handleFieldChange, activeSlide)}
       </div>
 
@@ -379,6 +589,9 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
           onClose={() => setShowQR(false)}
         />
       )}
+
+      {/* ── INTERACTIVE TUTORIAL OVERLAY ── */}
+      {renderTutorial()}
     </div>
   );
 }

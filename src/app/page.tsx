@@ -1358,6 +1358,36 @@ function getCutoutStyle(cutout?: string, color: string = "#ffffff"): React.CSSPr
     svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path d="M0 -5 L 0 10 C 25 25, 75 -5, 100 10 L 100 -5 Z" fill="${color}"/></svg>`;
     width = 100;
     height = 20;
+  } else if (cutout === "hearts") {
+    // Elegant repeating double-heart dips (bezier curves)
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 10"><path d="M0,-5 L0,0 C2.5,4 7.5,7 10,3 C12.5,7 17.5,4 20,0 C22.5,4 27.5,7 30,3 C32.5,7 37.5,4 40,0 L40,-5 Z" fill="${color}"/></svg>`;
+    width = 40;
+    height = 10;
+  } else if (cutout === "clouds") {
+    // Fluffy asymmetrical organic cloud scallops
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 12"><path d="M0,-5 L0,3 C7,11 15,11 20,4 C27,13 38,13 45,4 C52,11 58,11 60,3 L60,-5 Z" fill="${color}"/></svg>`;
+    width = 60;
+    height = 12;
+  } else if (cutout === "spikes") {
+    // Tech-styled sharp crystal spikes
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 10"><path d="M0,-5 L0,0 L5,7 L10,2 L15,10 L20,2 L25,7 L30,0 L30,-5 Z" fill="${color}"/></svg>`;
+    width = 30;
+    height = 10;
+  } else if (cutout === "bubbles") {
+    // Friendly alternating bubble circles
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 10"><path d="M0,-5 L0,0 A4,4 0 0,0 8,0 A6,6 0 0,0 20,0 A5,5 0 0,0 30,0 A5,5 0 0,0 40,0 L40,-5 Z" fill="${color}"/></svg>`;
+    width = 40;
+    height = 10;
+  } else if (cutout === "castles") {
+    // Crenellated battlements
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 10"><path d="M0,-5 L0,0 L8,0 L8,8 L16,8 L16,0 L24,0 L24,8 L32,8 L32,0 L40,0 L40,-5 Z" fill="${color}"/></svg>`;
+    width = 40;
+    height = 10;
+  } else if (cutout === "stamps") {
+    // Classic perforated post-stamp bites
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 8"><path d="M0,-5 L0,0 A 4,4 0 0,0 8,0 L12,0 A 4,4 0 0,0 20,0 L20,-5 Z" fill="${color}"/></svg>`;
+    width = 20;
+    height = 8;
   }
 
   if (!svg) return {};
@@ -1374,6 +1404,99 @@ function getCutoutStyle(cutout?: string, color: string = "#ffffff"): React.CSSPr
     backgroundSize: `${width}px ${height}px`,
     zIndex: 10
   };
+}
+
+/* ── Heading Section — Full-width Typography block ── */
+function HeadingSection({ section }: { section: DisplaySection }) {
+  const theme = getSectionTheme(section.theme);
+
+  // Background style
+  let bgStyle: React.CSSProperties = {};
+  if (section.headingBgType === "solid" && section.headingBgColor) {
+    bgStyle = { background: section.headingBgColor };
+  } else if (section.headingBgType === "theme") {
+    bgStyle = { background: theme.gradient };
+  } else {
+    bgStyle = { background: "transparent" };
+  }
+
+  const titleSizes = {
+    small: "clamp(18px, 3vw, 24px)",
+    normal: "clamp(24px, 4vw, 36px)",
+    medium: "clamp(32px, 5vw, 44px)",
+    big: "clamp(40px, 6vw, 56px)",
+    bigger: "clamp(48px, 8vw, 72px)"
+  };
+  const titleSize = titleSizes[section.titleSize || "normal"];
+
+  return (
+    <section id={`section-${section.id}`} style={{
+      width: "100%",
+      position: "relative",
+      overflow: "hidden",
+      ...bgStyle,
+      marginBottom: section.bottomSpaceEnabled ? `${section.bottomSpacePx || 40}px` : undefined,
+    }}>
+      {/* Top Cutout */}
+      {section.headerCutout && section.headerCutout !== "none" && (
+        <div style={getCutoutStyle(section.headerCutout, "#ffffff")} />
+      )}
+
+      {/* Heading Content */}
+      <div style={{
+        padding: "48px clamp(16px,4vw,48px)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        position: "relative",
+        zIndex: 2,
+        minHeight: 120
+      }}>
+        {section.headingBgType === "theme" && <OccasionDecorators theme={theme} />}
+
+        <h2 style={{
+          fontSize: titleSize,
+          fontWeight: 700,
+          color: section.headingColor || "#1E293B",
+          fontFamily: section.headerFontFamily || "'Dancing Script', cursive",
+          lineHeight: 1.25,
+          margin: 0,
+          textShadow: section.headingBgType === "theme" ? "0 2px 10px rgba(0,0,0,0.15)" : undefined,
+          wordBreak: "break-word",
+          maxWidth: 900
+        }}>
+          {section.title}
+        </h2>
+
+        {section.subtitle && (
+          <p style={{
+            fontSize: "clamp(12px, 2vw, 16px)",
+            color: section.headingBgType === "theme" ? "rgba(255,255,255,0.85)" : "#64748B",
+            marginTop: 12,
+            lineHeight: 1.4,
+            maxWidth: 600,
+            fontFamily: "'Nunito', sans-serif",
+            fontWeight: 600
+          }}>
+            {section.subtitle}
+          </p>
+        )}
+      </div>
+
+      {/* Bottom Cutout */}
+      {section.bottomCutout && section.bottomCutout !== "none" && (
+        <div style={{
+          ...getCutoutStyle(section.bottomCutout, "#ffffff"),
+          top: "auto",
+          bottom: -1,
+          transform: "scaleY(-1)",
+          zIndex: 10
+        }} />
+      )}
+    </section>
+  );
 }
 
 /* ── Occasion Section — Full-width shelf ── */
@@ -2539,7 +2662,13 @@ export default function HomePage() {
         </section>
       ) : (
         <>
-          {sections.map(sec => <OccasionSection key={sec.id} section={sec} products={products} onCardClick={openModal} />)}
+          {sections.map(sec => 
+            sec.isHeading ? (
+              <HeadingSection key={sec.id} section={sec} />
+            ) : (
+              <OccasionSection key={sec.id} section={sec} products={products} onCardClick={openModal} />
+            )
+          )}
           <AllGifts products={unsectioned} onCardClick={openModal} />
         </>
       )}

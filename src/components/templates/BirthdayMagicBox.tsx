@@ -676,6 +676,7 @@ export default function BirthdayMagicBox({
 
   // Store ytPlayer in a ref so the event listener always has the latest instance
   const ytPlayerRef = useRef<any>(null);
+  const fadeIntervalRef = useRef<any>(null);
   useEffect(() => { ytPlayerRef.current = ytPlayer; }, [ytPlayer]);
 
   useEffect(() => {
@@ -713,30 +714,85 @@ export default function BirthdayMagicBox({
     }
   }, [bgAudio, customData.bg_song_url, isYt]);
 
+  const isAudible = !editMode && hasInteracted && !globalMuted && !globalPlaying;
+
   useEffect(() => {
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+
     if (editMode) return;
-    
-    if (globalPlaying) {
-      bgAudio?.pause();
-      ytPlayer?.pauseVideo?.();
-    } else if (hasInteracted) {
-      if (!globalMuted) {
-        if (isYt) {
-          // If we reach here, it might be unmuting or returning from slide playback
-          ytPlayer?.playVideo?.();
-        } else {
-          bgAudio?.play().catch(e => console.log("Bg audio play prevented", e));
+
+    if (isAudible) {
+      if (isYt) {
+        if (ytPlayer && typeof ytPlayer.playVideo === "function") {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(0);
+          ytPlayer.playVideo();
+          
+          let currentVol = 0;
+          fadeIntervalRef.current = setInterval(() => {
+            currentVol = Math.min(currentVol + 5, 100);
+            if (ytPlayer && typeof ytPlayer.setVolume === "function") {
+              ytPlayer.setVolume(currentVol);
+            }
+            if (currentVol >= 100) {
+              if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
+              }
+            }
+          }, 100);
+        }
+      } else {
+        if (bgAudio) {
+          bgAudio.muted = false;
+          bgAudio.volume = 0;
+          bgAudio.play().catch(e => console.log("Bg audio play prevented", e));
+          
+          let currentVol = 0;
+          fadeIntervalRef.current = setInterval(() => {
+            currentVol = Math.min(currentVol + 0.05, 1.0);
+            bgAudio.volume = currentVol;
+            if (currentVol >= 1.0) {
+              if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
+              }
+            }
+          }, 100);
+        }
+      }
+    } else {
+      if (isYt) {
+        if (ytPlayer) {
+          if (globalMuted) {
+            ytPlayer.mute();
+          } else {
+            ytPlayer.pauseVideo?.();
+          }
+          ytPlayer.setVolume?.(0);
+        }
+      } else {
+        if (bgAudio) {
+          if (globalMuted) {
+            bgAudio.muted = true;
+          } else {
+            bgAudio.pause();
+          }
+          bgAudio.volume = 0;
         }
       }
     }
-  }, [globalPlaying, bgAudio, globalMuted, editMode, isYt, ytPlayer, hasInteracted]);
 
-  useEffect(() => {
-    if (bgAudio) bgAudio.muted = globalMuted;
-    if (ytPlayer && typeof ytPlayer.isMuted === "function") {
-      if (globalMuted) ytPlayer.mute(); else ytPlayer.unMute();
-    }
-  }, [globalMuted, bgAudio, ytPlayer]);
+    return () => {
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
+    };
+  }, [isAudible, bgAudio, ytPlayer, isYt, globalMuted]);
 
   const onYtReady = (event: any) => {
     setYtPlayer(event.target);

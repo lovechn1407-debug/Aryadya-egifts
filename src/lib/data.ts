@@ -646,14 +646,20 @@ export interface DisplaySection {
   titleSize?: "small" | "normal" | "medium" | "big" | "bigger";
   headerStyle?: "normal" | "new";
   headerFontFamily?: string;
-  headerCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave";
-  bottomCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave";
+  headerCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave" | "hearts" | "clouds" | "spikes" | "bubbles" | "castles" | "stamps";
+  bottomCutout?: "none" | "wavy" | "zigzag" | "wavy_stretched" | "circular" | "liquid_wave" | "hearts" | "clouds" | "spikes" | "bubbles" | "castles" | "stamps";
   fadeEnabled?: boolean;
   fadeLength?: number;
   bottomSpaceEnabled?: boolean;
   bottomSpacePx?: number;
   headerNote?: string;
   headerNoteEnabled?: boolean;
+
+  // Heading features
+  isHeading?: boolean;
+  headingColor?: string;
+  headingBgType?: "blank" | "solid" | "theme";
+  headingBgColor?: string;
 
   createdAt: string;
 }
