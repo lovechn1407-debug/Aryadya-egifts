@@ -525,35 +525,310 @@ function S5({ ch, em, ap }: { ch: () => void; em: boolean; ap?: boolean }) {
 
 // ── Slide 6: Final message ──
 function S6({ d, em, oc }: { d: Record<string,string>; em: boolean; oc?: (id:string,v:string)=>void }) {
+  const [sealed, setSealed] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
+  const [screenshotData, setScreenshotData] = useState<string | null>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
+
+  const handleSeal = () => {
+    setSealed(true);
+    
+    setTimeout(async () => {
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 700);
+
+      const element = document.getElementById("sweet-apology-card-to-capture");
+      if (!element) return;
+
+      try {
+        const html2canvas = (await import("html2canvas")).default;
+        const canvas = await html2canvas(element, {
+          useCORS: true,
+          scale: 2,
+          backgroundColor: "#fff",
+          logging: false,
+          ignoreElements: (el) => {
+            return el.classList.contains("no-screenshot") || el.tagName === "BUTTON";
+          }
+        });
+        const dataUrl = canvas.toDataURL("image/png");
+        setScreenshotData(dataUrl);
+        setOpenModal(true);
+      } catch (err) {
+        console.error("Screenshot capture failed", err);
+      }
+    }, 1500);
+  };
+
+  const handleShare = async () => {
+    if (!screenshotData) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const base64Data = screenshotData.split(",")[1];
+      const fd = new FormData();
+      fd.append("image", base64Data);
+
+      const res = await fetch("https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e", {
+        method: "POST",
+        body: fd
+      });
+      const json = await res.json();
+      if (json.success) {
+        const url = json.data.url;
+        setShareUrl(url);
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 5000);
+      } else {
+        setError("Failed to upload image. Please try again.");
+      }
+    } catch (err) {
+      setError("An error occurred during upload. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "64px 24px" }}>
-      <div style={{
-        position: "relative", background: "#fff", borderRadius: 24, padding: "clamp(20px,4vw,32px) clamp(16px,4vw,40px)",
-        width: "100%", maxWidth: 580, boxShadow: "0 16px 50px rgba(0,0,0,0.08)",
-        backgroundImage: "repeating-linear-gradient(45deg,transparent,transparent 30px,rgba(200,150,150,0.07) 30px,rgba(200,150,150,0.07) 31px)",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}>
-          <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, letterSpacing: "0.3em" }}>FOR MY LOVE ✦</p>
-          <span style={{ fontSize: 20, color: "#e91e8c" }}>✦</span>
+      <style>{`
+        @keyframes sealSlam {
+          0% { transform: scale(3.5) rotate(-45deg); opacity: 0; filter: blur(6px); }
+          70% { transform: scale(0.9) rotate(5deg); opacity: 1; filter: none; }
+          85% { transform: scale(1.15) rotate(-3deg); }
+          100% { transform: scale(1) rotate(-5deg); }
+        }
+        .seal-pressing {
+          animation: sealSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes cameraFlash {
+          0% { opacity: 0; }
+          15% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .camera-flash-overlay {
+          position: fixed; inset: 0; background: #fff; z-index: 99999; pointer-events: none;
+          animation: cameraFlash 0.7s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes popIn {
+          0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+          100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .pop-in-modal {
+          animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+      `}</style>
+
+      {showFlash && <div className="camera-flash-overlay" />}
+
+      <div id="sweet-apology-card-to-capture" style={{ width: "100%", maxWidth: 580, position: "relative" }}>
+        <div style={{
+          position: "relative", background: "#fff", borderRadius: 24, padding: "clamp(20px,4vw,32px) clamp(16px,4vw,40px)",
+          boxShadow: "0 16px 50px rgba(0,0,0,0.08)",
+          backgroundImage: "repeating-linear-gradient(45deg,transparent,transparent 30px,rgba(200,150,150,0.07) 30px,rgba(200,150,150,0.07) 31px)",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}>
+            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, letterSpacing: "0.3em" }}>FOR MY LOVE ✦</p>
+            <span style={{ fontSize: 20, color: "#e91e8c" }}>✦</span>
+          </div>
+
+          <div style={{ textAlign: "center" }}>
+            <ET fid="s6_heading" data={d} onChange={oc} editMode={em}
+              style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: "clamp(36px,6vw,52px)", color: "#e91e8c", marginBottom: 12 }} />
+            <ET fid="s6_subheading" data={d} onChange={oc} editMode={em}
+              style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: "clamp(24px,4vw,36px)", color: "#1a1a1a", marginBottom: 24 }} />
+            <ET fid="s6_message" data={d} onChange={oc} editMode={em} multiline
+              style={{ maxWidth: 440, margin: "0 auto", fontSize: 16, color: "#555", lineHeight: 1.7 }} />
+          </div>
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`${IMG}/kitty-sticker.png`} alt="" width={120}
+            className="no-screenshot"
+            style={{ position: "absolute", bottom: -24, right: -16 }} />
+
+          <p style={{ fontFamily: "'Dancing Script',cursive", textAlign: "center", fontSize: 16, color: "#888", marginTop: 16 }}>
+            made with ❤ and sparkles — forever yours ✨
+          </p>
+
+          {sealed && !em && (
+            <div className="pop-in" style={{ position:"absolute", inset:0, background:"rgba(255,248,250,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
+              <div className="seal-pressing" style={{ transform: "rotate(-5deg)", filter: "drop-shadow(0 8px 24px rgba(216,27,96,0.4))" }}>
+                <svg width="210" height="210" viewBox="0 0 200 200">
+                  <defs>
+                    <path id="apology-stamp-top-path" d="M 35, 100 A 65,65 0 0,1 165, 100" fill="none" />
+                    <path id="apology-stamp-bottom-path" d="M 165, 100 A 65,65 0 0,1 35, 100" fill="none" />
+                  </defs>
+                  
+                  {/* Irregular scalloped circle edge for a hyper-realistic hot wax look */}
+                  <path d="M 100, 15 A 85,85 0 0,0 20, 110 A 80,85 0 0,0 100, 185 A 85,80 0 0,0 180, 95 A 85,85 0 0,0 100, 15 Z" fill="#D81B60" stroke="#E91E63" strokeWidth="4" />
+                  <circle cx="100" cy="100" r="78" fill="none" stroke="#F8BBD0" strokeWidth="2" strokeDasharray="4 2" opacity="0.6" />
+                  <circle cx="100" cy="100" r="62" fill="#880E4F" stroke="#D81B60" strokeWidth="3" />
+                  
+                  <text fill="#F8BBD0" fontSize="9.5" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="1.5">
+                    <textPath href="#apology-stamp-top-path" startOffset="50%" textAnchor="middle">
+                      ARADHYA EGIFTS
+                    </textPath>
+                  </text>
+                  
+                  <text fill="#F8BBD0" fontSize="8" fontFamily="'Inter', sans-serif" fontWeight="700" letterSpacing="0.8">
+                    <textPath href="#apology-stamp-bottom-path" startOffset="50%" textAnchor="middle">
+                      {`SEEN ON ${currentDate}`}
+                    </textPath>
+                  </text>
+                  
+                  <text x="100" y="92" textAnchor="middle" fill="#FFF" fontSize="12" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="0.5">
+                    SEEN BY
+                  </text>
+                  <text x="100" y="112" textAnchor="middle" fill="#FFEB3B" fontSize="16" fontFamily="'Dancing Script', cursive" fontWeight="bold">
+                    {d.s1_recipient || "My Love"}
+                  </text>
+                  
+                  <text x="54" y="103" fill="#FFEB3B" fontSize="9">❤</text>
+                  <text x="146" y="103" fill="#FFEB3B" fontSize="9">❤</text>
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
-
-        <div style={{ textAlign: "center" }}>
-          <ET fid="s6_heading" data={d} onChange={oc} editMode={em}
-            style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: "clamp(36px,6vw,52px)", color: "#e91e8c", marginBottom: 12 }} />
-          <ET fid="s6_subheading" data={d} onChange={oc} editMode={em}
-            style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: "clamp(24px,4vw,36px)", color: "#1a1a1a", marginBottom: 24 }} />
-          <ET fid="s6_message" data={d} onChange={oc} editMode={em} multiline
-            style={{ maxWidth: 440, margin: "0 auto", fontSize: 16, color: "#555", lineHeight: 1.7 }} />
-        </div>
-
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`${IMG}/kitty-sticker.png`} alt="" width={120}
-          style={{ position: "absolute", bottom: -24, right: -16 }} />
-
-        <p style={{ fontFamily: "'Dancing Script',cursive", textAlign: "center", fontSize: 16, color: "#888", marginTop: 16 }}>
-          made with ❤ and sparkles — forever yours ✨
-        </p>
       </div>
+
+      {!em && (
+        <div className="no-screenshot" style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 40 }}>
+          <button
+            onClick={handleSeal}
+            style={{
+              background: "#e91e63", color: "#fff", borderRadius: 50, padding: "12px 28px",
+              fontWeight: 600, fontFamily: "'Nunito',sans-serif", fontSize: 14, border: "none",
+              cursor: "pointer", boxShadow: "0 4px 12px rgba(233,30,99,0.3)"
+            }}
+          >
+            Seal Apology Letter 💗
+          </button>
+        </div>
+      )}
+
+      {/* Screenshot Framed Preview Modal */}
+      {openModal && screenshotData && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(10, 5, 8, 0.8)", backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20
+        }} className="fade-in">
+          <div style={{
+            background: "rgba(255, 248, 250, 0.95)",
+            border: "2px solid #E91E63",
+            borderRadius: 24,
+            padding: "24px 20px",
+            width: "100%",
+            maxWidth: 440,
+            boxShadow: "0 24px 64px rgba(233, 30, 99, 0.3)",
+            textAlign: "center",
+            position: "relative",
+          }} className="pop-in-modal">
+            <h3 style={{
+              fontFamily: "'Nunito', sans-serif", fontWeight: 900,
+              fontSize: 22, color: "#E91E63", marginBottom: 6
+            }}>
+              💖 Seen Proof Sealed! 💖
+            </h3>
+            <p style={{ fontSize: 13, color: "#7a6b73", marginBottom: 16 }}>
+              Your letter is sealed and proof is captured!
+            </p>
+
+            {/* Polaroid frame preview */}
+            <div style={{
+              background: "#fff",
+              padding: "12px 12px 24px",
+              borderRadius: 12,
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+              border: "1px solid #F8BBD0",
+              marginBottom: 20,
+              transform: "rotate(-1deg)",
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={screenshotData} alt="Sealed Proof" style={{
+                width: "100%", borderRadius: 6, display: "block",
+                maxHeight: 280, objectFit: "contain",
+                border: "1px solid rgba(233, 30, 99, 0.1)"
+              }} />
+              <div style={{
+                fontFamily: "'Dancing Script', cursive",
+                fontSize: 18, color: "#E91E63", marginTop: 12, textAlign: "center"
+              }}>
+                Sealed with Love ✨
+              </div>
+            </div>
+
+            {shareUrl && (
+              <div style={{
+                background: "rgba(76, 175, 138, 0.08)",
+                border: "1px solid rgba(76, 175, 138, 0.3)",
+                borderRadius: 12, padding: "10px 14px", marginBottom: 16,
+                fontSize: 12, color: "#2E7D32", fontWeight: 600,
+                lineHeight: 1.4
+              }} className="fade-in">
+                <span style={{ fontSize: 14 }}>🎉</span> Link Copied to Clipboard!
+                <div style={{
+                  marginTop: 4, fontStyle: "italic", fontWeight: 400,
+                  color: "#388E3C", wordBreak: "break-all", background: "#fff",
+                  padding: "4px 8px", borderRadius: 6, border: "1px solid #E8F5E9"
+                }}>{shareUrl}</div>
+              </div>
+            )}
+
+            {error && (
+              <div style={{
+                background: "rgba(211, 47, 47, 0.08)",
+                border: "1px solid rgba(211, 47, 47, 0.3)",
+                borderRadius: 12, padding: "10px 14px", marginBottom: 16,
+                fontSize: 12, color: "#C62828", fontWeight: 600
+              }}>
+                ❌ {error}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+              <button
+                onClick={handleShare}
+                disabled={uploading}
+                style={{
+                  background: "#E91E63", color: "#fff",
+                  border: "none", borderRadius: 999,
+                  padding: "12px 24px", fontSize: 13, fontWeight: 800,
+                  cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
+                  boxShadow: "0 6px 16px rgba(233, 30, 99, 0.3)",
+                  opacity: uploading ? 0.7 : 1, transition: "all 0.2s",
+                  flex: 1
+                }}
+              >
+                {uploading ? "Uploading... ⏳" : "🔗 Share Seen Proof"}
+              </button>
+              <button
+                onClick={() => setOpenModal(false)}
+                style={{
+                  background: "#E0E0E0", color: "#333",
+                  border: "none", borderRadius: 999,
+                  padding: "12px 24px", fontSize: 13, fontWeight: 800,
+                  cursor: "pointer", transition: "all 0.2s", flex: 0.5
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

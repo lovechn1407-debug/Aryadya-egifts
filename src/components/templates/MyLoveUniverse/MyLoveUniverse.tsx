@@ -1113,6 +1113,22 @@ function S6({ d, em, oc, onBack, onReset }: {
 }) {
   const emberRef = useRef<HTMLDivElement>(null);
   const [sealed, setSealed] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
+  const [screenshotData, setScreenshotData] = useState<string | null>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
+
+  const viewerName = d.beloved_name || "My Jaan";
+  const stampText = `★ ARADHYA EGIFTS ★ SEEN BY ${viewerName.toUpperCase()} ★ ${currentDate.toUpperCase()} ★ FOREVER & ALWAYS`;
 
   useEffect(() => {
     if (!emberRef.current) return;
@@ -1128,13 +1144,71 @@ function S6({ d, em, oc, onBack, onReset }: {
     });
   }, []);
 
-  const seal = () => {
+  const handleSeal = () => {
     const fire = (x: number, y: number) => confetti({
       particleCount: 60, spread: 100, origin: { x, y },
       colors: ["#C0395A", "#F2C4CE", "#D4AF37", "#FFF8F0", "#8B1A3A"],
     });
     fire(0.1, 0.5); fire(0.9, 0.5); fire(0.5, 0.4);
-    setTimeout(() => setSealed(true), 1500);
+
+    setSealed(true);
+
+    // Wait for stamp pressing animation to complete, then capture screenshot
+    setTimeout(async () => {
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 700);
+
+      const element = document.getElementById("my-love-universe-card-to-capture");
+      if (!element) return;
+
+      try {
+        const html2canvas = (await import("html2canvas")).default;
+        const canvas = await html2canvas(element, {
+          useCORS: true,
+          scale: 2,
+          backgroundColor: "#060c1e", // Cosmic dark background matching My Love's Universe
+          logging: false,
+          ignoreElements: (el) => {
+            return el.classList.contains("no-screenshot") || el.tagName === "BUTTON";
+          }
+        });
+        const dataUrl = canvas.toDataURL("image/png");
+        setScreenshotData(dataUrl);
+        setOpenModal(true);
+      } catch (err) {
+        console.error("Screenshot capture failed", err);
+      }
+    }, 1500);
+  };
+
+  const handleShare = async () => {
+    if (!screenshotData) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const base64Data = screenshotData.split(",")[1];
+      const fd = new FormData();
+      fd.append("image", base64Data);
+
+      const res = await fetch("https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e", {
+        method: "POST",
+        body: fd
+      });
+      const json = await res.json();
+      if (json.success) {
+        const url = json.data.url;
+        setShareUrl(url);
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 5000);
+      } else {
+        setError("Failed to upload image. Please try again.");
+      }
+    } catch (err) {
+      setError("An error occurred during upload. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -1143,6 +1217,36 @@ function S6({ d, em, oc, onBack, onReset }: {
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       textAlign: "center", padding: "60px 20px", boxSizing: "border-box",
     }}>
+      <style>{`
+        @keyframes sealSlam {
+          0% { transform: scale(3.5) rotate(-45deg); opacity: 0; filter: blur(6px); }
+          70% { transform: scale(0.9) rotate(5deg); opacity: 1; filter: none; }
+          85% { transform: scale(1.15) rotate(-3deg); }
+          100% { transform: scale(1) rotate(-12deg); }
+        }
+        .seal-pressing {
+          animation: sealSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes cameraFlash {
+          0% { opacity: 0; }
+          15% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .camera-flash-overlay {
+          position: fixed; inset: 0; background: #fff; z-index: 99999; pointer-events: none;
+          animation: cameraFlash 0.7s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes popIn {
+          0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+          100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .pop-in-modal {
+          animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+      `}</style>
+
+      {showFlash && <div className="camera-flash-overlay" />}
+
       {/* Ember particles */}
       <div ref={emberRef} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         {Array.from({ length: 20 }).map((_, i) => (
@@ -1153,16 +1257,34 @@ function S6({ d, em, oc, onBack, onReset }: {
         ))}
       </div>
 
-      {/* Content */}
-      <div style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: 540, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div className="animate-bob" style={{ width: 240, height: 160, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+      {/* Content wrapper with ID to capture */}
+      <div
+        id="my-love-universe-card-to-capture"
+        style={{
+          position: "relative",
+          zIndex: 10,
+          width: "100%",
+          maxWidth: 480,
+          background: "rgba(18, 5, 9, 0.65)",
+          backdropFilter: "blur(12px)",
+          border: "2px solid #D4AF37",
+          borderRadius: 24,
+          padding: "36px 24px",
+          boxShadow: "0 16px 48px rgba(0,0,0,0.5), inset 0 0 32px rgba(212, 175, 55, 0.05)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          boxSizing: "border-box",
+        }}
+      >
+        <div className="animate-bob no-screenshot" style={{ width: 240, height: 160, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/templates/my-love-universe/bear3.gif" alt="Finale Bear Couple" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 16, objectFit: "contain" }} />
         </div>
 
         <ET fid="s7_title" data={d} onChange={oc} editMode={em} style={{
           fontFamily: "'Inter', sans-serif", textTransform: "uppercase",
-          letterSpacing: "0.4em", fontSize: 12, marginTop: 24, color: "#D4AF37", display: "block",
+          letterSpacing: "0.4em", fontSize: 12, marginTop: 12, color: "#D4AF37", display: "block",
         }} />
 
         <div style={{ margin: "16px 0 8px" }}>
@@ -1170,7 +1292,7 @@ function S6({ d, em, oc, onBack, onReset }: {
             fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700,
             fontSize: "clamp(2.5rem, 8vw, 4.5rem)", color: "#FFF8F0", lineHeight: 1,
           }}>
-            {d.beloved_name || "My Jaan"}{" "}
+            {viewerName}{" "}
             <span style={{ color: "#F2C4CE" }}>♡</span>
           </h1>
         </div>
@@ -1187,8 +1309,70 @@ function S6({ d, em, oc, onBack, onReset }: {
           color: "#D4AF37", display: "block", marginBottom: 8,
         }} />
 
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 32, position: "relative", zIndex: 10 }}>
-          <button onClick={seal} style={{
+        {/* Sealed heart overlay inside the card wrapper so it gets screenshotted */}
+        <AnimatePresence>
+          {sealed && (
+            <motion.div
+              initial={{ scale: 3.5, opacity: 0, rotate: -30 }}
+              animate={{ scale: 1, opacity: 0.95, rotate: -12 }}
+              transition={{ type: "spring", stiffness: 120, damping: 10, delay: 0.2 }}
+              style={{
+                position: "absolute", inset: 0, display: "flex",
+                alignItems: "center", justifyContent: "center", zIndex: 20,
+                background: "rgba(18, 5, 9, 0.96)", borderRadius: 22,
+                pointerEvents: "none",
+              }}>
+              <div style={{
+                width: 220, height: 220,
+                filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.6))",
+              }}>
+                <svg width="220" height="220" viewBox="0 0 200 200">
+                  <defs>
+                    <path id="outer-text-path" d="M 100, 100 m -78, 0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0" fill="none" />
+                    
+                    <radialGradient id="gold-wax" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+                      <stop offset="0%" stopColor="#FFFDD0" />
+                      <stop offset="40%" stopColor="#D4AF37" />
+                      <stop offset="100%" stopColor="#AA7C11" />
+                    </radialGradient>
+                    
+                    <linearGradient id="gold-metallic" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#AA7C11" />
+                      <stop offset="30%" stopColor="#D4AF37" />
+                      <stop offset="50%" stopColor="#FFFDD0" />
+                      <stop offset="70%" stopColor="#D4AF37" />
+                      <stop offset="100%" stopColor="#AA7C11" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Irregular scalloped circle edge for a hyper-realistic hot wax look */}
+                  <path d="M 100, 12 A 88,88 0 0,0 12, 105 A 82,88 0 0,0 100, 188 A 88,82 0 0,0 188, 95 A 88,88 0 0,0 100, 12 Z" fill="url(#gold-wax)" stroke="url(#gold-metallic)" strokeWidth="4" />
+                  <circle cx="100" cy="100" r="82" fill="none" stroke="#FFF8F0" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.5" />
+                  <circle cx="100" cy="100" r="64" fill="#6A1B29" stroke="url(#gold-metallic)" strokeWidth="3" />
+                  
+                  <text fill="#FFF8F0" fontSize="8.2" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="1.2">
+                    <textPath href="#outer-text-path" startOffset="0%">
+                      {stampText}
+                    </textPath>
+                  </text>
+                  
+                  <text x="100" y="94" textAnchor="middle" fill="#FFF8F0" fontSize="22" fontFamily="'Sacramento', cursive" fontWeight="bold">
+                    {viewerName}
+                  </text>
+                  <text x="100" y="118" textAnchor="middle" fill="#D4AF37" fontSize="8" fontFamily="'Inter', sans-serif" fontWeight="700" letterSpacing="1">
+                    FOREVER & ALWAYS
+                  </text>
+                  <circle cx="100" cy="130" r="3" fill="#D4AF37" />
+                </svg>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="no-screenshot" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 32, position: "relative", zIndex: 10 }}>
+        {!em && (
+          <button onClick={handleSeal} style={{
             background: "#C0395A", color: "#FFF8F0", border: "1.5px solid #D4AF37",
             borderRadius: 999, padding: "12px 28px",
             fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 500,
@@ -1196,62 +1380,135 @@ function S6({ d, em, oc, onBack, onReset }: {
           }}>
             {d.s7_seal_btn || "Seal It With Love 💌"}
           </button>
-          <button onClick={onReset} style={{
-            background: "transparent", color: "#FFF8F0",
-            border: "1.5px solid rgba(192,57,90,0.6)", borderRadius: 999,
-            padding: "12px 28px", fontFamily: "'Inter', sans-serif",
-            fontSize: 14, cursor: "pointer",
-          }}>
-            {d.s7_replay_btn || "Experience Again 🔄"}
-          </button>
-          <button onClick={onBack} style={{
-            background: "transparent", color: "#FFF8F0",
-            border: "1.5px solid rgba(192,57,90,0.6)", borderRadius: 999,
-            padding: "12px 28px", fontFamily: "'Inter', sans-serif",
-            fontSize: 14, cursor: "pointer",
-          }}>← Back</button>
-        </div>
+        )}
+        <button onClick={onReset} style={{
+          background: "transparent", color: "#FFF8F0",
+          border: "1.5px solid rgba(192,57,90,0.6)", borderRadius: 999,
+          padding: "12px 28px", fontFamily: "'Inter', sans-serif",
+          fontSize: 14, cursor: "pointer",
+        }}>
+          {d.s7_replay_btn || "Experience Again 🔄"}
+        </button>
+        <button onClick={onBack} style={{
+          background: "transparent", color: "#FFF8F0",
+          border: "1.5px solid rgba(192,57,90,0.6)", borderRadius: 999,
+          padding: "12px 28px", fontFamily: "'Inter', sans-serif",
+          fontSize: 14, cursor: "pointer",
+        }}>← Back</button>
       </div>
 
-      {/* Sealed heart overlay */}
-      <AnimatePresence>
-        {sealed && (
-          <motion.div
-            initial={{ scale: 3.5, opacity: 0, rotate: -30 }}
-            animate={{ scale: 1, opacity: 0.95, rotate: -12 }}
-            transition={{ type: "spring", stiffness: 120, damping: 10, delay: 0.2 }}
-            style={{
-              position: "fixed", inset: 0, display: "flex",
-              alignItems: "center", justifyContent: "center", zIndex: 150, pointerEvents: "none",
+      {/* Screenshot Framed Preview Modal */}
+      {openModal && screenshotData && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(6, 12, 30, 0.85)", backdropFilter: "blur(12px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20
+        }} className="fade-in">
+          <div style={{
+            background: "rgba(18, 5, 9, 0.95)",
+            border: "2px solid #D4AF37",
+            borderRadius: 24,
+            padding: "24px 20px",
+            width: "100%",
+            maxWidth: 440,
+            boxShadow: "0 24px 64px rgba(212, 175, 55, 0.25)",
+            textAlign: "center",
+            position: "relative",
+          }} className="pop-in-modal">
+            <h3 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 700,
+              fontSize: 24, color: "#D4AF37", marginBottom: 6, fontStyle: "italic"
             }}>
+              🌟 Cosmic Seal Locked! 🌟
+            </h3>
+            <p style={{ fontSize: 13, color: "#F2C4CE", marginBottom: 16, fontFamily: "'Lora', serif" }}>
+              Your love letter is sealed forever in the universe!
+            </p>
+
+            {/* Polaroid frame preview */}
             <div style={{
-              width: 220, height: 220,
-              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.6))",
+              background: "#060C1E",
+              padding: "12px 12px 24px",
+              borderRadius: 12,
+              boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+              border: "1px solid rgba(212, 175, 55, 0.3)",
+              marginBottom: 20,
+              transform: "rotate(-1.5deg)",
             }}>
-              <svg width="220" height="220" viewBox="0 0 200 200">
-                <defs>
-                  <path id="outer-text-path" d="M 100, 100 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0" />
-                </defs>
-                <circle cx="100" cy="100" r="92" fill="none" stroke="#FFF" strokeWidth="3" />
-                <circle cx="100" cy="100" r="86" fill="none" stroke="#FFF" strokeWidth="1" strokeDasharray="3 3" />
-                <circle cx="100" cy="100" r="62" fill="none" stroke="#FFF" strokeWidth="2" />
-                <text fill="#FFF" fontSize="10.5" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="1.5">
-                  <textPath href="#outer-text-path" startOffset="0%">
-                    ★ ARADHYA E-GIFTS ★ VIEWED WITH LOVE ★ SPECIAL GIFT
-                  </textPath>
-                </text>
-                <text x="100" y="98" textAnchor="middle" fill="#FFF" fontSize="24" fontFamily="Sacramento, cursive" fontWeight="bold">
-                  {d.beloved_name || "My Jaan"}
-                </text>
-                <text x="100" y="120" textAnchor="middle" fill="#FFF" fontSize="8" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="1">
-                  FOREVER & ALWAYS
-                </text>
-                <circle cx="100" cy="134" r="3" fill="#FFF" />
-              </svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={screenshotData} alt="Sealed Proof" style={{
+                width: "100%", borderRadius: 6, display: "block",
+                maxHeight: 280, objectFit: "contain",
+                border: "1px solid rgba(212, 175, 55, 0.2)"
+              }} />
+              <div style={{
+                fontFamily: "'Sacramento', cursive",
+                fontSize: 22, color: "#D4AF37", marginTop: 12, textAlign: "center"
+              }}>
+                Written in the Stars ✨
+              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            {shareUrl && (
+              <div style={{
+                background: "rgba(46, 125, 50, 0.1)",
+                border: "1px solid rgba(76, 175, 80, 0.4)",
+                borderRadius: 12, padding: "10px 14px", marginBottom: 16,
+                fontSize: 12, color: "#81C784", fontWeight: 600,
+                lineHeight: 1.4
+              }} className="fade-in">
+                <span style={{ fontSize: 14 }}>🎉</span> Link Copied to Clipboard!
+                <div style={{
+                  marginTop: 4, fontStyle: "italic", fontWeight: 400,
+                  color: "#A5D6A7", wordBreak: "break-all", background: "rgba(0,0,0,0.3)",
+                  padding: "4px 8px", borderRadius: 6, border: "1px solid rgba(212, 175, 55, 0.1)"
+                }}>{shareUrl}</div>
+              </div>
+            )}
+
+            {error && (
+              <div style={{
+                background: "rgba(211, 47, 47, 0.1)",
+                border: "1px solid rgba(211, 47, 47, 0.4)",
+                borderRadius: 12, padding: "10px 14px", marginBottom: 16,
+                fontSize: 12, color: "#EF5350", fontWeight: 600
+              }}>
+                ❌ {error}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+              <button
+                onClick={handleShare}
+                disabled={uploading}
+                style={{
+                  background: "#C0395A", color: "#FFF8F0",
+                  border: "1px solid #D4AF37", borderRadius: 999,
+                  padding: "12px 24px", fontSize: 13, fontWeight: 600,
+                  cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
+                  boxShadow: "0 6px 16px rgba(192, 57, 90, 0.3)",
+                  opacity: uploading ? 0.7 : 1, transition: "all 0.2s",
+                  flex: 1, fontFamily: "'Inter', sans-serif"
+                }}
+              >
+                {uploading ? "Uploading... ⏳" : "🔗 Share Seen Proof"}
+              </button>
+              <button
+                onClick={() => setOpenModal(false)}
+                style={{
+                  background: "rgba(255, 255, 255, 0.1)", color: "#FFF8F0",
+                  border: "1px solid rgba(255, 255, 255, 0.2)", borderRadius: 999,
+                  padding: "12px 24px", fontSize: 13, fontWeight: 600,
+                  cursor: "pointer", transition: "all 0.2s", flex: 0.5,
+                  fontFamily: "'Inter', sans-serif"
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
