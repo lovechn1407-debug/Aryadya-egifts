@@ -205,7 +205,10 @@ function S1({ d, ch, em, oc, onBack }: {
   d: Record<string, string>; ch: () => void; em: boolean;
   oc?: (id: string, v: string) => void; onBack: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(em);
+  useEffect(() => {
+    if (em) setOpen(true);
+  }, [em]);
 
   return (
     <section style={{
@@ -304,87 +307,77 @@ function S1({ d, ch, em, oc, onBack }: {
 }
 
 // ── Slide 2: Heart Puzzle ─────────────────────────────────────────────────────
-const TILE = 64;
-const SLOTS = [
-  { id: "s1", col: -1.5, row: -0.9, color: "#C0395A" },
-  { id: "s2", col: -0.5, row: -1.2, color: "#8B1A3A" },
-  { id: "s3", col:  0.5, row: -1.2, color: "#8B1A3A" },
-  { id: "s4", col:  1.5, row: -0.9, color: "#C0395A" },
-  { id: "s5", col: -0.5, row:  0.1, color: "#C0395A" },
-  { id: "s6", col:  0.5, row:  0.1, color: "#8B1A3A" },
+interface PieceData {
+  id: string;
+  clip: string;
+  color: string;
+  cx: number;
+  cy: number;
+}
+
+const PUZZLE_PIECES: PieceData[] = [
+  { id: "p1", color: "#C0395A", clip: "polygon(0% 0%, 50% 0%, 50% 35%, 35% 42%, 0% 42%)", cx: 25, cy: 20 },
+  { id: "p2", color: "#8B1A3A", clip: "polygon(50% 0%, 100% 0%, 100% 42%, 35% 42%, 50% 35%)", cx: 75, cy: 20 },
+  { id: "p3", color: "#8B1A3A", clip: "polygon(0% 42%, 35% 42%, 50% 35%, 50% 65%, 65% 70%, 0% 70%)", cx: 25, cy: 50 },
+  { id: "p4", color: "#C0395A", clip: "polygon(100% 42%, 35% 42%, 50% 35%, 50% 65%, 65% 70%, 100% 70%)", cx: 75, cy: 50 },
+  { id: "p5", color: "#C0395A", clip: "polygon(0% 70%, 65% 70%, 50% 65%, 50% 100%, 0% 100%)", cx: 30, cy: 80 },
+  { id: "p6", color: "#8B1A3A", clip: "polygon(100% 70%, 65% 70%, 50% 65%, 50% 100%, 100% 100%)", cx: 70, cy: 80 },
 ];
 
-// Heart-shaped piece SVG
-function HeartPieceSVG({ color, size = TILE, glowId }: { color: string; size?: number; glowId: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 70 70" style={{ display: "block" }}>
-      <defs>
-        <linearGradient id={glowId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={color} />
-          <stop offset="100%" stopColor={color + "bb"} />
-        </linearGradient>
-      </defs>
-      <path
-        d={HEART_PATH}
-        fill={`url(#${glowId})`}
-        stroke="#D4AF37"
-        strokeWidth="2.5"
-      />
-    </svg>
-  );
-}
+function JigsawPiece({ p }: { p: PieceData }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: p.id });
+  const leftOffset = 40 - (p.cx * 260 / 100);
+  const topOffset = 40 - (p.cy * 260 / 100);
 
-function Piece({ id, color, dragging }: { id: string; color: string; dragging: boolean }) {
-  return (
-    <div style={{
-      width: TILE, height: TILE,
-      filter: dragging
-        ? "drop-shadow(0 12px 24px rgba(0,0,0,0.5)) drop-shadow(0 0 0 3px rgba(212,175,55,0.8))"
-        : "drop-shadow(0 6px 10px rgba(0,0,0,0.4))",
-      cursor: "grab", userSelect: "none", transition: "filter 0.15s",
-    }}>
-      <HeartPieceSVG color={color} glowId={`piece-${id}`} />
-    </div>
-  );
-}
-
-function Draggable({ id, color }: { id: string; color: string }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
   return (
     <div ref={setNodeRef} {...listeners} {...attributes}
-      style={{ opacity: isDragging ? 0 : 1, touchAction: "none" }}>
-      <Piece id={id} color={color} dragging={false} />
+      style={{
+        width: 80, height: 80,
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: 12,
+        background: "rgba(255,248,240,0.05)",
+        border: "1.5px solid rgba(212,175,55,0.25)",
+        cursor: "grab",
+        touchAction: "none",
+        opacity: isDragging ? 0 : 1,
+        flexShrink: 0,
+      }}>
+      <div style={{
+        position: "absolute",
+        left: leftOffset, top: topOffset,
+        width: 260, height: 260,
+        clipPath: p.clip,
+      }}>
+        <svg width="260" height="260" viewBox="0 0 70 70">
+          <defs>
+            <linearGradient id={`piece-grad-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={p.color} />
+              <stop offset="100%" stopColor={p.color + "dd"} />
+            </linearGradient>
+          </defs>
+          <path d={HEART_PATH} fill={`url(#piece-grad-${p.id})`} stroke="#D4AF37" strokeWidth="2.5" />
+        </svg>
+      </div>
     </div>
   );
 }
 
-function Slot({ id, col, row, color, filled }: {
-  id: string; col: number; row: number; color: string; filled: boolean;
-}) {
+function JigsawSlot({ id, p, filled }: { id: string; p: PieceData; filled: boolean }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
     <div ref={setNodeRef} style={{
       position: "absolute",
-      left: `calc(50% + ${col * TILE}px - ${TILE / 2}px)`,
-      top:  `calc(50% + ${row * TILE}px - ${TILE / 2}px)`,
-      width: TILE, height: TILE,
+      left: `${p.cx}%`, top: `${p.cy}%`,
+      width: 76, height: 76,
+      transform: "translate(-50%, -50%)",
+      borderRadius: "50%",
+      background: isOver ? "rgba(212,175,55,0.2)" : "transparent",
+      border: isOver ? "2px dashed #D4AF37" : "none",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 10,
     }}>
-      {filled ? (
-        <motion.div initial={{ scale: 1.3 }} animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 400, damping: 18 }}
-          style={{ width: "100%", height: "100%", filter: "drop-shadow(0 0 12px rgba(212,175,55,0.6))" }}>
-          <HeartPieceSVG color={color} glowId={`slot-filled-${id}`} />
-        </motion.div>
-      ) : (
-        <svg width={TILE} height={TILE} viewBox="0 0 70 70">
-          <path d={HEART_PATH}
-            fill={isOver ? "rgba(212,175,55,0.15)" : "transparent"}
-            stroke={isOver ? "#D4AF37" : "rgba(212,175,55,0.4)"}
-            strokeWidth="2"
-            strokeDasharray={isOver ? "none" : "5 4"}
-          />
-        </svg>
-      )}
+      {isOver && <span style={{ fontSize: 9, color: "#D4AF37", fontWeight: 700 }}>SNAP</span>}
     </div>
   );
 }
@@ -395,8 +388,8 @@ function S2({ d, ch, em, oc, onBack, ap }: {
 }) {
   const [filled, setFilled] = useState<Record<string, boolean>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
-  const trayOrder = useMemo(() => [...SLOTS].sort(() => Math.random() - 0.5), []);
-  const won = Object.keys(filled).length === SLOTS.length || em || ap;
+  const trayOrder = useMemo(() => [...PUZZLE_PIECES].sort(() => Math.random() - 0.5), []);
+  const won = Object.keys(filled).length === PUZZLE_PIECES.length || em || ap;
 
   useEffect(() => {
     if (won && !em && !ap) {
@@ -417,7 +410,6 @@ function S2({ d, ch, em, oc, onBack, ap }: {
       setFilled(p => ({ ...p, [String(event.active.id)]: true }));
     }
   };
-  const activeSlot = activeId ? SLOTS.find(s => s.id === activeId) : null;
 
   return (
     <section style={{
@@ -437,21 +429,49 @@ function S2({ d, ch, em, oc, onBack, ap }: {
 
       <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* Heart board */}
-        <div style={{ position: "relative", width: "100%", maxWidth: 380, height: 300 }}>
-          {/* Large faint heart outline behind the board */}
-          <svg style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", pointerEvents: "none" }}
-            width="280" height="250" viewBox="0 0 70 70">
-            <path d={HEART_PATH} fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeDasharray="5 4" opacity="0.3" />
-          </svg>
+        <div style={{ position: "relative", width: 260, height: 260, margin: "0 auto 20px" }}>
+          {/* Target dashed silhouettes for unfilled slots */}
+          {PUZZLE_PIECES.map(p => {
+            const isFilled = won ? true : !!filled[p.id];
+            return isFilled ? (
+              <motion.div key={p.id} initial={{ scale: 1.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                style={{
+                  position: "absolute", inset: 0,
+                  clipPath: p.clip,
+                  filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.3))",
+                }}>
+                <svg width="260" height="260" viewBox="0 0 70 70">
+                  <defs>
+                    <linearGradient id={`slot-grad-filled-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor={p.color} />
+                      <stop offset="100%" stopColor={p.color + "dd"} />
+                    </linearGradient>
+                  </defs>
+                  <path d={HEART_PATH} fill={`url(#slot-grad-filled-${p.id})`} stroke="#D4AF37" strokeWidth="2.5" />
+                </svg>
+              </motion.div>
+            ) : (
+              <div key={p.id} style={{
+                position: "absolute", inset: 0,
+                clipPath: p.clip,
+                opacity: 0.25,
+              }}>
+                <svg width="260" height="260" viewBox="0 0 70 70">
+                  <path d={HEART_PATH} fill="none" stroke="#D4AF37" strokeWidth="2.5" strokeDasharray="4 3" />
+                </svg>
+              </div>
+            );
+          })}
 
-          {SLOTS.map(s => (
-            <Slot key={s.id} id={s.id} col={s.col} row={s.row} color={s.color} filled={won ? true : !!filled[s.id]} />
+          {/* Dynamic drop-zone targets */}
+          {!won && PUZZLE_PIECES.map(p => (
+            <JigsawSlot key={p.id} id={p.id} p={p} filled={!!filled[p.id]} />
           ))}
 
           <AnimatePresence>
             {won && (
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-                style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", zIndex: 20 }}>
                 <p style={{ fontFamily: "'Sacramento', cursive", fontSize: "2.2rem", color: "#FFF8F0", textShadow: "0 0 20px #C0395A", textAlign: "center" }}>
                   {d.s3_win_text || "You complete me. ♡"}
                 </p>
@@ -472,15 +492,11 @@ function S2({ d, ch, em, oc, onBack, ap }: {
             minHeight: 100, width: "100%", maxWidth: 380,
             boxSizing: "border-box",
           }}>
-            {trayOrder.map(s =>
-              filled[s.id] ? (
-                <div key={s.id} style={{ width: TILE, height: TILE, opacity: 0.2 }}>
-                  <svg width={TILE} height={TILE} viewBox="0 0 70 70">
-                    <path d={HEART_PATH} fill="none" stroke="#D4AF37" strokeWidth="2" strokeDasharray="4 3" />
-                  </svg>
-                </div>
+            {trayOrder.map(p =>
+              filled[p.id] ? (
+                <div key={p.id} style={{ width: 80, height: 80, opacity: 0.1, border: "1px dashed rgba(212,175,55,0.2)", borderRadius: 12 }} />
               ) : (
-                <Draggable key={s.id} id={s.id} color={s.color} />
+                <JigsawPiece key={p.id} p={p} />
               )
             )}
           </div>
@@ -488,7 +504,33 @@ function S2({ d, ch, em, oc, onBack, ap }: {
         {won && <div style={{ height: 100 }} />}
 
         <DragOverlay>
-          {activeSlot ? <Piece id={activeSlot.id} color={activeSlot.color} dragging /> : null}
+          {activeId ? (() => {
+            const activePiece = PUZZLE_PIECES.find(p => p.id === activeId);
+            if (!activePiece) return null;
+            return (
+              <div style={{
+                width: 80, height: 80,
+                position: "relative",
+                overflow: "hidden",
+                borderRadius: 12,
+                background: "rgba(255,248,240,0.1)",
+                border: "2px solid #D4AF37",
+                boxShadow: "0 12px 28px rgba(0,0,0,0.6)",
+              }}>
+                <div style={{
+                  position: "absolute",
+                  left: 40 - (activePiece.cx * 260 / 100),
+                  top: 40 - (activePiece.cy * 260 / 100),
+                  width: 260, height: 260,
+                  clipPath: activePiece.clip,
+                }}>
+                  <svg width="260" height="260" viewBox="0 0 70 70">
+                    <path d={HEART_PATH} fill={activePiece.color} stroke="#D4AF37" strokeWidth="2.5" />
+                  </svg>
+                </div>
+              </div>
+            );
+          })() : null}
         </DragOverlay>
       </DndContext>
 
@@ -522,6 +564,16 @@ function S3({ d, ch, em, oc, onBack }: {
     setTimeout(() => setShake(0), 200);
     setIndex(i => i + 1);
   };
+
+  const offsets = useMemo(() => [
+    { x: -20, y: -190, rotate: -8 },
+    { x: 20, y: -210, rotate: 6 },
+    { x: -15, y: -160, rotate: -12 },
+    { x: 15, y: -180, rotate: 10 },
+    { x: 0, y: -200, rotate: -3 },
+  ], []);
+
+  const currentOffset = index >= 0 ? offsets[index % offsets.length] : { x: 0, y: -170, rotate: -8 };
 
   return (
     <section style={{
@@ -564,13 +616,19 @@ function S3({ d, ch, em, oc, onBack }: {
         <AnimatePresence>
           {index >= 0 && (
             <motion.div key={index}
-              initial={{ opacity: 0, y: 20, rotate: 0 }}
-              animate={{ opacity: 1, y: -170, rotate: -8 }}
-              exit={{ opacity: 0, y: -240 }}
-              transition={{ duration: 0.6, type: "spring" }}
+              initial={{ opacity: 0, y: 50, x: "-50%", scale: 0.8, rotate: 0 }}
+              animate={{
+                opacity: 1,
+                x: `calc(-50% + ${currentOffset.x}px)`,
+                y: currentOffset.y,
+                rotate: currentOffset.rotate,
+                scale: 1
+              }}
+              exit={{ opacity: 0, y: -240, scale: 0.8 }}
+              transition={{ duration: 0.6, type: "spring", stiffness: 120, damping: 14 }}
               style={{
-                position: "absolute", left: "50%", transform: "translateX(-50%)",
-                width: 260, top: 100, zIndex: 10,
+                position: "absolute", left: "50%",
+                width: 260, top: 120, zIndex: 10,
                 background: "#FFF8F0", border: "1.5px solid #D4AF37",
                 borderRadius: 20, padding: "20px 24px",
                 boxShadow: "0 16px 40px rgba(0,0,0,0.25)",
@@ -645,9 +703,18 @@ function S4({ d, ch, em, oc, onBack, onPlayStateChange }: {
   const songArtist = d[songs[current].a] || songs[current].defArtist;
   const songUrl = d[songs[current].u] || "";
 
+  const prevCurrentRef = useRef(current);
   useEffect(() => {
+    const isSongChange = prevCurrentRef.current !== current;
+    prevCurrentRef.current = current;
+
     if (audioObj) { audioObj.pause(); audioObj.currentTime = 0; }
-    setProgress(0); setPlaying(false);
+    setProgress(0);
+    if (isSongChange) {
+      setPlaying(true);
+    } else {
+      setPlaying(false);
+    }
     if (songUrl && !em) {
       const a = new Audio(songUrl);
       a.onloadedmetadata = () => setDuration(Math.floor(a.duration) || 17);
@@ -945,28 +1012,41 @@ function S5({ d, ch, em, oc, onBack, ap }: {
 
           {/* Tooltip for clicked star */}
           <AnimatePresence>
-            {activeIdx !== null && (
-              <motion.div key={activeIdx}
-                initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                style={{
-                  position: "absolute",
-                  left: `${STAR_POSITIONS[activeIdx].x}%`,
-                  top: `calc(${STAR_POSITIONS[activeIdx].y}% + 44px)`,
-                  transform: "translateX(-50%)",
-                  width: 200, zIndex: 20,
-                  background: "#FFF8F0",
-                  border: "1.5px solid #D4AF37",
-                  borderRadius: 16, padding: "14px 16px",
-                  boxShadow: "0 12px 30px rgba(0,0,0,0.4)",
-                }}>
-                <p style={{ textAlign: "center", color: "#C0395A", marginBottom: 4, fontSize: 16 }}>♡</p>
-                <p style={{ fontFamily: "'Lora', serif", fontStyle: "italic", textAlign: "center", fontSize: 13, color: "#8B1A3A", lineHeight: 1.5 }}>
-                  {starReasons[activeIdx]}
-                </p>
-              </motion.div>
-            )}
+            {activeIdx !== null && (() => {
+              const isRight = STAR_POSITIONS[activeIdx].x > 70;
+              const isLeft = STAR_POSITIONS[activeIdx].x < 30;
+              let tooltipStyle: React.CSSProperties = {
+                position: "absolute",
+                top: `calc(${STAR_POSITIONS[activeIdx].y}% + 28px)`,
+                width: 200, zIndex: 20,
+                background: "#FFF8F0",
+                border: "1.5px solid #D4AF37",
+                borderRadius: 16, padding: "14px 16px",
+                boxShadow: "0 12px 30px rgba(0,0,0,0.4)",
+              };
+              if (isRight) {
+                tooltipStyle.right = `calc(${100 - STAR_POSITIONS[activeIdx].x}% - 18px)`;
+                tooltipStyle.transform = "none";
+              } else if (isLeft) {
+                tooltipStyle.left = `calc(${STAR_POSITIONS[activeIdx].x}% - 18px)`;
+                tooltipStyle.transform = "none";
+              } else {
+                tooltipStyle.left = `${STAR_POSITIONS[activeIdx].x}%`;
+                tooltipStyle.transform = "translateX(-50%)";
+              }
+              return (
+                <motion.div key={activeIdx}
+                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  style={tooltipStyle}>
+                  <p style={{ textAlign: "center", color: "#C0395A", marginBottom: 4, fontSize: 16 }}>♡</p>
+                  <p style={{ fontFamily: "'Lora', serif", fontStyle: "italic", textAlign: "center", fontSize: 13, color: "#8B1A3A", lineHeight: 1.5 }}>
+                    {starReasons[activeIdx]}
+                  </p>
+                </motion.div>
+              );
+            })()}
           </AnimatePresence>
         </div>
 
@@ -1098,18 +1178,39 @@ function S6({ d, em, oc, onBack, onReset }: {
       {/* Sealed heart overlay */}
       <AnimatePresence>
         {sealed && (
-          <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.2, 1] }} transition={{ duration: 0.4 }}
+          <motion.div
+            initial={{ scale: 3.5, opacity: 0, rotate: -30 }}
+            animate={{ scale: 1, opacity: 0.95, rotate: -12 }}
+            transition={{ type: "spring", stiffness: 120, damping: 10, delay: 0.2 }}
             style={{
               position: "fixed", inset: 0, display: "flex",
-              alignItems: "center", justifyContent: "center", zIndex: 50, pointerEvents: "none",
+              alignItems: "center", justifyContent: "center", zIndex: 150, pointerEvents: "none",
             }}>
             <div style={{
-              width: 140, height: 140, borderRadius: "50%", display: "flex",
-              alignItems: "center", justifyContent: "center",
-              background: "#8B1A3A", border: "4px solid #D4AF37",
-              boxShadow: "0 0 60px rgba(192,57,90,0.7), 0 0 100px rgba(212,175,55,0.4)",
-              fontSize: 52, color: "#F2C4CE",
-            }}>♡</div>
+              width: 220, height: 220,
+              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.6))",
+            }}>
+              <svg width="220" height="220" viewBox="0 0 200 200">
+                <defs>
+                  <path id="outer-text-path" d="M 100, 100 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0" />
+                </defs>
+                <circle cx="100" cy="100" r="92" fill="none" stroke="#FFF" strokeWidth="3" />
+                <circle cx="100" cy="100" r="86" fill="none" stroke="#FFF" strokeWidth="1" strokeDasharray="3 3" />
+                <circle cx="100" cy="100" r="62" fill="none" stroke="#FFF" strokeWidth="2" />
+                <text fill="#FFF" fontSize="10.5" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="1.5">
+                  <textPath href="#outer-text-path" startOffset="0%">
+                    ★ ARADHYA E-GIFTS ★ VIEWED WITH LOVE ★ SPECIAL GIFT
+                  </textPath>
+                </text>
+                <text x="100" y="98" textAnchor="middle" fill="#FFF" fontSize="24" fontFamily="Sacramento, cursive" fontWeight="bold">
+                  {d.beloved_name || "My Jaan"}
+                </text>
+                <text x="100" y="120" textAnchor="middle" fill="#FFF" fontSize="8" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="1">
+                  FOREVER & ALWAYS
+                </text>
+                <circle cx="100" cy="134" r="3" fill="#FFF" />
+              </svg>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
