@@ -653,7 +653,12 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
       setTimeout(() => setShowFlash(false), 700);
 
       const element = document.getElementById("birthday-magic-card-to-capture");
-      if (!element) return;
+      if (!element) {
+        console.error("Capture element not found");
+        setScreenshotData("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23fff5f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23e91e8c' font-size='16'>Sealed with Love! 💖</text></svg>");
+        setOpenModal(true);
+        return;
+      }
 
       try {
         const html2canvas = (await import("html2canvas")).default;
@@ -671,6 +676,9 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
         setOpenModal(true);
       } catch (err) {
         console.error("Screenshot capture failed", err);
+        // Fallback so the share modal is never blocked from opening
+        setScreenshotData("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23fff5f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23e91e8c' font-size='16'>Sealed with Love! 💖</text></svg>");
+        setOpenModal(true);
       }
     }, 1500);
   };
@@ -679,8 +687,49 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
     if (!screenshotData) return;
     setUploading(true);
     setError(null);
+
+    let isShared = false;
+
+    // 1. Try direct image file sharing if supported by browser/device
     try {
-      const base64Data = screenshotData.split(",")[1];
+      if (screenshotData.includes(";base64,")) {
+        const base64Data = screenshotData.split(",")[1];
+        const byteString = atob(base64Data);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: "image/png" });
+        const file = new File([blob], `seen-proof-${Date.now()}.png`, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "Birthday Sealed Proof 💖",
+            text: "My birthday card is sealed and proof is locked! 🎂"
+          });
+          isShared = true;
+        }
+      }
+    } catch (err) {
+      console.log("Direct raw file sharing not supported or cancelled, trying link upload...", err);
+    }
+
+    if (isShared) {
+      setUploading(false);
+      return;
+    }
+
+    // 2. Fallback to ImgBB upload and Native Share Sheet / Clipboard Copy
+    try {
+      let base64Data = "";
+      if (screenshotData.includes(";base64,")) {
+        base64Data = screenshotData.split(",")[1];
+      } else {
+        base64Data = btoa(unescape(encodeURIComponent(screenshotData.split(",")[1] || screenshotData)));
+      }
+
       const fd = new FormData();
       fd.append("image", base64Data);
 
@@ -692,9 +741,27 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
       if (json.success) {
         const url = json.data.url;
         setShareUrl(url);
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 5000);
+
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 5000);
+        } catch (clipErr) {
+          console.log("Clipboard write failed", clipErr);
+        }
+
+        // Try to trigger native share box with the uploaded link
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Birthday Sealed Proof 💖",
+              text: "My birthday card is sealed and proof is locked! Check out the seen proof here: 🎂",
+              url: url
+            });
+          } catch (shareErr) {
+            console.log("Native link sharing cancelled or failed", shareErr);
+          }
+        }
       } else {
         setError("Failed to upload image. Please try again.");
       }
@@ -717,6 +784,13 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
         .seal-pressing {
           animation: sealSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .seal-backdrop {
+          animation: fadeIn 0.4s ease forwards;
+        }
         @keyframes cameraFlash {
           0% { opacity: 0; }
           15% { opacity: 1; }
@@ -737,7 +811,7 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
 
       {showFlash && <div className="camera-flash-overlay" />}
 
-      <Title title="Final Birthday Letter" sub="Sealed with love 💗" />
+      <Title title="Final Birthday Letter" sub="Sealed with love ✦" />
       
       <div id="birthday-magic-card-to-capture">
         <Card>
@@ -753,7 +827,7 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
             style={{ display:"block", fontFamily:"'Dancing Script',cursive", fontSize:20, color:"#E91E8C" }} />
           
           {sealed && !em && (
-            <div className="pop-in" style={{ position:"absolute", inset:0, background:"rgba(255,245,248,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
+            <div className="seal-backdrop" style={{ position:"absolute", inset:0, background:"rgba(255,245,248,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
               <div className="seal-pressing" style={{ transform: "rotate(-5deg)", filter: "drop-shadow(0 8px 24px rgba(183,28,28,0.4))" }}>
                 <svg width="210" height="210" viewBox="0 0 200 200">
                   <defs>

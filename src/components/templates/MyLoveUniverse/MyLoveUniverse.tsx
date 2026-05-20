@@ -1159,7 +1159,12 @@ function S6({ d, em, oc, onBack, onReset }: {
       setTimeout(() => setShowFlash(false), 700);
 
       const element = document.getElementById("my-love-universe-card-to-capture");
-      if (!element) return;
+      if (!element) {
+        console.error("Capture element not found");
+        setScreenshotData("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23060c1e'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23d4af37' font-size='16'>Sealed with Love! 💖</text></svg>");
+        setOpenModal(true);
+        return;
+      }
 
       try {
         const html2canvas = (await import("html2canvas")).default;
@@ -1177,6 +1182,9 @@ function S6({ d, em, oc, onBack, onReset }: {
         setOpenModal(true);
       } catch (err) {
         console.error("Screenshot capture failed", err);
+        // Fallback so the share modal is never blocked from opening
+        setScreenshotData("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23060c1e'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23d4af37' font-size='16'>Sealed with Love! 💖</text></svg>");
+        setOpenModal(true);
       }
     }, 1500);
   };
@@ -1185,8 +1193,49 @@ function S6({ d, em, oc, onBack, onReset }: {
     if (!screenshotData) return;
     setUploading(true);
     setError(null);
+
+    let isShared = false;
+
+    // 1. Try direct image file sharing if supported by browser/device
     try {
-      const base64Data = screenshotData.split(",")[1];
+      if (screenshotData.includes(";base64,")) {
+        const base64Data = screenshotData.split(",")[1];
+        const byteString = atob(base64Data);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: "image/png" });
+        const file = new File([blob], `seen-proof-${Date.now()}.png`, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "Cosmic Sealed Proof 🌟",
+            text: "Our love letter is sealed in the stars! ✨"
+          });
+          isShared = true;
+        }
+      }
+    } catch (err) {
+      console.log("Direct raw file sharing not supported or cancelled, trying link upload...", err);
+    }
+
+    if (isShared) {
+      setUploading(false);
+      return;
+    }
+
+    // 2. Fallback to ImgBB upload and Native Share Sheet / Clipboard Copy
+    try {
+      let base64Data = "";
+      if (screenshotData.includes(";base64,")) {
+        base64Data = screenshotData.split(",")[1];
+      } else {
+        base64Data = btoa(unescape(encodeURIComponent(screenshotData.split(",")[1] || screenshotData)));
+      }
+
       const fd = new FormData();
       fd.append("image", base64Data);
 
@@ -1198,9 +1247,27 @@ function S6({ d, em, oc, onBack, onReset }: {
       if (json.success) {
         const url = json.data.url;
         setShareUrl(url);
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 5000);
+
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 5000);
+        } catch (clipErr) {
+          console.log("Clipboard write failed", clipErr);
+        }
+
+        // Try to trigger native share box with the uploaded link
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Cosmic Sealed Proof 🌟",
+              text: "Our love letter is sealed in the stars! Check out the seen proof here: ✨",
+              url: url
+            });
+          } catch (shareErr) {
+            console.log("Native link sharing cancelled or failed", shareErr);
+          }
+        }
       } else {
         setError("Failed to upload image. Please try again.");
       }
@@ -1226,6 +1293,13 @@ function S6({ d, em, oc, onBack, onReset }: {
         }
         .seal-pressing {
           animation: sealSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .seal-backdrop {
+          animation: fadeIn 0.4s ease forwards;
         }
         @keyframes cameraFlash {
           0% { opacity: 0; }
@@ -1312,17 +1386,15 @@ function S6({ d, em, oc, onBack, onReset }: {
         {/* Sealed heart overlay inside the card wrapper so it gets screenshotted */}
         <AnimatePresence>
           {sealed && (
-            <motion.div
-              initial={{ scale: 3.5, opacity: 0, rotate: -30 }}
-              animate={{ scale: 1, opacity: 0.95, rotate: -12 }}
-              transition={{ type: "spring", stiffness: 120, damping: 10, delay: 0.2 }}
+            <div
+              className="seal-backdrop"
               style={{
                 position: "absolute", inset: 0, display: "flex",
                 alignItems: "center", justifyContent: "center", zIndex: 20,
                 background: "rgba(18, 5, 9, 0.96)", borderRadius: 22,
                 pointerEvents: "none",
               }}>
-              <div style={{
+              <div className="seal-pressing" style={{
                 width: 220, height: 220,
                 filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.6))",
               }}>
@@ -1365,7 +1437,7 @@ function S6({ d, em, oc, onBack, onReset }: {
                   <circle cx="100" cy="130" r="3" fill="#D4AF37" />
                 </svg>
               </div>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>
