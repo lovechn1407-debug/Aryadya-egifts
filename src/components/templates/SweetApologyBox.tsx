@@ -748,8 +748,8 @@ function S6({ d, em, oc }: { d: Record<string,string>; em: boolean; oc?: (id:str
           </p>
 
           {sealed && !em && (
-            <div className={animationDone ? "" : "seal-backdrop"} style={{ position:"absolute", inset:0, background:"rgba(255,248,250,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
-              <div className={animationDone ? "" : "seal-pressing"} style={{ transform: "rotate(-5deg)", filter: "drop-shadow(0 8px 24px rgba(216,27,96,0.4))" }}>
+            <div className="seal-backdrop" style={{ position:"absolute", inset:0, background:"rgba(255,248,250,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20, ...(animationDone ? { animation: "none", opacity: 1 } : {}) }}>
+              <div className="seal-pressing" style={{ transform: "rotate(-5deg)", filter: "drop-shadow(0 8px 24px rgba(216,27,96,0.4))", ...(animationDone ? { animation: "none" } : {}) }}>
                 <svg width="210" height="210" viewBox="0 0 200 200">
                   <defs>
                     <path id="apology-stamp-top-path" d="M 35, 100 A 65,65 0 0,1 165, 100" fill="none" />

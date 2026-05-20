@@ -1397,17 +1397,19 @@ function S6({ d, em, oc, onBack, onReset }: {
         {/* Sealed heart overlay inside the card wrapper so it gets screenshotted */}
         {sealed && (
           <div
-            className={animationDone ? "" : "seal-backdrop"}
+            className="seal-backdrop"
             style={{
               position: "absolute", inset: 0, display: "flex",
               alignItems: "center", justifyContent: "center", zIndex: 20,
               background: "rgba(18, 5, 9, 0.96)", borderRadius: 22,
               pointerEvents: "none",
+              ...(animationDone ? { animation: "none", opacity: 1 } : {})
             }}>
-            <div className={animationDone ? "" : "seal-pressing"} style={{
+            <div className="seal-pressing" style={{
               width: 220, height: 220,
               filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.6))",
               transform: "rotate(-12deg)",
+              ...(animationDone ? { animation: "none" } : {})
             }}>
               <svg width="220" height="220" viewBox="0 0 200 200">
                 <defs>

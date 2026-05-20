@@ -838,8 +838,8 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
             style={{ display:"block", fontFamily:"'Dancing Script',cursive", fontSize:20, color:"#E91E8C" }} />
           
           {sealed && !em && (
-            <div className={animationDone ? "" : "seal-backdrop"} style={{ position:"absolute", inset:0, background:"rgba(255,245,248,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
-              <div className={animationDone ? "" : "seal-pressing"} style={{ transform: "rotate(-5deg)", filter: "drop-shadow(0 8px 24px rgba(183,28,28,0.4))" }}>
+            <div className="seal-backdrop" style={{ position:"absolute", inset:0, background:"rgba(255,245,248,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20, ...(animationDone ? { animation: "none", opacity: 1 } : {}) }}>
+              <div className="seal-pressing" style={{ transform: "rotate(-5deg)", filter: "drop-shadow(0 8px 24px rgba(183,28,28,0.4))", ...(animationDone ? { animation: "none" } : {}) }}>
                 <svg width="210" height="210" viewBox="0 0 200 200">
                   <defs>
                     <path id="stamp-top-path" d="M 35, 100 A 65,65 0 0,1 165, 100" fill="none" />
