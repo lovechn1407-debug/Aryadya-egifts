@@ -1380,7 +1380,7 @@ export default function MyLoveUniverse({
   // Auto-play preview cycling
   useEffect(() => {
     if (!autoPlay || editMode) return;
-    const timer = setInterval(() => setSlide(s => (s + 1) % 7), 3000);
+    const timer = setInterval(() => setSlide(s => (s + 1) % 7), 1500);
     return () => clearInterval(timer);
   }, [autoPlay, editMode]);
 

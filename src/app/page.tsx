@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, memo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSectionTheme } from "@/lib/data";
@@ -617,7 +617,7 @@ function HowItWorks() {
 }
 
 /* ── Product Card ── */
-function ProductCard({ product, accent, onCardClick }: { product: Product; accent?: string; onCardClick: (p: Product) => void }) {
+const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: { product: Product; accent?: string; onCardClick: (p: Product) => void }) {
   const color = accent || "#E91E8C";
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.35);
@@ -688,7 +688,9 @@ function ProductCard({ product, accent, onCardClick }: { product: Product; accen
       </div>
     </div>
   );
-}
+}, (prev, next) => {
+  return prev.product.id === next.product.id && prev.accent === next.accent;
+});
 
 
 /* ── Login Modal ── */

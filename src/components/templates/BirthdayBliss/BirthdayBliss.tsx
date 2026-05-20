@@ -17,7 +17,7 @@ interface BlissProps {
   autoPlay?: boolean;
 }
 
-export default function BirthdayBliss({ customData = {}, editMode = false, onFieldChange, forcedSlide }: BlissProps) {
+export default function BirthdayBliss({ customData = {}, editMode = false, onFieldChange, forcedSlide, autoPlay }: BlissProps) {
   const d = customData;
   // Map forcedSlide to stage
   const stageFromSlide = (n?: number): Stage => {
@@ -31,6 +31,19 @@ export default function BirthdayBliss({ customData = {}, editMode = false, onFie
   };
   const [stage, setStage] = useState<Stage>(forcedSlide != null ? stageFromSlide(forcedSlide) : "intro");
   useEffect(() => { if (forcedSlide != null) setStage(stageFromSlide(forcedSlide)); }, [forcedSlide]);
+
+  // Auto-play preview cycling every 1.5s
+  useEffect(() => {
+    if (!autoPlay || editMode) return;
+    const stages: Stage[] = ["intro", "balloons", "cake", "memories", "envelope", "letter"];
+    const timer = setInterval(() => {
+      setStage(current => {
+        const idx = stages.indexOf(current);
+        return stages[(idx + 1) % stages.length];
+      });
+    }, 1500);
+    return () => clearInterval(timer);
+  }, [autoPlay, editMode]);
   const reset = () => setStage("intro");
   const go = (s: Stage) => { if (!editMode) setStage(s); };
 
