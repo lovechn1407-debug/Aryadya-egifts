@@ -14,63 +14,6 @@ import { RosePetals } from "./RosePetals";
 // ── SHARED HEART SVG PATH (70x70 viewBox) ─────────────────────────────────────
 const HEART_PATH = "M35,62 C10,48 3,37 3,22 C3,10 12,3 22,3 C28,3 33,6 35,12 C37,6 42,3 48,3 C58,3 67,10 67,22 C67,37 60,48 35,62 Z";
 
-// ── Image Uploader (imgbb) ──
-const IMGBB_KEY = "83e3f88941efd1059a89f016ff302d9e";
-
-function ImageUploader({ fid, data, onChange, defaultSrc }: {
-  fid: string; data: Record<string, string>; onChange?: (id: string, v: string) => void; defaultSrc: string;
-}) {
-  const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const currentSrc = data[fid] || "";
-
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPreview(URL.createObjectURL(file));
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("image", file);
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
-      const json = await res.json();
-      if (json.success) {
-        onChange?.(fid, json.data.url);
-        setPreview(null);
-      }
-    } catch { /* ignore */ }
-    setUploading(false);
-  };
-
-  const useDefault = () => { onChange?.(fid, ""); setPreview(null); };
-
-  return (
-    <div style={{ padding: "8px 12px", background: "rgba(212,175,55,0.05)", border: "1px dashed rgba(212,175,55,0.3)", borderRadius: 12 }}>
-      {preview && (
-        <div style={{ marginBottom: 6, textAlign: "center" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={preview} alt="Preview" style={{ maxHeight: 80, borderRadius: 8, border: "2px solid #D4AF37" }} />
-        </div>
-      )}
-      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
-        <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{
-          background: "#C0395A", color: "#FFF8F0", border: "1px solid #D4AF37", borderRadius: 8,
-          padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-          opacity: uploading ? 0.6 : 1,
-        }}>{uploading ? "Uploading…" : "📷 Change GIF/Photo"}</button>
-        {currentSrc && (
-          <button onClick={useDefault} style={{
-            background: "rgba(255,255,255,0.1)", color: "#FFF8F0", border: "1px solid rgba(255,255,255,0.2)",
-            borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 600, cursor: "pointer",
-          }}>↩ Use Default</button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── Editable Text Component ───────────────────────────────────────────────────
 function ET({
   fid, data, onChange, style, multiline = false, editMode = false,
@@ -248,20 +191,10 @@ function S0({ d, ch, em, oc }: { d: Record<string, string>; ch: () => void; em: 
         }} />
 
         <div style={{ margin: "8px 0 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          {d.bear1 ? (
-            <div className="animate-bob" style={{ width: 140, height: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={d.bear1} alt="Custom Bear 1" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 16, objectFit: "contain" }} />
-            </div>
-          ) : (
-            <BearCharacter size={140} withBouquet />
-          )}
-          {em && (
-            <div style={{ width: "100%", maxWidth: 300, zIndex: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#D4AF37", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>Custom Welcome Bear GIF</div>
-              <ImageUploader fid="bear1" data={d} onChange={oc} defaultSrc="" />
-            </div>
-          )}
+          <div className="animate-bob" style={{ width: 140, height: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/templates/my-love-universe/bear1.gif" alt="Welcome Bear" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 16, objectFit: "contain" }} />
+          </div>
         </div>
 
         <NavBar onNext={ch} nextLabel={d.s1_cta || "Begin Our Story →"} />
@@ -950,23 +883,12 @@ function S4({ d, ch, em, oc, onBack, onPlayStateChange }: {
         </div>
 
         {/* Bear decoration */}
-        <div style={{ position: "absolute", bottom: -24, right: -16, width: 100, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          {d.bear2 ? (
-            <div className="animate-bob" style={{ width: 100, height: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={d.bear2} alt="Custom Bear 2" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 12, objectFit: "contain" }} />
-            </div>
-          ) : (
-            <BearCharacter size={100} withHeadphones />
-          )}
-        </div>
-
-        {em && (
-          <div style={{ marginTop: 24, position: "relative", zIndex: 30 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#8B1A3A", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>Custom Music Bear GIF</div>
-            <ImageUploader fid="bear2" data={d} onChange={oc} defaultSrc="" />
+        <div style={{ position: "absolute", bottom: -24, right: -16, width: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="animate-bob" style={{ width: 100, height: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/templates/my-love-universe/bear2.gif" alt="Music Bear" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 12, objectFit: "contain" }} />
           </div>
-        )}
+        </div>
       </div>
 
       {pickingFor !== null && (
@@ -1233,20 +1155,10 @@ function S6({ d, em, oc, onBack, onReset }: {
 
       {/* Content */}
       <div style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: 540, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        {d.bear3 ? (
-          <div className="animate-bob" style={{ width: 240, height: 160, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={d.bear3} alt="Custom Bear 3" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 16, objectFit: "contain" }} />
-          </div>
-        ) : (
-          <BearCharacter variant="couple" size={160} />
-        )}
-        {em && (
-          <div style={{ width: "100%", maxWidth: 300, zIndex: 20, marginBottom: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#D4AF37", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>Custom Finale Bear GIF</div>
-            <ImageUploader fid="bear3" data={d} onChange={oc} defaultSrc="" />
-          </div>
-        )}
+        <div className="animate-bob" style={{ width: 240, height: 160, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/templates/my-love-universe/bear3.gif" alt="Finale Bear Couple" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 16, objectFit: "contain" }} />
+        </div>
 
         <ET fid="s7_title" data={d} onChange={oc} editMode={em} style={{
           fontFamily: "'Inter', sans-serif", textTransform: "uppercase",

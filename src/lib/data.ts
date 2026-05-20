@@ -358,7 +358,6 @@ export const PRODUCT_REGISTRY: Product[] = [
           { id: "s1_title", label: "Intro Title", type: "text", defaultValue: "✦ For My ✦" },
           { id: "s1_tagline", label: "Intro Tagline", type: "textarea", defaultValue: "I built this little universe, just because you exist in mine." },
           { id: "s1_cta", label: "Button Text", type: "text", defaultValue: "Begin Our Story →" },
-          { id: "bear1", label: "Welcome Slide Bear GIF", type: "image", defaultValue: "" },
         ],
       },
       {
@@ -412,7 +411,6 @@ export const PRODUCT_REGISTRY: Product[] = [
           { id: "s5_song3_name", label: "Song 3 Name", type: "text", defaultValue: "Mere Naam Tu" },
           { id: "s5_song3_artist", label: "Song 3 Artist", type: "text", defaultValue: "Abbas–Mustan" },
           { id: "s5_song3_url", label: "Song 3 URL", type: "text", defaultValue: "" },
-          { id: "bear2", label: "Music Slide Bear GIF", type: "image", defaultValue: "" },
         ],
       },
       {
@@ -442,7 +440,6 @@ export const PRODUCT_REGISTRY: Product[] = [
           { id: "s7_closing", label: "Finale Closing", type: "text", defaultValue: "— Forever & Always ♡" },
           { id: "s7_seal_btn", label: "Seal Button Text", type: "text", defaultValue: "Seal It With Love 💌" },
           { id: "s7_replay_btn", label: "Replay Button Text", type: "text", defaultValue: "Experience Again 🔄" },
-          { id: "bear3", label: "Final Slide Bear GIF", type: "image", defaultValue: "" },
         ],
       },
     ],
