@@ -150,8 +150,14 @@ function S0({ d, ch, em, oc, bgProps }: { d: Record<string,string>; ch: ()=>void
 function S1({ d, ch, em, oc }: { d: Record<string,string>; ch: ()=>void; em: boolean; oc?: (id:string,v:string)=>void }) {
   return (
     <Card withDots>
-      <div style={{ position:"absolute", top:-16, right:-8, fontSize:48 }} className="float-bob">🐱</div>
-      <div style={{ position:"absolute", bottom:-16, left:-8, fontSize:48 }} className="float-bob">🐱</div>
+      <div style={{ position:"absolute", top:-16, right:-8, width: 80, height: 80 }} className="float-bob">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/templates/birthday-magic-box/dudu1.png" alt="Dudu corner 1" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </div>
+      <div style={{ position:"absolute", bottom:-16, left:-8, width: 80, height: 80 }} className="float-bob">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/templates/birthday-magic-box/dudu1.png" alt="Dudu corner 2" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </div>
       <div style={{ textAlign:"center", paddingTop:8 }}>
         <p style={{ fontSize:13, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:"#E91E8C" }}>Happy Birthday!</p>
         <ET fid="s1_heading" data={d} onChange={oc} editMode={em}
@@ -281,7 +287,10 @@ function S3({ d, ch, em, oc }: { d: Record<string,string>; ch: ()=>void; em: boo
     <div>
       <Title title="A Birthday Love Letter 📩" sub="From my heart to the birthday queen" />
       <Card>
-        <div style={{ position:"absolute", top:-20, right:-12, fontSize:48 }} className="float-bob">🐱</div>
+        <div style={{ position:"absolute", top:-20, right:-12, width: 80, height: 80 }} className="float-bob">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/templates/birthday-magic-box/bear6.gif" alt="Letter Box Bear" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+        </div>
         <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
           <div style={{ width:40, height:40, borderRadius:"50%", background:"#FFE4EE", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>💗</div>
           <h3 style={{ fontWeight:800, fontSize:16 }}>To My Birthday Princess</h3>
@@ -567,9 +576,9 @@ function S6({ d, ch, em, oc, audio }: { d: Record<string,string>; ch: ()=>void; 
 function S7({ d, em, oc, onAll }: { d: Record<string,string>; em: boolean; oc?: (id:string,v:string)=>void; onAll: ()=>void }) {
   const [flipped, setFlipped] = useState([false,false,false]);
   const cards = [
-    { fi:"🎉🌹", bg:"linear-gradient(135deg,#FFB6D5,#FFD56B)", fid:"s7_card1" },
-    { fi:"💌💖", bg:"linear-gradient(135deg,#FFE4EE,#FF8FBF)", fid:"s7_card2" },
-    { fi:"🐱✨", bg:"linear-gradient(135deg,#FF6FAE,#9C27B0)", fid:"s7_card3" },
+    { gif: "/templates/birthday-magic-box/bear5.gif", bg:"linear-gradient(135deg,#FFB6D5,#FFD56B)", fid:"s7_card1", alt: "Wishes Bear 5" },
+    { gif: "/templates/birthday-magic-box/bear10.gif", bg:"linear-gradient(135deg,#FFE4EE,#FF8FBF)", fid:"s7_card2", alt: "Wishes Bear 10" },
+    { gif: "/templates/birthday-magic-box/bear7.gif", bg:"linear-gradient(135deg,#FF6FAE,#9C27B0)", fid:"s7_card3", alt: "Wishes Bear 7" },
   ];
   const count = flipped.filter(Boolean).length;
   const toggle = (i:number) => {
@@ -595,7 +604,10 @@ function S7({ d, em, oc, onAll }: { d: Record<string,string>; em: boolean; oc?: 
             {cards.map((c,i) => (
               <div key={i} onClick={() => toggle(i)} className={`flip-card ${flipped[i]?"flipped":""}`} style={{ height:190, cursor:"pointer" }}>
                 <div className="flip-inner">
-                  <div className="flip-face" style={{ background:c.bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:38 }}>{c.fi}</div>
+                  <div className="flip-face" style={{ background:c.bg, display:"flex", alignItems:"center", justifyContent:"center", padding:12 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={c.gif} alt={c.alt} style={{ maxWidth: "80%", maxHeight: "80%", objectFit: "contain", borderRadius: 8 }} />
+                  </div>
                   <div className="flip-face flip-back" style={{ background:"#fff", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:12, border:"1px solid #FFE4EE" }}>
                     <p style={{ fontSize:12, fontWeight:700, textAlign:"center", lineHeight:1.6 }}>{d[c.fid]}</p>
                     <p style={{ fontSize:10, color:"#7a6b73", marginTop:6 }}>Tap to flip back</p>
@@ -622,7 +634,10 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
     <div>
       <Title title="Final Birthday Letter" sub="Sealed with love 💗" />
       <Card>
-        <div style={{ position:"absolute", top:-20, right:-12, fontSize:48 }} className="float-bob">🐱</div>
+        <div style={{ position:"absolute", top:-20, right:-12, width: 80, height: 80 }} className="float-bob">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/templates/birthday-magic-box/bear8.gif" alt="Final Letter Bear" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+        </div>
         <ET fid="s9_greeting" data={d} onChange={oc} editMode={em}
           style={{ display:"block", fontFamily:"'Dancing Script',cursive", fontSize:26, color:"#E91E8C", marginBottom:10 }} />
         <ET fid="s9_message" data={d} onChange={oc} editMode={em} multiline
