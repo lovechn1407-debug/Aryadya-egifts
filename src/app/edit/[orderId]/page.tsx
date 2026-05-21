@@ -11,6 +11,7 @@ import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourne
 import QRSharePopup from "@/components/QRSharePopup";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
+import { isAdminLoggedIn } from "@/lib/data";
 
 
 // Slide map for the top tab bar
@@ -165,6 +166,10 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       setLoading(true);
       try {
         if (isPreviewEditor) {
+          if (!isAdminLoggedIn()) {
+            router.replace("/admin");
+            return;
+          }
           const targetId = orderId.replace("preview_", "");
           const p = await getProductDB(targetId);
           if (!p) { setLoading(false); return; }
