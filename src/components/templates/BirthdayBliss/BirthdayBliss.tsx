@@ -51,6 +51,13 @@ export default function BirthdayBliss({ customData = {}, editMode = false, onFie
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {autoPlay && (
+        <div style={{ display: "none" }}>
+          <img src={d.p_img1 || "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=600"} alt="preload" />
+          <img src={d.p_img2 || "https://images.unsplash.com/photo-1518199266791-5375a83164ba?auto=format&fit=crop&w=600"} alt="preload" />
+          <img src={d.p_img3 || "https://images.unsplash.com/photo-1478147424044-16b7eb0a006c?auto=format&fit=crop&w=600"} alt="preload" />
+        </div>
+      )}
       {d.bg_song_url && !editMode && <audio id="bliss-bg-audio" src={d.bg_song_url} autoPlay loop />}
       
       {stage === "intro" && <IntroSlide onDone={() => go("balloons")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}

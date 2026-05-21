@@ -1800,6 +1800,14 @@ export default function MyLoveUniverse({
       background: "linear-gradient(160deg, #120509 0%, #4A1020 50%, #7A1530 100%)",
       color: "#FFF8F0",
     }}>
+      {autoPlay && (
+        <div style={{ display: "none" }}>
+          <img src="/templates/my-love-universe/bear1.gif" alt="preload" />
+          <img src="/templates/my-love-universe/bear2.gif" alt="preload" />
+          <img src="/templates/my-love-universe/bear3.gif" alt="preload" />
+          <img src="https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=2000" alt="preload" />
+        </div>
+      )}
       {/* Injected styles */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Lora:ital,wght@0,400;0,600;1,400&family=Sacramento&family=Inter:wght@300;400;500;600&display=swap');
