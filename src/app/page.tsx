@@ -669,11 +669,19 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
       </div>
       {/* Solid footer — always visible below iframe */}
       <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: "#1F2937", lineHeight: 1.3, height: 18, overflow: "hidden", whiteSpace: "nowrap" }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#1F2937", lineHeight: 1.3, height: 18, overflow: "hidden", whiteSpace: "nowrap", position: "relative" }}>
           {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim().length > 22 ? (
-            createElement("marquee", { behavior: "alternate", scrollamount: "2", style: { width: "100%" } },
-              product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()
-            )
+            <>
+              <style dangerouslySetInnerHTML={{__html: `
+                @keyframes marquee-${product.id} {
+                  0%, 15% { transform: translateX(0); }
+                  85%, 100% { transform: translateX(-${(product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim().length - 20) * 7.5}px); }
+                }
+              `}} />
+              <div style={{ animation: `marquee-${product.id} 4s linear infinite alternate`, display: "inline-block", whiteSpace: "nowrap" }}>
+                {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
+              </div>
+            </>
           ) : (
             product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()
           )}
