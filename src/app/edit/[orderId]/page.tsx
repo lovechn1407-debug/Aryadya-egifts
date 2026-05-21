@@ -7,6 +7,7 @@ import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
 import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse";
+import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourney/LoversEnchantedJourney";
 import QRSharePopup from "@/components/QRSharePopup";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
@@ -56,7 +57,20 @@ const UNIVERSE_SLIDES = [
   { n: 6, label: "Finale" },
 ];
 
+const LOVERS_SLIDES = [
+  { n: 1, label: "Room" },
+  { n: 2, label: "Polaroids" },
+  { n: 3, label: "Tape" },
+  { n: 4, label: "Scratch" },
+  { n: 5, label: "Stars" },
+  { n: 6, label: "Wheel" },
+  { n: 7, label: "Bottle" },
+  { n: 8, label: "Garden" },
+  { n: 9, label: "Finale" },
+];
+
 function getSlideList(productId: string) {
+  if (productId === "lovers-enchanted-journey") return LOVERS_SLIDES;
   if (productId === "birthday-magic-box") return BIRTHDAY_SLIDES;
   if (productId === "sweet-apology-box") return APOLOGY_SLIDES;
   if (productId === "birthday-bliss-microsite") return BLISS_SLIDES;
@@ -70,6 +84,16 @@ function renderEditorTemplate(
   onFieldChange: (id: string, val: string) => void,
   forcedSlide: number
 ) {
+  if (productId === "lovers-enchanted-journey") {
+    return (
+      <LoversEnchantedJourney
+        customData={customData}
+        editMode={true}
+        onFieldChange={onFieldChange}
+        forcedSlide={forcedSlide}
+      />
+    );
+  }
   if (productId === "my-love-s-universe") {
     return (
       <MyLoveUniverse

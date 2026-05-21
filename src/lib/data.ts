@@ -444,6 +444,125 @@ export const PRODUCT_REGISTRY: Product[] = [
       },
     ],
   },
+  {
+    id: "lovers-enchanted-journey",
+    name: "Lovers' Enchanted Journey ✨",
+    tagline: "An immersive 9-slide love path featuring a cozy dark room, interactive polaroids, music tape, scratch surprise, stargazing constellation, spinner wheel, drift bottle, love garden, and grand fireworks finale",
+    category: "love" as const,
+    price: 9900,
+    visible: true,
+    thumbnail: "✨",
+    previewRoute: "/preview/lovers-enchanted-journey",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 1,
+        title: "Cozy Dark Room 💡",
+        description: "A dark room silhouette with diwali strings to light up and warm greetings.",
+        fields: [
+          { id: "s1_light_text", label: "Greeting Text", type: "text", defaultValue: "I lit up the world for you, just like you lit up mine. ✨" }
+        ]
+      },
+      {
+        slideNumber: 2,
+        title: "Moments Polaroids 📸",
+        description: "6 beautiful polaroid memory cards with custom captions.",
+        fields: [
+          { id: "s2_title", label: "Polaroids Title", type: "text", defaultValue: "Our Moments Together 📸" },
+          { id: "s2_p1_caption", label: "Card 1 Caption", type: "text", defaultValue: "The day everything changed 🌸" },
+          { id: "s2_p2_caption", label: "Card 2 Caption", type: "text", defaultValue: "Always laughing with you ✨" },
+          { id: "s2_p3_caption", label: "Card 3 Caption", type: "text", defaultValue: "My favourite view 🌅" },
+          { id: "s2_p4_caption", label: "Card 4 Caption", type: "text", defaultValue: "Us, always ♡" },
+          { id: "s2_p5_caption", label: "Card 5 Caption", type: "text", defaultValue: "Golden hours with you 🌻" },
+          { id: "s2_p6_caption", label: "Card 6 Caption", type: "text", defaultValue: "Forever in my heart 💕" }
+        ]
+      },
+      {
+        slideNumber: 3,
+        title: "Tape Playlist 🎵",
+        description: "3 customizable romantic soundtracks on an interactive cassette player.",
+        fields: [
+          { id: "s3_song1_title", label: "Song 1 Title", type: "text", defaultValue: "Tere Bina" },
+          { id: "s3_song1_artist", label: "Song 1 Artist", type: "text", defaultValue: "Arijit Singh" },
+          { id: "s3_song1_url", label: "Song 1 Audio URL", type: "text", defaultValue: "" },
+          { id: "s3_song2_title", label: "Song 2 Title", type: "text", defaultValue: "Pehli Nazar Mein" },
+          { id: "s3_song2_artist", label: "Song 2 Artist", type: "text", defaultValue: "Atif Aslam" },
+          { id: "s3_song2_url", label: "Song 2 Audio URL", type: "text", defaultValue: "" },
+          { id: "s3_song3_title", label: "Song 3 Title", type: "text", defaultValue: "Tu Hi Meri Shab Hai" },
+          { id: "s3_song3_artist", label: "Song 3 Artist", type: "text", defaultValue: "Mohit Chauhan" },
+          { id: "s3_song3_url", label: "Song 3 Audio URL", type: "text", defaultValue: "" }
+        ]
+      },
+      {
+        slideNumber: 4,
+        title: "Scratch Card 🔮",
+        description: "Interactive scratch surface that reveals a hidden message.",
+        fields: [
+          { id: "s4_reveal_title", label: "Scratch Title", type: "text", defaultValue: "You are my favourite person" },
+          { id: "s4_reveal_body", label: "Scratch Hidden Message", type: "textarea", defaultValue: "Not just today. Not just on special days.\nEvery single day." }
+        ]
+      },
+      {
+        slideNumber: 5,
+        title: "Starry Constellation 🌌",
+        description: "Connect-the-stars constellation puzzle showing a celestial note.",
+        fields: [
+          { id: "s5_title", label: "Constellation Title", type: "text", defaultValue: "Connect the stars to reveal what I see ✨" },
+          { id: "s5_reveal_text", label: "Constellation Message", type: "textarea", defaultValue: "That's how I see you — a constellation I'll always find ♡" }
+        ]
+      },
+      {
+        slideNumber: 6,
+        title: "Lottery Wheel 🎡",
+        description: "A spin wheel containing 8 different heart-touching messages.",
+        fields: [
+          { id: "s6_seg1", label: "Segment 1 Message", type: "text", defaultValue: "You deserve every love song ever written" },
+          { id: "s6_seg2", label: "Segment 2 Message", type: "text", defaultValue: "I choose you. Every single day." },
+          { id: "s6_seg3", label: "Segment 3 Message", type: "text", defaultValue: "Being loved by you is my greatest gift" },
+          { id: "s6_seg4", label: "Segment 4 Message", type: "text", defaultValue: "You make ordinary moments extraordinary" },
+          { id: "s6_seg5", label: "Segment 5 Message", type: "text", defaultValue: "My heart plays your favourite song on repeat" },
+          { id: "s6_seg6", label: "Segment 6 Message", type: "text", defaultValue: "You give me butterflies, always" },
+          { id: "s6_seg7", label: "Segment 7 Message", type: "text", defaultValue: "I think of you in every quiet moment" },
+          { id: "s6_seg8", label: "Segment 8 Message", type: "text", defaultValue: "You are the best part of my story" }
+        ]
+      },
+      {
+        slideNumber: 7,
+        title: "Ocean Drift Bottle 🍾",
+        description: "A message in a bottle floating on water waves that opens on shaking or rapid taps.",
+        fields: [
+          { id: "s7_letter_body", label: "Drift Letter Message", type: "textarea", defaultValue: "No matter where life takes us,\nI will always find my way back to you.\nYou are my home, my peace,\nmy favourite place to be.\nWith every wave, I think of you. ♡" },
+          { id: "s7_sign", label: "Drift Letter Sign", type: "text", defaultValue: "— Yours, always" }
+        ]
+      },
+      {
+        slideNumber: 8,
+        title: "Garden of Love 🪴",
+        description: "Grow 8 colorful rose pots one-by-one, unlocking different reasons why you love them.",
+        fields: [
+          { id: "s8_title", label: "Garden Title", type: "text", defaultValue: "Grow our garden of love 🌹" },
+          { id: "s8_reason1", label: "Reason 1", type: "text", defaultValue: "Your laugh 😄" },
+          { id: "s8_reason2", label: "Reason 2", type: "text", defaultValue: "The way you care ♡" },
+          { id: "s8_reason3", label: "Reason 3", type: "text", defaultValue: "Your kindness 🌸" },
+          { id: "s8_reason4", label: "Reason 4", type: "text", defaultValue: "Being with you ✨" },
+          { id: "s8_reason5", label: "Reason 5", type: "text", defaultValue: "Your eyes 🌟" },
+          { id: "s8_reason6", label: "Reason 6", type: "text", defaultValue: "How you make me feel 💕" },
+          { id: "s8_reason7", label: "Reason 7", type: "text", defaultValue: "Your strength 🦁" },
+          { id: "s8_reason8", label: "Reason 8", type: "text", defaultValue: "All of you. Always. 💘" }
+        ]
+      },
+      {
+        slideNumber: 9,
+        title: "Grand Fireworks Finale 🎆",
+        description: "Grand closing letter with a wax stamp seal button, romantic couple bears, and particle fireworks.",
+        fields: [
+          { id: "s9_title", label: "Finale Title", type: "text", defaultValue: "You Are My Everything ♡" },
+          { id: "s9_body", label: "Finale Message", type: "textarea", defaultValue: "From the lights we lit together,\nto every song, every memory, every moment —\nit has all been for you.\nThank you for existing.\nThank you for being mine." },
+          { id: "s9_sign", label: "Finale Sign", type: "text", defaultValue: "— Yours, in every lifetime ♡" }
+        ]
+      }
+    ]
+  }
 ];
 
 // ─── LOCALSTORAGE HELPERS ─────────────────────────────────────────────────────

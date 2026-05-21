@@ -6,11 +6,14 @@ import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
 import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse";
+import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourney/LoversEnchantedJourney";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 function renderTemplate(productId: string, customData: Record<string, string>, autoPlay?: boolean) {
   switch (productId) {
+    case "lovers-enchanted-journey":
+      return <LoversEnchantedJourney customData={customData} autoPlay={autoPlay} />;
     case "my-love-s-universe":
       return <MyLoveUniverse customData={customData} autoPlay={autoPlay} />;
     case "birthday-bliss-microsite":
