@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef, memo } from "react";
+import { useEffect, useState, useRef, memo, createElement } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSectionTheme } from "@/lib/data";
@@ -671,10 +671,9 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
       <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 800, color: "#1F2937", lineHeight: 1.3, height: 18, overflow: "hidden", whiteSpace: "nowrap" }}>
           {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim().length > 22 ? (
-            // @ts-ignore
-            <marquee behavior="alternate" scrollamount="2" style={{ width: "100%" }}>
-              {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
-            </marquee>
+            createElement("marquee", { behavior: "alternate", scrollamount: "2", style: { width: "100%" } },
+              product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()
+            )
           ) : (
             product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()
           )}
