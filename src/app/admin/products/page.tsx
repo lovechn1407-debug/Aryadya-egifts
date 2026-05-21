@@ -317,6 +317,16 @@ export default function AdminProductsPage() {
                 )}
               </div>
 
+              {/* Edit Default Template Button */}
+              <div style={{ paddingLeft: 16, borderLeft: "1px solid #E2E8F0" }}>
+                <button 
+                  onClick={() => window.location.href = `/edit/preview_${product.id}`}
+                  style={{ background: "#7C3AED", color: "#FFF", border: "none", borderRadius: 6, padding: "6px 12px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: "0 2px 8px rgba(124,58,237,0.2)" }}
+                >
+                  <span style={{ fontSize: 14 }}>🎨</span> Edit Default Template
+                </button>
+              </div>
+
               {/* Visibility toggle */}
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <label className="toggle">

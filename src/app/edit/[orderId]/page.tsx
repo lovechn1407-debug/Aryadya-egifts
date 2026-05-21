@@ -1,7 +1,7 @@
 "use client";
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getProductDB, getOrderDB, updateOrderCustomizationsDB, finalizeOrderDB } from "@/lib/db";
+import { getProductDB, getOrderDB, updateOrderCustomizationsDB, finalizeOrderDB, updateProductOverrideDB } from "@/lib/db";
 import type { Order, Product } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
@@ -141,6 +141,8 @@ function renderEditorTemplate(
 export default function EditorPage({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = use(params);
   const router = useRouter();
+  
+  const isPreviewEditor = orderId.startsWith("preview_");
 
   const [order, setOrder] = useState<Order | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -162,34 +164,44 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
     (async () => {
       setLoading(true);
       try {
-        const o = await getOrderDB(orderId);
-        if (!o) {
-          setLoading(false);
-          return;
+        if (isPreviewEditor) {
+          const targetId = orderId.replace("preview_", "");
+          const p = await getProductDB(targetId);
+          if (!p) { setLoading(false); return; }
+          setProduct(p);
+          
+          const cust = (p as any).previewData || {};
+          const defaults: Record<string, string> = { ...cust };
+          p.slides.forEach(sl => sl.fields.forEach(f => {
+            defaults[f.id] = cust[f.id] ?? f.defaultValue;
+          }));
+          setCustomizations(defaults);
+          const slides = getSlideList(p.id);
+          if (slides.length > 0) setActiveSlide(slides[0].n);
+        } else {
+          const o = await getOrderDB(orderId);
+          if (!o) { setLoading(false); return; }
+          setOrder(o);
+          if (o.status === "finalized") setLocked(true);
+          const p = await getProductDB(o.productId);
+          if (!p) { setLoading(false); return; }
+          setProduct(p);
+          const defaults: Record<string, string> = { ...o.customizations };
+          const cust = o.customizations || {};
+          p.slides.forEach(sl => sl.fields.forEach(f => {
+            defaults[f.id] = cust[f.id] ?? f.defaultValue;
+          }));
+          setCustomizations(defaults);
+          const slides = getSlideList(o.productId);
+          if (slides.length > 0) setActiveSlide(slides[0].n);
         }
-        setOrder(o);
-        if (o.status === "finalized") setLocked(true);
-        const p = await getProductDB(o.productId);
-        if (!p) {
-          setLoading(false);
-          return;
-        }
-        setProduct(p);
-        const defaults: Record<string, string> = { ...o.customizations };
-        const cust = o.customizations || {};
-        p.slides.forEach(sl => sl.fields.forEach(f => {
-          defaults[f.id] = cust[f.id] ?? f.defaultValue;
-        }));
-        setCustomizations(defaults);
-        const slides = getSlideList(o.productId);
-        if (slides.length > 0) setActiveSlide(slides[0].n);
       } catch (err) {
         console.error("Error loading editor:", err);
       } finally {
         setLoading(false);
       }
     })();
-  }, [orderId]);
+  }, [orderId, isPreviewEditor]);
 
   useEffect(() => {
     if (!loading && order && !locked) {
@@ -207,13 +219,33 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
 
   const handleSave = async () => {
     setSaving(true);
-    await updateOrderCustomizationsDB(orderId, customizations);
+    if (isPreviewEditor) {
+      const targetId = orderId.replace("preview_", "");
+      await updateProductOverrideDB(targetId, { previewData: customizations });
+    } else {
+      await updateOrderCustomizationsDB(orderId, customizations);
+    }
     setTimeout(() => { setSaving(false); setSaved(true); }, 700);
   };
 
   const handleFinalize = async () => {
-    if (!agreed || !order || !product) return;
+    if (!agreed || !product) return;
+    if (!isPreviewEditor && !order) return;
+
     setFinalizing(true);
+
+    if (isPreviewEditor) {
+      const targetId = orderId.replace("preview_", "");
+      await updateProductOverrideDB(targetId, { previewData: customizations });
+      setTimeout(() => {
+        setFinalizing(false);
+        setShowFinalPanel(false);
+        setLocked(true);
+        router.push("/admin/products");
+      }, 1200);
+      return;
+    }
+
     await updateOrderCustomizationsDB(orderId, customizations);
     setTimeout(async () => {
       await finalizeOrderDB(orderId);
@@ -222,7 +254,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       const { getSettingsDB } = await import("@/lib/db");
       const settings = await getSettingsDB();
 
-      if (settings.emailServiceFinalize) {
+      if (settings.emailServiceFinalize && order) {
         sendFinalizationEmail({
           buyer_name: order.buyerName,
           email: order.buyerEmail,

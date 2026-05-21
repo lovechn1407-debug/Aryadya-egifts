@@ -1,5 +1,5 @@
 "use client";
-import { use, Suspense, useState } from "react";
+import { use, Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getProduct } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
@@ -38,11 +38,33 @@ function PreviewContent({ productId }: { productId: string }) {
   const searchParams = useSearchParams();
   const isEmbed = searchParams.get("embed") === "1";
   const product = getProduct(productId);
+  const [dbData, setDbData] = useState<Record<string, string> | null>(null);
+
+  useEffect(() => {
+    import("@/lib/db").then(({ getProductDB }) => {
+      getProductDB(productId).then(p => {
+        if (p && (p as any).previewData) {
+          setDbData((p as any).previewData);
+        } else {
+          setDbData({});
+        }
+      });
+    });
+  }, [productId]);
 
   if (!product) return notFound();
 
-  const defaultData: Record<string, string> = {};
-  product.slides.forEach(sl => sl.fields.forEach(f => { defaultData[f.id] = f.defaultValue; }));
+  if (!dbData) return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: isEmbed ? "transparent" : "#0F172A" }}>
+      <div style={{ width: 30, height: 30, border: "3px solid rgba(255,255,255,0.1)", borderTopColor: "#7C3AED", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+
+  const defaultData: Record<string, string> = { ...dbData };
+  product.slides.forEach(sl => sl.fields.forEach(f => {
+    defaultData[f.id] = defaultData[f.id] ?? f.defaultValue;
+  }));
 
   if (isEmbed) {
     // Embed mode: no top bar, auto-play slides, no padding

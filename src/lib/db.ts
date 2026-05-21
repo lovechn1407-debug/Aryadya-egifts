@@ -69,6 +69,7 @@ export interface ProductOverride {
   stockLeft?: number;
   showStock?: boolean;
   previewUrl?: string;
+  previewData?: Record<string, string>;
 }
 
 export async function getProductsDB(): Promise<Product[]> {
