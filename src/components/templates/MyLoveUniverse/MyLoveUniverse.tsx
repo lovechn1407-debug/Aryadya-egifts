@@ -1830,9 +1830,9 @@ export default function MyLoveUniverse({
           <motion.div 
             key={activeSlide} 
             style={{ width: "100%" }}
-            initial={autoPlay ? { opacity: 0 } : false}
-            animate={autoPlay ? { opacity: 1 } : false}
-            exit={autoPlay ? { opacity: 0 } : false}
+            initial={autoPlay ? { opacity: 0 } : undefined}
+            animate={autoPlay ? { opacity: 1 } : undefined}
+            exit={autoPlay ? { opacity: 0 } : undefined}
             transition={{ duration: 0.6 }}
           >
             {renderSlide()}
