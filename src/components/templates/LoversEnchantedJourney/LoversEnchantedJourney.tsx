@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useSpring, animated } from "@react-spring/web";
 import confetti from "canvas-confetti";
 import gsap from "gsap";
@@ -8,7 +8,7 @@ import SongLibraryPopup from "../../SongLibraryPopup";
 
 // ── CSS Keyframes (injected as style tag) ─────────────────────────────────────
 const KEYFRAMES = `
-  @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@100..900&family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Sacramento&family=Nunito:wght@300..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@100..900&family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Sacramento&family=Nunito:wght@300..800&family=Lora:ital,wght@0,400..700;1,400..700&family=Dancing+Script:wght@400..700&family=Caveat:wght@400..700&display=swap");
   @keyframes lej-flicker { from { opacity: 1; } to { opacity: 0.82; } }
   .lej-bulb { width:14px;height:18px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;display:inline-block;box-shadow:0 0 8px currentColor,0 0 20px currentColor; }
   .lej-bulb-flicker { animation: lej-flicker 0.12s ease infinite alternate; }
@@ -23,45 +23,51 @@ const KEYFRAMES = `
   @keyframes lej-glow { 0%,100%{text-shadow:0 0 20px rgba(255,200,100,.5),0 0 40px rgba(255,180,80,.3);} 50%{text-shadow:0 0 30px rgba(255,200,100,.8),0 0 60px rgba(255,180,80,.5);} }
   .lej-glow { animation: lej-glow 2s ease-in-out infinite; }
 
-  /* Premium Responsive Layout Helpers */
-  .lej-mobile-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-  .lej-polaroid {
-    background: #fefefe;
-    padding: 12px 12px 28px;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Premium Card Stack Helpers */
+  .lej-stack-container {
     position: relative;
-  }
-  .lej-polaroid:hover {
-    transform: translateY(-10px) rotate(0deg) !important;
-    box-shadow: 0 20px 48px rgba(0,0,0,0.45);
-    z-index: 10;
-  }
-  .lej-polaroid-image {
-    height: 190px;
-    border-radius: 2px;
+    width: 320px;
+    height: 450px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
   }
-  .lej-polaroid-caption {
-    margin-top: 14px;
+  .lej-swipable-card {
+    width: 290px;
+    height: 400px;
+  }
+  .lej-premium-card {
+    background: #fdfaf4;
+    padding: 16px 16px 32px;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.3);
+    border-radius: 16px;
+    border: 3px solid #D4AF37;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.3s ease;
+  }
+  .lej-premium-card-image {
+    height: 230px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(212,175,55,0.3);
+  }
+  .lej-premium-card-caption {
+    margin-top: 12px;
     text-align: center;
-    font-family: 'Great Vibes', cursive !important;
-    color: #3a2418;
-    font-size: 1.5rem !important;
-    line-height: 1.1;
+    font-family: 'Dancing Script', cursive !important;
+    font-weight: 700;
+    color: #4a2f1b;
+    font-size: 1.8rem !important;
+    line-height: 1.2;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.05);
   }
 
   .lej-garden-pots-wrapper {
@@ -94,84 +100,49 @@ const KEYFRAMES = `
     z-index: 30;
   }
 
-  @media (max-width: 992px) {
-    .lej-mobile-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-  }
-
-  /* Polaroid absolute positioning for desktop */
-  .lej-photo-p1 { position: absolute; top: 8%; left: 6%; transform: rotate(-6deg); }
-  .lej-photo-p2 { position: absolute; top: 10%; left: 38%; transform: rotate(5deg); }
-  .lej-photo-p3 { position: absolute; top: 6%; left: 70%; transform: rotate(-4deg); }
-  .lej-photo-p4 { position: absolute; top: 48%; left: 12%; transform: rotate(7deg); }
-  .lej-photo-p5 { position: absolute; top: 50%; left: 42%; transform: rotate(-5deg); }
-  .lej-photo-p6 { position: absolute; top: 46%; left: 72%; transform: rotate(4deg); }
-  
-  .lej-photos-container {
-    position: relative;
-    margin: 0 auto;
-    max-width: 1200px;
-    height: 720px;
-  }
-
   @media (max-width: 768px) {
-    .lej-photos-container {
-      height: auto !important;
-      padding: 0 16px !important;
-    }
-    .lej-photo-p1, .lej-photo-p2, .lej-photo-p3, .lej-photo-p4, .lej-photo-p5, .lej-photo-p6 {
-      position: relative !important;
-      top: auto !important;
-      left: auto !important;
-      transform: none !important;
-      width: 100% !important;
-    }
-    .lej-mobile-grid {
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 14px !important;
-      padding: 0 16px !important;
-    }
-    .lej-polaroid {
-      padding: 8px 8px 20px !important;
-    }
-    .lej-polaroid-image {
-      height: 140px !important;
-    }
-    .lej-polaroid-caption {
-      font-size: 1.3rem !important;
-    }
     .lej-garden-pots-wrapper {
       display: grid !important;
       grid-template-columns: repeat(4, 1fr) !important;
-      gap: 36px 8px !important;
-      padding: 48px 8px 12px 8px !important;
+      gap: 20px 8px !important;
+      padding: 24px 8px 12px 8px !important;
     }
   }
 
   @media (max-width: 480px) {
-    .lej-mobile-grid {
-      grid-template-columns: 1fr !important;
-      gap: 20px !important;
-      max-width: 280px !important;
+    .lej-stack-container {
+      width: 280px;
+      height: 420px;
     }
-    .lej-polaroid-image {
-      height: 190px !important;
+    .lej-swipable-card {
+      width: 260px !important;
+      height: 380px !important;
     }
-    .lej-polaroid-caption {
+    .lej-premium-card-image {
+      height: 200px !important;
+    }
+    .lej-premium-card-caption {
       font-size: 1.6rem !important;
     }
     .lej-garden-pots-wrapper {
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 40px 16px !important;
-      padding: 48px 16px 12px 16px !important;
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 12px 4px !important;
+      padding: 20px 4px 12px 4px !important;
+    }
+    .lej-garden-pot {
+      width: 70px !important;
+      height: 180px !important;
+    }
+    .lej-garden-pot-inner {
+      transform: scale(0.72) !important;
+      transform-origin: bottom center !important;
     }
     .lej-garden-tooltip {
-      width: 140px !important;
-      font-size: 0.85rem !important;
-      padding: 6px 10px !important;
-      top: -70px !important;
+      width: 130px !important;
+      font-size: 0.8rem !important;
+      padding: 4px 8px !important;
+      top: -55px !important;
     }
   }
 `;
@@ -179,126 +150,192 @@ const KEYFRAMES = `
 /* ── Premium Inline Vector SVG Component Helpers ── */
 function SVGCamera({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-      <circle cx="12" cy="13" r="4" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <rect x="6" y="16" width="52" height="36" rx="6" fill="url(#goldGrad)" stroke="#FFE57F" strokeWidth="1.5" />
+      <path d="M22 16 L26 8 H38 L42 16 Z" fill="url(#goldGrad)" stroke="#FFE57F" strokeWidth="1.5" />
+      <circle cx="32" cy="34" r="13" fill="#1a0a14" stroke="#FFE57F" strokeWidth="2.5" />
+      <circle cx="32" cy="34" r="9" fill="url(#goldGrad)" />
+      <circle cx="32" cy="34" r="4" fill="#1a0a14" />
+      <circle cx="35" cy="31" r="1.5" fill="#fdf6e3" />
+      <rect x="46" y="20" width="6" height="4" rx="1" fill="#FF1744" />
     </svg>
   );
 }
 
-function SVGHeart({ size = 24, fill = "currentColor", stroke = "none", strokeWidth = 0, style = {}, className = "" }: { size?: number; fill?: string; stroke?: string; strokeWidth?: number; style?: React.CSSProperties; className?: string }) {
+function SVGHeart({ size = 24, fill = "url(#roseGrad)", stroke = "none", strokeWidth = 0, style = {}, className = "" }: { size?: number; fill?: string; stroke?: string; strokeWidth?: number; style?: React.CSSProperties; className?: string }) {
+  const actualFill = fill === "currentColor" || fill === "url(#roseGrad)" ? "url(#roseGrad)" : fill;
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" stroke={stroke} strokeWidth={strokeWidth} style={style} className={className}>
+      {/* Outer Gold Shadow & Border */}
+      <path d="M32 55.3l-3.8-3.5C14.4 39.5 5.3 31.2 5.3 21 5.3 12.7 11.8 6.2 20.1 6.2c4.7 0 9.2 2.2 11.9 5.6C34.7 8.4 39.2 6.2 43.9 6.2 52.2 6.2 58.7 12.7 58.7 21c0 10.2-9.1 18.5-22.9 30.8L32 55.3z" fill="url(#goldGrad)" style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.3))" }} />
+      {/* Main Heart */}
+      <path d="M32 53l-3.2-2.9C15.5 38.3 7 30.5 7 21c0-7.8 6-13.8 13.8-13.8 4.4 0 8.6 2 11.2 5.2 2.6-3.2 6.8-5.2 11.2-5.2C51 7.2 57 13.2 57 21c0 9.5-8.5 17.3-21.8 29.1L32 53z" fill={actualFill} />
+      {/* Highlight Gloss Shape */}
+      <path d="M20.1 9.2c-5.5 0-9.8 4.3-9.8 9.8 0 7.2 6.8 14.1 18.2 24.3l3.5-3.5C22 29.8 15.6 23.5 15.6 19c0-3.5 2.5-6 6-6c1.5 0 3 .5 4 1.5L20.1 9.2" fill="#FFFFFF" opacity="0.25" />
     </svg>
   );
 }
 
 function SVGRose({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <path d="M12 2c2.2 0 4 1.8 4 4c0 1.5-.8 2.8-2 3.5c1.2.7 2 2 2 3.5c0 2.2-1.8 4-4 4s-4-1.8-4-4c0-1.5.8-2.8 2-3.5c-1.2-.7-2-2-2-3.5c0-2.2 1.8-4 4-4z" fill="currentColor" fillOpacity="0.15" />
-      <path d="M12 22v-4" />
-      <path d="M12 18c-2 0-3.5-1.5-3.5-3.5" />
-      <path d="M12 14c2 0 3.5-1.5 3.5-3.5" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      {/* Green Stem & Leaves */}
+      <path d="M32 30 Q32 46 32 58" stroke="url(#stemGrad)" strokeWidth="3" strokeLinecap="round" />
+      <path d="M32 38 Q46 38 48 34" stroke="url(#stemGrad)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <path d="M48 34 c2-2 1-7-4-5-4 1.5-10 7-12 9" fill="url(#stemGrad)" opacity="0.9" />
+      <path d="M32 46 Q18 46 16 42" stroke="url(#stemGrad)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <path d="M16 42 c-2-2-1-7 4-5 4 1.5 10 7 12 9" fill="url(#stemGrad)" opacity="0.9" />
+      {/* Thorns */}
+      <path d="M32 42 L27 40" stroke="url(#stemGrad)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M32 50 L37 48" stroke="url(#stemGrad)" strokeWidth="2" strokeLinecap="round" />
+      {/* Layered Rose Head */}
+      <circle cx="32" cy="22" r="15" fill="url(#roseGrad)" stroke="#5A0010" strokeWidth="0.5" />
+      <path d="M22 22 C22 14 42 14 42 22 C42 30 22 30 22 22 Z" fill="url(#roseGrad)" opacity="0.9" />
+      <path d="M26 22 C26 17 38 17 38 22 C38 27 26 27 26 22 Z" fill="#E60026" opacity="0.95" />
+      <path d="M29 22 C29 19 35 19 35 22 C35 25 29 25 29 22 Z" fill="#FF3366" />
+      <ellipse cx="32" cy="22" rx="2" ry="3" fill="#FFD700" opacity="0.8" />
     </svg>
   );
 }
 
 function SVGEnvelope({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="M22 7l-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <rect x="6" y="16" width="52" height="36" rx="4" fill="black" opacity="0.15" />
+      <rect x="12" y="10" width="40" height="20" rx="2" fill="#FFFFFF" stroke="#FFE57F" strokeWidth="1" />
+      <line x1="18" y1="16" x2="34" y2="16" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="18" y1="21" x2="46" y2="21" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="6" y="18" width="52" height="34" rx="4" fill="url(#goldGrad)" stroke="#FFE57F" strokeWidth="1.2" />
+      <path d="M6 18 L32 36 L58 18" stroke="#7A5800" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 52 L24 33.5" stroke="#7A5800" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M58 52 L40 33.5" stroke="#7A5800" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="32" cy="35" r="7.5" fill="#B22222" stroke="#FFD700" strokeWidth="1" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }} />
+      <path d="M32 38.5l-.8-.7c-2.8-2.6-4.7-4.3-4.7-6.5 0-1.8 1.4-3.2 3.2-3.2 1 0 2 .5 2.5 1.2.5-.7 1.5-1.2 2.5-1.2 1.8 0 3.2 1.4 3.2 3.2 0 2.2-1.9 3.9-4.7 6.5l-.7.7z" fill="#FF4D4D" transform="translate(-32, -35) scale(0.6) translate(32, 35)" />
     </svg>
   );
 }
 
 function SVGSparkle({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={style} className={className}>
-      <path d="M12 2l2.4 7.4L22 12l-7.6 2.6L12 22l-2.4-7.4L2 12l7.6-2.6z" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <circle cx="32" cy="32" r="16" fill="url(#goldGrad)" opacity="0.3" style={{ filter: "blur(8px)" }} />
+      <path d="M32 6 Q32 32 6 32 Q32 32 32 58 Q32 32 58 32 Q32 32 32 6 Z" fill="url(#goldGrad)" />
+      <path d="M32 14 Q32 32 14 32 Q32 32 32 50 Q32 32 50 32 Q32 32 32 14 Z" fill="#FFF8E1" opacity="0.8" transform="rotate(45 32 32)" />
+      <circle cx="32" cy="32" r="4.5" fill="#FFFFFF" style={{ filter: "drop-shadow(0 0 6px #FFFFFF)" }} />
     </svg>
   );
 }
 
 function SVGMusic({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <path d="M9 18V5l12-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="18" cy="16" r="3" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <path d="M22 45V14l26-5v31" stroke="url(#goldGrad)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 18L48 13.5" stroke="#FFE57F" strokeWidth="2.5" />
+      <ellipse cx="16" cy="45" rx="9" ry="6.5" fill="url(#goldGrad)" transform="rotate(-15 16 45)" />
+      <ellipse cx="42" cy="40" rx="9" ry="6.5" fill="url(#goldGrad)" transform="rotate(-15 42 40)" />
+      <circle cx="16" cy="45" r="3" fill="#FFF59D" />
+      <circle cx="42" cy="40" r="3" fill="#FFF59D" />
     </svg>
   );
 }
 
 function SVGButterfly({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <path d="M12 2v20M12 6c-2-3-8-3-8 2 0 4 3 6 8 8 5-2 8-4 8-8 0-5-6-5-8-2z" fill="currentColor" fillOpacity="0.1" />
-      <path d="M12 12c-2-2-8-2-8 3 0 4 3 5 8 7 5-2 8-3 8-7 0-5-6-5-8-3z" fill="currentColor" fillOpacity="0.1" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <path d="M30 18 Q26 8 18 10" stroke="#FFE57F" strokeWidth="1.5" fill="none" />
+      <path d="M34 18 Q38 8 46 10" stroke="#FFE57F" strokeWidth="1.5" fill="none" />
+      <circle cx="18" cy="10" r="1.5" fill="#FFE57F" />
+      <circle cx="46" cy="10" r="1.5" fill="#FFE57F" />
+      <path d="M31 28 C26 12 6 16 12 32 C15 38 24 35 31 38" fill="url(#roseGrad)" stroke="#5A0010" strokeWidth="0.8" />
+      <path d="M31 36 C24 34 10 40 14 50 C18 56 26 48 31 40" fill="url(#goldGrad)" stroke="#7A5800" strokeWidth="0.8" />
+      <path d="M33 28 C38 12 58 16 52 32 C49 38 40 35 33 38" fill="url(#roseGrad)" stroke="#5A0010" strokeWidth="0.8" />
+      <path d="M33 36 C40 34 54 40 50 50 C46 56 38 48 33 40" fill="url(#goldGrad)" stroke="#7A5800" strokeWidth="0.8" />
+      <circle cx="18" cy="24" r="3" fill="#FFFFFF" opacity="0.4" />
+      <circle cx="46" cy="24" r="3" fill="#FFFFFF" opacity="0.4" />
+      <circle cx="20" cy="44" r="2" fill="#FFFFFF" opacity="0.4" />
+      <circle cx="44" cy="44" r="2" fill="#FFFFFF" opacity="0.4" />
+      <rect x="30" y="16" width="4" height="32" rx="2" fill="url(#goldGrad)" stroke="#4A2F1B" strokeWidth="1.2" />
     </svg>
   );
 }
 
 function SVGMoon({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor" fillOpacity="0.1" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <path d="M48 32 C48 46.4 36.4 58 22 58 C16.5 58 11.5 56.3 7.3 53.4 C18.7 51 27.2 41 27.2 28.8 C27.2 16.6 18.7 6.6 7.3 4.2 C11.5 1.3 16.5-0.4 22-0.4 C36.4-0.4 48 11.2 48 25.6 z" fill="url(#goldGrad)" transform="translate(10, 6)" style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.4))" }} />
+      <path d="M34 28 q3 3 6 0" stroke="#4A2F1B" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <circle cx="37" cy="33" r="3.5" fill="#FF8A80" opacity="0.6" />
+      <path d="M12 16 l1 2 l2 1 l-2 1 l-1 2 l-1-2 l-2-1 l2-1 z" fill="#FFF8E1" />
+      <path d="M48 48 l0.5 1 l1 0.5 l-1 0.5 l-0.5 1 l-0.5-1 l-1-0.5 l1-0.5 z" fill="#FFF8E1" />
     </svg>
   );
 }
 
 function SVGStar({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor" fillOpacity="0.1" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <circle cx="32" cy="32" r="22" fill="url(#goldGrad)" opacity="0.25" style={{ filter: "blur(10px)" }} />
+      <polygon points="32,4 40.5,21.5 59.5,24.5 45.8,37.8 49,56.8 32,47.8 15,56.8 18.2,37.8 4.5,24.5 23.5,21.5" fill="url(#goldGrad)" stroke="#FFE57F" strokeWidth="1" />
+      <polygon points="32,4 32,47.8 49,56.8" fill="rgba(255,255,255,0.22)" />
+      <polygon points="32,4 32,47.8 15,56.8" fill="rgba(0,0,0,0.15)" />
+      <polygon points="32,4 32,47.8 40.5,21.5" fill="rgba(255,255,255,0.3)" />
+      <polygon points="32,4 32,47.8 23.5,21.5" fill="rgba(0,0,0,0.2)" />
     </svg>
   );
 }
 
 function SVGSmile({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <circle cx="12" cy="12" r="10" />
-      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-      <line x1="9" y1="9" x2="9.01" y2="9" />
-      <line x1="15" y1="9" x2="15.01" y2="9" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <circle cx="32" cy="32" r="28" fill="url(#goldGrad)" stroke="#FFE57F" strokeWidth="1.5" style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.25))" }} />
+      <path d="M12 24 C16 12 48 12 52 24 C44 14 20 14 12 24" fill="#FFFFFF" opacity="0.35" />
+      <circle cx="22" cy="26" r="3.5" fill="#3D0C1A" />
+      <circle cx="23" cy="25" r="1" fill="#FFF" />
+      <circle cx="42" cy="26" r="3.5" fill="#3D0C1A" />
+      <circle cx="43" cy="25" r="1" fill="#FFF" />
+      <path d="M20 38 Q32 50 44 38" stroke="#3D0C1A" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+      <circle cx="16" cy="37" r="3" fill="#FF8A80" opacity="0.8" />
+      <circle cx="48" cy="37" r="3" fill="#FF8A80" opacity="0.8" />
     </svg>
   );
 }
 
 function SVGSunset({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <path d="M17 18a5 5 0 0 0-10 0" />
-      <line x1="12" y1="2" x2="12" y2="9" />
-      <line x1="4.22" y1="10.22" x2="5.64" y2="11.64" />
-      <line x1="1" y1="18" x2="3" y2="18" />
-      <line x1="21" y1="18" x2="23" y2="18" />
-      <line x1="18.36" y1="11.64" x2="19.78" y2="10.22" />
-      <line x1="23" y1="22" x2="1" y2="22" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <path d="M52 44 a20 20 0 0 0-40 0 Z" fill="url(#goldGrad)" stroke="#FFE57F" strokeWidth="1" />
+      <line x1="32" y1="12" x2="32" y2="6" stroke="#FFC107" strokeWidth="3" strokeLinecap="round" />
+      <line x1="16" y1="20" x2="11" y2="15" stroke="#FFC107" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="48" y1="20" x2="53" y2="15" stroke="#FFC107" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="10" y1="36" x2="4" y2="36" stroke="#FFC107" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="54" y1="36" x2="60" y2="36" stroke="#FFC107" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="58" y1="46" x2="6" y2="46" stroke="#FFE57F" strokeWidth="3" strokeLinecap="round" />
+      <path d="M 6 46 Q 20 50 32 46 Q 44 42 58 46" stroke="#C0395A" strokeWidth="2" fill="none" />
+      <path d="M 12 52 Q 24 55 32 52 Q 40 49 52 52" stroke="#C0395A" strokeWidth="1.5" fill="none" />
     </svg>
   );
 }
 
 function SVGSunflower({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 5V3M12 21v-2M5 12H3m18 0h-2m-1.93-7.07l-1.41 1.41M6.34 17.66l-1.41 1.41m0-12.72l1.41 1.41m11.32 11.32l1.41-1.41" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style} className={className}>
+      <circle cx="32" cy="32" r="10" fill="#3D0C1A" stroke="#5D4037" strokeWidth="2.5" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }} />
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg, i) => (
+        <path key={i} d="M 32 20 C 28 10 36 10 32 20" fill="url(#goldGrad)" transform={`rotate(${deg} 32 32)`} stroke="#D4AF37" strokeWidth="0.5" />
+      ))}
+      <circle cx="32" cy="32" r="5" fill="#fbbf24" opacity="0.45" />
     </svg>
   );
 }
 
 function renderPhotoSVG(id: string) {
-  const size = 64;
-  const style = { color: "#fff", filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))" };
+  const size = 76;
+  const style = { filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.3))" };
   switch(id) {
     case "p1": return <SVGRose size={size} style={style} />;
     case "p2": return <SVGSmile size={size} style={style} />;
     case "p3": return <SVGSunset size={size} style={style} />;
-    case "p4": return <SVGHeart size={size} fill="#fff" style={style} />;
+    case "p4": return <SVGHeart size={size} style={style} />;
     case "p5": return <SVGSunflower size={size} style={style} />;
     case "p6": return <SVGSparkle size={size} style={style} />;
     default: return <SVGHeart size={size} style={style} />;
@@ -306,35 +343,33 @@ function renderPhotoSVG(id: string) {
 }
 
 function renderWheelIcon(iconName: string, x: number, y: number, angleDegrees: number) {
-  const size = 26;
-  const style = { color: "#fff" };
+  const size = 28;
   return (
     <g transform={`translate(${x}, ${y}) rotate(${angleDegrees + 90}) translate(${-size / 2}, ${-size / 2})`}>
-      {iconName === "envelope" && <SVGEnvelope size={size} style={style} />}
-      {iconName === "rose" && <SVGRose size={size} style={style} />}
-      {iconName === "heart" && <SVGHeart size={size} fill="#fff" style={style} />}
-      {iconName === "sparkle" && <SVGSparkle size={size} style={style} />}
-      {iconName === "music" && <SVGMusic size={size} style={style} />}
-      {iconName === "butterfly" && <SVGButterfly size={size} style={style} />}
-      {iconName === "moon" && <SVGMoon size={size} style={style} />}
-      {iconName === "star" && <SVGStar size={size} style={style} />}
+      {iconName === "envelope" && <SVGEnvelope size={size} />}
+      {iconName === "rose" && <SVGRose size={size} />}
+      {iconName === "heart" && <SVGHeart size={size} />}
+      {iconName === "sparkle" && <SVGSparkle size={size} />}
+      {iconName === "music" && <SVGMusic size={size} />}
+      {iconName === "butterfly" && <SVGButterfly size={size} />}
+      {iconName === "moon" && <SVGMoon size={size} />}
+      {iconName === "star" && <SVGStar size={size} />}
     </g>
   );
 }
 
 function renderResultIcon(iconName: string) {
-  const size = 36;
-  const style = { color: "#C0395A" };
+  const size = 44;
   switch(iconName) {
-    case "envelope": return <SVGEnvelope size={size} style={style} />;
-    case "rose": return <SVGRose size={size} style={style} />;
-    case "heart": return <SVGHeart size={size} fill="#C0395A" style={style} />;
-    case "sparkle": return <SVGSparkle size={size} style={style} />;
-    case "music": return <SVGMusic size={size} style={style} />;
-    case "butterfly": return <SVGButterfly size={size} style={style} />;
-    case "moon": return <SVGMoon size={size} style={style} />;
-    case "star": return <SVGStar size={size} style={style} />;
-    default: return <SVGHeart size={size} fill="#C0395A" style={style} />;
+    case "envelope": return <SVGEnvelope size={size} />;
+    case "rose": return <SVGRose size={size} />;
+    case "heart": return <SVGHeart size={size} />;
+    case "sparkle": return <SVGSparkle size={size} />;
+    case "music": return <SVGMusic size={size} />;
+    case "butterfly": return <SVGButterfly size={size} />;
+    case "moon": return <SVGMoon size={size} />;
+    case "star": return <SVGStar size={size} />;
+    default: return <SVGHeart size={size} />;
   }
 }
 
@@ -491,15 +526,22 @@ function BearChar({ size = 100, variant = "plain" as BearVariant, extStyle }: { 
 }
 
 // ── SlideShell ─────────────────────────────────────────────────────────────────
-function SlideShell({ children, onBack, onNext, backLabel = "← Back", nextLabel = "Next →", showNext = true, background }: {
+function SlideShell({ children, onBack, onNext, backLabel = "← Back", nextLabel = "Next →", showNext = true, background, isEditMode = false }: {
   children: React.ReactNode; onBack?: () => void; onNext?: () => void;
-  backLabel?: string; nextLabel?: string; showNext?: boolean; background?: string;
+  backLabel?: string; nextLabel?: string; showNext?: boolean; background?: string; isEditMode?: boolean;
 }) {
   return (
     <motion.div
       initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -60, opacity: 0 }}
       transition={{ type: "spring", stiffness: 80, damping: 15 }}
-      style={{ position:"relative", minHeight:"100vh", width:"100%", overflow:"hidden", ...(background ? { background } : {}) }}
+      style={{
+        position:"relative",
+        height:"100dvh",
+        width:"100%",
+        overflowX:"hidden",
+        overflowY: isEditMode ? "auto" : "hidden",
+        ...(background ? { background } : {})
+      }}
     >
       {children}
       <div style={{ position:"absolute", bottom:24, left:0, right:0, zIndex:50, display:"flex", alignItems:"flex-end", justifyContent:"space-between", padding:"0 20px", pointerEvents:"none" }}>
@@ -507,7 +549,7 @@ function SlideShell({ children, onBack, onNext, backLabel = "← Back", nextLabe
           {onBack && <button onClick={onBack} style={{ borderRadius:9999, border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", padding:"10px 20px", fontSize:14, fontWeight:500, color:"rgba(255,255,255,0.9)", backdropFilter:"blur(8px)", cursor:"pointer" }}>{backLabel}</button>}
         </div>
         <div style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", pointerEvents:"none" }}>
-          <span style={{ fontSize:12, color:"rgba(255,255,255,0.5)", fontFamily:"'Sacramento',cursive" }}>made with love ♡</span>
+          <span style={{ fontSize:12, color:"rgba(255,255,255,0.5)", fontFamily:"'Caveat',cursive", fontWeight:600 }}>made with love ♡</span>
         </div>
         <div style={{ pointerEvents:"auto" }}>
           {onNext && showNext && <button onClick={onNext} style={{ borderRadius:9999, background:"linear-gradient(to right,#D4AF37,#FFB347)", padding:"10px 24px", fontSize:14, fontWeight:600, color:"#3D0C1A", boxShadow:"0 8px 30px rgba(212,175,55,0.4)", cursor:"pointer", border:"none" }}>{nextLabel}</button>}
@@ -553,8 +595,8 @@ function Slide1DarkRoom({ d, onNext, em, oc, ap }: { d:Record<string,string>; on
   });
 
   return (
-    <SlideShell onNext={lightsOn || em ? onNext : undefined} showNext={lightsOn || em} background={lightsOn ? "#1A0A1A" : "#080408"}>
-      <div style={{ position:"relative", minHeight:"100vh", transition:"background 700ms" }}>
+    <SlideShell onNext={lightsOn || em ? onNext : undefined} showNext={lightsOn || em} background={lightsOn ? "#1A0A1A" : "#080408"} isEditMode={em}>
+      <div style={{ position:"relative", height:"100%", transition:"background 700ms" }}>
         {/* Room silhouette */}
         <div style={{ pointerEvents:"none", position:"absolute", inset:0 }}>
           <div style={{ position:"absolute", top:"18%", left:"12%", width:220, height:280, border:`2px solid ${lightsOn?"rgba(255,220,180,0.25)":"rgba(255,255,255,0.05)"}`, borderRadius:8, transition:"all 800ms" }}>
@@ -586,7 +628,7 @@ function Slide1DarkRoom({ d, onNext, em, oc, ap }: { d:Record<string,string>; on
         {!lightsOn && (
           <button onClick={() => setLightsOn(true)} style={{ position:"absolute", bottom:80, right:40, width:60, height:90, background:"#f4f1e8", borderRadius:4, border:"1px solid rgba(255,230,150,0.3)", boxShadow:"0 0 12px rgba(255,230,150,0.3),0 0 30px rgba(255,200,100,0.15)", cursor:"pointer" }}>
             <span style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", top:18, width:24, height:40, background:"linear-gradient(180deg,#d4cfbf,#f4f1e8)", borderRadius:4, boxShadow:"inset 0 -4px 6px rgba(0,0,0,0.15)", display:"block" }} />
-            <span style={{ position:"absolute", left:"50%", top:-32, transform:"translateX(-50%)", whiteSpace:"nowrap", fontSize:14, fontFamily:"'Sacramento',cursive", color:"rgba(255,215,150,0.55)" }}>Turn me on ✦</span>
+            <span style={{ position:"absolute", left:"50%", top:-32, transform:"translateX(-50%)", whiteSpace:"nowrap", fontSize:16, fontFamily:"'Caveat',cursive", color:"rgba(255,215,150,0.55)", fontWeight:600 }}>Turn me on ✦</span>
           </button>
         )}
 
@@ -621,31 +663,201 @@ const PHOTOS_DEF: PhotoData[] = [
   { id:"p6", emoji:"💕", bg:"linear-gradient(135deg,#fda4af,#f43f5e)", rotate:4, pinColor:"#7c3aed", top:"46%", left:"72%", fidCaption:"s2_p6_caption" },
 ];
 
-function Polaroid({ photo, caption, onClick }: { photo:PhotoData; caption:string; onClick:()=>void }) {
+function PremiumGoldPolaroid({ photo, caption, editMode = false, onChange, onClick }: {
+  photo: PhotoData; caption: string; editMode?: boolean; onChange?: (id: string, v: string) => void; onClick?: () => void;
+}) {
   return (
-    <motion.div layoutId={`lej-photo-${photo.id}`} onClick={onClick}
-      whileHover={{ y:-10, scale:1.05, zIndex:20 }}
-      className={`lej-polaroid lej-photo-${photo.id}`}
-      style={{ width: 220 }}
+    <div
+      onClick={!editMode ? onClick : undefined}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        background: "#fffdf9",
+        borderRadius: 20,
+        border: "4px solid transparent",
+        backgroundImage: "linear-gradient(#fffdf9, #fffdf9), linear-gradient(135deg, #FFE57F, #FFC107, #FF8F00, #A66800)",
+        backgroundOrigin: "border-box",
+        backgroundClip: "content-box, border-box",
+        boxShadow: "0 15px 35px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5)",
+        padding: "16px 16px 24px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        alignItems: "center"
+      }}
     >
-      <div style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", top:-8, width:16, height:16, borderRadius:"50%", background:photo.pinColor, boxShadow:`0 2px 4px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2)` }} />
-      <div className="lej-polaroid-image" style={{ background:photo.bg }}>
+      {/* Gold Heart Push-Pin anchored at top center */}
+      <div style={{
+        position: "absolute",
+        top: -14,
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: 28,
+        height: 28,
+        borderRadius: "50%",
+        background: "radial-gradient(circle at 30% 30%, #FFE57F 0%, #FFC107 40%, #A66800 100%)",
+        boxShadow: "0 4px 6px rgba(0,0,0,0.3), inset 0 1px 3px rgba(255,255,255,0.6)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 10
+      }}>
+        <SVGHeart size={14} fill="url(#goldGrad)" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))" }} />
+      </div>
+
+      <div className="lej-premium-card-image" style={{
+        width: "100%",
+        height: editMode ? "150px" : undefined,
+        borderRadius: 12,
+        background: photo.bg,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "inset 0 4px 10px rgba(0,0,0,0.15)",
+        border: "1px solid rgba(212,175,55,0.25)",
+        overflow: "hidden"
+      }}>
         {renderPhotoSVG(photo.id)}
       </div>
-      <div className="lej-polaroid-caption">{caption}</div>
+
+      <div style={{ marginTop: 12, width: "100%" }}>
+        {editMode ? (
+          <ET fid={photo.fidCaption} data={{ [photo.fidCaption]: caption }} onChange={onChange} editMode={editMode}
+            style={{ fontFamily: "'Dancing Script', cursive", fontWeight: 700, fontSize: "1.4rem", color: "#3D0C1A", textAlign: "center" }} />
+        ) : (
+          <div style={{
+            textAlign: "center",
+            fontFamily: "'Dancing Script', cursive",
+            fontWeight: 700,
+            fontSize: "1.6rem",
+            color: "#3D0C1A",
+            textShadow: "0 1px 1px rgba(255,255,255,0.8)",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            width: "100%"
+          }}>
+            {caption}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SwipableCard({
+  photo,
+  caption,
+  isTop,
+  absoluteIndex,
+  onSwipe,
+  swipeDir,
+  onClick
+}: {
+  photo: PhotoData;
+  caption: string;
+  isTop: boolean;
+  absoluteIndex: number;
+  onSwipe: (dir: "left" | "right") => void;
+  swipeDir?: "left" | "right";
+  onClick: () => void;
+}) {
+  const x = useMotionValue(0);
+  const rotateDrag = useTransform(x, [-200, 200], [-15, 15]);
+  const opacityDrag = useTransform(x, [-150, 0, 150], [0.5, 1, 0.5]);
+
+  const handleDragEnd = (event: any, info: any) => {
+    const swipeThreshold = 80;
+    if (info.offset.x > swipeThreshold) {
+      onSwipe("right");
+    } else if (info.offset.x < -swipeThreshold) {
+      onSwipe("left");
+    }
+  };
+
+  return (
+    <motion.div
+      layoutId={`lej-photo-${photo.id}`}
+      drag={isTop ? "x" : false}
+      dragConstraints={{ left: 0, right: 0 }}
+      onDragEnd={isTop ? handleDragEnd : undefined}
+      className="lej-swipable-card"
+      style={{
+        position: "absolute",
+        zIndex: 100 - absoluteIndex,
+        cursor: isTop ? "grab" : "default",
+        transformOrigin: "bottom center",
+        x: isTop ? x : 0,
+        rotate: isTop ? rotateDrag : (absoluteIndex % 2 === 0 ? 3 : -3) * absoluteIndex,
+        opacity: isTop ? opacityDrag : 1 - absoluteIndex * 0.15,
+      }}
+      animate={isTop ? {
+        scale: 1,
+        y: 0,
+      } : {
+        scale: 1 - absoluteIndex * 0.05,
+        y: absoluteIndex * 12,
+      }}
+      exit={{
+        x: swipeDir === "right" ? 400 : -400,
+        opacity: 0,
+        rotate: swipeDir === "right" ? 45 : -45,
+        scale: 0.8,
+        transition: { duration: 0.35 }
+      }}
+    >
+      <PremiumGoldPolaroid photo={photo} caption={caption} editMode={false} onClick={onClick} />
     </motion.div>
   );
 }
 
 function Slide2Photos({ d, onBack, onNext, em, oc }: { d:Record<string,string>; onBack:()=>void; onNext:()=>void; em:boolean; oc?:(id:string,v:string)=>void }) {
+  const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set());
+  const [swipeDirs, setSwipeDirs] = useState<Record<string, "left" | "right">>({});
   const [expanded, setExpanded] = useState<PhotoData | null>(null);
-  
-  // Clean default s2_title of any emojis
+
   const rawTitle = d.s2_title || "Our Moments Together";
   const displayTitle = rawTitle.replace(/📸/g, "").trim();
 
+  const swipe = (dir: "left" | "right") => {
+    const visibleCards = PHOTOS_DEF.filter(p => !swipedIds.has(p.id));
+    if (visibleCards.length === 0) return;
+    const topCardId = visibleCards[0].id;
+    setSwipedIds(prev => {
+      const next = new Set(prev);
+      next.add(topCardId);
+      return next;
+    });
+    setSwipeDirs(prev => ({ ...prev, [topCardId]: dir }));
+  };
+
+  const visibleCards = PHOTOS_DEF.filter(p => !swipedIds.has(p.id));
+
+  if (em) {
+    return (
+      <SlideShell onBack={onBack} onNext={onNext} background="radial-gradient(ellipse at center,#a87a3d 0%,#6b4a1f 70%,#3d2810 100%)" isEditMode={true}>
+        <div style={{ position:"absolute", inset:0, opacity:0.3, mixBlendMode:"overlay", pointerEvents:"none",
+          backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E")` }} />
+        
+        <div style={{ position:"relative", paddingTop:64, paddingBottom:128, minHeight:"100%" }}>
+          <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, textAlign:"center", marginBottom: 32, fontFamily:"'Dancing Script',cursive", color:"#fdf6e3", fontSize:"clamp(2rem,5vw,3.2rem)", textShadow:"0 4px 20px rgba(0,0,0,0.4)" }}>
+            <ET fid="s2_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Dancing Script',cursive", color:"#fdf6e3", fontSize:"clamp(2rem,5vw,3.2rem)", fontWeight: 700 }} />
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "24px", maxWidth: "1000px", margin: "0 auto", padding: "0 24px" }}>
+            {PHOTOS_DEF.map(p => (
+              <div key={p.id} style={{ width: 220, margin: "0 auto" }}>
+                <PremiumGoldPolaroid photo={p} caption={d[p.fidCaption] || ""} editMode={true} onChange={oc} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </SlideShell>
+    );
+  }
+
   return (
-    <SlideShell onBack={onBack} onNext={onNext} background="radial-gradient(ellipse at center,#a87a3d 0%,#6b4a1f 70%,#3d2810 100%)">
+    <SlideShell onBack={onBack} onNext={onNext} background="radial-gradient(ellipse at center,#a87a3d 0%,#6b4a1f 70%,#3d2810 100%)" isEditMode={false}>
       <div style={{ position:"absolute", inset:0, opacity:0.3, mixBlendMode:"overlay", pointerEvents:"none",
         backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E")` }} />
       {/* Fairy lights */}
@@ -659,39 +871,118 @@ function Slide2Photos({ d, onBack, onNext, em, oc }: { d:Record<string,string>; 
         })}
       </div>
 
-      <div style={{ position:"relative", paddingTop:80, paddingBottom:128 }}>
-        <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, textAlign:"center", marginBottom: 32, fontFamily:"'Sacramento',cursive", color:"#fdf6e3", fontSize:"clamp(2rem,5vw,3.2rem)", textShadow:"0 4px 20px rgba(0,0,0,0.4)" }}>
-          {em ? (
-            <ET fid="s2_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Sacramento',cursive", color:"#fdf6e3", fontSize:"clamp(2rem,5vw,3.2rem)" }} />
-          ) : (
-            <>
-              {displayTitle}
-              <SVGCamera size={38} style={{ color: "#FFD700", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }} />
-            </>
-          )}
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", paddingBottom: 64 }}>
+        <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, textAlign:"center", marginBottom: 20, fontFamily:"'Dancing Script',cursive", color:"#fdf6e3", fontSize:"clamp(1.8rem,4vw,2.8rem)", textShadow:"0 4px 20px rgba(0,0,0,0.4)", fontWeight: 700 }}>
+          {displayTitle}
+          <SVGCamera size={34} style={{ color: "#FFD700", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }} />
         </h2>
-        <div className="lej-photos-container">
-          <div className="lej-mobile-grid">
-            {PHOTOS_DEF.map(p => (
-              <Polaroid key={p.id} photo={p} caption={d[p.fidCaption] || ""} onClick={() => setExpanded(p)} />
-            ))}
-          </div>
+
+        <div className="lej-stack-container" style={{ position: "relative", width: 320, height: 420 }}>
+          <AnimatePresence>
+            {visibleCards.length === 0 ? (
+              <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: "100%", height: "100%" }}>
+                <div style={{
+                  width: "100%",
+                  height: "100%",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "2px dashed rgba(212, 175, 55, 0.4)",
+                  borderRadius: 20,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 24,
+                  textAlign: "center",
+                  color: "#fff"
+                }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <SVGHeart size={48} fill="url(#goldGrad)" className="lej-bob" />
+                  </div>
+                  <h3 style={{ fontFamily: "'Dancing Script', cursive", fontSize: "2rem", color: "#FFD700", marginBottom: 12, fontWeight: 700 }}>
+                    Our Magical Memories
+                  </h3>
+                  <p style={{ fontFamily: "'Nunito', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.75)", marginBottom: 24 }}>
+                    That&apos;s all of our magical memories... for now! ♡
+                  </p>
+                  <button onClick={() => { setSwipedIds(new Set()); setSwipeDirs({}); }}
+                    style={{
+                      borderRadius: 9999,
+                      background: "linear-gradient(to right,#D4AF37,#FFB347)",
+                      padding: "10px 24px",
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#3D0C1A",
+                      boxShadow: "0 8px 30px rgba(212, 175, 55, 0.4)",
+                      cursor: "pointer",
+                      border: "none",
+                      transition: "all 0.3s"
+                    }}>
+                    Replay Memories Stack ↺
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              visibleCards.slice().reverse().map((photo, relativeIndex) => {
+                const absoluteIndex = visibleCards.length - 1 - relativeIndex;
+                const isTop = absoluteIndex === 0;
+
+                return (
+                  <SwipableCard
+                    key={photo.id}
+                    photo={photo}
+                    caption={d[photo.fidCaption] || ""}
+                    isTop={isTop}
+                    absoluteIndex={absoluteIndex}
+                    swipeDir={swipeDirs[photo.id]}
+                    onSwipe={(dir) => {
+                      setSwipedIds(prev => {
+                        const next = new Set(prev);
+                        next.add(photo.id);
+                        return next;
+                      });
+                      setSwipeDirs(prev => ({ ...prev, [photo.id]: dir }));
+                    }}
+                    onClick={() => setExpanded(photo)}
+                  />
+                );
+              })
+            )}
+          </AnimatePresence>
         </div>
+
+        {visibleCards.length > 0 && (
+          <div style={{ display: "flex", gap: 24, marginTop: 24, justifyContent: "center", width: "100%", zIndex: 10 }}>
+            <button onClick={() => swipe("left")} style={{
+              width: 50, height: 50, borderRadius: "50%", background: "linear-gradient(135deg, #1e293b, #0f172a)", border: "2px solid #D4AF37",
+              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.3)", fontSize: 18, color: "#FDA4AF"
+            }} title="Swipe Left">
+              ✕
+            </button>
+            <button onClick={() => swipe("right")} style={{
+              width: 50, height: 50, borderRadius: "50%", background: "linear-gradient(135deg, #D4AF37, #FFB347)", border: "2px solid #fff",
+              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+              boxShadow: "0 8px 20px rgba(212,175,55,0.4)", fontSize: 18, color: "#3D0C1A"
+            }} title="Swipe Right">
+              ♥
+            </button>
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
         {expanded && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
             onClick={() => setExpanded(null)}
-            style={{ position:"fixed", inset:0, zIndex:60, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,0.8)", backdropFilter:"blur(4px)", padding:24 }}
+            style={{ position:"fixed", inset:0, zIndex:120, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,0.85)", backdropFilter:"blur(6px)", padding:24 }}
           >
-            <motion.div layoutId={`lej-photo-${expanded.id}`} style={{ position:"relative", width:"min(420px,90vw)", background:"#fefefe", padding:"20px 20px 48px", borderRadius:6, boxShadow:"0 30px 80px rgba(0,0,0,0.5)" }}
+            <motion.div layoutId={`lej-photo-${expanded.id}`} style={{ position:"relative", width:"min(400px,90vw)", background:"#fffdf9", padding:"16px 16px 32px", borderRadius:20, border:"4px solid #D4AF37", boxShadow:"0 30px 80px rgba(0,0,0,0.6)" }}
               onClick={e => e.stopPropagation()}
             >
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:expanded.bg, height:360, borderRadius:2 }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:expanded.bg, height:320, borderRadius:12 }}>
                 {renderPhotoSVG(expanded.id)}
               </div>
-              <div style={{ marginTop:20, textAlign:"center", fontFamily:"'Sacramento',cursive", color:"#3a2418", fontSize:"1.8rem" }}>{d[expanded.fidCaption] || ""}</div>
+              <div style={{ marginTop:16, textAlign:"center", fontFamily:"'Dancing Script',cursive", color:"#3D0C1A", fontSize:"2rem", fontWeight: 700 }}>{d[expanded.fidCaption] || ""}</div>
             </motion.div>
           </motion.div>
         )}
@@ -723,7 +1014,7 @@ function CassetteSVG({ spinning }: { spinning: boolean }) {
       style={{ width:220, height:140, background:"linear-gradient(135deg,#1A1A2E,#2D2D4A)", borderRadius:14, boxShadow:"0 20px 60px rgba(255,100,150,0.25),inset 0 2px 4px rgba(255,255,255,0.1)", position:"relative", flexShrink:0 }}
     >
       <div style={{ position:"absolute", left:16, right:16, top:12, height:40, borderRadius:4, background:"linear-gradient(180deg,#fdf6e3,#e8dcc0)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <span style={{ fontFamily:"'Sacramento',cursive", color:"#7a4a2a", fontSize:14 }}>Songs For You ♡</span>
+        <span style={{ fontFamily:"'Dancing Script',cursive", fontWeight:700, color:"#7a4a2a", fontSize:16 }}>Songs For You ♡</span>
       </div>
       <div style={{ position:"absolute", left:28, bottom:24, width:64, height:64, borderRadius:"50%", border:"4px solid #0a0a14", background:"#1a1a2e", display:"flex", alignItems:"center", justifyContent:"center" }}>
         <motion.div animate={{ rotate:360 }} transition={{ duration:4, repeat:Infinity, ease:"linear" }} style={{ width:12, height:12, borderRadius:"50%", background:"#FF69B4" }} />
@@ -765,7 +1056,7 @@ function Slide3Music({ d, onBack, onNext, em, oc }: { d:Record<string,string>; o
   }, [songIdx, playing, em]);
 
   return (
-    <SlideShell onBack={onBack} onNext={playing || em ? onNext : undefined} showNext={playing || em} background="linear-gradient(180deg,#0D1B2A 0%,#1B2A3B 100%)">
+    <SlideShell onBack={onBack} onNext={playing || em ? onNext : undefined} showNext={playing || em} background="linear-gradient(180deg,#0D1B2A 0%,#1B2A3B 100%)" isEditMode={em}>
       {/* Stars */}
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
         {Array.from({ length:60 }).map((_, i) => (
@@ -773,7 +1064,7 @@ function Slide3Music({ d, onBack, onNext, em, oc }: { d:Record<string,string>; o
         ))}
       </div>
 
-      <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px 24px 128px" }}>
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px 24px 64px" }}>
         {!playing && !em && (<>
           <CassetteSVG spinning={spinning} />
           <motion.p animate={{ scale:[1,1.05,1], opacity:[0.7,1,0.7] }} transition={{ duration:2, repeat:Infinity }}
@@ -884,7 +1175,7 @@ function Slide4Scratch({ d, onBack, onNext, em, oc, ap }: { d:Record<string,stri
   };
 
   return (
-    <SlideShell onBack={onBack} onNext={revealed ? onNext : undefined} showNext={revealed} background="linear-gradient(180deg,#3D0C1A 0%,#6B1628 100%)">
+    <SlideShell onBack={onBack} onNext={revealed ? onNext : undefined} showNext={revealed} background="linear-gradient(180deg,#3D0C1A 0%,#6B1628 100%)" isEditMode={em}>
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
         {Array.from({ length:30 }).map((_,i) => (
           <motion.span key={i} style={{ position:"absolute", left:`${Math.random()*100}%`, bottom:-20, width:3, height:3, borderRadius:"50%", background:"rgba(255,215,100,0.6)", boxShadow:"0 0 8px rgba(255,215,100,0.8)", display:"block" }}
@@ -892,7 +1183,7 @@ function Slide4Scratch({ d, onBack, onNext, em, oc, ap }: { d:Record<string,stri
             transition={{ duration:8+Math.random()*6, repeat:Infinity, delay:Math.random()*6, ease:"linear" }} />
         ))}
       </div>
-      <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"64px 24px 128px" }}>
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 24px" }}>
         <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textAlign:"center", marginBottom:8, fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }}>
           Scratch to reveal your surprise...
           <SVGSparkle size={22} style={{ color: "#FFD700" }} />
@@ -903,8 +1194,8 @@ function Slide4Scratch({ d, onBack, onNext, em, oc, ap }: { d:Record<string,stri
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
               <SVGHeart size={32} fill="#C0395A" />
             </div>
-            <div style={{ marginTop:8, fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.9rem", lineHeight:1.1 }}>
-              <ET fid="s4_reveal_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.9rem" }} />
+            <div style={{ marginTop:8, fontFamily:"'Dancing Script',cursive", color:"#C0395A", fontSize:"1.9rem", lineHeight:1.1 }}>
+              <ET fid="s4_reveal_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Dancing Script',cursive", color:"#C0395A", fontSize:"1.9rem" }} />
             </div>
             <div style={{ marginTop:12, fontFamily:"'Lora',serif", color:"#3a2418", fontSize:"0.95rem", lineHeight:1.5 }}>
               <ET fid="s4_reveal_body" data={d} onChange={oc} editMode={em} multiline style={{ fontFamily:"'Lora',serif", color:"#3a2418", fontSize:"0.95rem" }} />
@@ -959,13 +1250,13 @@ function Slide5Constellation({ d, onBack, onNext, em, oc, ap }: { d:Record<strin
   const displayReveal = rawReveal.replace(/♡/g, "").trim();
 
   return (
-    <SlideShell onBack={onBack} onNext={done||em ? onNext : undefined} nextLabel="Keep going... →" showNext={done||em} background="#020818">
+    <SlideShell onBack={onBack} onNext={done||em ? onNext : undefined} nextLabel="Keep going... →" showNext={done||em} background="#020818" isEditMode={em}>
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
         {Array.from({ length:120 }).map((_,i) => (
           <span key={i} className="lej-star" style={{ position:"absolute", top:`${Math.random()*100}%`, left:`${Math.random()*100}%`, width:Math.random()*2.5+0.5, height:Math.random()*2.5+0.5, borderRadius:"50%", background:"#fff", opacity:Math.random()*0.8+0.1, animationDelay:`${Math.random()*3}s`, display:"block" }} />
         ))}
       </div>
-      <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-start", padding:"56px 24px 128px" }}>
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 24px" }}>
         <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }}>
           {em ? (
             <ET fid="s5_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }} />
@@ -1004,9 +1295,9 @@ function Slide5Constellation({ d, onBack, onNext, em, oc, ap }: { d:Record<strin
         <AnimatePresence>
           {done && (
             <motion.p initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.6 }}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: 8, marginTop:32, textAlign:"center", maxWidth:600, padding:"0 24px", fontFamily:"'Sacramento',cursive", color:"#FFD700", fontSize:"clamp(1.4rem,3vw,2rem)" }}>
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: 8, marginTop:32, textAlign:"center", maxWidth:600, padding:"0 24px", fontFamily:"'Dancing Script',cursive", color:"#FFD700", fontSize:"clamp(1.4rem,3vw,2.2rem)" }}>
               {em ? (
-                <ET fid="s5_reveal_text" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Sacramento',cursive", color:"#FFD700", fontSize:"clamp(1.4rem,3vw,2rem)" }} />
+                <ET fid="s5_reveal_text" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Dancing Script',cursive", color:"#FFD700", fontSize:"clamp(1.4rem,3vw,2.2rem)" }} />
               ) : (
                 <>
                   {displayReveal}
@@ -1059,13 +1350,13 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
   const radius=160; const cx=170; const cy=170;
 
   return (
-    <SlideShell onBack={onBack} onNext={spinCount>=3||em ? onNext : undefined} showNext={spinCount>=3||em} background="linear-gradient(135deg,#2D0A15 0%,#8B1A3A 100%)">
+    <SlideShell onBack={onBack} onNext={spinCount>=3||em ? onNext : undefined} showNext={spinCount>=3||em} background="linear-gradient(135deg,#2D0A15 0%,#8B1A3A 100%)" isEditMode={em}>
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
         {[{l:"10%",t:"20%",sz:200,c:"rgba(255,150,180,0.15)"},{l:"80%",t:"30%",sz:280,c:"rgba(212,175,55,0.12)"},{l:"30%",t:"80%",sz:240,c:"rgba(255,100,140,0.18)"},{l:"70%",t:"75%",sz:180,c:"rgba(255,200,210,0.12)"}].map((b,i) => (
           <div key={i} style={{ position:"absolute", left:b.l, top:b.t, width:b.sz, height:b.sz, borderRadius:"50%", background:`radial-gradient(circle,${b.c},transparent 70%)`, filter:"blur(20px)" }} />
         ))}
       </div>
-      <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-start", padding:"48px 24px 128px" }}>
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 24px" }}>
         <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#fdf6e3", fontSize:"clamp(1.8rem,4vw,2.6rem)" }}>
           Spin to discover something beautiful <SVGRose size={28} style={{ color: "#FFD700" }} />
         </h2>
@@ -1080,7 +1371,7 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
           </div>
         )}
 
-        <div style={{ position:"relative", marginTop:32, width:340, height:340 }}>
+        <div style={{ position:"relative", marginTop:20, width:"min(340px, 80vw)", height:"min(340px, 80vw)" }}>
           <div style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", top:-8, zIndex:20, width:0, height:0, borderLeft:"16px solid transparent", borderRight:"16px solid transparent", borderTop:"30px solid #FFD700", filter:"drop-shadow(0 4px 6px rgba(0,0,0,0.5))" }} />
           <div ref={wheelRef} style={{ position:"absolute", inset:0 }}>
             <svg viewBox="0 0 340 340" style={{ width:"100%", height:"100%" }}>
@@ -1122,7 +1413,7 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
                   {renderResultIcon(segs[result].icon)}
                 </div>
-                <div style={{ marginTop:4, fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.6rem", lineHeight:1.15 }}>
+                <div style={{ marginTop:4, fontFamily:"'Dancing Script',cursive", color:"#C0395A", fontSize:"1.8rem", lineHeight:1.15 }}>
                   &ldquo;{segs[result].text}&rdquo;
                 </div>
               </div>
@@ -1197,7 +1488,7 @@ function Slide7Bottle({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
   const wobble = (shake/100)*8;
 
   return (
-    <SlideShell onBack={onBack} onNext={opened||em ? onNext : undefined} showNext={opened||em}>
+    <SlideShell onBack={onBack} onNext={opened||em ? onNext : undefined} showNext={opened||em} isEditMode={em}>
       <div style={{ position:"absolute", inset:0, background:"linear-gradient(180deg,#1A1A2E 0%,#1A1A2E 50%,#1A6FA8 50%,#0A3D62 100%)" }} />
       <div style={{ position:"absolute", right:"12%", top:"10%", width:80, height:80, borderRadius:"50%", background:"radial-gradient(circle,#fef3c7 30%,#fcd34d 70%)", boxShadow:"0 0 60px rgba(252,211,77,0.4)" }} />
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
@@ -1207,7 +1498,7 @@ function Slide7Bottle({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
         {[0,1,2].map(i => <div key={i} className="lej-wave" style={{ position:"absolute", left:0, right:0, top:i*30, height:60, background:`rgba(255,255,255,${0.04+i*0.02})`, animationDelay:`${i*0.6}s` }} />)}
       </div>
 
-      <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", padding:"56px 24px 128px" }}>
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px 16px" }}>
         <h2 style={{ textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#fdf6e3", fontSize:"clamp(1.6rem,3.5vw,2.4rem)", fontStyle:"italic" }}>A bottle drifted ashore...</h2>
         <p style={{ marginTop:8, fontSize:14, color:"rgba(253,246,227,0.7)" }}>
           {opened ? "Read the message ♡" : "Drag the bottle or tap rapidly to shake it"}
@@ -1247,10 +1538,10 @@ function Slide7Bottle({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
             <motion.div initial={{ scaleY:0, opacity:0, y:-20 }} animate={{ scaleY:1, opacity:1, y:0 }} transition={{ delay:0.6, duration:0.6, type:"spring", stiffness:90, damping:14 }}
               style={{ transformOrigin:"top center", width:340, maxWidth:"92vw", background:"linear-gradient(180deg,#fdf6e3,#f5e6c8)", backgroundImage:`repeating-linear-gradient(180deg,transparent,transparent 28px,rgba(180,140,90,0.25) 28px,rgba(180,140,90,0.25) 29px),linear-gradient(180deg,#fdf6e3,#f5e6c8)`, borderRadius:8, boxShadow:"0 30px 80px rgba(0,0,0,0.5)", padding:"32px 28px", marginTop:-160, position:"relative", zIndex:5 }}
             >
-              <h3 style={{ textAlign:"center", fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.7rem" }}>A note from across the ocean...</h3>
+              <h3 style={{ textAlign:"center", fontFamily:"'Dancing Script',cursive", color:"#C0395A", fontSize:"1.8rem" }}>A note from across the ocean...</h3>
               <ET fid="s7_letter_body" data={d} onChange={oc} editMode={em} multiline style={{ marginTop:16, textAlign:"center", fontFamily:"'Lora',serif", color:"#3a2418", fontSize:"1rem", fontStyle:"italic", lineHeight:1.7 }} />
               <div style={{ marginTop:12, textAlign:"right" }}>
-                <ET fid="s7_sign" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.4rem" }} />
+                <ET fid="s7_sign" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Caveat',cursive", color:"#C0395A", fontSize:"1.7rem", fontWeight:700 }} />
               </div>
               <div style={{ position:"absolute", right:-16, bottom:-16 }}><BearChar size={70} variant="sailor" /></div>
             </motion.div>
@@ -1275,10 +1566,10 @@ function GardenRose({ colors }: { colors:[string,string] }) {
       <motion.div initial={{ height:0 }} animate={{ height:95 }} transition={{ duration:0.4 }} style={{ position:"absolute", left:"50%", bottom:0, transform:"translateX(-50%)", width:4, borderRadius:2, background:"linear-gradient(180deg,#3f7a3a,#2d5a28)" }} />
       <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ duration:0.3, delay:0.4 }} style={{ position:"absolute", left:"50%", bottom:40, width:18, height:10, background:"#3f7a3a", borderRadius:"0 50% 50% 50%", transform:"translateX(-110%) rotate(-30deg)" }} />
       <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ duration:0.3, delay:0.5 }} style={{ position:"absolute", left:"50%", bottom:55, width:18, height:10, background:"#3f7a3a", borderRadius:"50% 0 50% 50%", transform:"translateX(10%) rotate(30deg)" }} />
-      <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ duration:0.5, delay:0.7, type:"spring", stiffness:180 }} style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", top:0, width:50, height:50 }}>
+      <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ duration:0.5, delay:0.7, type:"spring", stiffness:180 }} style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", top:10, width:50, height:50 }}>
         {[0,45,90,135,180,225,270,315].map((deg,i) => (
           <motion.div key={i} initial={{ scale:0, rotate:deg }} animate={{ scale:1, rotate:deg }} transition={{ duration:0.3, delay:0.85+i*0.05 }}
-            style={{ position:"absolute", left:"50%", top:"50%", width:18, height:22, background:`radial-gradient(circle at 60% 40%,${colors[1]},${colors[0]})`, borderRadius:"50% 50% 50% 0", transform:`translate(-50%,-100%) rotate(${deg}deg)` }} />
+            style={{ position:"absolute", left:"50%", top:"50%", width:18, height:22, background:`radial-gradient(circle at 60% 40%,${colors[1]},${colors[0]})`, borderRadius:"50% 50% 50% 0", x: "-50%", y: "-100%", transformOrigin:"50% 100%" }} />
         ))}
         <div style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", width:12, height:12, borderRadius:"50%", background:"#fbbf24" }} />
       </motion.div>
@@ -1291,13 +1582,15 @@ function GardenPot({ index, bloomed, onClick, reason }: { index:number; bloomed:
   const handle = () => { if(bloomed) return; onClick(); setShowCard(true); setTimeout(()=>setShowCard(false),3000); };
   return (
     <div className="lej-garden-pot">
-      {bloomed && <GardenRose colors={ROSE_COLORS[index]} />}
-      <button onClick={handle} disabled={bloomed} style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:76, height:64, cursor:bloomed?"default":"pointer", background:"none", border:"none" }}>
-        <div style={{ position:"absolute", left:0, right:0, bottom:0, height:60, background:"linear-gradient(180deg,#D4845A,#A85A30)", clipPath:"polygon(8% 100%,92% 100%,100% 0,0 0)" }} />
-        <div style={{ position:"absolute", left:-4, right:-4, top:0, height:12, background:"linear-gradient(180deg,#E89060,#B86838)", borderRadius:2 }} />
-        <div style={{ position:"absolute", left:4, right:4, top:8, height:8, background:"#3a1f10", borderRadius:2 }} />
-        <div style={{ position:"absolute", left:"50%", top:28, transform:"translateX(-50%)", fontSize:10, color:"rgba(253,246,227,0.8)" }}>{index+1}</div>
-      </button>
+      <div className="lej-garden-pot-inner" style={{ position:"relative", width:"100%", height:"100%" }}>
+        {bloomed && <GardenRose colors={ROSE_COLORS[index]} />}
+        <button onClick={handle} disabled={bloomed} style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:76, height:64, cursor:bloomed?"default":"pointer", background:"none", border:"none" }}>
+          <div style={{ position:"absolute", left:0, right:0, bottom:0, height:60, background:"linear-gradient(180deg,#D4845A,#A85A30)", clipPath:"polygon(8% 100%,92% 100%,100% 0,0 0)" }} />
+          <div style={{ position:"absolute", left:-4, right:-4, top:0, height:12, background:"linear-gradient(180deg,#E89060,#B86838)", borderRadius:2 }} />
+          <div style={{ position:"absolute", left:4, right:4, top:8, height:8, background:"#3a1f10", borderRadius:2 }} />
+          <div style={{ position:"absolute", left:"50%", top:28, transform:"translateX(-50%)", fontSize:10, color:"rgba(253,246,227,0.8)" }}>{index+1}</div>
+        </button>
+      </div>
       <AnimatePresence>
         {showCard && bloomed && (
           <motion.div
@@ -1309,7 +1602,7 @@ function GardenPot({ index, bloomed, onClick, reason }: { index:number; bloomed:
             <div style={{ color:"#f472b6", display: "flex", justifyContent: "center", marginBottom: 2 }}>
               <SVGHeart size={14} fill="#f472b6" />
             </div>
-            <div style={{ fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.15rem", lineHeight:1.1 }}>{reason}</div>
+            <div style={{ fontFamily:"'Dancing Script',cursive", color:"#C0395A", fontSize:"1.2rem", lineHeight:1.15, fontWeight:700 }}>{reason}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1329,7 +1622,7 @@ function Slide8Garden({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
   const displayTitle = rawTitle.replace(/🌹/g, "").trim();
 
   return (
-    <SlideShell onBack={onBack} onNext={allBloomed||em ? onNext : undefined} nextLabel="Final chapter... →" showNext={allBloomed||em} background="linear-gradient(180deg,#1A0A2E 0%,#2D1B4E 40%,#3D5A2A 100%)">
+    <SlideShell onBack={onBack} onNext={allBloomed||em ? onNext : undefined} nextLabel="Final chapter... →" showNext={allBloomed||em} background="linear-gradient(180deg,#1A0A2E 0%,#2D1B4E 40%,#3D5A2A 100%)" isEditMode={em}>
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
         {Array.from({length:60}).map((_,i) => <span key={i} className="lej-star" style={{ position:"absolute", top:`${Math.random()*50}%`, left:`${Math.random()*100}%`, width:Math.random()*2+0.5, height:Math.random()*2+0.5, borderRadius:"50%", background:"#fff", opacity:Math.random()*0.7, animationDelay:`${Math.random()*3}s`, display:"block" }} />)}
       </div>
@@ -1339,7 +1632,7 @@ function Slide8Garden({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
           transition={{ duration:4+Math.random()*3, repeat:Infinity, delay:Math.random()*2 }} />
       ))}
 
-      <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", padding:"56px 24px 160px" }}>
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px 16px" }}>
         <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.8rem,4vw,2.6rem)" }}>
           {em ? (
             <ET fid="s8_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.8rem,4vw,2.6rem)" }} />
@@ -1364,7 +1657,7 @@ function Slide8Garden({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
         <AnimatePresence>
           {allBloomed && (
             <motion.p initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.4 }}
-              style={{ marginTop:24, textAlign:"center", maxWidth:600, padding:"0 16px", fontFamily:"'Sacramento',cursive", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }}>
+              style={{ marginTop:24, textAlign:"center", maxWidth:600, padding:"0 16px", fontFamily:"'Dancing Script',cursive", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.6rem)", fontWeight:700 }}>
               This garden will always bloom for you. ♡
             </motion.p>
           )}
@@ -1444,7 +1737,7 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
   const seal = () => { setSealed(true); setFlash(true); fireConfetti(); setTimeout(()=>setFlash(false),1500); };
 
   return (
-    <SlideShell onBack={onBack} showNext={false}>
+    <SlideShell onBack={onBack} showNext={false} isEditMode={em}>
       <div style={{ position:"absolute", inset:0, background:"#050A18" }} />
       <Fireworks flash={flash} />
       {/* Diwali strings */}
@@ -1460,42 +1753,85 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
         ))}
       </div>
 
-      <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"96px 24px 128px", textAlign:"center" }}>
-        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.2 }} style={{ fontSize:11, letterSpacing:"0.4em", fontWeight:600, color:"#FFD700", fontFamily:"'Outfit', sans-serif" }}>✦ ALWAYS &amp; FOREVER ✦</motion.div>
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 16px 48px", textAlign:"center" }}>
 
-        <motion.h1 initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.5 }} className="lej-glow"
-          style={{ fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic", fontWeight:700, fontSize:"clamp(2.4rem,7vw,4.5rem)", color:"#fdf6e3", lineHeight:1.05, marginTop:16 }}>
-          <ET fid="s9_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic", fontWeight:700, fontSize:"clamp(2.4rem,7vw,4.5rem)", color:"#fdf6e3" }} />
-        </motion.h1>
+        {/* Glassmorphic hero card */}
+        <motion.div
+          initial={{ opacity:0, y:30, scale:0.95 }}
+          animate={{ opacity:1, y:0, scale:1 }}
+          transition={{ delay:0.2, type:"spring", stiffness:80, damping:16 }}
+          style={{
+            position:"relative",
+            maxWidth:520,
+            width:"100%",
+            background:"linear-gradient(135deg,rgba(20,8,32,0.82),rgba(60,12,28,0.76))",
+            backdropFilter:"blur(24px)",
+            WebkitBackdropFilter:"blur(24px)",
+            border:"1px solid rgba(212,175,55,0.35)",
+            borderRadius:28,
+            boxShadow:"0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07), 0 0 60px rgba(212,175,55,0.08)",
+            padding:"clamp(24px, 6vw, 40px) clamp(16px, 5vw, 36px)",
+          }}
+        >
+          {/* Gold shimmer top bar */}
+          <div style={{ position:"absolute", top:0, left:"20%", right:"20%", height:2, borderRadius:1, background:"linear-gradient(90deg,transparent,#FFD700,transparent)" }} />
 
-        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.9 }} style={{ marginTop:24, maxWidth:480 }}>
-          <ET fid="s9_body" data={d} onChange={oc} editMode={em} multiline style={{ fontFamily:"'Lora',serif", fontStyle:"italic", color:"#F2C4CE", fontSize:"1.1rem", lineHeight:2 }} />
+          <motion.div initial={{ opacity:0,y:10 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.3 }}
+            style={{ fontSize:11, letterSpacing:"0.45em", fontWeight:700, color:"#D4AF37", fontFamily:"'Outfit', sans-serif", marginBottom:20 }}>
+            ✦ ALWAYS &amp; FOREVER ✦
+          </motion.div>
+
+          <motion.h1 initial={{ opacity:0,y:15 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.5 }} className="lej-glow"
+            style={{ fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic", fontWeight:700, fontSize:"clamp(2rem,6vw,3.6rem)", color:"#fdf6e3", lineHeight:1.05, marginBottom:20, textShadow:"0 2px 20px rgba(212,175,55,0.3)" }}>
+            <ET fid="s9_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic", fontWeight:700, fontSize:"clamp(2rem,6vw,3.6rem)", color:"#fdf6e3" }} />
+          </motion.h1>
+
+          {/* Divider line */}
+          <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ delay:0.7, duration:0.6 }}
+            style={{ height:1, background:"linear-gradient(90deg,transparent,rgba(212,175,55,0.5),transparent)", marginBottom:20 }} />
+
+          <motion.div initial={{ opacity:0,y:15 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.9 }}
+            style={{ marginBottom:20 }}>
+            <ET fid="s9_body" data={d} onChange={oc} editMode={em} multiline
+              style={{ fontFamily:"'Lora',serif", fontStyle:"italic", color:"rgba(253,246,227,0.9)", fontSize:"1.05rem", lineHeight:1.9 }} />
+          </motion.div>
+
+          <motion.div initial={{ opacity:0,y:15 }} animate={{ opacity:1,y:0 }} transition={{ delay:1.3 }}>
+            <ET fid="s9_sign" data={d} onChange={oc} editMode={em}
+              style={{ fontFamily:"'Dancing Script',cursive", color:"#FFD700", fontSize:"2.2rem", fontWeight:700, textShadow:"0 2px 12px rgba(212,175,55,0.4)" }} />
+          </motion.div>
+
+          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:1.5 }}
+            style={{ marginTop:6, fontSize:11, letterSpacing:"0.25em", fontWeight:600, color:"rgba(212,175,55,0.45)", fontFamily:"'Outfit', sans-serif" }}>
+            ARADHYA E-GIFTS
+          </motion.div>
+
+          {/* Gold shimmer bottom bar */}
+          <div style={{ position:"absolute", bottom:0, left:"30%", right:"30%", height:1, borderRadius:1, background:"linear-gradient(90deg,transparent,rgba(212,175,55,0.4),transparent)" }} />
         </motion.div>
 
-        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:1.3 }} style={{ marginTop:24 }}>
-          <ET fid="s9_sign" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Great Vibes', cursive", color:"#FFD700", fontSize:"2.8rem" }} />
-        </motion.div>
-
-        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:1.4 }} style={{ marginTop:8, fontSize:12, letterSpacing:"0.2em", fontWeight:700, color:"rgba(255,255,255,0.4)", fontFamily:"'Outfit', sans-serif" }}>
-          ARADHYA E-GIFTS
-        </motion.div>
-
-        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:1.6 }} style={{ marginTop:40, display:"flex", flexWrap:"wrap", justifyContent:"center", gap:16 }}>
+        {/* Buttons row */}
+        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:1.6 }}
+          style={{ marginTop:28, display:"flex", flexWrap:"wrap", justifyContent:"center", gap:14 }}>
           {!sealed && !em && (
-            <button onClick={seal} style={{ display: "flex", alignItems: "center", gap: 8, borderRadius:9999, padding:"12px 32px", fontWeight:600, color:"#3D0C1A", boxShadow:"0 10px 40px rgba(212,175,55,0.5)", background:"linear-gradient(135deg,#FFD700,#FFB347)", border:"2px solid #fdf6e3", cursor:"pointer", fontSize:15 }}>
+            <button onClick={seal}
+              style={{ display:"flex", alignItems:"center", gap:8, borderRadius:9999, padding:"12px 32px", fontWeight:700, color:"#3D0C1A", boxShadow:"0 10px 40px rgba(212,175,55,0.5)", background:"linear-gradient(135deg,#FFD700,#FFB347)", border:"2px solid rgba(255,255,255,0.4)", cursor:"pointer", fontSize:15, letterSpacing:"0.02em" }}>
               Seal It With Love <SVGHeart size={18} fill="#3D0C1A" />
             </button>
           )}
-          <button onClick={onReset} style={{ display: "flex", alignItems: "center", gap: 6, borderRadius:9999, border:"1px solid rgba(255,255,255,0.3)", background:"transparent", padding:"12px 24px", color:"rgba(255,255,255,0.85)", cursor:"pointer", fontSize:14 }}>
-            Live it again <SVGSparkle size={14} style={{ color: "rgba(255,255,255,0.85)" }} />
+          <button onClick={onReset}
+            style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, border:"1px solid rgba(212,175,55,0.4)", background:"rgba(212,175,55,0.08)", backdropFilter:"blur(8px)", padding:"12px 24px", color:"#FFD700", cursor:"pointer", fontSize:14, fontWeight:600 }}>
+            Live it again <SVGSparkle size={14} style={{ color:"#FFD700" }} />
           </button>
         </motion.div>
 
-        <motion.div animate={sealed?{y:[0,-20,0]}:{}} transition={{ duration:0.6 }} style={{ marginTop:40, position:"relative" }}>
-          <div style={{ position:"absolute", left:-80, right:-80, top:-40, bottom:-40, background:"radial-gradient(ellipse,rgba(255,215,100,0.25),transparent 70%)" }} />
-          <BearChar size={120} variant="couple" />
+        {/* Bear + floating hearts */}
+        <motion.div animate={sealed?{y:[0,-20,0]}:{}} transition={{ duration:0.6 }}
+          style={{ marginTop:28, position:"relative" }}>
+          <div style={{ position:"absolute", left:-80, right:-80, top:-40, bottom:-40, background:"radial-gradient(ellipse,rgba(255,215,100,0.2),transparent 70%)" }} />
+          <BearChar size={100} variant="couple" />
           {[0,1,2].map(i => (
-            <motion.div key={i} style={{ position:"absolute", left:"50%", bottom:40, color:"#FF69B4", pointerEvents: "none" }}
+            <motion.div key={i} style={{ position:"absolute", left:"50%", bottom:40, color:"#FF69B4", pointerEvents:"none" }}
               animate={{ y:[0,-100], opacity:[1,0], x:[(i-1)*30,(i-1)*60] }}
               transition={{ duration:3, repeat:Infinity, delay:i*0.7 }}>
               <SVGHeart size={20} fill="#FF69B4" />
@@ -1581,6 +1917,36 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
   return (
     <div style={{ position: "relative", minHeight: "100vh", fontFamily: "'Nunito', sans-serif" }}>
       <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
+
+      {/* Global SVG Gradients Container */}
+      <svg style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}>
+        <defs>
+          {/* Luxury Gold Metallic text path gradient */}
+          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFE57F" />
+            <stop offset="45%" stopColor="#FFC107" />
+            <stop offset="75%" stopColor="#FF8F00" />
+            <stop offset="100%" stopColor="#A66800" />
+          </linearGradient>
+          {/* Layered Rose Head / Crimson-Pink gradient */}
+          <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FF6B6B" />
+            <stop offset="50%" stopColor="#E60026" />
+            <stop offset="100%" stopColor="#8A0808" />
+          </linearGradient>
+          {/* Green Stem and Leaf gradient */}
+          <linearGradient id="stemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#4CAF50" />
+            <stop offset="100%" stopColor="#1B5E20" />
+          </linearGradient>
+          {/* Organic wax shading gradients */}
+          <radialGradient id="waxGrad" cx="45%" cy="40%" r="60%">
+            <stop offset="0%" stopColor="#DF2020" />
+            <stop offset="65%" stopColor="#8A0808" />
+            <stop offset="100%" stopColor="#3F0000" />
+          </radialGradient>
+        </defs>
+      </svg>
 
       {/* Slide number indicator */}
       <div style={{ position: "fixed", top: editMode ? 110 : 20, left: "50%", transform: "translateX(-50%)", zIndex: 50, display: "flex", gap: 6, pointerEvents: "none" }}>
