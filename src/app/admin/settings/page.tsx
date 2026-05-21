@@ -297,16 +297,18 @@ export default function SettingsPage() {
             </div>
             <label style={{ background: "#10B981", color: "#fff", padding: "8px 16px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
               Upload New Favicon
-              <input type="file" accept="image/*" style={{ display: "none" }} onChange={async (e) => {
+              <input type="file" accept="image/png, image/x-icon, image/svg+xml, image/gif" style={{ display: "none" }} onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
-                const fd = new FormData();
-                fd.append("image", file);
-                try {
-                  const res = await fetch("https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e", { method: "POST", body: fd });
-                  const json = await res.json();
-                  if (json.success) setSettings(s => ({ ...s, faviconUrl: json.data.url }));
-                } catch (e) { console.error("Upload failed", e); }
+                
+                // For favicons, to perfectly preserve transparency and bypass ImgBB compression,
+                // we convert it to a Base64 Data URL and store it directly.
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  const base64String = reader.result as string;
+                  setSettings(s => ({ ...s, faviconUrl: base64String }));
+                };
+                reader.readAsDataURL(file);
               }} />
             </label>
             {settings.faviconUrl && (
