@@ -447,7 +447,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
     );
   }
 
-  if (!order || !product) {
+  if ((!isPreviewEditor && !order) || !product) {
     return (
       <div style={{ minHeight: "100vh", background: "#0A0A0F", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center", color: "#fff", maxWidth: 440, padding: 24 }}>
