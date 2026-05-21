@@ -1,31 +1,32 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
-export const metadata: Metadata = {
-  title: "Aradhya E-Gifts — Personalised Digital Surprises",
-  description:
-    "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more. Preview, personalise and share instantly.",
-  keywords: "e-gift, digital gift, birthday surprise, personalised webpage, proposal gift, anniversary",
-  openGraph: {
-    title: "Aradhya E-Gifts",
-    description: "Magical personalised digital gift pages",
-    type: "website",
-  },
-};
-
-import MaintenanceWrapper from "@/components/MaintenanceWrapper";
 import { getSettingsDB } from "@/lib/db";
+import MaintenanceWrapper from "@/components/MaintenanceWrapper";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettingsDB();
+  return {
+    title: "Aradhya E-Gifts — Personalised Digital Surprises",
+    description:
+      "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more. Preview, personalise and share instantly.",
+    keywords: "e-gift, digital gift, birthday surprise, personalised webpage, proposal gift, anniversary",
+    openGraph: {
+      title: "Aradhya E-Gifts",
+      description: "Magical personalised digital gift pages",
+      type: "website",
+    },
+    icons: {
+      icon: settings.faviconUrl || "/favicon.ico",
+    }
+  };
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const settings = await getSettingsDB();
-  const favicon = settings.faviconUrl || "/favicon.ico";
-
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href={favicon} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
