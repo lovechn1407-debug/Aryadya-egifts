@@ -723,11 +723,11 @@ function Slide1DarkRoom({ d, onNext, em, oc, ap }: { d:Record<string,string>; on
 
         {/* Spotlight circle behind bear */}
         {lightsOn && (
-          <div style={{ position:"absolute", left:"calc(12% + 110px)", top:"48%", transform:"translate(-50%,-50%)", width:230, height:230, borderRadius:"50%", background:"radial-gradient(ellipse,rgba(255,235,160,0.22) 0%,rgba(255,200,80,0.10) 55%,transparent 75%)", pointerEvents:"none", zIndex:1 }} />
+          <div style={{ position:"absolute", left:"50%", bottom:50, transform:"translate(-50%,50%)", width:230, height:230, borderRadius:"50%", background:"radial-gradient(ellipse,rgba(255,235,160,0.22) 0%,rgba(255,200,80,0.10) 55%,transparent 75%)", pointerEvents:"none", zIndex:1 }} />
         )}
 
-        {/* Bear GIF – bear7 – centered in spotlight (inside left oval) */}
-        <animated.div style={{ position:"absolute", left:"calc(12% + 110px)", top:"48%", transform:bearSpring.scale.to(sc=>`translate(-50%,-50%) scale(${sc})`), opacity:bearSpring.scale, zIndex:2 }}>
+        {/* Bear GIF – bear7 – sitting perfectly on top of 'made with love' */}
+        <animated.div style={{ position:"absolute", left:"50%", bottom:50, transform:bearSpring.scale.to(sc=>`translateX(-50%) scale(${sc})`), transformOrigin:"bottom center", opacity:bearSpring.scale, zIndex:2 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/templates/lovers-enchanted-journey/bear7.gif" alt="bear" style={{ width: 155, height: 155, objectFit: "contain" }} />
         </animated.div>
@@ -2143,8 +2143,97 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
     };
   }, [editMode, d.bg_song_url, globalMuted]);
 
+  // ── Preloader Logic ────────────────────────────────────────────────────────
+  const [preloading, setPreloading] = useState(!editMode);
+  const [preloadProgress, setPreloadProgress] = useState(0);
+  const [preloadText, setPreloadText] = useState("Initializing experience...");
+
+  useEffect(() => {
+    if (editMode) return;
+    let isCancelled = false;
+    
+    const runPreload = async () => {
+      if (isCancelled) return;
+      setPreloadProgress(10);
+      setPreloadText("Checking memory paths...");
+      await new Promise(r => setTimeout(r, 400));
+      
+      if (isCancelled) return;
+      setPreloadProgress(30);
+      setPreloadText("Connecting audio frequencies...");
+      if (d.bg_song_url) {
+        const a = new Audio(d.bg_song_url);
+        a.preload = "auto";
+      }
+      await new Promise(r => setTimeout(r, 600));
+      
+      if (isCancelled) return;
+      setPreloadProgress(60);
+      setPreloadText("Loading polaroids and stars...");
+      
+      const assets = [
+        "/templates/lovers-enchanted-journey/bear7.gif",
+        "/templates/lovers-enchanted-journey/bear8.gif",
+        "/templates/lovers-enchanted-journey/bear2.gif",
+        "/templates/lovers-enchanted-journey/bear10.gif",
+        d.s2_p1_img, d.s2_p2_img, d.s2_p3_img, d.s2_p4_img, d.s2_p5_img, d.s2_p6_img
+      ].filter(Boolean);
+      
+      let loaded = 0;
+      await Promise.all(assets.map(src => new Promise(res => {
+        if (!src) { res(null); return; }
+        const img = new Image();
+        img.onload = () => {
+          loaded++;
+          if (!isCancelled) setPreloadProgress(60 + Math.floor((loaded/assets.length)*30));
+          res(null);
+        };
+        img.onerror = () => res(null);
+        img.src = src;
+      })));
+      
+      if (isCancelled) return;
+      setPreloadProgress(95);
+      setPreloadText("Preparing the magic...");
+      await new Promise(r => setTimeout(r, 400));
+      
+      if (isCancelled) return;
+      setPreloadProgress(100);
+      setPreloadText("Ready.");
+      await new Promise(r => setTimeout(r, 200));
+      
+      if (!isCancelled) setPreloading(false);
+    };
+    
+    runPreload();
+    return () => { isCancelled = true; };
+  }, [editMode, d]);
+
+  const attemptGlobalPlay = () => {
+    if (editMode || !d.bg_song_url || globalMuted) return;
+    if (!bgAudioRef.current) {
+      const a = new Audio(d.bg_song_url);
+      a.loop = true;
+      a.volume = 0.45;
+      bgAudioRef.current = a;
+    }
+    if (bgAudioRef.current.paused) {
+      bgAudioRef.current.play().catch(() => {});
+    }
+  };
+
   return (
-    <div style={{ position: "relative", minHeight: "100vh", fontFamily: "'Nunito', sans-serif" }}>
+    <div onClickCapture={attemptGlobalPlay} onTouchStartCapture={attemptGlobalPlay} style={{ position: "relative", minHeight: "100vh", fontFamily: "'Nunito', sans-serif" }}>
+      {preloading && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 99999, background: "#080408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#fdf6e3" }}>
+          <div style={{ width: 60, height: 60, border: "3px solid rgba(255,255,255,0.1)", borderTopColor: "#D4AF37", borderRadius: "50%", animation: "lej-spin 1s linear infinite", marginBottom: 24 }} />
+          <div style={{ fontFamily: "'Dancing Script', cursive", fontSize: 28, marginBottom: 16 }}>{preloadText}</div>
+          <div style={{ width: 240, height: 4, background: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", background: "#D4AF37", width: `${preloadProgress}%`, transition: "width 0.3s ease" }} />
+          </div>
+          <style>{`@keyframes lej-spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
       <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
 
       {/* Global SVG Gradients Container */}
