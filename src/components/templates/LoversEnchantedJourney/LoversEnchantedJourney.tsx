@@ -2225,13 +2225,20 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
   return (
     <div onClickCapture={attemptGlobalPlay} onTouchStartCapture={attemptGlobalPlay} style={{ position: "relative", minHeight: "100vh", fontFamily: "'Nunito', sans-serif" }}>
       {preloading && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 99999, background: "#080408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#fdf6e3" }}>
-          <div style={{ width: 60, height: 60, border: "3px solid rgba(255,255,255,0.1)", borderTopColor: "#D4AF37", borderRadius: "50%", animation: "lej-spin 1s linear infinite", marginBottom: 24 }} />
-          <div style={{ fontFamily: "'Dancing Script', cursive", fontSize: 28, marginBottom: 16 }}>{preloadText}</div>
-          <div style={{ width: 240, height: 4, background: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" }}>
-            <div style={{ height: "100%", background: "#D4AF37", width: `${preloadProgress}%`, transition: "width 0.3s ease" }} />
+        <div style={{ position: "fixed", inset: 0, zIndex: 99999, background: "#06060A", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif" }}>
+          <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3.5px solid rgba(124,58,237,0.15)", borderTopColor: "#7C3AED", animation: "lej-spin 0.9s cubic-bezier(0.16, 1, 0.3, 1) infinite", marginBottom: 20 }} />
+          <h2 style={{ fontWeight: 800, color: "#F8FAFC", fontSize: 18, letterSpacing: -0.3, animation: "lej-pulse 2s infinite", marginBottom: 16 }}>Opening Your Surprise</h2>
+          
+          {/* Progress Bar & Status Text */}
+          <div style={{ width: 240, height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden", marginBottom: 12 }}>
+            <div style={{ height: "100%", background: "#7C3AED", width: `${preloadProgress}%`, transition: "width 0.3s ease" }} />
           </div>
-          <style>{`@keyframes lej-spin { to { transform: rotate(360deg); } }`}</style>
+          <p style={{ color: "#64748B", fontSize: 13 }}>{preloadText}</p>
+          
+          <style>{`
+            @keyframes lej-spin { 100% { transform: rotate(360deg); } }
+            @keyframes lej-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+          `}</style>
         </div>
       )}
       <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
