@@ -723,11 +723,11 @@ function Slide1DarkRoom({ d, onNext, em, oc, ap }: { d:Record<string,string>; on
 
         {/* Spotlight circle behind bear */}
         {lightsOn && (
-          <div style={{ position:"absolute", left:"50%", top:"48%", transform:"translate(-50%,-50%)", width:230, height:230, borderRadius:"50%", background:"radial-gradient(ellipse,rgba(255,235,160,0.22) 0%,rgba(255,200,80,0.10) 55%,transparent 75%)", pointerEvents:"none", zIndex:1 }} />
+          <div style={{ position:"absolute", left:"calc(12% + 110px)", top:"48%", transform:"translate(-50%,-50%)", width:230, height:230, borderRadius:"50%", background:"radial-gradient(ellipse,rgba(255,235,160,0.22) 0%,rgba(255,200,80,0.10) 55%,transparent 75%)", pointerEvents:"none", zIndex:1 }} />
         )}
 
-        {/* Bear GIF – bear7 – centered in spotlight */}
-        <animated.div style={{ position:"absolute", left:"50%", top:"48%", transform:bearSpring.scale.to(sc=>`translate(-50%,-50%) scale(${sc})`), opacity:bearSpring.scale, zIndex:2 }}>
+        {/* Bear GIF – bear7 – centered in spotlight (inside left oval) */}
+        <animated.div style={{ position:"absolute", left:"calc(12% + 110px)", top:"48%", transform:bearSpring.scale.to(sc=>`translate(-50%,-50%) scale(${sc})`), opacity:bearSpring.scale, zIndex:2 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/templates/lovers-enchanted-journey/bear7.gif" alt="bear" style={{ width: 155, height: 155, objectFit: "contain" }} />
         </animated.div>

@@ -175,7 +175,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
           return;
         }
         setProduct(p);
-        const defaults: Record<string, string> = {};
+        const defaults: Record<string, string> = { ...o.customizations };
         const cust = o.customizations || {};
         p.slides.forEach(sl => sl.fields.forEach(f => {
           defaults[f.id] = cust[f.id] ?? f.defaultValue;

@@ -177,8 +177,8 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
   }
 
   // Build final data: merge defaults + customizations
-  const mergedData: Record<string, string> = {};
   const cust = order.customizations || {};
+  const mergedData: Record<string, string> = { ...cust };
   product.slides.forEach(slide => {
     slide.fields.forEach(f => {
       mergedData[f.id] = cust[f.id] ?? f.defaultValue;
