@@ -8,7 +8,7 @@ import SongLibraryPopup from "../../SongLibraryPopup";
 
 // ── CSS Keyframes (injected as style tag) ─────────────────────────────────────
 const KEYFRAMES = `
-  @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&family=Sacramento&family=Nunito:wght@400..800&family=Lora:ital,wght@0,400..600;1,400..600&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@100..900&family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Sacramento&family=Nunito:wght@300..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap");
   @keyframes lej-flicker { from { opacity: 1; } to { opacity: 0.82; } }
   .lej-bulb { width:14px;height:18px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;display:inline-block;box-shadow:0 0 8px currentColor,0 0 20px currentColor; }
   .lej-bulb-flicker { animation: lej-flicker 0.12s ease infinite alternate; }
@@ -22,7 +22,374 @@ const KEYFRAMES = `
   .lej-dance { animation: lej-bear 1.2s ease-in-out infinite; }
   @keyframes lej-glow { 0%,100%{text-shadow:0 0 20px rgba(255,200,100,.5),0 0 40px rgba(255,180,80,.3);} 50%{text-shadow:0 0 30px rgba(255,200,100,.8),0 0 60px rgba(255,180,80,.5);} }
   .lej-glow { animation: lej-glow 2s ease-in-out infinite; }
+
+  /* Premium Responsive Layout Helpers */
+  .lej-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .lej-polaroid {
+    background: #fefefe;
+    padding: 12px 12px 28px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+  .lej-polaroid:hover {
+    transform: translateY(-10px) rotate(0deg) !important;
+    box-shadow: 0 20px 48px rgba(0,0,0,0.45);
+    z-index: 10;
+  }
+  .lej-polaroid-image {
+    height: 190px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .lej-polaroid-caption {
+    margin-top: 14px;
+    text-align: center;
+    font-family: 'Great Vibes', cursive !important;
+    color: #3a2418;
+    font-size: 1.5rem !important;
+    line-height: 1.1;
+  }
+
+  .lej-garden-pots-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 32px 16px;
+    padding: 32px 16px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .lej-garden-pot {
+    position: relative;
+    width: 90px;
+    height: 230px;
+  }
+  .lej-garden-tooltip {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 176px;
+    padding: 8px 12px;
+    text-align: center;
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+    background: #fdf6e3;
+    border: 2px solid #C0395A;
+    top: -75px;
+    z-index: 30;
+  }
+
+  @media (max-width: 992px) {
+    .lej-mobile-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+  }
+
+  /* Polaroid absolute positioning for desktop */
+  .lej-photo-p1 { position: absolute; top: 8%; left: 6%; transform: rotate(-6deg); }
+  .lej-photo-p2 { position: absolute; top: 10%; left: 38%; transform: rotate(5deg); }
+  .lej-photo-p3 { position: absolute; top: 6%; left: 70%; transform: rotate(-4deg); }
+  .lej-photo-p4 { position: absolute; top: 48%; left: 12%; transform: rotate(7deg); }
+  .lej-photo-p5 { position: absolute; top: 50%; left: 42%; transform: rotate(-5deg); }
+  .lej-photo-p6 { position: absolute; top: 46%; left: 72%; transform: rotate(4deg); }
+  
+  .lej-photos-container {
+    position: relative;
+    margin: 0 auto;
+    max-width: 1200px;
+    height: 720px;
+  }
+
+  @media (max-width: 768px) {
+    .lej-photos-container {
+      height: auto !important;
+      padding: 0 16px !important;
+    }
+    .lej-photo-p1, .lej-photo-p2, .lej-photo-p3, .lej-photo-p4, .lej-photo-p5, .lej-photo-p6 {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      transform: none !important;
+      width: 100% !important;
+    }
+    .lej-mobile-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 14px !important;
+      padding: 0 16px !important;
+    }
+    .lej-polaroid {
+      padding: 8px 8px 20px !important;
+    }
+    .lej-polaroid-image {
+      height: 140px !important;
+    }
+    .lej-polaroid-caption {
+      font-size: 1.3rem !important;
+    }
+    .lej-garden-pots-wrapper {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 36px 8px !important;
+      padding: 48px 8px 12px 8px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .lej-mobile-grid {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+      max-width: 280px !important;
+    }
+    .lej-polaroid-image {
+      height: 190px !important;
+    }
+    .lej-polaroid-caption {
+      font-size: 1.6rem !important;
+    }
+    .lej-garden-pots-wrapper {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 40px 16px !important;
+      padding: 48px 16px 12px 16px !important;
+    }
+    .lej-garden-tooltip {
+      width: 140px !important;
+      font-size: 0.85rem !important;
+      padding: 6px 10px !important;
+      top: -70px !important;
+    }
+  }
 `;
+
+/* ── Premium Inline Vector SVG Component Helpers ── */
+function SVGCamera({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  );
+}
+
+function SVGHeart({ size = 24, fill = "currentColor", stroke = "none", strokeWidth = 0, style = {}, className = "" }: { size?: number; fill?: string; stroke?: string; strokeWidth?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+    </svg>
+  );
+}
+
+function SVGRose({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M12 2c2.2 0 4 1.8 4 4c0 1.5-.8 2.8-2 3.5c1.2.7 2 2 2 3.5c0 2.2-1.8 4-4 4s-4-1.8-4-4c0-1.5.8-2.8 2-3.5c-1.2-.7-2-2-2-3.5c0-2.2 1.8-4 4-4z" fill="currentColor" fillOpacity="0.15" />
+      <path d="M12 22v-4" />
+      <path d="M12 18c-2 0-3.5-1.5-3.5-3.5" />
+      <path d="M12 14c2 0 3.5-1.5 3.5-3.5" />
+    </svg>
+  );
+}
+
+function SVGEnvelope({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M22 7l-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  );
+}
+
+function SVGSparkle({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={style} className={className}>
+      <path d="M12 2l2.4 7.4L22 12l-7.6 2.6L12 22l-2.4-7.4L2 12l7.6-2.6z" />
+    </svg>
+  );
+}
+
+function SVGMusic({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M9 18V5l12-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+    </svg>
+  );
+}
+
+function SVGButterfly({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M12 2v20M12 6c-2-3-8-3-8 2 0 4 3 6 8 8 5-2 8-4 8-8 0-5-6-5-8-2z" fill="currentColor" fillOpacity="0.1" />
+      <path d="M12 12c-2-2-8-2-8 3 0 4 3 5 8 7 5-2 8-3 8-7 0-5-6-5-8-3z" fill="currentColor" fillOpacity="0.1" />
+    </svg>
+  );
+}
+
+function SVGMoon({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor" fillOpacity="0.1" />
+    </svg>
+  );
+}
+
+function SVGStar({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor" fillOpacity="0.1" />
+    </svg>
+  );
+}
+
+function SVGSmile({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+      <line x1="9" y1="9" x2="9.01" y2="9" />
+      <line x1="15" y1="9" x2="15.01" y2="9" />
+    </svg>
+  );
+}
+
+function SVGSunset({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M17 18a5 5 0 0 0-10 0" />
+      <line x1="12" y1="2" x2="12" y2="9" />
+      <line x1="4.22" y1="10.22" x2="5.64" y2="11.64" />
+      <line x1="1" y1="18" x2="3" y2="18" />
+      <line x1="21" y1="18" x2="23" y2="18" />
+      <line x1="18.36" y1="11.64" x2="19.78" y2="10.22" />
+      <line x1="23" y1="22" x2="1" y2="22" />
+    </svg>
+  );
+}
+
+function SVGSunflower({ size = 24, style = {}, className = "" }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 5V3M12 21v-2M5 12H3m18 0h-2m-1.93-7.07l-1.41 1.41M6.34 17.66l-1.41 1.41m0-12.72l1.41 1.41m11.32 11.32l1.41-1.41" />
+    </svg>
+  );
+}
+
+function renderPhotoSVG(id: string) {
+  const size = 64;
+  const style = { color: "#fff", filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))" };
+  switch(id) {
+    case "p1": return <SVGRose size={size} style={style} />;
+    case "p2": return <SVGSmile size={size} style={style} />;
+    case "p3": return <SVGSunset size={size} style={style} />;
+    case "p4": return <SVGHeart size={size} fill="#fff" style={style} />;
+    case "p5": return <SVGSunflower size={size} style={style} />;
+    case "p6": return <SVGSparkle size={size} style={style} />;
+    default: return <SVGHeart size={size} style={style} />;
+  }
+}
+
+function renderWheelIcon(iconName: string, x: number, y: number, angleDegrees: number) {
+  const size = 26;
+  const style = { color: "#fff" };
+  return (
+    <g transform={`translate(${x}, ${y}) rotate(${angleDegrees + 90}) translate(${-size / 2}, ${-size / 2})`}>
+      {iconName === "envelope" && <SVGEnvelope size={size} style={style} />}
+      {iconName === "rose" && <SVGRose size={size} style={style} />}
+      {iconName === "heart" && <SVGHeart size={size} fill="#fff" style={style} />}
+      {iconName === "sparkle" && <SVGSparkle size={size} style={style} />}
+      {iconName === "music" && <SVGMusic size={size} style={style} />}
+      {iconName === "butterfly" && <SVGButterfly size={size} style={style} />}
+      {iconName === "moon" && <SVGMoon size={size} style={style} />}
+      {iconName === "star" && <SVGStar size={size} style={style} />}
+    </g>
+  );
+}
+
+function renderResultIcon(iconName: string) {
+  const size = 36;
+  const style = { color: "#C0395A" };
+  switch(iconName) {
+    case "envelope": return <SVGEnvelope size={size} style={style} />;
+    case "rose": return <SVGRose size={size} style={style} />;
+    case "heart": return <SVGHeart size={size} fill="#C0395A" style={style} />;
+    case "sparkle": return <SVGSparkle size={size} style={style} />;
+    case "music": return <SVGMusic size={size} style={style} />;
+    case "butterfly": return <SVGButterfly size={size} style={style} />;
+    case "moon": return <SVGMoon size={size} style={style} />;
+    case "star": return <SVGStar size={size} style={style} />;
+    default: return <SVGHeart size={size} fill="#C0395A" style={style} />;
+  }
+}
+
+const getFormattedDate = () => {
+  const date = new Date();
+  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+  return date.toLocaleDateString('en-US', options).toUpperCase(); // e.g., "MAY 21, 2026"
+};
+
+function CircularWaxStamp({ viewerName = "MY LOVE", dateText = "MAY 21, 2026" }) {
+  const brandText = "ARADHYA E-GIFTS";
+  const fullText = `${brandText}   •   ${viewerName.toUpperCase()}   •   ${dateText}   •   `;
+  
+  return (
+    <svg viewBox="0 0 200 200" style={{ width: 190, height: 190, filter: "drop-shadow(0 12px 30px rgba(139,0,0,0.6))" }}>
+      <defs>
+        {/* Organic wax shading gradients */}
+        <radialGradient id="waxGrad" cx="45%" cy="40%" r="60%">
+          <stop offset="0%" stopColor="#DF2020" />
+          <stop offset="65%" stopColor="#8A0808" />
+          <stop offset="100%" stopColor="#3F0000" />
+        </radialGradient>
+        {/* Luxury Gold Metallic text path gradient */}
+        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FFE57F" />
+          <stop offset="45%" stopColor="#FFC107" />
+          <stop offset="75%" stopColor="#FF8F00" />
+          <stop offset="100%" stopColor="#A66800" />
+        </linearGradient>
+        {/* Perfect text path radius */}
+        <path id="stampTextPath" d="M 100 100 m -66, 0 a 66,66 0 1,1 132,0 a 66,66 0 1,1 -132,0" fill="none" />
+      </defs>
+      
+      {/* Outer irregular handmade wax seal shapes */}
+      <path d="M 100,8 C 148,3 194,15 191,62 C 196,112 195,162 153,190 C 109,199 58,195 16,163 C 2,126 5,76 15,39 C 24,10 61,11 100,8 Z" fill="url(#waxGrad)" />
+      <path d="M 100,12 C 136,14 186,6 183,57 C 191,102 183,152 146,180 C 106,190 56,184 26,154 C 5,117 13,67 23,37 C 33,17 66,9 100,12 Z" fill="url(#waxGrad)" opacity="0.38" transform="rotate(22 100 100)" />
+      
+      {/* Inner thin golden circle borders */}
+      <circle cx="100" cy="100" r="74" fill="none" stroke="url(#goldGrad)" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.75" />
+      <circle cx="100" cy="100" r="56" fill="none" stroke="url(#goldGrad)" strokeWidth="1" opacity="0.4" />
+      
+      {/* Curved Text Path */}
+      <text fill="url(#goldGrad)" style={{ fontFamily: "'Outfit', sans-serif", fontSize: "8px", fontWeight: 900, letterSpacing: "2.1px", textTransform: "uppercase" }}>
+        <textPath href="#stampTextPath" startOffset="0%">
+          {fullText}
+        </textPath>
+      </text>
+      
+      {/* Central Majestic Gold Emblem: Gold Hearts */}
+      <g transform="translate(100, 102) scale(1.2)">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#goldGrad)" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }} />
+      </g>
+    </svg>
+  );
+}
 
 // ── Editable Text ──────────────────────────────────────────────────────────────
 function ET({ fid, data, onChange, style, multiline = false, editMode = false }: {
@@ -257,20 +624,26 @@ const PHOTOS_DEF: PhotoData[] = [
 function Polaroid({ photo, caption, onClick }: { photo:PhotoData; caption:string; onClick:()=>void }) {
   return (
     <motion.div layoutId={`lej-photo-${photo.id}`} onClick={onClick}
-      whileHover={{ y:-10, rotate:0, scale:1.05, zIndex:20 }}
-      initial={{ rotate:photo.rotate }} animate={{ rotate:photo.rotate }}
-      transition={{ type:"spring", stiffness:200, damping:18 }}
-      style={{ position:"absolute", top:photo.top, left:photo.left, width:220, background:"#fefefe", padding:"12px 12px 28px", boxShadow:"0 12px 30px rgba(0,0,0,0.35)", borderRadius:4, cursor:"pointer" }}
+      whileHover={{ y:-10, scale:1.05, zIndex:20 }}
+      className={`lej-polaroid lej-photo-${photo.id}`}
+      style={{ width: 220 }}
     >
       <div style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", top:-8, width:16, height:16, borderRadius:"50%", background:photo.pinColor, boxShadow:`0 2px 4px rgba(0,0,0,0.3),inset -2px -2px 3px rgba(0,0,0,0.2)` }} />
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", fontSize:48, background:photo.bg, height:200, borderRadius:2 }}>{photo.emoji}</div>
-      <div style={{ marginTop:12, textAlign:"center", fontFamily:"'Sacramento',cursive", color:"#3a2418", fontSize:"1.15rem", lineHeight:1.1 }}>{caption}</div>
+      <div className="lej-polaroid-image" style={{ background:photo.bg }}>
+        {renderPhotoSVG(photo.id)}
+      </div>
+      <div className="lej-polaroid-caption">{caption}</div>
     </motion.div>
   );
 }
 
 function Slide2Photos({ d, onBack, onNext, em, oc }: { d:Record<string,string>; onBack:()=>void; onNext:()=>void; em:boolean; oc?:(id:string,v:string)=>void }) {
   const [expanded, setExpanded] = useState<PhotoData | null>(null);
+  
+  // Clean default s2_title of any emojis
+  const rawTitle = d.s2_title || "Our Moments Together";
+  const displayTitle = rawTitle.replace(/📸/g, "").trim();
+
   return (
     <SlideShell onBack={onBack} onNext={onNext} background="radial-gradient(ellipse at center,#a87a3d 0%,#6b4a1f 70%,#3d2810 100%)">
       <div style={{ position:"absolute", inset:0, opacity:0.3, mixBlendMode:"overlay", pointerEvents:"none",
@@ -287,13 +660,22 @@ function Slide2Photos({ d, onBack, onNext, em, oc }: { d:Record<string,string>; 
       </div>
 
       <div style={{ position:"relative", paddingTop:80, paddingBottom:128 }}>
-        <h2 style={{ textAlign:"center", marginBottom:32, fontFamily:"'Sacramento',cursive", color:"#fdf6e3", fontSize:"clamp(2rem,5vw,3.2rem)", textShadow:"0 4px 20px rgba(0,0,0,0.4)" }}>
-          {d.s2_title || "Our Moments Together 📸"}
+        <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, textAlign:"center", marginBottom: 32, fontFamily:"'Sacramento',cursive", color:"#fdf6e3", fontSize:"clamp(2rem,5vw,3.2rem)", textShadow:"0 4px 20px rgba(0,0,0,0.4)" }}>
+          {em ? (
+            <ET fid="s2_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Sacramento',cursive", color:"#fdf6e3", fontSize:"clamp(2rem,5vw,3.2rem)" }} />
+          ) : (
+            <>
+              {displayTitle}
+              <SVGCamera size={38} style={{ color: "#FFD700", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }} />
+            </>
+          )}
         </h2>
-        <div style={{ position:"relative", margin:"0 auto", maxWidth:1200, height:720 }}>
-          {PHOTOS_DEF.map(p => (
-            <Polaroid key={p.id} photo={p} caption={d[p.fidCaption] || ""} onClick={() => setExpanded(p)} />
-          ))}
+        <div className="lej-photos-container">
+          <div className="lej-mobile-grid">
+            {PHOTOS_DEF.map(p => (
+              <Polaroid key={p.id} photo={p} caption={d[p.fidCaption] || ""} onClick={() => setExpanded(p)} />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -306,7 +688,9 @@ function Slide2Photos({ d, onBack, onNext, em, oc }: { d:Record<string,string>; 
             <motion.div layoutId={`lej-photo-${expanded.id}`} style={{ position:"relative", width:"min(420px,90vw)", background:"#fefefe", padding:"20px 20px 48px", borderRadius:6, boxShadow:"0 30px 80px rgba(0,0,0,0.5)" }}
               onClick={e => e.stopPropagation()}
             >
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", fontSize:90, background:expanded.bg, height:360, borderRadius:2 }}>{expanded.emoji}</div>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:expanded.bg, height:360, borderRadius:2 }}>
+                {renderPhotoSVG(expanded.id)}
+              </div>
               <div style={{ marginTop:20, textAlign:"center", fontFamily:"'Sacramento',cursive", color:"#3a2418", fontSize:"1.8rem" }}>{d[expanded.fidCaption] || ""}</div>
             </motion.div>
           </motion.div>
@@ -393,21 +777,26 @@ function Slide3Music({ d, onBack, onNext, em, oc }: { d:Record<string,string>; o
         {!playing && !em && (<>
           <CassetteSVG spinning={spinning} />
           <motion.p animate={{ scale:[1,1.05,1], opacity:[0.7,1,0.7] }} transition={{ duration:2, repeat:Infinity }}
-            style={{ marginTop:40, textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#fdf6e3", fontSize:"1.4rem", fontStyle:"italic" }}>
-            Tap to play your song... 🎵
+            style={{ display: "flex", alignItems: "center", gap: 8, marginTop:40, textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#fdf6e3", fontSize:"1.4rem", fontStyle:"italic" }}>
+            Tap to play your song...
+            <SVGMusic size={20} style={{ color: "#FF69B4" }} />
           </motion.p>
-          <button onClick={startPlay} style={{ marginTop:32, borderRadius:9999, background:"linear-gradient(to right,#FF69B4,#C0395A)", padding:"12px 32px", color:"#fff", fontWeight:600, boxShadow:"0 10px 30px rgba(255,105,180,0.4)", border:"none", cursor:"pointer", fontSize:15 }}>▶ Press Play</button>
+          <button onClick={startPlay} style={{ display: "flex", alignItems: "center", gap: 10, marginTop:32, borderRadius:9999, background:"linear-gradient(to right,#FF69B4,#C0395A)", padding:"12px 32px", color:"#fff", fontWeight:600, boxShadow:"0 10px 30px rgba(255,105,180,0.4)", border:"none", cursor:"pointer", fontSize:15 }}>
+            <SVGMusic size={18} /> Press Play
+          </button>
         </>)}
 
         {em && (
           <div style={{ background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:20, padding:24, width:"100%", maxWidth:420, marginBottom:24 }}>
-            <p style={{ fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:18, marginBottom:16, textAlign:"center" }}>🎵 Edit Songs</p>
+            <p style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:18, marginBottom:16, textAlign:"center" }}>
+              <SVGMusic size={18} /> Edit Songs
+            </p>
             {songs.map((s, i) => (
               <div key={i} style={{ marginBottom:16, background:"rgba(255,105,180,0.1)", borderRadius:12, padding:12 }}>
                 <ET fid={s.nFid} data={d} onChange={oc} editMode={em} style={{ fontWeight:700, fontSize:14, color:"#fdf6e3", marginBottom:4 }} />
                 <ET fid={s.aFid} data={d} onChange={oc} editMode={em} style={{ fontSize:12, color:"#FF69B4", marginBottom:8 }} />
-                <button onClick={() => setPickingFor(i)} style={{ background:"none", border:"1px dashed #FF69B4", borderRadius:6, padding:"4px 10px", fontSize:11, color:"#FF69B4", cursor:"pointer", fontWeight:600 }}>
-                  {d[s.uFid] ? "🎵 Change Audio" : "🎵 Add Audio"}
+                <button onClick={() => setPickingFor(i)} style={{ display: "flex", alignItems: "center", gap: 6, background:"none", border:"1px dashed #FF69B4", borderRadius:6, padding:"4px 10px", fontSize:11, color:"#FF69B4", cursor:"pointer", fontWeight:600 }}>
+                  <SVGMusic size={12} /> {d[s.uFid] ? "Change Audio" : "Add Audio"}
                 </button>
               </div>
             ))}
@@ -504,11 +893,16 @@ function Slide4Scratch({ d, onBack, onNext, em, oc, ap }: { d:Record<string,stri
         ))}
       </div>
       <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"64px 24px 128px" }}>
-        <h2 style={{ textAlign:"center", marginBottom:8, fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }}>Scratch to reveal your surprise... ✨</h2>
+        <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textAlign:"center", marginBottom:8, fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }}>
+          Scratch to reveal your surprise...
+          <SVGSparkle size={22} style={{ color: "#FFD700" }} />
+        </h2>
         <p style={{ fontSize:14, color:"rgba(253,246,227,0.7)", marginBottom:32 }}>Use your finger or mouse to scratch</p>
         <div style={{ position:"relative", width:380, maxWidth:"92vw" }}>
           <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:24, textAlign:"center", background:"linear-gradient(135deg,#fdf6e3,#f5e6c8)", borderRadius:16, border:"3px solid #D4AF37", boxShadow:"0 20px 60px rgba(0,0,0,0.4)" }}>
-            <div style={{ fontSize:24 }}>♡</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+              <SVGHeart size={32} fill="#C0395A" />
+            </div>
             <div style={{ marginTop:8, fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.9rem", lineHeight:1.1 }}>
               <ET fid="s4_reveal_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.9rem" }} />
             </div>
@@ -532,8 +926,16 @@ function Slide4Scratch({ d, onBack, onNext, em, oc, ap }: { d:Record<string,stri
 // SLIDE 5: CONSTELLATION
 // ─────────────────────────────────────────────────────────────────────────────
 const STARS = [
-  {x:150,y:220},{x:200,y:170},{x:260,y:195},{x:320,y:170},{x:370,y:220},
-  {x:410,y:280},{x:380,y:360},{x:320,y:430},{x:250,y:360},{x:200,y:280},
+  { x: 300, y: 190 },
+  { x: 230, y: 140 },
+  { x: 160, y: 170 },
+  { x: 130, y: 240 },
+  { x: 190, y: 340 },
+  { x: 300, y: 430 },
+  { x: 410, y: 340 },
+  { x: 470, y: 240 },
+  { x: 440, y: 170 },
+  { x: 370, y: 140 }
 ];
 
 function Slide5Constellation({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string>; onBack:()=>void; onNext:()=>void; em:boolean; oc?:(id:string,v:string)=>void; ap?:boolean }) {
@@ -550,6 +952,12 @@ function Slide5Constellation({ d, onBack, onNext, em, oc, ap }: { d:Record<strin
     } else { setShake(i); setTimeout(()=>setShake(null),400); }
   };
 
+  const rawTitle = d.s5_title || "Connect the stars to reveal what I see";
+  const displayTitle = rawTitle.replace(/✨/g, "").trim();
+
+  const rawReveal = d.s5_reveal_text || "That's how I see you — a constellation I'll always find";
+  const displayReveal = rawReveal.replace(/♡/g, "").trim();
+
   return (
     <SlideShell onBack={onBack} onNext={done||em ? onNext : undefined} nextLabel="Keep going... →" showNext={done||em} background="#020818">
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
@@ -558,8 +966,15 @@ function Slide5Constellation({ d, onBack, onNext, em, oc, ap }: { d:Record<strin
         ))}
       </div>
       <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-start", padding:"56px 24px 128px" }}>
-        <h2 style={{ textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }}>
-          {d.s5_title || "Connect the stars to reveal what I see ✨"}
+        <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }}>
+          {em ? (
+            <ET fid="s5_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.6rem,3.5vw,2.4rem)" }} />
+          ) : (
+            <>
+              {displayTitle}
+              <SVGSparkle size={24} style={{ color: "#FFD700" }} />
+            </>
+          )}
         </h2>
         <p style={{ marginTop:8, fontSize:14, color:"rgba(253,246,227,0.6)" }}>Click each star in order — 1 through 10</p>
         <div style={{ position:"relative", marginTop:32, width:600, maxWidth:"95vw", aspectRatio:"600/500" }}>
@@ -589,8 +1004,15 @@ function Slide5Constellation({ d, onBack, onNext, em, oc, ap }: { d:Record<strin
         <AnimatePresence>
           {done && (
             <motion.p initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.6 }}
-              style={{ marginTop:32, textAlign:"center", maxWidth:600, padding:"0 24px", fontFamily:"'Sacramento',cursive", color:"#FFD700", fontSize:"clamp(1.4rem,3vw,2rem)" }}>
-              {d.s5_reveal_text || "That's how I see you — a constellation I'll always find ♡"}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: 8, marginTop:32, textAlign:"center", maxWidth:600, padding:"0 24px", fontFamily:"'Sacramento',cursive", color:"#FFD700", fontSize:"clamp(1.4rem,3vw,2rem)" }}>
+              {em ? (
+                <ET fid="s5_reveal_text" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Sacramento',cursive", color:"#FFD700", fontSize:"clamp(1.4rem,3vw,2rem)" }} />
+              ) : (
+                <>
+                  {displayReveal}
+                  <SVGHeart size={20} fill="#FFD700" />
+                </>
+              )}
             </motion.p>
           )}
         </AnimatePresence>
@@ -603,10 +1025,10 @@ function Slide5Constellation({ d, onBack, onNext, em, oc, ap }: { d:Record<strin
 // SLIDE 6: WHEEL
 // ─────────────────────────────────────────────────────────────────────────────
 const WHEEL_SEGS_DEF = [
-  { color:"#C0395A", emoji:"💌" }, { color:"#E8A0B0", emoji:"🌹" },
-  { color:"#8B1A3A", emoji:"💕" }, { color:"#F2C4CE", emoji:"✨" },
-  { color:"#D4AF37", emoji:"🎶" }, { color:"#FAEBD7", emoji:"🦋" },
-  { color:"#9B1A40", emoji:"🌙" }, { color:"#FFB6C1", emoji:"💫" },
+  { color:"#C0395A", icon:"envelope" }, { color:"#E8A0B0", icon:"rose" },
+  { color:"#8B1A3A", icon:"heart" }, { color:"#F2C4CE", icon:"sparkle" },
+  { color:"#D4AF37", icon:"music" }, { color:"#FAEBD7", icon:"butterfly" },
+  { color:"#9B1A40", icon:"moon" }, { color:"#FFB6C1", icon:"star" },
 ];
 
 function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string>; onBack:()=>void; onNext:()=>void; em:boolean; oc?:(id:string,v:string)=>void; ap?:boolean }) {
@@ -644,7 +1066,9 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
         ))}
       </div>
       <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-start", padding:"48px 24px 128px" }}>
-        <h2 style={{ textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#fdf6e3", fontSize:"clamp(1.8rem,4vw,2.6rem)" }}>Spin to discover something beautiful 🌹</h2>
+        <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#fdf6e3", fontSize:"clamp(1.8rem,4vw,2.6rem)" }}>
+          Spin to discover something beautiful <SVGRose size={28} style={{ color: "#FFD700" }} />
+        </h2>
 
         {em && (
           <div style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(212,175,55,0.3)", borderRadius:16, padding:16, marginTop:16, width:"100%", maxWidth:400 }}>
@@ -670,7 +1094,7 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
                 const lx=cx+radius*0.65*Math.cos(la); const ly=cy+radius*0.65*Math.sin(la);
                 return (<g key={i}>
                   <path d={`M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`} fill={seg.color} stroke="#D4AF37" strokeWidth="1" />
-                  <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="28">{seg.emoji}</text>
+                  {renderWheelIcon(seg.icon, lx, ly, i * segAngle + segAngle / 2 - 90)}
                 </g>);
               })}
               <circle cx={cx} cy={cy} r={26} fill="#D4AF37" stroke="#1a0a14" strokeWidth="3" />
@@ -680,8 +1104,12 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
         </div>
 
         <button onClick={spin} disabled={spinning}
-          style={{ marginTop:24, borderRadius:9999, background:"linear-gradient(to right,#FF69B4,#C0395A)", padding:"12px 32px", color:"#fff", fontWeight:600, boxShadow:"0 10px 30px rgba(255,105,180,0.4)", border:"none", cursor:spinning?"not-allowed":"pointer", opacity:spinning?0.6:1, fontSize:15 }}>
-          {spinning ? "Spinning..." : "Spin the wheel! 🌸"}
+          style={{ display: "flex", alignItems: "center", gap: 8, marginTop:24, borderRadius:9999, background:"linear-gradient(to right,#FF69B4,#C0395A)", padding:"12px 32px", color:"#fff", fontWeight:600, boxShadow:"0 10px 30px rgba(255,105,180,0.4)", border:"none", cursor:spinning?"not-allowed":"pointer", opacity:spinning?0.6:1, fontSize:15 }}>
+          {spinning ? "Spinning..." : (
+            <>
+              Spin the wheel! <SVGSparkle size={18} />
+            </>
+          )}
         </button>
 
         <AnimatePresence mode="wait">
@@ -691,7 +1119,9 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
             >
               <BearChar size={50} />
               <div style={{ background:"#fdf6e3", border:"2px solid #D4AF37", borderRadius:20, padding:"16px 24px", textAlign:"center" }}>
-                <div style={{ fontSize:24 }}>{segs[result].emoji}</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+                  {renderResultIcon(segs[result].icon)}
+                </div>
                 <div style={{ marginTop:4, fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.6rem", lineHeight:1.15 }}>
                   &ldquo;{segs[result].text}&rdquo;
                 </div>
@@ -860,7 +1290,7 @@ function GardenPot({ index, bloomed, onClick, reason }: { index:number; bloomed:
   const [showCard, setShowCard] = useState(false);
   const handle = () => { if(bloomed) return; onClick(); setShowCard(true); setTimeout(()=>setShowCard(false),3000); };
   return (
-    <div style={{ position:"relative", width:90, height:230 }}>
+    <div className="lej-garden-pot">
       {bloomed && <GardenRose colors={ROSE_COLORS[index]} />}
       <button onClick={handle} disabled={bloomed} style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:76, height:64, cursor:bloomed?"default":"pointer", background:"none", border:"none" }}>
         <div style={{ position:"absolute", left:0, right:0, bottom:0, height:60, background:"linear-gradient(180deg,#D4845A,#A85A30)", clipPath:"polygon(8% 100%,92% 100%,100% 0,0 0)" }} />
@@ -870,10 +1300,15 @@ function GardenPot({ index, bloomed, onClick, reason }: { index:number; bloomed:
       </button>
       <AnimatePresence>
         {showCard && bloomed && (
-          <motion.div initial={{ opacity:0, y:10, scale:0.9 }} animate={{ opacity:1, y:0, scale:1 }} exit={{ opacity:0, y:-10 }}
-            style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", width:176, padding:"8px 12px", textAlign:"center", borderRadius:20, boxShadow:"0 24px 64px rgba(0,0,0,0.18)", background:"#fdf6e3", border:"2px solid #C0395A", top:-60, zIndex:30 }}
+          <motion.div
+            initial={{ opacity:0, y:10, scale:0.9 }}
+            animate={{ opacity:1, y:0, scale:1 }}
+            exit={{ opacity:0, y:-10 }}
+            className="lej-garden-tooltip"
           >
-            <div style={{ color:"#f472b6" }}>♡</div>
+            <div style={{ color:"#f472b6", display: "flex", justifyContent: "center", marginBottom: 2 }}>
+              <SVGHeart size={14} fill="#f472b6" />
+            </div>
             <div style={{ fontFamily:"'Sacramento',cursive", color:"#C0395A", fontSize:"1.15rem", lineHeight:1.1 }}>{reason}</div>
           </motion.div>
         )}
@@ -890,6 +1325,9 @@ function Slide8Garden({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
 
   const reasons = Array.from({length:8},(_,i)=>d[`s8_reason${i+1}`]||"");
 
+  const rawTitle = d.s8_title || "Grow our garden of love";
+  const displayTitle = rawTitle.replace(/🌹/g, "").trim();
+
   return (
     <SlideShell onBack={onBack} onNext={allBloomed||em ? onNext : undefined} nextLabel="Final chapter... →" showNext={allBloomed||em} background="linear-gradient(180deg,#1A0A2E 0%,#2D1B4E 40%,#3D5A2A 100%)">
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
@@ -902,8 +1340,15 @@ function Slide8Garden({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
       ))}
 
       <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", padding:"56px 24px 160px" }}>
-        <h2 style={{ textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.8rem,4vw,2.6rem)" }}>
-          {d.s8_title || "Grow our garden of love 🌹"}
+        <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, textAlign:"center", fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.8rem,4vw,2.6rem)" }}>
+          {em ? (
+            <ET fid="s8_title" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Cormorant Garamond',serif", color:"#FFD700", fontSize:"clamp(1.8rem,4vw,2.6rem)" }} />
+          ) : (
+            <>
+              {displayTitle}
+              <SVGRose size={28} style={{ color: "#FFD700" }} />
+            </>
+          )}
         </h2>
         <p style={{ marginTop:8, fontSize:14, color:"rgba(253,246,227,0.75)" }}>Click each pot to plant a rose</p>
 
@@ -925,16 +1370,14 @@ function Slide8Garden({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
           )}
         </AnimatePresence>
 
-        <div style={{ marginTop:"auto", width:"100%", overflowX:"auto" }}>
-          <div style={{ position:"relative", maxWidth:980, margin:"0 auto" }}>
-            <div style={{ position:"absolute", left:0, right:0, bottom:0, height:12, borderRadius:4, background:"linear-gradient(180deg,#4a6b2a,#2d4818)" }} />
-            <div style={{ position:"relative", display:"flex", alignItems:"flex-end", justifyContent:"center", gap:8, padding:"0 12px" }}>
-              {Array.from({length:8},(_,i) => (
-                <motion.div key={i} animate={bloomed.has(i)&&allBloomed ? {rotate:[-2,2,-2]} : {}} transition={{ duration:3, repeat:Infinity, ease:"easeInOut", delay:i*0.2 }}>
-                  <GardenPot index={i} bloomed={bloomed.has(i)} onClick={()=>setBloomed(s=>new Set(s).add(i))} reason={reasons[i]} />
-                </motion.div>
-              ))}
-            </div>
+        <div style={{ marginTop: "40px", width: "100%", position: "relative" }}>
+          <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 12, borderRadius: 4, background: "linear-gradient(180deg,#4a6b2a,#2d4818)", zIndex: 1 }} />
+          <div className="lej-garden-pots-wrapper" style={{ position: "relative", zIndex: 2 }}>
+            {Array.from({length:8},(_,i) => (
+              <motion.div key={i} animate={bloomed.has(i)&&allBloomed ? {rotate:[-2,2,-2]} : {}} transition={{ duration:3, repeat:Infinity, ease:"easeInOut", delay:i*0.2 }} style={{ display: "flex", justifyContent: "center" }}>
+                <GardenPot index={i} bloomed={bloomed.has(i)} onClick={()=>setBloomed(s=>new Set(s).add(i))} reason={reasons[i]} />
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
@@ -988,6 +1431,9 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
   const [sealed, setSealed] = useState(false);
   const [flash, setFlash] = useState(false);
 
+  const viewerName = (d.s9_viewer_name || d.beloved_name || "MY LOVE").toUpperCase();
+  const dateText = getFormattedDate();
+
   const fireConfetti = () => {
     const opts:confetti.Options={ particleCount:60, spread:80, ticks:200, colors:["#FFD700","#FF69B4","#fdf6e3","#FF6B6B","#C0395A"], shapes:["circle"] as never };
     confetti({ ...opts, origin:{x:0.1,y:0.6}, angle:60 });
@@ -1015,7 +1461,7 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
       </div>
 
       <div style={{ position:"relative", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"96px 24px 128px", textAlign:"center" }}>
-        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.2 }} style={{ fontSize:11, letterSpacing:"0.4em", fontWeight:600, color:"#FFD700" }}>✦ ALWAYS &amp; FOREVER ✦</motion.div>
+        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.2 }} style={{ fontSize:11, letterSpacing:"0.4em", fontWeight:600, color:"#FFD700", fontFamily:"'Outfit', sans-serif" }}>✦ ALWAYS &amp; FOREVER ✦</motion.div>
 
         <motion.h1 initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.5 }} className="lej-glow"
           style={{ fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic", fontWeight:700, fontSize:"clamp(2.4rem,7vw,4.5rem)", color:"#fdf6e3", lineHeight:1.05, marginTop:16 }}>
@@ -1027,17 +1473,21 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
         </motion.div>
 
         <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:1.3 }} style={{ marginTop:24 }}>
-          <ET fid="s9_sign" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Sacramento',cursive", color:"#FFD700", fontSize:"2.2rem" }} />
+          <ET fid="s9_sign" data={d} onChange={oc} editMode={em} style={{ fontFamily:"'Great Vibes', cursive", color:"#FFD700", fontSize:"2.8rem" }} />
+        </motion.div>
+
+        <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:1.4 }} style={{ marginTop:8, fontSize:12, letterSpacing:"0.2em", fontWeight:700, color:"rgba(255,255,255,0.4)", fontFamily:"'Outfit', sans-serif" }}>
+          ARADHYA E-GIFTS
         </motion.div>
 
         <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:1.6 }} style={{ marginTop:40, display:"flex", flexWrap:"wrap", justifyContent:"center", gap:16 }}>
           {!sealed && !em && (
-            <button onClick={seal} style={{ borderRadius:9999, padding:"12px 32px", fontWeight:600, color:"#3D0C1A", boxShadow:"0 10px 40px rgba(212,175,55,0.5)", background:"linear-gradient(135deg,#FFD700,#FFB347)", border:"2px solid #fdf6e3", cursor:"pointer", fontSize:15 }}>
-              Seal It With Love 💘
+            <button onClick={seal} style={{ display: "flex", alignItems: "center", gap: 8, borderRadius:9999, padding:"12px 32px", fontWeight:600, color:"#3D0C1A", boxShadow:"0 10px 40px rgba(212,175,55,0.5)", background:"linear-gradient(135deg,#FFD700,#FFB347)", border:"2px solid #fdf6e3", cursor:"pointer", fontSize:15 }}>
+              Seal It With Love <SVGHeart size={18} fill="#3D0C1A" />
             </button>
           )}
-          <button onClick={onReset} style={{ borderRadius:9999, border:"1px solid rgba(255,255,255,0.3)", background:"transparent", padding:"12px 24px", color:"rgba(255,255,255,0.85)", cursor:"pointer", fontSize:14 }}>
-            Live it again 🔄
+          <button onClick={onReset} style={{ display: "flex", alignItems: "center", gap: 6, borderRadius:9999, border:"1px solid rgba(255,255,255,0.3)", background:"transparent", padding:"12px 24px", color:"rgba(255,255,255,0.85)", cursor:"pointer", fontSize:14 }}>
+            Live it again <SVGSparkle size={14} style={{ color: "rgba(255,255,255,0.85)" }} />
           </button>
         </motion.div>
 
@@ -1045,17 +1495,19 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
           <div style={{ position:"absolute", left:-80, right:-80, top:-40, bottom:-40, background:"radial-gradient(ellipse,rgba(255,215,100,0.25),transparent 70%)" }} />
           <BearChar size={120} variant="couple" />
           {[0,1,2].map(i => (
-            <motion.span key={i} style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", bottom:40, fontSize:24, color:"#FF69B4" }}
+            <motion.div key={i} style={{ position:"absolute", left:"50%", bottom:40, color:"#FF69B4", pointerEvents: "none" }}
               animate={{ y:[0,-100], opacity:[1,0], x:[(i-1)*30,(i-1)*60] }}
-              transition={{ duration:3, repeat:Infinity, delay:i*0.7 }}>♡</motion.span>
+              transition={{ duration:3, repeat:Infinity, delay:i*0.7 }}>
+              <SVGHeart size={20} fill="#FF69B4" />
+            </motion.div>
           ))}
         </motion.div>
 
         <AnimatePresence>
           {sealed && (
             <motion.div initial={{ scale:0, rotate:-30 }} animate={{ scale:[0,1.2,1], rotate:0 }} transition={{ type:"spring", stiffness:180, damping:12 }}
-              style={{ position:"fixed", left:"50%", top:"50%", transform:"translate(-50%,-50%)", zIndex:40, pointerEvents:"none", width:180, height:180, borderRadius:"50%", background:"radial-gradient(circle,#8B0000,#4A0008)", border:"4px solid #FFD700", boxShadow:"0 0 60px rgba(139,0,0,0.6),inset 0 0 30px rgba(0,0,0,0.4)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <span style={{ fontSize:90, color:"#FFD700", filter:"drop-shadow(0 0 12px rgba(255,215,0,0.6))" }}>♡</span>
+              style={{ position:"fixed", left:"50%", top:"50%", transform:"translate(-50%,-50%)", zIndex:40, pointerEvents:"none" }}>
+              <CircularWaxStamp viewerName={viewerName} dateText={dateText} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -1077,21 +1529,21 @@ export interface LoversEnchantedJourneyProps {
 
 export default function LoversEnchantedJourney({ customData = {}, editMode = false, onFieldChange, forcedSlide, autoPlay = false }: LoversEnchantedJourneyProps) {
   const defaults: Record<string, string> = {
-    s1_light_text: "I lit up the world for you, just like you lit up mine. ✨",
-    s2_title: "Our Moments Together 📸",
-    s2_p1_caption: "The day everything changed 🌸",
-    s2_p2_caption: "Always laughing with you ✨",
-    s2_p3_caption: "My favourite view 🌅",
-    s2_p4_caption: "Us, always ♡",
-    s2_p5_caption: "Golden hours with you 🌻",
-    s2_p6_caption: "Forever in my heart 💕",
+    s1_light_text: "I lit up the world for you, just like you lit up mine. ✦",
+    s2_title: "Our Moments Together",
+    s2_p1_caption: "The day everything changed",
+    s2_p2_caption: "Always laughing with you",
+    s2_p3_caption: "My favourite view",
+    s2_p4_caption: "Us, always",
+    s2_p5_caption: "Golden hours with you",
+    s2_p6_caption: "Forever in my heart",
     s3_song1_title: "Tere Bina", s3_song1_artist: "Arijit Singh", s3_song1_url: "",
     s3_song2_title: "Pehli Nazar Mein", s3_song2_artist: "Atif Aslam", s3_song2_url: "",
     s3_song3_title: "Tu Hi Meri Shab Hai", s3_song3_artist: "Mohit Chauhan", s3_song3_url: "",
     s4_reveal_title: "You are my favourite person",
     s4_reveal_body: "Not just today. Not just on special days.\nEvery single day.",
-    s5_title: "Connect the stars to reveal what I see ✨",
-    s5_reveal_text: "That's how I see you — a constellation I'll always find ♡",
+    s5_title: "Connect the stars to reveal what I see",
+    s5_reveal_text: "That's how I see you — a constellation I'll always find",
     s6_seg1: "You deserve every love song ever written",
     s6_seg2: "I choose you. Every single day.",
     s6_seg3: "Being loved by you is my greatest gift",
@@ -1100,15 +1552,15 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
     s6_seg6: "You give me butterflies, always",
     s6_seg7: "I think of you in every quiet moment",
     s6_seg8: "You are the best part of my story",
-    s7_letter_body: "No matter where life takes us,\nI will always find my way back to you.\nYou are my home, my peace,\nmy favourite place to be.\nWith every wave, I think of you. ♡",
+    s7_letter_body: "No matter where life takes us,\nI will always find my way back to you.\nYou are my home, my peace,\nmy favourite place to be.\nWith every wave, I think of you.",
     s7_sign: "— Yours, always",
-    s8_title: "Grow our garden of love 🌹",
-    s8_reason1: "Your laugh 😄", s8_reason2: "The way you care ♡", s8_reason3: "Your kindness 🌸",
-    s8_reason4: "Being with you ✨", s8_reason5: "Your eyes 🌟", s8_reason6: "How you make me feel 💕",
-    s8_reason7: "Your strength 🦁", s8_reason8: "All of you. Always. 💘",
-    s9_title: "You Are My Everything ♡",
+    s8_title: "Grow our garden of love",
+    s8_reason1: "Your laugh", s8_reason2: "The way you care", s8_reason3: "Your kindness",
+    s8_reason4: "Being with you", s8_reason5: "Your eyes", s8_reason6: "How you make me feel",
+    s8_reason7: "Your strength", s8_reason8: "All of you. Always.",
+    s9_title: "YOU ARE MY EVERYTHING",
     s9_body: "From the lights we lit together,\nto every song, every memory, every moment —\nit has all been for you.\nThank you for existing.\nThank you for being mine.",
-    s9_sign: "— Yours, in every lifetime ♡",
+    s9_sign: "— Yours, in every lifetime",
   };
 
   const d = useMemo(() => ({ ...defaults, ...customData }), [customData]);

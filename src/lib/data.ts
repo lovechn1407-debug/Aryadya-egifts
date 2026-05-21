@@ -557,6 +557,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         description: "Grand closing letter with a wax stamp seal button, romantic couple bears, and particle fireworks.",
         fields: [
           { id: "s9_title", label: "Finale Title", type: "text", defaultValue: "You Are My Everything ♡" },
+          { id: "s9_viewer_name", label: "Viewer Name (Stamp & Finale)", type: "text", defaultValue: "MY LOVE" },
           { id: "s9_body", label: "Finale Message", type: "textarea", defaultValue: "From the lights we lit together,\nto every song, every memory, every moment —\nit has all been for you.\nThank you for existing.\nThank you for being mine." },
           { id: "s9_sign", label: "Finale Sign", type: "text", defaultValue: "— Yours, in every lifetime ♡" }
         ]
