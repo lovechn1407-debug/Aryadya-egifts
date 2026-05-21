@@ -665,7 +665,7 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
       )}
       {/* Iframe — maintains 3:4 ratio */}
       <div ref={containerRef} style={{ aspectRatio: "3/4", position: "relative", overflow: "hidden", background: `${color}08`, flexShrink: 0 }}>
-        <iframe src={`/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
+        <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
       </div>
       {/* Solid footer — always visible below iframe */}
       <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
@@ -937,7 +937,7 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 901, width: "min(860px,95vw)", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: 24, boxShadow: "0 40px 100px rgba(15,23,42,0.22)", display: "flex", flexWrap: "wrap", fontFamily: "'Inter', sans-serif" }}>
         {/* Preview pane */}
         <div ref={containerRef} style={{ flex: "1 1 300px", minHeight: 280, position: "relative", overflow: "hidden", borderRadius: "24px 0 0 24px", background: `${accent}05` }}>
-          <iframe src={`/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
+          <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
         </div>
         {/* Details pane */}
         <div style={{ flex: "1 1 260px", padding: "32px 28px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
@@ -981,6 +981,24 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
           </div>
 
           <div>
+            <div style={{ margin: "20px 0 0", padding: "16px 20px", background: "#F8FAFC", borderRadius: 12, border: "1px solid #E2E8F0" }}>
+              <p style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "#64748B", marginBottom: 12, marginInline: 0 }}>Top Features</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>🎵</span>
+                  <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>Custom Background Songs</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>🖼️</span>
+                  <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>Custom Image Uploads</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>✍️</span>
+                  <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>Custom Text & Messages</span>
+                </div>
+              </div>
+            </div>
+
             <div style={{ margin: "24px 0 16px", padding: "16px 0 0 0", borderTop: "1px solid #F1F5F9", display: "flex", alignItems: "baseline", gap: 8 }}>
               <span style={{ fontSize: 30, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
               {product.cuttedPrice && <span style={{ fontSize: 15, color: "#94A3B8", textDecoration: "line-through", fontWeight: 700 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}

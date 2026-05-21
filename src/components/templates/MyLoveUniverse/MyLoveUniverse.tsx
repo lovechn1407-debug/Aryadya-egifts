@@ -1826,9 +1826,18 @@ export default function MyLoveUniverse({
 
       {/* Main - no maxWidth constraint, let each section control its own */}
       <main style={{ position: "relative", zIndex: 10, minHeight: "100vh" }}>
-        <div key={activeSlide} style={{ width: "100%" }}>
-          {renderSlide()}
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={activeSlide} 
+            style={{ width: "100%" }}
+            initial={autoPlay ? { opacity: 0 } : false}
+            animate={autoPlay ? { opacity: 1 } : false}
+            exit={autoPlay ? { opacity: 0 } : false}
+            transition={{ duration: 0.6 }}
+          >
+            {renderSlide()}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Mute button */}

@@ -137,6 +137,19 @@ function PreviewContent({ productId }: { productId: string }) {
       <div style={{ paddingTop: 46 }}>
         {renderTemplate(productId, defaultData, false)}
       </div>
+
+      {/* Guider Note */}
+      <div style={{
+        position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
+        background: "rgba(15, 23, 42, 0.85)", backdropFilter: "blur(12px)",
+        border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: 100,
+        padding: "10px 20px", color: "#F8FAFC", fontSize: 13, fontWeight: 500,
+        display: "flex", alignItems: "center", gap: 8, boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+        zIndex: 9999, pointerEvents: "none", width: "calc(100% - 32px)", maxWidth: 500, justifyContent: "center"
+      }}>
+        <span style={{ fontSize: 16 }}>💡</span>
+        <span style={{ whiteSpace: "normal", textAlign: "center", lineHeight: 1.4 }}>Tip: You can always change the background song, photos, and messages when you customize!</span>
+      </div>
     </div>
   );
 }

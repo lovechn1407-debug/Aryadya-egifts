@@ -68,6 +68,7 @@ export interface ProductOverride {
   reviewCount?: number;
   stockLeft?: number;
   showStock?: boolean;
+  previewUrl?: string;
 }
 
 export async function getProductsDB(): Promise<Product[]> {

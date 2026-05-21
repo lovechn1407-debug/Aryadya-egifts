@@ -2312,16 +2312,25 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
       </div>
 
       <AnimatePresence mode="wait">
-        {slide === 0 && <Slide0BgMusic key="s0" d={d} onNext={next} em={em} oc={oc} />}
-        {slide === 1 && <Slide1DarkRoom key="s1" {...commonProps} onNext={next} />}
-        {slide === 2 && <Slide2Photos key="s2" {...commonProps} onBack={back} onNext={next} />}
-        {slide === 3 && <Slide3Music key="s3" {...commonProps} onBack={back} onNext={next} />}
-        {slide === 4 && <Slide4Scratch key="s4" {...commonProps} onBack={back} onNext={next} />}
-        {slide === 5 && <Slide5Constellation key="s5" {...commonProps} onBack={back} onNext={next} />}
-        {slide === 6 && <Slide6Wheel key="s6" {...commonProps} onBack={back} onNext={next} />}
-        {slide === 7 && <Slide7Bottle key="s7" {...commonProps} onBack={back} onNext={next} />}
-        {slide === 8 && <Slide8Garden key="s8" {...commonProps} onBack={back} onNext={next} />}
-        {slide === 9 && <Slide9Finale key="s9" {...commonProps} onBack={back} onReset={reset} />}
+        <motion.div 
+          key={slide} 
+          style={{ width: "100%" }}
+          initial={autoPlay ? { opacity: 0 } : false}
+          animate={autoPlay ? { opacity: 1 } : false}
+          exit={autoPlay ? { opacity: 0 } : false}
+          transition={{ duration: 0.6 }}
+        >
+          {slide === 0 && <Slide0BgMusic key="s0" d={d} onNext={next} em={em} oc={oc} />}
+          {slide === 1 && <Slide1DarkRoom key="s1" {...commonProps} onNext={next} />}
+          {slide === 2 && <Slide2Photos key="s2" {...commonProps} onBack={back} onNext={next} />}
+          {slide === 3 && <Slide3Music key="s3" {...commonProps} onBack={back} onNext={next} />}
+          {slide === 4 && <Slide4Scratch key="s4" {...commonProps} onBack={back} onNext={next} />}
+          {slide === 5 && <Slide5Constellation key="s5" {...commonProps} onBack={back} onNext={next} />}
+          {slide === 6 && <Slide6Wheel key="s6" {...commonProps} onBack={back} onNext={next} />}
+          {slide === 7 && <Slide7Bottle key="s7" {...commonProps} onBack={back} onNext={next} />}
+          {slide === 8 && <Slide8Garden key="s8" {...commonProps} onBack={back} onNext={next} />}
+          {slide === 9 && <Slide9Finale key="s9" {...commonProps} onBack={back} onReset={reset} />}
+        </motion.div>
       </AnimatePresence>
 
       {/* BG Audio mute/unmute button */}

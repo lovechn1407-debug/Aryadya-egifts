@@ -26,6 +26,8 @@ export default function AdminProductsPage() {
   const [editingStock, setEditingStock] = useState<string | null>(null);
   const [stockInput, setStockInput] = useState("");
   const [showStockInput, setShowStockInput] = useState(false);
+  const [editingPreview, setEditingPreview] = useState<string | null>(null);
+  const [previewInput, setPreviewInput] = useState("");
   const [orderCounts, setOrderCounts] = useState<Record<string, number>>({});
   const [revenueCounts, setRevenueCounts] = useState<Record<string, number>>({});
 
@@ -98,6 +100,12 @@ export default function AdminProductsPage() {
     if (!isNaN(s)) updates.stockLeft = s;
     await updateProductOverrideDB(id, updates);
     setEditingStock(null);
+    reload();
+  };
+
+  const savePreview = async (id: string) => {
+    await updateProductOverrideDB(id, { previewUrl: previewInput.trim() === "" ? undefined : previewInput.trim() });
+    setEditingPreview(null);
     reload();
   };
 
@@ -278,6 +286,35 @@ export default function AdminProductsPage() {
                   <option value="specials">🎁 SPECIAL</option>
                   <option value="premium">💎 PREMIUM</option>
                 </select>
+              </div>
+
+              {/* Preview URL Override */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, paddingLeft: 16, borderLeft: "1px solid #E2E8F0" }}>
+                <span style={{ fontSize: 13, color: "#64748B", fontWeight: 500 }}>Preview:</span>
+                {editingPreview === product.id ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <input 
+                      style={{...inputStyle, width: 220, padding: "6px"}} 
+                      type="text" 
+                      placeholder="e.g. /preview/xyz?embed=1" 
+                      value={previewInput} 
+                      onChange={e => setPreviewInput(e.target.value)} 
+                      autoFocus
+                    />
+                    <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#0F172A", color: "#FFFFFF", border: "none", cursor: "pointer" }} onClick={() => savePreview(product.id)}>Save</button>
+                    <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#F1F5F9", color: "#334155", border: "none", cursor: "pointer" }} onClick={() => setEditingPreview(null)}>✕</button>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 13, color: (product as any).previewUrl ? "#0F172A" : "#94A3B8", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {(product as any).previewUrl || "Default (/preview/id)"}
+                    </span>
+                    <button 
+                      onClick={() => { setEditingPreview(product.id); setPreviewInput((product as any).previewUrl || ""); }} 
+                      style={{ background: "transparent", border: "none", color: "#94A3B8", cursor: "pointer", fontSize: 14 }}
+                    >✏️</button>
+                  </div>
+                )}
               </div>
 
               {/* Visibility toggle */}
