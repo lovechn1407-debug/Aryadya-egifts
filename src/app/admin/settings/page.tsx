@@ -281,6 +281,45 @@ export default function SettingsPage() {
       </div>
       <div style={{ background: "#fff", padding: 32, borderRadius: 16, border: "1px solid #E2E8F0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginTop: 24 }}>
         <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Branding Settings</h2>
+          <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>Configure your website's favicon and logo.</p>
+        </div>
+
+        <div>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Favicon (Website Icon)</label>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 8, border: "1px solid #CBD5E1", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8FAFC" }}>
+              {settings.faviconUrl ? (
+                <img src={settings.faviconUrl} alt="Favicon" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              ) : (
+                <span style={{ fontSize: 20, color: "#94A3B8" }}>🌍</span>
+              )}
+            </div>
+            <label style={{ background: "#10B981", color: "#fff", padding: "8px 16px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
+              Upload New Favicon
+              <input type="file" accept="image/*" style={{ display: "none" }} onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const fd = new FormData();
+                fd.append("image", file);
+                try {
+                  const res = await fetch("https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e", { method: "POST", body: fd });
+                  const json = await res.json();
+                  if (json.success) setSettings(s => ({ ...s, faviconUrl: json.data.url }));
+                } catch (e) { console.error("Upload failed", e); }
+              }} />
+            </label>
+            {settings.faviconUrl && (
+              <button onClick={() => setSettings(s => ({ ...s, faviconUrl: "" }))} style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FCA5A5", padding: "7px 16px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: "#fff", padding: 32, borderRadius: 16, border: "1px solid #E2E8F0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginTop: 24 }}>
+        <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Contact & Email Settings</h2>
           <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>Configure your public contact details and email notifications.</p>
         </div>

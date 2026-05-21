@@ -29,6 +29,7 @@ export interface Settings {
   contactAddress?: string;
   emailServiceBuy?: boolean;
   emailServiceFinalize?: boolean;
+  faviconUrl?: string;
 }
 
 export async function getSettingsDB(): Promise<Settings> {

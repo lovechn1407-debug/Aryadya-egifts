@@ -14,13 +14,18 @@ export const metadata: Metadata = {
 };
 
 import MaintenanceWrapper from "@/components/MaintenanceWrapper";
+import { getSettingsDB } from "@/lib/db";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const settings = await getSettingsDB();
+  const favicon = settings.faviconUrl || "/favicon.ico";
+
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href={favicon} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

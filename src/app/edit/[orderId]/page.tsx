@@ -219,14 +219,19 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       await finalizeOrderDB(orderId);
       
       const viewLink = `${window.location.origin}/view/${orderId}`;
-      sendFinalizationEmail({
-        buyer_name: order.buyerName,
-        email: order.buyerEmail,
-        order_id: orderId,
-        product_name: product.name,
-        product_emoji: product.thumbnail || "🎁",
-        view_link: viewLink,
-      });
+      const { getSettingsDB } = await import("@/lib/db");
+      const settings = await getSettingsDB();
+
+      if (settings.emailServiceFinalize) {
+        sendFinalizationEmail({
+          buyer_name: order.buyerName,
+          email: order.buyerEmail,
+          order_id: orderId,
+          product_name: product.name,
+          product_emoji: product.thumbnail || "🎁",
+          view_link: viewLink,
+        });
+      }
 
       setFinalizing(false);
       setShowFinalPanel(false);

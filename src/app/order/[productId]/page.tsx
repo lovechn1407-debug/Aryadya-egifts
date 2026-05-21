@@ -183,19 +183,24 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
       await saveCouponDB({ ...appliedCoupon, usedCount: appliedCoupon.usedCount + 1 });
     }
 
-    const editLink = `${window.location.origin}/edit/${order.id}`;
-    sendOrderConfirmationEmail({
-      buyer_name: form.name,
-      email: form.email,
-      order_id: order.id,
-      product_name: product.name,
-      product_emoji: product.thumbnail || "🎁",
-      subtotal: String(Math.floor(product.price / 100)),
-      discount: String(Math.floor(discountAmount / 100)),
-      amount: String(Math.floor(finalPrice / 100)),
-      coupon_code: appliedCoupon ? appliedCoupon.id : "NONE",
-      edit_link: editLink,
-    });
+    const { getSettingsDB } = await import("@/lib/db");
+    const settings = await getSettingsDB();
+
+    if (settings.emailServiceBuy) {
+      const editLink = `${window.location.origin}/edit/${order.id}`;
+      sendOrderConfirmationEmail({
+        buyer_name: form.name,
+        email: form.email,
+        order_id: order.id,
+        product_name: product.name,
+        product_emoji: product.thumbnail || "🎁",
+        subtotal: String(Math.floor(product.price / 100)),
+        discount: String(Math.floor(discountAmount / 100)),
+        amount: String(Math.floor(finalPrice / 100)),
+        coupon_code: appliedCoupon ? appliedCoupon.id : "NONE",
+        edit_link: editLink,
+      });
+    }
 
     router.push(`/edit/${order.id}`);
   };
