@@ -1846,25 +1846,56 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
         useCORS: true,
         backgroundColor: "#050A18",
         onclone: (_doc, el) => {
-          // Strip backdrop-filter to prevent blank canvas on Safari/Firefox
-          el.style.setProperty("backdrop-filter", "none", "important");
-          el.style.setProperty("-webkit-backdrop-filter", "none", "important");
-          el.style.setProperty("background-color", "#14081E", "important");
-          el.querySelectorAll<HTMLElement>("*").forEach(child => {
-            child.style.backdropFilter = "none";
-            (child.style as unknown as Record<string,string>)["-webkit-backdrop-filter"] = "none";
-          });
+          try {
+            el.style.setProperty("backdrop-filter", "none", "important");
+            el.style.setProperty("-webkit-backdrop-filter", "none", "important");
+            el.style.setProperty("background-color", "#14081E", "important");
+            const children = el.querySelectorAll<HTMLElement>("*");
+            for (let i = 0; i < children.length; i++) {
+              if (children[i] && children[i].style) {
+                children[i].style.setProperty("backdrop-filter", "none", "important");
+                children[i].style.setProperty("-webkit-backdrop-filter", "none", "important");
+              }
+            }
+          } catch (e) {
+            console.log("Safe clone styling failed", e);
+          }
         },
         ignoreElements: (el) => el.tagName === "BUTTON",
       });
+      
       const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/png"));
       if (!blob) throw new Error("no blob");
+
+      const file = new File([blob], `lovers-enchanted-proof.png`, { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "Sealed With Love",
+            text: "Look at the love letter I sealed for you! ✦",
+          });
+          setShareLoading(false);
+          return;
+        } catch (err) {
+          console.log("Native share failed", err);
+        }
+      }
+
+      // Fallback to ImgBB
       const fd = new FormData();
       fd.append("image", blob, "lovers-enchanted-proof.png");
       const res = await fetch(`https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e`, { method: "POST", body: fd });
       const json = await res.json();
-      if (json.success) { setShareUrl(json.data.url); setShowShareModal(true); }
-    } catch { /* ignore */ }
+      if (json.success) { 
+        setShareUrl(json.data.url); 
+        setShowShareModal(true); 
+      }
+    } catch (e) {
+      console.error("Screenshot failed:", e);
+      alert("Oops, capturing the screenshot failed on your device. Please take a manual screenshot!");
+    }
     setShareLoading(false);
   };
 
