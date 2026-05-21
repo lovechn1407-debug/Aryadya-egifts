@@ -58,6 +58,7 @@ const UNIVERSE_SLIDES = [
 ];
 
 const LOVERS_SLIDES = [
+  { n: 0, label: "BG Music" },
   { n: 1, label: "Room" },
   { n: 2, label: "Polaroids" },
   { n: 3, label: "Tape" },

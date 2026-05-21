@@ -608,6 +608,63 @@ function SlideShell({ children, onBack, onNext, backLabel = "← Back", nextLabe
 const BULB_COLORS = ["#FF6B6B","#FFD700","#FF69B4","#00CED1","#FF8C00","#9B59B6"];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 0: BACKGROUND MUSIC
+// ─────────────────────────────────────────────────────────────────────────────
+function Slide0BgMusic({ d, onNext, em, oc }: { d:Record<string,string>; onNext:()=>void; em:boolean; oc?:(id:string,v:string)=>void }) {
+  const [isPicking, setIsPicking] = useState(false);
+  return (
+    <SlideShell onNext={onNext} showNext={true} nextLabel="Room →" background="linear-gradient(160deg,#0D0818 0%,#1A0A2E 100%)" isEditMode={em}>
+      <div style={{ position:"relative", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px 80px" }}>
+        {/* Floating decorative notes */}
+        {["♪","♫","♩","♬"].map((n,i) => (
+          <div key={i} style={{ position:"absolute", fontSize:28, opacity:0.07, top:`${18+i*18}%`, left:`${8+i*24}%`, color:"#FFD700", pointerEvents:"none", userSelect:"none" }}>{n}</div>
+        ))}
+        <motion.div initial={{ opacity:0, scale:0.88 }} animate={{ opacity:1, scale:1 }} transition={{ type:"spring", stiffness:80, damping:16 }}
+          style={{ position:"relative", width:"100%", maxWidth:420, background:"linear-gradient(135deg,rgba(20,6,36,0.96),rgba(52,8,24,0.94))", border:"1.5px solid rgba(212,175,55,0.4)", borderRadius:28, padding:"40px 32px", textAlign:"center", boxShadow:"0 30px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
+          <div style={{ position:"absolute", top:0, left:"20%", right:"20%", height:2, borderRadius:1, background:"linear-gradient(90deg,transparent,#FFD700,transparent)" }} />
+          <div style={{ width:68, height:68, borderRadius:"50%", background:"rgba(212,175,55,0.1)", border:"1.5px solid rgba(212,175,55,0.35)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}>
+            <SVGMusic size={32} style={{ color:"#D4AF37" }} />
+          </div>
+          <div style={{ fontSize:10, letterSpacing:"0.45em", fontWeight:700, color:"#D4AF37", fontFamily:"'Outfit',sans-serif", marginBottom:12 }}>✦ BACKGROUND MUSIC ✦</div>
+          <h2 style={{ fontFamily:"'Dancing Script',cursive", fontSize:"clamp(1.6rem,4vw,2.2rem)", color:"#fdf6e3", fontWeight:700, marginBottom:8 }}>Set the Mood</h2>
+          <p style={{ fontFamily:"'Lora',serif", fontStyle:"italic", color:"rgba(253,246,227,0.6)", fontSize:13, lineHeight:1.7, marginBottom:24 }}>
+            Choose a song that plays softly throughout the entire experience
+          </p>
+          {d.bg_song_name ? (
+            <div style={{ background:"rgba(212,175,55,0.08)", border:"1px solid rgba(212,175,55,0.25)", borderRadius:12, padding:"10px 16px", marginBottom:20, display:"flex", alignItems:"center", gap:10 }}>
+              <SVGMusic size={16} style={{ color:"#D4AF37", flexShrink:0 }} />
+              <span style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700, color:"#fdf6e3", textAlign:"left" }}>{d.bg_song_name}</span>
+            </div>
+          ) : (
+            <p style={{ fontFamily:"'Caveat',cursive", fontSize:"1.15rem", color:"rgba(255,255,255,0.28)", marginBottom:20 }}>No background song selected yet</p>
+          )}
+          {em && (
+            <button onClick={() => setIsPicking(true)} style={{ display:"inline-flex", alignItems:"center", gap:8, borderRadius:9999, background:"linear-gradient(135deg,#D4AF37,#FFB347)", color:"#3D0C1A", border:"none", padding:"12px 28px", fontSize:13, fontWeight:700, cursor:"pointer", boxShadow:"0 8px 24px rgba(212,175,55,0.4)" }}>
+              <SVGMusic size={14} />{d.bg_song_url ? "Change Music" : "Pick a Song"}
+            </button>
+          )}
+          <div style={{ position:"absolute", bottom:0, left:"30%", right:"30%", height:1, borderRadius:1, background:"linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)" }} />
+        </motion.div>
+      </div>
+      {isPicking && (
+        <SongLibraryPopup
+          onClose={() => setIsPicking(false)}
+          onSelect={(song) => {
+            oc?.("bg_song_name", song.name);
+            oc?.("bg_song_url", song.url || "");
+            oc?.("bg_song_type", song.type || "direct");
+            oc?.("bg_song_youtube_id", song.youtubeId || "");
+            oc?.("bg_song_start", String(song.startTime || 0));
+            oc?.("bg_song_end", String(song.endTime || 0));
+            setIsPicking(false);
+          }}
+        />
+      )}
+    </SlideShell>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SLIDE 1: DARK ROOM
 // ─────────────────────────────────────────────────────────────────────────────
 function LightString({ y, sag, count }: { y:number; sag:number; count:number }) {
@@ -664,10 +721,10 @@ function Slide1DarkRoom({ d, onNext, em, oc, ap }: { d:Record<string,string>; on
           <LightString y={130} sag={45} count={13} />
         </>)}
 
-        {/* Bear GIF – bear7 */}
-        <animated.div style={{ position:"absolute", left:"50%", top:"48%", transform:bearSpring.scale.to(sc=>`translate(-50%,-50%) scale(${sc})`), opacity:bearSpring.scale }}>
+        {/* Bear GIF – bear7 – positioned to left of light switch */}
+        <animated.div style={{ position:"absolute", bottom:66, right:116, transform:bearSpring.scale.to(sc=>`scale(${sc})`), opacity:bearSpring.scale, zIndex:2 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/templates/lovers-enchanted-journey/bear7.gif" alt="bear" style={{ width: 140, height: 140, objectFit: "contain" }} />
+          <img src="/templates/lovers-enchanted-journey/bear7.gif" alt="bear" style={{ width: 108, height: 108, objectFit: "contain" }} />
         </animated.div>
 
         {/* Light switch */}
@@ -806,7 +863,8 @@ function SwipableCard({
   absoluteIndex,
   onSwipe,
   swipeDir,
-  onClick
+  onClick,
+  data = {}
 }: {
   photo: PhotoData;
   caption: string;
@@ -815,6 +873,7 @@ function SwipableCard({
   onSwipe: (dir: "left" | "right") => void;
   swipeDir?: "left" | "right";
   onClick: () => void;
+  data?: Record<string, string>;
 }) {
   const x = useMotionValue(0);
   const rotateDrag = useTransform(x, [-200, 200], [-15, 15]);
@@ -860,7 +919,7 @@ function SwipableCard({
         transition: { duration: 0.35 }
       }}
     >
-      <PremiumGoldPolaroid photo={photo} caption={caption} editMode={false} onClick={onClick} />
+      <PremiumGoldPolaroid photo={photo} caption={caption} editMode={false} onClick={onClick} data={data} />
     </motion.div>
   );
 }
@@ -994,6 +1053,7 @@ function Slide2Photos({ d, onBack, onNext, em, oc }: { d:Record<string,string>; 
                       setSwipeDirs(prev => ({ ...prev, [photo.id]: dir }));
                     }}
                     onClick={() => setExpanded(photo)}
+                    data={d}
                   />
                 );
               })
@@ -1030,9 +1090,14 @@ function Slide2Photos({ d, onBack, onNext, em, oc }: { d:Record<string,string>; 
             <motion.div layoutId={`lej-photo-${expanded.id}`} style={{ position:"relative", width:"min(400px,90vw)", background:"#fffdf9", padding:"16px 16px 32px", borderRadius:20, border:"4px solid #D4AF37", boxShadow:"0 30px 80px rgba(0,0,0,0.6)" }}
               onClick={e => e.stopPropagation()}
             >
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:expanded.bg, height:320, borderRadius:12 }}>
-                {renderPhotoSVG(expanded.id)}
-              </div>
+              {d[`s2_${expanded.id}_img`] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={d[`s2_${expanded.id}_img`]!} alt="memory" style={{ width:"100%", height:320, objectFit:"cover", borderRadius:12, display:"block" }} />
+              ) : (
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:expanded.bg, height:320, borderRadius:12 }}>
+                  {renderPhotoSVG(expanded.id)}
+                </div>
+              )}
               <div style={{ marginTop:16, textAlign:"center", fontFamily:"'Dancing Script',cursive", color:"#3D0C1A", fontSize:"2rem", fontWeight: 700 }}>{d[expanded.fidCaption] || ""}</div>
             </motion.div>
           </motion.div>
@@ -1800,7 +1865,22 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
     if (!cardRef.current) return;
     setShareLoading(true);
     try {
-      const canvas = await html2canvas(cardRef.current, { scale: 2, useCORS: true, backgroundColor: "#050A18" });
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#050A18",
+        onclone: (_doc, el) => {
+          // Strip backdrop-filter to prevent blank canvas on Safari/Firefox
+          el.style.setProperty("backdrop-filter", "none", "important");
+          el.style.setProperty("-webkit-backdrop-filter", "none", "important");
+          el.style.setProperty("background-color", "#14081E", "important");
+          el.querySelectorAll<HTMLElement>("*").forEach(child => {
+            child.style.backdropFilter = "none";
+            (child.style as unknown as Record<string,string>)["-webkit-backdrop-filter"] = "none";
+          });
+        },
+        ignoreElements: (el) => el.tagName === "BUTTON",
+      });
       const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/png"));
       if (!blob) throw new Error("no blob");
       const fd = new FormData();
@@ -2029,6 +2109,38 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
 
   const commonProps = { d, em, oc, ap };
 
+  // ── Global Background Audio ────────────────────────────────────────────────
+  const bgAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [globalMuted, setGlobalMuted] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  useEffect(() => {
+    const onInteract = () => setHasInteracted(true);
+    window.addEventListener("click", onInteract, { once: true });
+    window.addEventListener("touchstart", onInteract, { once: true });
+    return () => {
+      window.removeEventListener("click", onInteract);
+      window.removeEventListener("touchstart", onInteract);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (editMode) return;
+    const url = d.bg_song_url;
+    if (!url || globalMuted) { bgAudioRef.current?.pause(); return; }
+    if (hasInteracted) {
+      if (!bgAudioRef.current || bgAudioRef.current.src !== url) {
+        bgAudioRef.current?.pause();
+        const a = new Audio(url);
+        a.loop = true;
+        a.volume = 0.45;
+        bgAudioRef.current = a;
+      }
+      bgAudioRef.current.play().catch(() => {});
+    }
+    return () => { bgAudioRef.current?.pause(); };
+  }, [editMode, d.bg_song_url, hasInteracted, globalMuted]);
+
   return (
     <div style={{ position: "relative", minHeight: "100vh", fontFamily: "'Nunito', sans-serif" }}>
       <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
@@ -2071,6 +2183,7 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
       </div>
 
       <AnimatePresence mode="wait">
+        {slide === 0 && <Slide0BgMusic key="s0" d={d} onNext={next} em={em} oc={oc} />}
         {slide === 1 && <Slide1DarkRoom key="s1" {...commonProps} onNext={next} />}
         {slide === 2 && <Slide2Photos key="s2" {...commonProps} onBack={back} onNext={next} />}
         {slide === 3 && <Slide3Music key="s3" {...commonProps} onBack={back} onNext={next} />}
@@ -2081,6 +2194,19 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
         {slide === 8 && <Slide8Garden key="s8" {...commonProps} onBack={back} onNext={next} />}
         {slide === 9 && <Slide9Finale key="s9" {...commonProps} onBack={back} onReset={reset} />}
       </AnimatePresence>
+
+      {/* BG Audio mute/unmute button */}
+      {!editMode && d.bg_song_url && (
+        <button
+          onClick={() => setGlobalMuted(m => !m)}
+          title={globalMuted ? "Unmute background music" : "Mute background music"}
+          style={{ position:"fixed", bottom:24, right:24, zIndex:200, width:46, height:46, borderRadius:"50%", background:"rgba(255,255,255,0.88)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", border:"1px solid rgba(212,175,55,0.25)", boxShadow:"0 8px 24px rgba(0,0,0,0.22)", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color: globalMuted ? "#888" : "#C0395A", transition:"all 0.3s" }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            {globalMuted ? (<><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" /></>) : (<><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /></>)}
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
