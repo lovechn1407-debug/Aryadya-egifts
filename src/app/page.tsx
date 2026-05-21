@@ -669,8 +669,15 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
       </div>
       {/* Solid footer — always visible below iframe */}
       <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: "#1F2937", lineHeight: 1.3, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-          {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#1F2937", lineHeight: 1.3, height: 18, overflow: "hidden", whiteSpace: "nowrap" }}>
+          {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim().length > 22 ? (
+            // @ts-ignore
+            <marquee behavior="alternate" scrollamount="2" style={{ width: "100%" }}>
+              {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
+            </marquee>
+          ) : (
+            product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()
+          )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 2, marginTop: 5 }}>
           {[1, 2, 3, 4, 5].map(i => <span key={i} style={{ color: i <= Math.round(rating) ? "#F59E0B" : "#E5E7EB", fontSize: 11 }}>★</span>)}
@@ -981,20 +988,23 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
           </div>
 
           <div>
-            <div style={{ margin: "20px 0 0", padding: "16px 20px", background: "#F8FAFC", borderRadius: 12, border: "1px solid #E2E8F0" }}>
-              <p style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, color: "#64748B", marginBottom: 12, marginInline: 0 }}>Top Features</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>🎵</span>
-                  <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>Custom Background Songs</span>
+            <div style={{ margin: "20px 0 0", padding: "16px", background: `linear-gradient(145deg, ${accent}08, ${accent}02)`, borderRadius: 14, border: `1px solid ${accent}15`, boxShadow: `inset 0 2px 10px ${accent}05` }}>
+              <p style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.8, color: accent, marginBottom: 14, marginInline: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Premium Features
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "8px 10px", borderRadius: 8, border: "1px solid #f1f5f9", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
+                  <span style={{ fontSize: 15 }}>🎵</span>
+                  <span style={{ fontSize: 12, color: "#334155", fontWeight: 700 }}>Custom Music</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>🖼️</span>
-                  <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>Custom Image Uploads</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "8px 10px", borderRadius: 8, border: "1px solid #f1f5f9", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
+                  <span style={{ fontSize: 15 }}>🖼️</span>
+                  <span style={{ fontSize: 12, color: "#334155", fontWeight: 700 }}>Your Photos</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>✍️</span>
-                  <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>Custom Text & Messages</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "8px 10px", borderRadius: 8, border: "1px solid #f1f5f9", gridColumn: "span 2", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
+                  <span style={{ fontSize: 15 }}>✍️</span>
+                  <span style={{ fontSize: 12, color: "#334155", fontWeight: 700 }}>Personalized Text & Messages</span>
                 </div>
               </div>
             </div>

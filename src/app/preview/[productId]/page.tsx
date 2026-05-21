@@ -34,6 +34,7 @@ function renderTemplate(productId: string, customData: Record<string, string>, a
 function PreviewContent({ productId }: { productId: string }) {
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showTip, setShowTip] = useState(true);
   const searchParams = useSearchParams();
   const isEmbed = searchParams.get("embed") === "1";
   const product = getProduct(productId);
@@ -139,17 +140,24 @@ function PreviewContent({ productId }: { productId: string }) {
       </div>
 
       {/* Guider Note */}
-      <div style={{
-        position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
-        background: "rgba(15, 23, 42, 0.85)", backdropFilter: "blur(12px)",
-        border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: 100,
-        padding: "10px 20px", color: "#F8FAFC", fontSize: 13, fontWeight: 500,
-        display: "flex", alignItems: "center", gap: 8, boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-        zIndex: 9999, pointerEvents: "none", width: "calc(100% - 32px)", maxWidth: 500, justifyContent: "center"
-      }}>
-        <span style={{ fontSize: 16 }}>💡</span>
-        <span style={{ whiteSpace: "normal", textAlign: "center", lineHeight: 1.4 }}>Tip: You can always change the background song, photos, and messages when you customize!</span>
-      </div>
+      {showTip && (
+        <div style={{
+          position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
+          background: "rgba(15, 23, 42, 0.85)", backdropFilter: "blur(12px)",
+          border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: 100,
+          padding: "10px 14px 10px 20px", color: "#F8FAFC", fontSize: 13, fontWeight: 500,
+          display: "flex", alignItems: "center", gap: 8, boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+          zIndex: 9999, width: "calc(100% - 32px)", maxWidth: 500, justifyContent: "space-between"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, pointerEvents: "none" }}>
+            <span style={{ fontSize: 16 }}>💡</span>
+            <span style={{ whiteSpace: "normal", textAlign: "left", lineHeight: 1.4 }}>Tip: You can always change the background song, photos, and messages when you customize!</span>
+          </div>
+          <button onClick={() => setShowTip(false)} style={{ background: "transparent", border: "none", color: "rgba(255,255,255,0.5)", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
