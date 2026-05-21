@@ -721,10 +721,15 @@ function Slide1DarkRoom({ d, onNext, em, oc, ap }: { d:Record<string,string>; on
           <LightString y={130} sag={45} count={13} />
         </>)}
 
-        {/* Bear GIF – bear7 – positioned to left of light switch */}
-        <animated.div style={{ position:"absolute", bottom:66, right:116, transform:bearSpring.scale.to(sc=>`scale(${sc})`), opacity:bearSpring.scale, zIndex:2 }}>
+        {/* Spotlight circle behind bear */}
+        {lightsOn && (
+          <div style={{ position:"absolute", left:"50%", top:"48%", transform:"translate(-50%,-50%)", width:230, height:230, borderRadius:"50%", background:"radial-gradient(ellipse,rgba(255,235,160,0.22) 0%,rgba(255,200,80,0.10) 55%,transparent 75%)", pointerEvents:"none", zIndex:1 }} />
+        )}
+
+        {/* Bear GIF – bear7 – centered in spotlight */}
+        <animated.div style={{ position:"absolute", left:"50%", top:"48%", transform:bearSpring.scale.to(sc=>`translate(-50%,-50%) scale(${sc})`), opacity:bearSpring.scale, zIndex:2 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/templates/lovers-enchanted-journey/bear7.gif" alt="bear" style={{ width: 108, height: 108, objectFit: "contain" }} />
+          <img src="/templates/lovers-enchanted-journey/bear7.gif" alt="bear" style={{ width: 155, height: 155, objectFit: "contain" }} />
         </animated.div>
 
         {/* Light switch */}
@@ -777,84 +782,56 @@ function PremiumGoldPolaroid({ photo, caption, editMode = false, onChange, onCli
         position: "relative",
         width: "100%",
         height: "100%",
-        background: "#fffdf9",
-        borderRadius: 20,
-        border: "4px solid transparent",
-        backgroundImage: "linear-gradient(#fffdf9, #fffdf9), linear-gradient(135deg, #FFE57F, #FFC107, #FF8F00, #A66800)",
-        backgroundOrigin: "border-box",
-        backgroundClip: "content-box, border-box",
-        boxShadow: "0 15px 35px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5)",
-        padding: "16px 16px 24px",
+        background: "#fffef8",
+        borderRadius: 3,
+        boxShadow: "0 20px 55px rgba(0,0,0,0.42), 0 6px 16px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.9)",
+        padding: "10px 10px 44px",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        alignItems: "center"
+        cursor: !editMode && onClick ? "pointer" : "default",
+        userSelect: "none",
       }}
     >
-      {/* Gold Heart Push-Pin anchored at top center */}
+      {/* Photo / color area */}
       <div style={{
-        position: "absolute",
-        top: -14,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: 28,
-        height: 28,
-        borderRadius: "50%",
-        background: "radial-gradient(circle at 30% 30%, #FFE57F 0%, #FFC107 40%, #A66800 100%)",
-        boxShadow: "0 4px 6px rgba(0,0,0,0.3), inset 0 1px 3px rgba(255,255,255,0.6)",
+        flex: 1,
+        borderRadius: 2,
+        background: customImg ? "#111" : photo.bg,
+        overflow: "hidden",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 10
-      }}>
-        <SVGHeart size={14} fill="url(#goldGrad)" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))" }} />
-      </div>
-
-      <div className="lej-premium-card-image" style={{
-        width: "100%",
-        height: editMode ? "160px" : undefined,
-        borderRadius: 12,
-        background: customImg ? "#000" : photo.bg,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "inset 0 4px 10px rgba(0,0,0,0.15)",
-        border: "1px solid rgba(212,175,55,0.25)",
-        overflow: "hidden"
+        minHeight: editMode ? 160 : 0,
       }}>
         {customImg ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={customImg} alt="memory" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        ) : renderPhotoSVG(photo.id)}
-      </div>
-      {editMode && (
-        <ImageUploader fid={`s2_${photo.id}_img`} data={data} onChange={onChange} defaultSrc="" />
-      )}
-
-      <div style={{ marginTop: 12, width: "100%" }}>
-        {editMode ? (
-          <ET fid={photo.fidCaption} data={{ [photo.fidCaption]: caption }} onChange={onChange} editMode={editMode}
-            style={{ fontFamily: "'Dancing Script', cursive", fontWeight: 700, fontSize: "1.4rem", color: "#3D0C1A", textAlign: "center" }} />
+          <img src={customImg} alt="memory" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
         ) : (
-          <div style={{
-            textAlign: "center",
-            fontFamily: "'Dancing Script', cursive",
-            fontWeight: 700,
-            fontSize: "1.6rem",
-            color: "#3D0C1A",
-            textShadow: "0 1px 1px rgba(255,255,255,0.8)",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            width: "100%"
-          }}>
-            {caption}
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {renderPhotoSVG(photo.id)}
           </div>
         )}
       </div>
+
+      {/* Caption strip */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 44, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
+        {editMode ? (
+          <ET fid={photo.fidCaption} data={{ [photo.fidCaption]: caption }} onChange={onChange} editMode={editMode}
+            style={{ fontFamily: "'Dancing Script', cursive", fontWeight: 700, fontSize: "1.15rem", color: "#3D0C1A", textAlign: "center" }} />
+        ) : (
+          <div style={{ fontFamily: "'Dancing Script', cursive", fontWeight: 700, fontSize: "1.25rem", color: "#3D0C1A", textAlign: "center", lineHeight: 1.15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>
+            {caption || "✦"}
+          </div>
+        )}
+      </div>
+
+      {editMode && (
+        <ImageUploader fid={`s2_${photo.id}_img`} data={data} onChange={onChange} defaultSrc="" />
+      )}
     </div>
   );
 }
+
 
 function SwipableCard({
   photo,
@@ -877,46 +854,32 @@ function SwipableCard({
 }) {
   const x = useMotionValue(0);
   const rotateDrag = useTransform(x, [-200, 200], [-15, 15]);
-  const opacityDrag = useTransform(x, [-150, 0, 150], [0.5, 1, 0.5]);
 
-  const handleDragEnd = (event: any, info: any) => {
-    const swipeThreshold = 80;
-    if (info.offset.x > swipeThreshold) {
-      onSwipe("right");
-    } else if (info.offset.x < -swipeThreshold) {
-      onSwipe("left");
-    }
+  const handleDragEnd = (_event: unknown, info: { offset: { x: number } }) => {
+    if (info.offset.x > 80) onSwipe("right");
+    else if (info.offset.x < -80) onSwipe("left");
   };
 
   return (
     <motion.div
-      layoutId={`lej-photo-${photo.id}`}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={isTop ? handleDragEnd : undefined}
-      className="lej-swipable-card"
       style={{
         position: "absolute",
+        inset: 0,
         zIndex: 100 - absoluteIndex,
         cursor: isTop ? "grab" : "default",
-        transformOrigin: "bottom center",
         x: isTop ? x : 0,
-        rotate: isTop ? rotateDrag : (absoluteIndex % 2 === 0 ? 3 : -3) * absoluteIndex,
-        opacity: isTop ? opacityDrag : 1 - absoluteIndex * 0.15,
+        rotate: isTop ? rotateDrag : (absoluteIndex % 2 === 0 ? 2.5 : -2.5) * absoluteIndex,
+        opacity: 1 - absoluteIndex * 0.14,
       }}
-      animate={isTop ? {
-        scale: 1,
-        y: 0,
-      } : {
-        scale: 1 - absoluteIndex * 0.05,
-        y: absoluteIndex * 12,
-      }}
+      animate={isTop ? { scale: 1, y: 0 } : { scale: 1 - absoluteIndex * 0.04, y: absoluteIndex * 8 }}
       exit={{
-        x: swipeDir === "right" ? 400 : -400,
+        x: swipeDir === "right" ? 420 : -420,
         opacity: 0,
-        rotate: swipeDir === "right" ? 45 : -45,
-        scale: 0.8,
-        transition: { duration: 0.35 }
+        rotate: swipeDir === "right" ? 40 : -40,
+        transition: { duration: 0.3 }
       }}
     >
       <PremiumGoldPolaroid photo={photo} caption={caption} editMode={false} onClick={onClick} data={data} />
@@ -1525,7 +1488,7 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
               style={{ marginTop:24, display:"flex", alignItems:"center", gap:12, maxWidth:440 }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/templates/lovers-enchanted-journey/bear8.gif" alt="bear" style={{ width: 55, height: 55, objectFit: "contain", flexShrink: 0 }} />
+              <img src="/templates/lovers-enchanted-journey/bear8.gif" alt="bear" style={{ width: 76, height: 76, objectFit: "contain", flexShrink: 0 }} />
               <div style={{ background:"#fdf6e3", border:"2px solid #D4AF37", borderRadius:20, padding:"16px 24px", textAlign:"center" }}>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
                   {renderResultIcon(segs[result].icon)}
@@ -1535,7 +1498,7 @@ function Slide6Wheel({ d, onBack, onNext, em, oc, ap }: { d:Record<string,string
                 </div>
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/templates/lovers-enchanted-journey/bear8.gif" alt="bear" style={{ width: 55, height: 55, objectFit: "contain", flexShrink: 0 }} />
+              <img src="/templates/lovers-enchanted-journey/bear8.gif" alt="bear" style={{ width: 76, height: 76, objectFit: "contain", flexShrink: 0 }} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -1663,7 +1626,7 @@ function Slide7Bottle({ d, onBack, onNext, em, oc, ap }: { d:Record<string,strin
               </div>
               <div style={{ position:"absolute", right:-20, bottom:-20 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/templates/lovers-enchanted-journey/bear2.gif" alt="bear" style={{ width: 75, height: 75, objectFit: "contain" }} />
+                <img src="/templates/lovers-enchanted-journey/bear2.gif" alt="bear" style={{ width: 98, height: 98, objectFit: "contain" }} />
               </div>
             </motion.div>
           )}
@@ -1684,10 +1647,16 @@ const ROSE_COLORS: [string,string][] = [
 function GardenRose({ colors }: { colors:[string,string] }) {
   return (
     <div style={{ position:"absolute", left:"50%", bottom:58, transform:"translateX(-50%)", width:80, height:130, pointerEvents:"none" }}>
-      <motion.div initial={{ height:0 }} animate={{ height:95 }} transition={{ duration:0.4 }} style={{ position:"absolute", left:"50%", bottom:0, transform:"translateX(-50%)", width:4, borderRadius:2, background:"linear-gradient(180deg,#3f7a3a,#2d5a28)" }} />
-      <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ duration:0.3, delay:0.4 }} style={{ position:"absolute", left:"50%", bottom:40, width:18, height:10, background:"#3f7a3a", borderRadius:"0 50% 50% 50%", transform:"translateX(-110%) rotate(-30deg)" }} />
-      <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ duration:0.3, delay:0.5 }} style={{ position:"absolute", left:"50%", bottom:55, width:18, height:10, background:"#3f7a3a", borderRadius:"50% 0 50% 50%", transform:"translateX(10%) rotate(30deg)" }} />
-      <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ duration:0.5, delay:0.7, type:"spring", stiffness:180 }} style={{ position:"absolute", left:"50%", transform:"translateX(-50%)", top:-15, width:50, height:50 }}>
+      {/* Stem – use calc to avoid Framer transform conflicts */}
+      <motion.div initial={{ height:0 }} animate={{ height:95 }} transition={{ duration:0.4 }}
+        style={{ position:"absolute", left:"calc(50% - 2px)", bottom:0, width:4, borderRadius:2, background:"linear-gradient(180deg,#3f7a3a,#2d5a28)" }} />
+      <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ duration:0.3, delay:0.4 }}
+        style={{ position:"absolute", left:"50%", bottom:40, width:18, height:10, background:"#3f7a3a", borderRadius:"0 50% 50% 50%", transform:"translateX(-110%) rotate(-30deg)" }} />
+      <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ duration:0.3, delay:0.5 }}
+        style={{ position:"absolute", left:"50%", bottom:55, width:18, height:10, background:"#3f7a3a", borderRadius:"50% 0 50% 50%", transform:"translateX(10%) rotate(30deg)" }} />
+      {/* Flower head – use calc so Framer scale doesn\'t shift it */}
+      <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ duration:0.5, delay:0.7, type:"spring", stiffness:180 }}
+        style={{ position:"absolute", left:"calc(50% - 25px)", top:-15, width:50, height:50 }}>
         {[0,45,90,135,180,225,270,315].map((deg,i) => (
           <motion.div key={i} initial={{ scale:0, rotate:deg }} animate={{ scale:1, rotate:deg }} transition={{ duration:0.3, delay:0.85+i*0.05 }}
             style={{ position:"absolute", left:"50%", top:"50%", width:18, height:22, background:`radial-gradient(circle at 60% 40%,${colors[1]},${colors[0]})`, borderRadius:"50% 50% 50% 0", x: "-50%", y: "-100%", transformOrigin:"50% 100%" }} />
@@ -1859,7 +1828,14 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
     confetti({ ...opts, origin:{x:0.5,y:0.5}, spread:360 });
   };
 
-  const seal = () => { setSealed(true); setFlash(true); fireConfetti(); setTimeout(()=>setFlash(false),1500); };
+  const seal = () => {
+    setSealed(true);
+    setFlash(true);
+    fireConfetti();
+    setTimeout(() => setFlash(false), 1500);
+    // Auto-capture and show share modal after short delay
+    setTimeout(() => handleShare(), 800);
+  };
 
   const handleShare = async () => {
     if (!cardRef.current) return;
@@ -1992,7 +1968,7 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
           style={{ marginTop:28, position:"relative", display:"flex", justifyContent:"center" }}>
           <div style={{ position:"absolute", left:-80, right:-80, top:-40, bottom:-40, background:"radial-gradient(ellipse,rgba(255,215,100,0.2),transparent 70%)" }} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/templates/lovers-enchanted-journey/bear10.gif" alt="bear" style={{ width: 110, height: 110, objectFit: "contain", position: "relative", zIndex: 1 }} />
+          <img src="/templates/lovers-enchanted-journey/bear10.gif" alt="bear" style={{ width: 140, height: 140, objectFit: "contain", position: "relative", zIndex: 1 }} />
           {[0,1,2].map(i => (
             <motion.div key={i} style={{ position:"absolute", left:"50%", bottom:40, color:"#FF69B4", pointerEvents:"none", zIndex: 2 }}
               animate={{ y:[0,-100], opacity:[1,0], x:[(i-1)*30,(i-1)*60] }}
@@ -2002,39 +1978,44 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
           ))}
         </motion.div>
 
+        {/* Stamp – rendered inside the card on seal */}
         <AnimatePresence>
           {sealed && (
-            <motion.div initial={{ scale:0, rotate:-30 }} animate={{ scale:[0,1.2,1], rotate:0 }} transition={{ type:"spring", stiffness:180, damping:12 }}
-              style={{ position:"fixed", left:"50%", top:"50%", transform:"translate(-50%,-50%)", zIndex:40, pointerEvents:"none" }}>
+            <motion.div initial={{ scale:0, rotate:-40 }} animate={{ scale:1, rotate:-12 }} transition={{ type:"spring", stiffness:200, damping:14 }}
+              style={{ position:"absolute", bottom:20, right:20, zIndex:20, pointerEvents:"none" }}>
               <CircularWaxStamp viewerName={viewerName} dateText={dateText} />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ── Share Proof Modal ── */}
+        {/* ── Share Proof Modal (MLU-style polaroid frame) ── */}
         <AnimatePresence>
           {showShareModal && shareUrl && (
             <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
               onClick={() => setShowShareModal(false)}
-              style={{ position:"fixed", inset:0, zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,0.88)", backdropFilter:"blur(10px)", padding:24 }}>
+              style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(6,12,30,0.88)", backdropFilter:"blur(12px)", padding:20 }}>
               <motion.div initial={{ scale:0.88, y:24 }} animate={{ scale:1, y:0 }} exit={{ scale:0.88, opacity:0 }}
                 onClick={e => e.stopPropagation()}
-                style={{ width:"min(460px,92vw)", background:"linear-gradient(135deg,rgba(14,4,26,0.97),rgba(52,8,24,0.97))", border:"1px solid rgba(212,175,55,0.45)", borderRadius:24, padding:28, textAlign:"center", boxShadow:"0 32px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06)" }}>
-                <div style={{ position:"absolute", top:0, left:"20%", right:"20%", height:2, borderRadius:1, background:"linear-gradient(90deg,transparent,#FFD700,transparent)" }} />
-                <div style={{ fontSize:10, letterSpacing:"0.45em", fontWeight:700, color:"#D4AF37", fontFamily:"'Outfit',sans-serif", marginBottom:14 }}>✦ SEEN PROOF ✦</div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={shareUrl} alt="Proof" style={{ width:"100%", maxHeight:200, objectFit:"contain", borderRadius:12, border:"1px solid rgba(212,175,55,0.3)", marginBottom:18, display:"block" }} />
-                <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap" }}>
+                style={{ width:"min(460px,92vw)", background:"rgba(18,5,9,0.97)", border:"2px solid #D4AF37", borderRadius:24, padding:"24px 20px", textAlign:"center", boxShadow:"0 24px 64px rgba(212,175,55,0.25)", position:"relative" }}>
+                <h3 style={{ fontFamily:"'Cormorant Garamond',serif", fontWeight:700, fontSize:22, color:"#D4AF37", marginBottom:6, fontStyle:"italic" }}>
+                  🌟 Sealed With Love 🌟
+                </h3>
+                <p style={{ fontSize:13, color:"#F2C4CE", marginBottom:16, fontFamily:"'Lora',serif" }}>
+                  Your love letter is sealed forever!
+                </p>
+                {/* Polaroid-frame preview */}
+                <div style={{ background:"#060C1E", padding:"12px 12px 32px", borderRadius:12, boxShadow:"0 10px 25px rgba(0,0,0,0.5)", border:"1px solid rgba(212,175,55,0.3)", marginBottom:20, transform:"rotate(-1.5deg)" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={shareUrl} alt="Sealed Proof" style={{ width:"100%", borderRadius:6, display:"block", maxHeight:280, objectFit:"contain", border:"1px solid rgba(212,175,55,0.2)" }} />
+                  <div style={{ fontFamily:"'Dancing Script',cursive", fontSize:20, color:"#D4AF37", marginTop:10, textAlign:"center" }}>Sealed with love ✦</div>
+                </div>
+                <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
                   <button onClick={() => { navigator.clipboard?.writeText(shareUrl); }}
-                    style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, background:"linear-gradient(135deg,#FFD700,#FFB347)", color:"#3D0C1A", fontWeight:700, border:"none", padding:"10px 22px", fontSize:13, cursor:"pointer", boxShadow:"0 6px 20px rgba(212,175,55,0.45)" }}>
-                    📋 Copy Link
+                    style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, background:"#C0395A", color:"#FFF8F0", fontWeight:700, border:"1px solid #D4AF37", padding:"10px 22px", fontSize:13, cursor:"pointer", boxShadow:"0 6px 16px rgba(192,57,90,0.3)", flex:1, justifyContent:"center" }}>
+                    🔗 Share Seen Proof
                   </button>
-                  <a href={shareUrl} target="_blank" rel="noreferrer"
-                    style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, background:"rgba(255,255,255,0.07)", color:"#fdf6e3", fontWeight:600, border:"1px solid rgba(255,255,255,0.15)", padding:"10px 22px", fontSize:13, cursor:"pointer", textDecoration:"none" }}>
-                    🔗 Open Image
-                  </a>
                   <button onClick={() => setShowShareModal(false)}
-                    style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, background:"rgba(192,57,90,0.15)", color:"#FF69B4", fontWeight:600, border:"1px solid rgba(192,57,90,0.35)", padding:"10px 22px", fontSize:13, cursor:"pointer" }}>
+                    style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, background:"rgba(255,255,255,0.08)", color:"#fdf6e3", fontWeight:600, border:"1px solid rgba(255,255,255,0.15)", padding:"10px 20px", fontSize:13, cursor:"pointer" }}>
                     Close
                   </button>
                 </div>
@@ -2124,22 +2105,43 @@ export default function LoversEnchantedJourney({ customData = {}, editMode = fal
     };
   }, []);
 
+  // Try to resume audio whenever any user interaction happens
+  useEffect(() => {
+    if (!hasInteracted || editMode || !d.bg_song_url || globalMuted) return;
+    const url = d.bg_song_url;
+    if (!bgAudioRef.current || bgAudioRef.current.src !== url) {
+      bgAudioRef.current?.pause();
+      const a = new Audio(url);
+      a.loop = true;
+      a.volume = 0.45;
+      bgAudioRef.current = a;
+    }
+    bgAudioRef.current.play().catch(() => {});
+  }, [hasInteracted, editMode, d.bg_song_url, globalMuted]);
+
+  // Setup: always try to play after bg_song_url set; retry on visibility change
   useEffect(() => {
     if (editMode) return;
     const url = d.bg_song_url;
     if (!url || globalMuted) { bgAudioRef.current?.pause(); return; }
-    if (hasInteracted) {
-      if (!bgAudioRef.current || bgAudioRef.current.src !== url) {
-        bgAudioRef.current?.pause();
-        const a = new Audio(url);
-        a.loop = true;
-        a.volume = 0.45;
-        bgAudioRef.current = a;
-      }
-      bgAudioRef.current.play().catch(() => {});
+    // Try immediately (will succeed if interaction already happened)
+    if (!bgAudioRef.current || bgAudioRef.current.src !== url) {
+      bgAudioRef.current?.pause();
+      const a = new Audio(url);
+      a.loop = true;
+      a.volume = 0.45;
+      bgAudioRef.current = a;
     }
-    return () => { bgAudioRef.current?.pause(); };
-  }, [editMode, d.bg_song_url, hasInteracted, globalMuted]);
+    bgAudioRef.current.play().catch(() => {
+      // Blocked by autoplay policy — will play after first user interaction via the hasInteracted effect
+    });
+    const onVisible = () => { if (document.visibilityState === "visible") bgAudioRef.current?.play().catch(() => {}); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      bgAudioRef.current?.pause();
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [editMode, d.bg_song_url, globalMuted]);
 
   return (
     <div style={{ position: "relative", minHeight: "100vh", fontFamily: "'Nunito', sans-serif" }}>
