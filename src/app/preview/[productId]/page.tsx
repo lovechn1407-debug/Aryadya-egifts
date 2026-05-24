@@ -58,6 +58,36 @@ function PreviewContent({ productId }: { productId: string }) {
     });
   }, [productId]);
 
+  useEffect(() => {
+    if (isEmbed) {
+      try {
+        window.HTMLMediaElement.prototype.play = function() {
+          return Promise.resolve();
+        };
+        (window as any).AudioContext = function() {
+          return {
+            currentTime: 0,
+            destination: {},
+            createOscillator: () => ({
+              connect: () => {},
+              start: () => {},
+              stop: () => {},
+              type: "sine",
+              frequency: { setValueAtTime: () => {} }
+            }),
+            createGain: () => ({
+              connect: () => {},
+              gain: { setValueAtTime: () => {}, linearRampToValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }
+            })
+          };
+        };
+        (window as any).webkitAudioContext = (window as any).AudioContext;
+      } catch (e) {
+        console.error("Audio mock failed", e);
+      }
+    }
+  }, [isEmbed]);
+
   if (!product) return notFound();
 
   if (!dbData) return (
