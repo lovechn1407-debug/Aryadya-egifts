@@ -969,8 +969,17 @@ export default function RoyalWedding({
                                       <div style={{ display: "flex", gap: 6 }}>
                                         <button
                                           onClick={() => {
-                                            oc?.(`${evt.id}_map_url`, "");
-                                            alert("Map link set to search by location name.");
+                                            const defaultSearchQuery = d[evt.venueKey] || "The Oberoi Udaivilas Udaipur";
+                                            const query = prompt("Enter location name to search on Google Maps:", defaultSearchQuery);
+                                            if (query) {
+                                              window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, "_blank");
+                                              setTimeout(() => {
+                                                const url = prompt(`Google Maps has been opened in a new tab to search for "${query}".\n\n1. Find the suitable location.\n2. Copy the URL from the browser address bar.\n3. Paste the URL here to save it:`);
+                                                if (url) {
+                                                  oc?.(`${evt.id}_map_url`, url);
+                                                }
+                                              }, 1000);
+                                            }
                                           }}
                                           style={{
                                             background: !customMapUrl ? "#a6384f" : "rgba(0,0,0,0.05)",
@@ -1386,9 +1395,10 @@ export default function RoyalWedding({
           {/* Background Music Settings (Slide 0 in editor) */}
           {em && forcedSlide === 0 && (
             <div style={{
-              position: "fixed", inset: 0, zIndex: 999, background: "rgba(6, 13, 11, 0.88)",
-              backdropFilter: "blur(8px)", display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center"
+              position: "fixed", top: "98px", bottom: 0, left: 0, right: 0, zIndex: 400,
+              background: "rgba(6, 13, 11, 0.88)", backdropFilter: "blur(8px)",
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              padding: 24, textAlign: "center"
             }}>
               <div style={{
                 background: "#fcf8f0", border: "4px double #d8a957", borderRadius: 20,
