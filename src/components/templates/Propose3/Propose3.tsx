@@ -314,6 +314,7 @@ export default function Propose3({
   const [activeSlide, setActiveSlide] = useState(1);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [bgModalOpen, setBgModalOpen] = useState(false);
+  const [pleadingOpen, setPleadingOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -356,6 +357,9 @@ export default function Propose3({
 
   const nextSlide = () => {
     PlaySynth.pop();
+    if (activeSlide === 1 && audioRef.current && !musicPlaying && !em) {
+      audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => {});
+    }
     if (activeSlide < 9) {
       setActiveSlide(activeSlide + 1);
     }
@@ -483,7 +487,7 @@ export default function Propose3({
         <button
           onClick={toggleMusic}
           style={{
-            position: "fixed", bottom: 20, right: 20, zIndex: 1000,
+            position: "fixed", top: 20, right: 20, zIndex: 1000,
             width: 46, height: 46, borderRadius: "50%", background: "#EC4899",
             border: "2px solid #FFFFFF", display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 6px 20px rgba(236,72,153,0.4)", cursor: "pointer"
@@ -806,13 +810,22 @@ export default function Propose3({
                   <ET fid="s4_yes_btn" data={d} onChange={oc} editMode={em} />
                 </motion.button>
 
-                <EscapeButton
-                  yesScale={yesScale}
-                  setYesScale={setYesScale}
-                  onTriggerWarning={() => triggerWarningText(d.s4_no_msg || "Don't overthink it! Your heart knows the answer 💕")}
+                <button
+                  onClick={() => { PlaySynth.clickNo(); setPleadingOpen(true); }}
+                  style={{
+                    background: "rgba(255, 255, 255, 0.12)",
+                    border: "2px solid rgba(255, 255, 255, 0.2)",
+                    borderRadius: "16px",
+                    padding: "12px 28px",
+                    fontSize: "15px",
+                    fontWeight: 700,
+                    color: "rgba(255, 255, 255, 0.65)",
+                    cursor: "pointer",
+                    backdropFilter: "blur(4px)"
+                  }}
                 >
                   <ET fid="s4_no_btn" data={d} onChange={oc} editMode={em} />
-                </EscapeButton>
+                </button>
               </div>
             </motion.div>
           )}
@@ -953,74 +966,30 @@ export default function Propose3({
               
               {/* Envelope Board */}
               <div style={{ margin: "30px 0", position: "relative" }}>
-                {!letterOpen ? (
-                  // Closed Envelope View
-                  <motion.div
-                    whileHover={{ scale: 1.03 }}
-                    onClick={triggerLetterOpen}
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "2.5px dashed #EC4899",
-                      borderRadius: "24px",
-                      padding: "40px 20px",
-                      cursor: "pointer",
-                      maxWidth: 340,
-                      margin: "0 auto"
-                    }}
-                  >
-                    {/* Closed image mascot */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={d.s6_img_closed || "/templates/propose3/cat-hearts.png"}
-                      alt="Closed Envelope Mascot"
-                      style={{ width: 140, height: 140, objectFit: "contain", margin: "0 auto 16px auto", filter: "drop-shadow(0 8px 16px rgba(236,72,153,0.3))" }}
-                    />
-                    <p className="prop-sans" style={{ fontSize: 14, fontWeight: 700, color: "#EC4899", margin: 0 }}>
-                      <ET fid="s6_tap_text" data={d} onChange={oc} editMode={em} />
-                    </p>
-                  </motion.div>
-                ) : (
-                  // Open Letter View
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    style={{
-                      background: "#FFFFFF",
-                      color: "#1E293B",
-                      borderRadius: "24px",
-                      padding: "24px 20px",
-                      maxWidth: 360,
-                      margin: "0 auto",
-                      boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
-                      textAlign: "left",
-                      border: "3px solid #EC4899"
-                    }}
-                  >
-                    {/* Open mascot */}
-                    <div style={{ textAlign: "center", marginBottom: 16 }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={d.s6_img_open || "/templates/propose3/cat-aiming.png"}
-                        alt="Open Letter Mascot"
-                        style={{ width: 110, height: 110, objectFit: "contain", margin: "0 auto" }}
-                      />
-                    </div>
-
-                    <p className="prop-title" style={{ fontSize: "1.6rem", color: "#EC4899", margin: "0 0 12px 0", fontWeight: 700 }}>
-                      My Love,
-                    </p>
-                    
-                    <p className="prop-sans" style={{ fontSize: 14, lineHeight: 1.6, color: "#334155", whiteSpace: "pre-line", marginBottom: 20 }}>
-                      <ET fid="s6_letter_body" data={d} onChange={oc} editMode={em} multiline={true} />
-                    </p>
-
-                    <div style={{ borderTop: "1px dashed #E2E8F0", paddingTop: 12, textAlign: "right" }}>
-                      <span className="prop-title" style={{ fontSize: "1.45rem", color: "#EC4899", display: "block" }}>
-                        <ET fid="s6_signoff" data={d} onChange={oc} editMode={em} />
-                      </span>
-                    </div>
-                  </motion.div>
-                )}
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  onClick={() => { PlaySynth.bell(); nextSlide(); }}
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "2.5px dashed #EC4899",
+                    borderRadius: "24px",
+                    padding: "40px 20px",
+                    cursor: "pointer",
+                    maxWidth: 340,
+                    margin: "0 auto"
+                  }}
+                >
+                  {/* Closed image mascot */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={d.s6_img_closed || "/templates/propose3/cat-hearts.png"}
+                    alt="Closed Envelope Mascot"
+                    style={{ width: 140, height: 140, objectFit: "contain", margin: "0 auto 16px auto", filter: "drop-shadow(0 8px 16px rgba(236,72,153,0.3))" }}
+                  />
+                  <p className="prop-sans" style={{ fontSize: 14, fontWeight: 700, color: "#EC4899", margin: 0 }}>
+                    <ET fid="s6_tap_text" data={d} onChange={oc} editMode={em} />
+                  </p>
+                </motion.div>
               </div>
 
               {/* Upload settings */}
@@ -1036,72 +1005,98 @@ export default function Propose3({
                   </div>
                 </div>
               )}
-
-              {letterOpen && (
-                <motion.button
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  onClick={nextSlide}
-                  style={{
-                    background: "#EC4899",
-                    color: "#FFFFFF",
-                    border: "none",
-                    borderRadius: "50px",
-                    padding: "14px 44px",
-                    fontSize: 15,
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    boxShadow: "0 8px 24px rgba(236,72,153,0.3)",
-                    marginTop: 20
-                  }}
-                >
-                  Continue ➜
-                </motion.button>
-              )}
             </motion.div>
           )}
 
           {activeSlide === 7 && (
             <motion.div
               key="slide7"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
               transition={{ type: "spring", stiffness: 90, damping: 15 }}
+              style={{ width: "100%" }}
             >
-              {/* Mascot decoration */}
-              <div style={{ marginBottom: 20 }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={d.s6_img_closed || "/templates/propose3/cat-hearts.png"}
-                  alt="Final Choice Mascot"
-                  style={{ width: 170, height: 170, objectFit: "contain", margin: "0 auto", filter: "drop-shadow(0 10px 25px rgba(236,72,153,0.4))" }}
-                />
-              </div>
+              {/* Open Letter View */}
+              <motion.div
+                style={{
+                  background: "linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02))",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderRadius: "28px",
+                  padding: "32px 24px",
+                  maxWidth: 400,
+                  width: "100%",
+                  margin: "0 auto 30px auto",
+                  boxShadow: "0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
+                  textAlign: "center",
+                  position: "relative"
+                }}
+              >
+                {/* Floating bubbles/decorations */}
+                <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", borderRadius: "28px" }}>
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="propose-float"
+                      style={{
+                        position: "absolute", width: 6, height: 6, borderRadius: "50%",
+                        background: "rgba(236, 72, 153, 0.15)",
+                        left: `${15 + i * 15}%`, top: `${20 + (i % 2) * 40}%`,
+                        animationDelay: `${i * 0.5}s`, animationDuration: `${4 + i * 0.5}s`
+                      }}
+                    />
+                  ))}
+                </div>
 
-              {/* Subtitle / Category */}
-              <span className="prop-sans" style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: 2, color: "#EC4899", fontWeight: 700 }}>
-                <ET fid="s7_heading" data={d} onChange={oc} editMode={em} />
-              </span>
+                {/* Open mascot */}
+                <div style={{ textAlign: "center", marginBottom: 20 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={d.s6_img_open || "/templates/propose3/cat-aiming.png"}
+                    alt="Open Letter Mascot"
+                    style={{ width: 120, height: 120, objectFit: "contain", margin: "0 auto", filter: "drop-shadow(0 8px 16px rgba(236,72,153,0.2))" }}
+                  />
+                </div>
 
-              {/* Question */}
-              <h2 className="prop-title animate-prop-beat" style={{ fontSize: "2.6rem", color: "#FFFFFF", margin: "20px 0 40px 0", lineHeight: 1.25 }}>
+                <p className="prop-title" style={{ fontSize: "2rem", color: "#EC4899", margin: "0 0 16px 0", fontWeight: 700 }}>
+                  <ET fid="s7_heading" data={d} onChange={oc} editMode={em} />
+                </p>
+                
+                {/* Letter Body Scroll area */}
+                <div style={{
+                  maxHeight: 220, overflowY: "auto", paddingRight: 8, textAlign: "left",
+                  fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", whiteSpace: "pre-line",
+                  scrollbarWidth: "thin"
+                }}>
+                  <ET fid="s6_letter_body" data={d} onChange={oc} editMode={em} multiline={true} />
+                </div>
+
+                <div style={{ borderTop: "1px dashed rgba(255,255,255,0.15)", paddingTop: 16, marginTop: 16, textAlign: "right" }}>
+                  <p style={{ fontSize: 14, fontStyle: "italic", color: "rgba(255,255,255,0.5)", margin: "0 0 4px 0" }}>Forever yours,</p>
+                  <span className="prop-title" style={{ fontSize: "1.6rem", color: "#EC4899", display: "block" }}>
+                    <ET fid="s6_signoff" data={d} onChange={oc} editMode={em} />
+                  </span>
+                </div>
+              </motion.div>
+
+              {/* Proposal Question / Pleading Subtext */}
+              <p className="prop-sans animate-prop-beat" style={{ fontSize: 18, color: "rgba(255,255,255,0.85)", margin: "0 auto 24px auto", maxWidth: 360, fontWeight: 700 }}>
                 <ET fid="s7_question" data={d} onChange={oc} editMode={em} />
-              </h2>
+              </p>
 
               {/* The big proposal yes button */}
               <motion.button
-                whileHover={{ scale: 1.08 }}
+                whileHover={{ scale: 1.05 }}
                 onClick={nextSlide}
-                className="pulse-pink-glow"
+                className="pulse-pink-glow animate-pulse"
                 style={{
                   background: "linear-gradient(135deg, #EC4899, #F43F5E)",
                   color: "#FFFFFF",
                   border: "none",
                   borderRadius: "50px",
-                  padding: "18px 48px",
+                  padding: "16px 44px",
                   fontSize: 16,
-                  fontWeight: 900,
+                  fontWeight: 950,
                   cursor: "pointer",
                   letterSpacing: 0.5
                 }}
@@ -1250,6 +1245,86 @@ export default function Propose3({
             setBgModalOpen(false);
           }}
         />
+      )}
+
+      {/* Pleading Modal overlay for Slide 4 No Button */}
+      {pleadingOpen && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 2000,
+          background: "rgba(15, 8, 29, 0.85)", backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 16
+        }}>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{
+              background: "linear-gradient(135deg, #1E1B4B, #110C24)",
+              border: "3px double #EC4899",
+              borderRadius: "24px",
+              padding: "32px 24px",
+              maxWidth: 400,
+              width: "100%",
+              textAlign: "center",
+              boxShadow: "0 20px 50px rgba(236,72,153,0.3)"
+            }}
+          >
+            <div style={{ marginBottom: 16 }}>
+              <img
+                src={d.s2_img || "/templates/propose3/cat-sad.png"}
+                alt="Pleading Mascot"
+                style={{ width: 140, height: 140, objectFit: "contain", margin: "0 auto", filter: "drop-shadow(0 8px 16px rgba(236,72,153,0.3))" }}
+              />
+            </div>
+            
+            <h3 className="prop-title" style={{ fontSize: "1.8rem", color: "#EC4899", marginBottom: 12 }}>
+              Please think again... 🥺
+            </h3>
+            
+            <p className="prop-sans" style={{ fontSize: 15, color: "rgba(255,255,255,0.8)", lineHeight: 1.6, marginBottom: 24 }}>
+              {d.s4_no_msg || "Don't overthink it! Your heart knows the answer 💕"}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button
+                onClick={() => {
+                  PlaySynth.success();
+                  setPleadingOpen(false);
+                  nextSlide();
+                }}
+                className="pulse-pink-glow"
+                style={{
+                  background: "linear-gradient(135deg, #EC4899, #F43F5E)",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "16px",
+                  padding: "12px 24px",
+                  fontSize: "15px",
+                  fontWeight: 800,
+                  cursor: "pointer"
+                }}
+              >
+                Yes, I'm Yours! 💝
+              </button>
+              
+              <button
+                onClick={() => setPleadingOpen(false)}
+                style={{
+                  background: "none",
+                  border: "1px dashed rgba(255,255,255,0.2)",
+                  color: "rgba(255,255,255,0.5)",
+                  borderRadius: "16px",
+                  padding: "10px 24px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer"
+                }}
+              >
+                Let me think... 🤔
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );
