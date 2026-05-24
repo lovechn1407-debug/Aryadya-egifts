@@ -10,6 +10,7 @@ import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse
 import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourney/LoversEnchantedJourney";
 import RoyalWedding from "@/components/templates/RoyalWedding/RoyalWedding";
 import RoyalWedding2 from "@/components/templates/RoyalWedding/RoyalWedding2";
+import DuduBirthday from "@/components/templates/DuduBirthday/DuduBirthday";
 import QRSharePopup from "@/components/QRSharePopup";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
@@ -83,6 +84,19 @@ const WEDDING_SLIDES = [
   { n: 6, label: "RSVP" }
 ];
 
+const DUDU_BIRTHDAY_SLIDES = [
+  { n: 0, label: "BG Music" },
+  { n: 1, label: "Welcome" },
+  { n: 2, label: "Claw Machine" },
+  { n: 3, label: "Polaroids" },
+  { n: 4, label: "Bake Cake" },
+  { n: 5, label: "Cake Cutting" },
+  { n: 6, label: "Wishing Well" },
+  { n: 7, label: "Rhythm Dance" },
+  { n: 8, label: "Scratch Card" },
+  { n: 9, label: "Finale" }
+];
+
 function getSlideList(productId: string) {
   if (productId === "lovers-enchanted-journey") return LOVERS_SLIDES;
   if (productId === "birthday-magic-box") return BIRTHDAY_SLIDES;
@@ -91,6 +105,7 @@ function getSlideList(productId: string) {
   if (productId === "my-love-s-universe") return UNIVERSE_SLIDES;
   if (productId === "royal-wedding-card") return WEDDING_SLIDES;
   if (productId === "royal-wedding-card-2") return WEDDING_SLIDES;
+  if (productId === "pastel-dudu-birthday") return DUDU_BIRTHDAY_SLIDES;
   return [];
 }
 
@@ -163,6 +178,16 @@ function renderEditorTemplate(
   if (productId === "royal-wedding-card-2") {
     return (
       <RoyalWedding2
+        customData={customData}
+        editMode={true}
+        onFieldChange={onFieldChange}
+        forcedSlide={forcedSlide}
+      />
+    );
+  }
+  if (productId === "pastel-dudu-birthday") {
+    return (
+      <DuduBirthday
         customData={customData}
         editMode={true}
         onFieldChange={onFieldChange}

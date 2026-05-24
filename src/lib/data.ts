@@ -751,6 +751,117 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       }
     ]
+  },
+  {
+    id: "pastel-dudu-birthday",
+    name: "Dudu Bear's Birthday Dreamland 🌸",
+    tagline: "A super cute pink-pastel love microsite featuring balloon popping, claw machine capsule grabber, kitchen cake baking, interactive blow-and-slice cake cutting, wishing well, rhythm dance, scratch card, and wax seal stamp lock.",
+    category: "birthday" as const,
+    price: 15900,
+    visible: true,
+    thumbnail: "🌸",
+    previewRoute: "/preview/pastel-dudu-birthday",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 0,
+        title: "Background Music",
+        description: "Curated ambient sound controls",
+        fields: [
+          { id: "bg_song_name", label: "Soundtrack Name", type: "text", defaultValue: "Sweet Pastel Melodies" },
+          { id: "bg_song_url", label: "Soundtrack URL (.mp3)", type: "text", defaultValue: "https://pub-1cc0f6e993214be9a36badeeb631f4b6.r2.dev/templates/template09/assets/song/Template_09.mp3" },
+        ]
+      },
+      {
+        slideNumber: 1,
+        title: "Balloon Parade",
+        description: "Welcome slide popping balloons",
+        fields: [
+          { id: "s1_name", label: "Celebrant Name", type: "text", defaultValue: "Cutie" },
+          { id: "s1_heading", label: "Welcome Heading", type: "text", defaultValue: "Happy Birthday to my favorite person! 🧸💕" },
+          { id: "s1_message", label: "Opening Message", type: "textarea", defaultValue: "Welcome to Dudu & Bubu's Pastel Dreamland. I've custom-made this romantic journey for you. Let's start the celebration by popping the balloons!" },
+          { id: "s1_cta", label: "Unlock Button Text", type: "text", defaultValue: "Unwrap Surprise ✨" }
+        ]
+      },
+      {
+        slideNumber: 2,
+        title: "Claw Machine",
+        description: "Interactive capsule claw game",
+        fields: [
+          { id: "s2_joystick_label", label: "Claw Joystick Text", type: "text", defaultValue: "Drag joystick & press Drop!" },
+          { id: "s2_win_message", label: "Capsule Message", type: "text", defaultValue: "You grabbed my heart! 💖" }
+        ]
+      },
+      {
+        slideNumber: 3,
+        title: "Polaroid Memories",
+        description: "Stack of swipeable photos that flip",
+        fields: [
+          { id: "photo1", label: "Photo 1 (Portrait)", type: "image", defaultValue: "/templates/royal-wedding-2/photo1.jpg" },
+          { id: "photo1_note", label: "Photo 1 Note", type: "text", defaultValue: "Remember this day? 🌸" },
+          { id: "photo2", label: "Photo 2 (Portrait)", type: "image", defaultValue: "/templates/royal-wedding-2/photo2.jpg" },
+          { id: "photo2_note", label: "Photo 2 Note", type: "text", defaultValue: "Our best trip together..." },
+          { id: "photo3", label: "Photo 3 (Portrait)", type: "image", defaultValue: "/templates/royal-wedding-2/photo3.png" },
+          { id: "photo3_note", label: "Photo 3 Note", type: "text", defaultValue: "You make me laugh so much!" },
+          { id: "photo4", label: "Photo 4 (Portrait)", type: "image", defaultValue: "/templates/royal-wedding-2/photo4.png" },
+          { id: "photo4_note", label: "Photo 4 Note", type: "text", defaultValue: "Loving you more every day ❤️" }
+        ]
+      },
+      {
+        slideNumber: 4,
+        title: "Bake Cake",
+        description: "Drag ingredients and stir the cake",
+        fields: [
+          { id: "s4_recipe_title", label: "Recipe Box Title", type: "text", defaultValue: "Chef Dudu's Kitchen" },
+          { id: "s4_success_message", label: "Success Message", type: "text", defaultValue: "Stirring complete! Time to bake 🎂" }
+        ]
+      },
+      {
+        slideNumber: 5,
+        title: "Cake Cutting",
+        description: "Blow candles and slice the cake",
+        fields: [
+          { id: "s5_age", label: "Age Turning", type: "text", defaultValue: "21" },
+          { id: "s5_wish_message", label: "Wish Inside Cake", type: "textarea", defaultValue: "May all your birthday wishes come true, my favorite human! 🧸✨" }
+        ]
+      },
+      {
+        slideNumber: 6,
+        title: "Wishing Well",
+        description: "Drop shooting stars into the well",
+        fields: [
+          { id: "s6_well_label", label: "Well Caption", type: "text", defaultValue: "Make a wish! Drop a star in the well ✨" },
+          { id: "s6_sender_wish", label: "Personalized Wish", type: "textarea", defaultValue: "I wish for your infinite smiles, countless filter coffees together, and endless warm hugs! Happy Birthday!" }
+        ]
+      },
+      {
+        slideNumber: 7,
+        title: "Rhythm Dance",
+        description: "Interactive rhythm tap dance game",
+        fields: [
+          { id: "s7_dance_label", label: "Rhythm Game Title", type: "text", defaultValue: "Dudu & Bubu's Rhythm Dance" },
+          { id: "s7_success_banner", label: "Dance Victory Banner", type: "text", defaultValue: "You got the rhythm! 🎀" }
+        ]
+      },
+      {
+        slideNumber: 8,
+        title: "Scratch Card",
+        description: "Rub off glitter to read a love letter",
+        fields: [
+          { id: "s8_scratch_label", label: "Scratch Header", type: "text", defaultValue: "Glitter Scratch Card ✨" },
+          { id: "s8_secret_letter", label: "Hidden Letter Text", type: "textarea", defaultValue: "Dearest Cutie,\n\nYou make my world brighter and warmer every day. Thank you for being the sweetest, most wonderful partner I could ask for. Have the best birthday!\n\nWith all my love 💗" }
+        ]
+      },
+      {
+        slideNumber: 9,
+        title: "Finale",
+        description: "Slam wax seal stamp to lock",
+        fields: [
+          { id: "s9_seal_label", label: "Wax Seal Text", type: "text", defaultValue: "Seal with Love" },
+          { id: "s9_footer_sig", label: "Footer Signature", type: "text", defaultValue: "Dudu & Bubu Approved 💖" }
+        ]
+      }
+    ]
   }
 ];
 

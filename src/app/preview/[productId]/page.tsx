@@ -9,6 +9,7 @@ import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse
 import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourney/LoversEnchantedJourney";
 import RoyalWedding from "@/components/templates/RoyalWedding/RoyalWedding";
 import RoyalWedding2 from "@/components/templates/RoyalWedding/RoyalWedding2";
+import DuduBirthday from "@/components/templates/DuduBirthday/DuduBirthday";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -28,6 +29,8 @@ function renderTemplate(productId: string, customData: Record<string, string>, a
       return <RoyalWedding customData={customData} autoPlay={autoPlay} />;
     case "royal-wedding-card-2":
       return <RoyalWedding2 customData={customData} autoPlay={autoPlay} />;
+    case "pastel-dudu-birthday":
+      return <DuduBirthday customData={customData} autoPlay={autoPlay} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#fff" }}>
