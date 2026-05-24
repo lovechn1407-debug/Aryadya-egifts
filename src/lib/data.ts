@@ -862,6 +862,132 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       }
     ]
+  },
+  {
+    id: "propose3",
+    name: "Interactive Cat Proposal 🐱💖",
+    tagline: "A beautiful multi-stage cat-themed interactive proposal site with fun escape buttons, memory carousel, heart envelope, and fireworks celebration",
+    category: "proposal" as const,
+    price: 12900,
+    visible: true,
+    thumbnail: "🐱",
+    previewRoute: "/preview/propose3",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 0,
+        title: "Background Music",
+        description: "Plays continuously in the background",
+        fields: [
+          { id: "bg_song_name", label: "Soundtrack Name", type: "text", defaultValue: "Sweet Romantic Piano" },
+          { id: "bg_song_url", label: "Soundtrack URL (.mp3)", type: "text", defaultValue: "" }
+        ]
+      },
+      {
+        slideNumber: 1,
+        title: "Intro Slide",
+        description: "Welcome introduction page",
+        fields: [
+          { id: "s1_name", label: "Beloved Name", type: "text", defaultValue: "Kinza" },
+          { id: "s1_heading", label: "Intro Heading", type: "text", defaultValue: "I have something special to tell you..." },
+          { id: "s1_subtext", label: "Intro Subtext", type: "text", defaultValue: "Something that will change everything for us" },
+          { id: "s1_btn", label: "Intro Button Text", type: "text", defaultValue: "Tap to Begin" },
+          { id: "s1_img", label: "Intro Mascot Image", type: "image", defaultValue: "/templates/propose3/cat-cute.png" }
+        ]
+      },
+      {
+        slideNumber: 2,
+        title: "Trust Question",
+        description: "The first check question",
+        fields: [
+          { id: "s2_heading", label: "Heading", type: "text", defaultValue: "Be honest with me..." },
+          { id: "s2_subtext", label: "Subtext", type: "text", defaultValue: "This is important to me 💕" },
+          { id: "s2_question", label: "Question", type: "text", defaultValue: "Do you trust me?" },
+          { id: "s2_yes_btn", label: "Yes Button Text", type: "text", defaultValue: "Yes, I do 💕" },
+          { id: "s2_no_btn", label: "No Button Text", type: "text", defaultValue: "No 😔" },
+          { id: "s2_no_msg", label: "No Message Warning", type: "text", defaultValue: "Aww, please give me a chance! Just say yes 🥺💕" },
+          { id: "s2_img", label: "Honest Mascot Image", type: "image", defaultValue: "/templates/propose3/cat-sad.png" }
+        ]
+      },
+      {
+        slideNumber: 3,
+        title: "Love Question",
+        description: "The second check question",
+        fields: [
+          { id: "s3_heading", label: "Heading", type: "text", defaultValue: "One more thing..." },
+          { id: "s3_subtext", label: "Subtext", type: "text", defaultValue: "I need to know this 💖" },
+          { id: "s3_question", label: "Question", type: "text", defaultValue: "Do you also love me?" },
+          { id: "s3_yes_btn", label: "Yes Button Text", type: "text", defaultValue: "Yes, I love you! 💖" },
+          { id: "s3_no_btn", label: "No Button Text", type: "text", defaultValue: "No 😢" },
+          { id: "s3_no_msg", label: "No Message Warning", type: "text", defaultValue: "Come on, I know you do! Just admit it 🥰💕" },
+          { id: "s3_img", label: "Love Mascot Image", type: "image", defaultValue: "/templates/propose3/cat-flowers.png" }
+        ]
+      },
+      {
+        slideNumber: 4,
+        title: "Final Confirm",
+        description: "The third check question",
+        fields: [
+          { id: "s4_heading", label: "Heading", type: "text", defaultValue: "Last question, I promise!" },
+          { id: "s4_subtext", label: "Subtext", type: "text", defaultValue: "This one is the most important 🌟" },
+          { id: "s4_question", label: "Question", type: "text", defaultValue: "Will you be mine forever?" },
+          { id: "s4_yes_btn", label: "Yes Button Text", type: "text", defaultValue: "Yes, forever! 💝" },
+          { id: "s4_no_btn", label: "No Button Text", type: "text", defaultValue: "Let me think... 🤔" },
+          { id: "s4_no_msg", label: "No Message Warning", type: "text", defaultValue: "Don't overthink it! Your heart knows the answer 💕" },
+          { id: "s4_img", label: "Final Mascot Image", type: "image", defaultValue: "/templates/propose3/doodle-love.png" }
+        ]
+      },
+      {
+        slideNumber: 5,
+        title: "Memories Carousel",
+        description: "Slider of 3 couple photos & notes",
+        fields: [
+          { id: "s5_heading", label: "Carousel Heading", type: "text", defaultValue: "From the first day I met you..." },
+          { id: "s5_subtext", label: "Carousel Subtext", type: "text", defaultValue: "Every single moment has been magical" },
+          { id: "s5_footer", label: "Carousel Footer", type: "text", defaultValue: "And there are so many more memories to make..." },
+          { id: "s5_btn", label: "Next Button Text", type: "text", defaultValue: "Open My Letter 💌" },
+          { id: "photo1", label: "Photo 1 (Meadow)", type: "image", defaultValue: "/templates/propose3/couple-meadow.png" },
+          { id: "photo1_caption", label: "Photo 1 Caption", type: "text", defaultValue: "The times we spend together in quiet peace 🌸" },
+          { id: "photo2", label: "Photo 2 (Beach)", type: "image", defaultValue: "/templates/propose3/couple-beach.png" },
+          { id: "photo2_caption", label: "Photo 2 Caption", type: "text", defaultValue: "Every sunset beach walk feels like a dream 🌅" },
+          { id: "photo3", label: "Photo 3 (Stars)", type: "image", defaultValue: "/templates/propose3/couple-stars.png" },
+          { id: "photo3_caption", label: "Photo 3 Caption", type: "text", defaultValue: "Under the stars, you're the brightest light ✨" }
+        ]
+      },
+      {
+        slideNumber: 6,
+        title: "Heart Letter",
+        description: "An envelope reveal and handwritten letter",
+        fields: [
+          { id: "s6_heading", label: "Letter Title", type: "text", defaultValue: "This is just for you..." },
+          { id: "s6_tap_text", label: "Letter Open Hint", type: "text", defaultValue: "Click the envelope to open and read..." },
+          { id: "s6_letter_body", label: "Letter Content", type: "textarea", defaultValue: "Dearest,\n\nFrom the moment you entered my life, everything changed. You are my laughter on hard days, my peace when things are chaotic, and my absolute favorite person. I want to build a future together, side-by-side, holding your hand.\n\nWith all my heart," },
+          { id: "s6_signoff", label: "Letter Sign-off", type: "text", defaultValue: "Forever yours 💝" },
+          { id: "s6_img_closed", label: "Closed Envelope Mascot", type: "image", defaultValue: "/templates/propose3/cat-hearts.png" },
+          { id: "s6_img_open", label: "Open Letter Mascot", type: "image", defaultValue: "/templates/propose3/cat-aiming.png" }
+        ]
+      },
+      {
+        slideNumber: 7,
+        title: "Final Decision",
+        description: "The ultimate proposal selection screen",
+        fields: [
+          { id: "s7_heading", label: "Ultimate Choice Heading", type: "text", defaultValue: "The ultimate choice..." },
+          { id: "s7_question", label: "Proposal Question", type: "text", defaultValue: "Will you make me the happiest person in the world?" },
+          { id: "s7_btn", label: "Yes Button Text", type: "text", defaultValue: "Yes, I'm Yours Forever! 💝" }
+        ]
+      },
+      {
+        slideNumber: 8,
+        title: "Celebration",
+        description: "Yay celebration fireworks page",
+        fields: [
+          { id: "s8_heading", label: "Celebration Title", type: "text", defaultValue: "YAY! She Said YES! 🎉" },
+          { id: "s8_subtext", label: "Celebration Subtext", type: "text", defaultValue: "Together Forever 💖" },
+          { id: "s8_promise", label: "Final Promise Text", type: "textarea", defaultValue: "I promise to love you, cherish you, and hold you close through all of life's seasons." }
+        ]
+      }
+    ]
   }
 ];
 

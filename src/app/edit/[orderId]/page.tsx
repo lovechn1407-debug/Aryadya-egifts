@@ -11,6 +11,7 @@ import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourne
 import RoyalWedding from "@/components/templates/RoyalWedding/RoyalWedding";
 import RoyalWedding2 from "@/components/templates/RoyalWedding/RoyalWedding2";
 import DuduBirthday from "@/components/templates/DuduBirthday/DuduBirthday";
+import Propose3 from "@/components/templates/Propose3/Propose3";
 import QRSharePopup from "@/components/QRSharePopup";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
@@ -97,6 +98,18 @@ const DUDU_BIRTHDAY_SLIDES = [
   { n: 9, label: "Finale" }
 ];
 
+const PROPOSE3_SLIDES = [
+  { n: 0, label: "BG Music" },
+  { n: 1, label: "Intro" },
+  { n: 2, label: "Trust" },
+  { n: 3, label: "Love" },
+  { n: 4, label: "Mine?" },
+  { n: 5, label: "Carousel" },
+  { n: 6, label: "Letter" },
+  { n: 7, label: "Choice" },
+  { n: 8, label: "Celebration" }
+];
+
 function getSlideList(productId: string) {
   if (productId === "lovers-enchanted-journey") return LOVERS_SLIDES;
   if (productId === "birthday-magic-box") return BIRTHDAY_SLIDES;
@@ -106,6 +119,7 @@ function getSlideList(productId: string) {
   if (productId === "royal-wedding-card") return WEDDING_SLIDES;
   if (productId === "royal-wedding-card-2") return WEDDING_SLIDES;
   if (productId === "pastel-dudu-birthday") return DUDU_BIRTHDAY_SLIDES;
+  if (productId === "propose3") return PROPOSE3_SLIDES;
   return [];
 }
 
@@ -188,6 +202,16 @@ function renderEditorTemplate(
   if (productId === "pastel-dudu-birthday") {
     return (
       <DuduBirthday
+        customData={customData}
+        editMode={true}
+        onFieldChange={onFieldChange}
+        forcedSlide={forcedSlide}
+      />
+    );
+  }
+  if (productId === "propose3") {
+    return (
+      <Propose3
         customData={customData}
         editMode={true}
         onFieldChange={onFieldChange}

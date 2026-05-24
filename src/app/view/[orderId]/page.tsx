@@ -10,6 +10,7 @@ import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourne
 import RoyalWedding from "@/components/templates/RoyalWedding/RoyalWedding";
 import RoyalWedding2 from "@/components/templates/RoyalWedding/RoyalWedding2";
 import DuduBirthday from "@/components/templates/DuduBirthday/DuduBirthday";
+import Propose3 from "@/components/templates/Propose3/Propose3";
 import Link from "next/link";
 
 /* ── Vector SVG Components ── */
@@ -80,6 +81,8 @@ function renderFinalTemplate(productId: string, customData: Record<string, strin
       return <RoyalWedding2 customData={customData} />;
     case "pastel-dudu-birthday":
       return <DuduBirthday customData={customData} />;
+    case "propose3":
+      return <Propose3 customData={customData} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#FFF" }}>
