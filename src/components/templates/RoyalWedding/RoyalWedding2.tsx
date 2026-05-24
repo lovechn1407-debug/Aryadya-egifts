@@ -173,6 +173,7 @@ export default function RoyalWedding2({
   const [scrollY, setScrollY] = useState(0);
   const [curtainPart, setCurtainPart] = useState(0); // 0 to 1
   const [unrolledScrolls, setUnrolledScrolls] = useState<Record<number, boolean>>({});
+  const [heroZoomProgress, setHeroZoomProgress] = useState(0);
 
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -238,6 +239,18 @@ export default function RoyalWedding2({
 
     const handleScroll = () => {
       setScrollY(window.scrollY);
+
+      // Robust Hero Zoom Progress
+      const heroEl = document.getElementById("welcome-section");
+      if (heroEl) {
+        const rect = heroEl.getBoundingClientRect();
+        const travel = rect.height - window.innerHeight;
+        if (travel > 0) {
+          const progress = -rect.top / travel;
+          const p = Math.min(1, Math.max(0, progress));
+          setHeroZoomProgress(p);
+        }
+      }
 
       // Curtains calculation (early and fast)
       if (storySectionRef.current) {
@@ -335,8 +348,7 @@ export default function RoyalWedding2({
   };
 
   // Parallax factors
-  const heroProgress = scrollY / (window.innerHeight || 800);
-  const heroP = Math.min(1, Math.max(0, heroProgress));
+  const heroP = heroZoomProgress;
   const heroScale = 1.0 + heroP * 0.45;
   const leafTranslateY = heroP * -18;
   const namesOpacity = Math.max(0, 1 - (heroP - 0.55) / (0.88 - 0.55));
@@ -353,7 +365,7 @@ export default function RoyalWedding2({
   return (
     <div style={{
       background: "#F2EAD4", color: "#1A0C2E", fontFamily: "'Raleway', sans-serif",
-      minHeight: "100vh", overflowX: "hidden", position: "relative"
+      minHeight: "100vh", position: "relative"
     }}>
       {/* Dynamic embedded styles */}
       <style dangerouslySetInnerHTML={{ __html: `
@@ -1129,61 +1141,88 @@ export default function RoyalWedding2({
         .gal-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
+          gap: 24px;
         }
         @media(min-width:640px) {
           .gal-grid { grid-template-columns: repeat(4, 1fr); }
         }
         .gal-item {
-          aspect-ratio: 4/5;
-          overflow: visible;
-          transition: transform .5s cubic-bezier(0.22,1.2,0.36,1);
+          background: #FDFBF7;
+          border: 1px solid rgba(200, 150, 10, 0.18);
+          box-shadow: 0 10px 25px rgba(26, 12, 46, 0.08);
+          border-radius: 6px;
+          padding: 12px 12px 36px 12px;
+          transition: transform 0.4s cubic-bezier(0.22,1.2,0.36,1), box-shadow 0.4s;
           position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
         }
         .gal-item:hover {
-          transform: scale(1.03) rotate(2deg);
+          transform: translateY(-8px) scale(1.03) rotate(1.5deg);
+          box-shadow: 0 20px 40px rgba(26, 12, 46, 0.15), 0 4px 12px rgba(200, 150, 10, 0.12);
+          border-color: rgba(200, 150, 10, 0.35);
         }
-        .gal-tall { aspect-ratio: 3/5; }
+        /* Pure CSS Golden Push-pins and Strings for hanging gallery feel */
+        .gal-item::before {
+          content: '';
+          position: absolute;
+          top: -12px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 8px;
+          height: 8px;
+          background: radial-gradient(circle, #E8C890 0%, #C8960A 100%);
+          border-radius: 50%;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          z-index: 3;
+        }
+        .gal-item::after {
+          content: '';
+          position: absolute;
+          top: -12px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 1px;
+          height: 12px;
+          background: linear-gradient(to bottom, #C8960A, rgba(200,150,10,0.4));
+          z-index: 2;
+        }
+        .gal-tall {
+          aspect-ratio: 3/4.2;
+        }
         @media(min-width:640px) {
-          .gal-tall { grid-row: span 2; aspect-ratio: auto; }
+          .gal-tall {
+            grid-row: span 2;
+            aspect-ratio: 3/5.2;
+          }
         }
-        .gal-frame {
+        .gal-item:not(.gal-tall) {
+          aspect-ratio: 4/4.2;
+        }
+        .gal-ph {
+          width: 100%;
+          position: relative;
+          background: #e5e7eb;
+          border-radius: 4px;
+          overflow: hidden;
+          border: 1px solid rgba(26, 12, 46, 0.06);
+          box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+        }
+        /* 3:4 aspect ratio for tall portrait cards */
+        .gal-tall .gal-ph {
+          aspect-ratio: 3/4;
+        }
+        /* 4:3 aspect ratio for wide landscape cards */
+        .gal-item:not(.gal-tall) .gal-ph {
+          aspect-ratio: 4/3;
+        }
+        .gal-ph img {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: fill;
-          pointer-events: none;
-          z-index: 2;
-          transition: transform .5s cubic-bezier(0.22,1.2,0.36,1);
-          transform-origin: center center;
-        }
-        .gal-ph {
-          position: absolute;
-          background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(6px);
-          border: 1px solid rgba(200, 150, 10, .22);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 24px rgba(0, 0, 0, .40);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          border-radius: 6px;
-          overflow: hidden;
-        }
-        /* Portrait Photo bounds adjustment under hanging ropes */
-        .gal-tall .gal-ph {
-          top: 21%;
-          bottom: 3.5%;
-          left: 6.5%;
-          right: 6.5%;
-        }
-        /* Landscape/Square Photo bounds adjustment under hanging ropes */
-        .gal-item:not(.gal-tall) .gal-ph {
-          top: 25.5%;
-          bottom: 4%;
-          left: 6%;
-          right: 6%;
+          object-fit: cover;
         }
 
         /* ── RSVP ── */
@@ -1851,13 +1890,7 @@ export default function RoyalWedding2({
                           />
                         </div>
 
-                        {/* Hanging Frame overlay */}
-                        <img 
-                          className="gal-frame" 
-                          src={item.frame} 
-                          alt="Frame" 
-                          style={{ pointerEvents: "none" }}
-                        />
+                        {/* CSS Polaroid Frame wraps photo automatically */}
 
                         {em && (
                           <div style={{ position: "relative", zIndex: 10, background: "rgba(26,12,46,0.9)", borderBottomLeftRadius: 8, borderBottomRightRadius: 8, padding: 4 }}>
