@@ -112,15 +112,15 @@ const PROPOSE3_SLIDES = [
 ];
 
 const CONFESS_SLIDES = [
-  { n: 0, label: "BG Music" },
-  { n: 1, label: "Welcome" },
-  { n: 2, label: "Why" },
-  { n: 3, label: "Moods" },
-  { n: 4, label: "Chat" },
-  { n: 5, label: "Gallery" },
-  { n: 6, label: "Envelope" },
-  { n: 7, label: "Quiz" },
-  { n: 8, label: "Promise" }
+  { n: -1, label: "BG Music" },
+  { n: 0, label: "Welcome" },
+  { n: 1, label: "Why" },
+  { n: 2, label: "Moods" },
+  { n: 3, label: "Chat" },
+  { n: 4, label: "Gallery" },
+  { n: 5, label: "Envelope" },
+  { n: 6, label: "Quiz" },
+  { n: 7, label: "Promise" }
 ];
 
 function getSlideList(productId: string) {

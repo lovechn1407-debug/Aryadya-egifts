@@ -1001,7 +1001,7 @@ export const PRODUCT_REGISTRY: Product[] = [
     createdAt: new Date().toISOString(),
     slides: [
       {
-        slideNumber: 0,
+        slideNumber: -1,
         title: "Background Music & Setup",
         description: "Background music configuration",
         fields: [
@@ -1010,19 +1010,18 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       },
       {
-        slideNumber: 1,
+        slideNumber: 0,
         title: "Landing Slide",
         description: "Welcoming landing slide with intro mascot",
         fields: [
           { id: "s1_name", label: "Beloved Name", type: "text", defaultValue: "Kinza" },
           { id: "s1_welcome_text", label: "Welcome Message", type: "textarea", defaultValue: "I created a little something just for you, because there are words my heart needs you to hear." },
           { id: "s1_signature", label: "Intro Signature", type: "text", defaultValue: "— this is my heart, speaking to yours 💕" },
-          { id: "s1_btn_text", label: "Button Text", type: "text", defaultValue: "Open My Heart 💌" },
-          { id: "s1_img", label: "Intro Bear Mascot", type: "image", defaultValue: "/templates/confess/dudu1.png" }
+          { id: "s1_btn_text", label: "Button Text", type: "text", defaultValue: "Open My Heart 💌" }
         ]
       },
       {
-        slideNumber: 2,
+        slideNumber: 1,
         title: "Why It's You",
         description: "List of reasons why you love them",
         fields: [
@@ -1037,7 +1036,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       },
       {
-        slideNumber: 3,
+        slideNumber: 2,
         title: "Every Version of You",
         description: "Accordion showing appreciation of all their moods",
         fields: [
@@ -1063,7 +1062,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       },
       {
-        slideNumber: 4,
+        slideNumber: 3,
         title: "Chat Simulator",
         description: "A cute automated messaging screen representing a personal conversation",
         fields: [
@@ -1073,7 +1072,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       },
       {
-        slideNumber: 5,
+        slideNumber: 4,
         title: "Memory Gallery",
         description: "Grid of 3 couple photos & captions",
         fields: [
@@ -1090,7 +1089,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       },
       {
-        slideNumber: 6,
+        slideNumber: 5,
         title: "3D Love Letter Envelope",
         description: "An envelope reveal and letter reading interaction",
         fields: [
@@ -1104,12 +1103,11 @@ export const PRODUCT_REGISTRY: Product[] = [
           { id: "s6_letter_p2", label: "Letter Paragraph 2", type: "textarea", defaultValue: "Every time you smile, I fall in love all over again. Every time you hold my hand, I know I'm exactly where I'm meant to be." },
           { id: "s6_letter_p3", label: "Letter Paragraph 3", type: "textarea", defaultValue: "This isn't just a letter; it's a piece of my soul left here for you to keep, always." },
           { id: "s6_signoff", label: "Letter Sign-off", type: "text", defaultValue: "Forever yours" },
-          { id: "s6_envelope_img", label: "Envelope Closed Bear Icon", type: "image", defaultValue: "/templates/confess/bear14.gif" },
           { id: "s6_btn_text", label: "Letter Continue Button", type: "text", defaultValue: "Continue 💘" }
         ]
       },
       {
-        slideNumber: 7,
+        slideNumber: 6,
         title: "Soulmates Quiz",
         description: "Interactive relationship quiz screen",
         fields: [
@@ -1136,7 +1134,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       },
       {
-        slideNumber: 8,
+        slideNumber: 7,
         title: "Promise & Replay Slide",
         description: "The final page containing your core love promise",
         fields: [
@@ -1144,8 +1142,7 @@ export const PRODUCT_REGISTRY: Product[] = [
           { id: "s8_promise_bold", label: "Bold Promise Text", type: "textarea", defaultValue: "I promise to be your safe place, your biggest cheerleader, and your forever person." },
           { id: "s8_promise_italic", label: "Italic Promise Text", type: "textarea", defaultValue: "Through every storm and every beautiful sunrise — I'm here. Because you are my everything." },
           { id: "s8_footer", label: "Footer Heading", type: "text", defaultValue: "Forever & Always" },
-          { id: "s8_btn_text", label: "Replay Button Text", type: "text", defaultValue: "Replay Story" },
-          { id: "s8_img", label: "Promise Mascot Image", type: "image", defaultValue: "/templates/confess/bear3.gif" }
+          { id: "s8_btn_text", label: "Replay Button Text", type: "text", defaultValue: "Replay Story" }
         ]
       }
     ]

@@ -403,7 +403,12 @@ export default function Confess({
   // Sync forcedSlide inside editor
   useEffect(() => {
     if (em && forcedSlide !== undefined) {
-      setActiveSlide(forcedSlide);
+      if (forcedSlide === -1) {
+        // Stay on the welcome slide when configuring background music
+        setActiveSlide(0);
+      } else {
+        setActiveSlide(forcedSlide);
+      }
     }
   }, [forcedSlide, em]);
 
@@ -501,11 +506,66 @@ export default function Confess({
     { id: 7, sender: "them", text: "I mean it. Forever.", time: "11:47 PM" }
   ];
 
-  useEffect(() => {
-    if (activeSlide !== 3) return;
-    if (chatStep >= qrMessages.length || !chatAutoplay) return;
+  const [chatMessagesList, setChatMessagesList] = useState<Array<{ id: number; sender: "them" | "me"; text: string; time: string }>>([]);
 
-    const currentMsg = qrMessages[chatStep];
+  useEffect(() => {
+    let initial = qrMessages;
+    if (d.chat_messages_json) {
+      try {
+        initial = JSON.parse(d.chat_messages_json);
+      } catch (e) {
+        console.error("Error parsing chat_messages_json", e);
+      }
+    }
+    setChatMessagesList(initial);
+  }, [d.chat_messages_json]);
+
+  const updateMessageText = (id: number, text: string) => {
+    const updated = chatMessagesList.map(m => m.id === id ? { ...m, text } : m);
+    setChatMessagesList(updated);
+    oc?.("chat_messages_json", JSON.stringify(updated));
+  };
+
+  const toggleSender = (id: number) => {
+    const updated = chatMessagesList.map(m => m.id === id ? { ...m, sender: (m.sender === "me" ? "them" : "me") as "me" | "them" } : m);
+    setChatMessagesList(updated);
+    oc?.("chat_messages_json", JSON.stringify(updated));
+  };
+
+  const deleteMessage = (id: number) => {
+    const updated = chatMessagesList.filter(m => m.id !== id);
+    setChatMessagesList(updated);
+    oc?.("chat_messages_json", JSON.stringify(updated));
+  };
+
+  const addMessage = (sender: "me" | "them") => {
+    const newId = chatMessagesList.length > 0 ? Math.max(...chatMessagesList.map(m => m.id)) + 1 : 1;
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = now.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const minutesStr = minutes < 10 ? '0'+minutes : minutes;
+    const timeStr = `${hours}:${minutesStr} ${ampm}`;
+
+    const newMsg = {
+      id: newId,
+      sender,
+      text: sender === "me" ? "New message..." : "New message...",
+      time: timeStr
+    };
+    const updated = [...chatMessagesList, newMsg];
+    setChatMessagesList(updated);
+    oc?.("chat_messages_json", JSON.stringify(updated));
+  };
+
+  useEffect(() => {
+    if (em) return;
+    if (activeSlide !== 3) return;
+    if (chatStep >= chatMessagesList.length || !chatAutoplay) return;
+
+    const currentMsg = chatMessagesList[chatStep];
     const typingTime = currentMsg.sender === "them" ? Math.max(1200, currentMsg.text.length * 30) : 800;
 
     const mainTimer = setTimeout(() => {
@@ -522,15 +582,15 @@ export default function Confess({
     }, 400);
 
     return () => clearTimeout(mainTimer);
-  }, [activeSlide, chatStep, chatAutoplay]);
+  }, [activeSlide, chatStep, chatAutoplay, chatMessagesList, em]);
 
   useEffect(() => {
     chatScrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages, isTyping]);
 
   const advanceChatManual = () => {
-    if (chatStep >= qrMessages.length) return;
-    const currentMsg = qrMessages[chatStep];
+    if (chatStep >= chatMessagesList.length) return;
+    const currentMsg = chatMessagesList[chatStep];
     setChatMessages(prev => [...prev, currentMsg]);
     setChatStep(prev => prev + 1);
   };
@@ -732,7 +792,7 @@ export default function Confess({
               
               <div className="relative mb-8">
                 <motion.img
-                  src={d.s1_img || "/templates/confess/dudu1.png"}
+                  src="/templates/confess/dudu1.png"
                   alt="Cute bear holding a rose"
                   width={220}
                   height={220}
@@ -747,7 +807,6 @@ export default function Confess({
                     y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.8 }
                   }}
                 />
-                {em && <ImageUploader fid="s1_img" data={d} onChange={oc} defaultSrc="/templates/confess/dudu1.png" />}
               </div>
 
               <motion.h1
@@ -1047,21 +1106,49 @@ export default function Confess({
                   <p className="text-xs text-foreground/40 font-semibold mb-6 uppercase tracking-widest text-center mt-2">Today 11:42 PM</p>
                   
                   <AnimatePresence initial={false}>
-                    {chatMessages.map(h => {
+                    {(em ? chatMessagesList : chatMessages).map(h => {
                       const isMe = h.sender === "me";
                       return (
                         <motion.div
                           key={h.id}
-                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                          initial={em ? false : { opacity: 0, y: 20, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           transition={{ type: "spring", stiffness: 200, damping: 20 }}
                           className={`w-full flex ${isMe ? "justify-end" : "justify-start"}`}
                         >
                           <div className={`max-w-[85%] md:max-w-[75%] p-3 md:p-4 shadow-md flex flex-col text-left relative group rounded-2xl ${isMe ? "bg-primary text-primary-foreground rounded-br-sm ml-8" : "bg-card/80 backdrop-blur-md border border-white/5 text-foreground rounded-bl-sm mr-8"}`}>
-                            <p className="text-[15px] md:text-base leading-relaxed font-medium">{h.text}</p>
-                            <span className={`text-[9px] md:text-[10px] mt-1.5 self-end font-semibold tracking-wider ${isMe ? "text-primary-foreground/70" : "text-foreground/40"}`}>
-                              {h.time} {isMe && "✓✓"}
-                            </span>
+                            {em ? (
+                              <textarea
+                                value={h.text}
+                                onChange={(e) => updateMessageText(h.id, e.target.value)}
+                                className="bg-transparent text-inherit border-none outline-none resize-none w-full text-[15px] md:text-base leading-relaxed font-medium"
+                                style={{ color: isMe ? "#fff" : "inherit" }}
+                                rows={Math.max(1, Math.ceil(h.text.length / 30))}
+                              />
+                            ) : (
+                              <p className="text-[15px] md:text-base leading-relaxed font-medium">{h.text}</p>
+                            )}
+                            <div className="flex items-center justify-between gap-4 mt-1.5">
+                              {em && (
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => toggleSender(h.id)}
+                                    className="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded bg-black/20 hover:bg-black/40 text-white font-semibold transition-colors"
+                                  >
+                                    Role: {h.sender === "me" ? "Me" : "Them"}
+                                  </button>
+                                  <button
+                                    onClick={() => deleteMessage(h.id)}
+                                    className="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 hover:bg-red-500/40 text-red-300 font-semibold transition-colors"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              )}
+                              <span className={`text-[9px] md:text-[10px] self-end font-semibold tracking-wider ${isMe ? "text-primary-foreground/70" : "text-foreground/40"}`}>
+                                {h.time} {isMe && "✓✓"}
+                              </span>
+                            </div>
                           </div>
                         </motion.div>
                       );
@@ -1078,6 +1165,23 @@ export default function Confess({
                         <TypingIndicator />
                       </motion.div>
                     )}
+
+                    {em && (
+                      <div className="flex gap-2 justify-center mt-4">
+                        <button
+                          onClick={() => addMessage("them")}
+                          className="px-4 py-2 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-all"
+                        >
+                          + Add Message from Them
+                        </button>
+                        <button
+                          onClick={() => addMessage("me")}
+                          className="px-4 py-2 rounded-full border border-accent/40 bg-accent/10 text-accent-foreground text-xs font-semibold hover:bg-accent/20 transition-all"
+                        >
+                          + Add Message from Me
+                        </button>
+                      </div>
+                    )}
                   </AnimatePresence>
 
                   <div ref={chatScrollRef} className="h-4" />
@@ -1088,7 +1192,7 @@ export default function Confess({
                   <div className="flex-grow h-11 bg-black/40 rounded-full border border-white/10 px-5 flex items-center">
                     <span className="text-foreground/40 text-sm italic font-medium">Message...</span>
                   </div>
-                  {!chatAutoplay && !em && chatStep < qrMessages.length && (
+                  {!chatAutoplay && !em && chatStep < chatMessagesList.length && (
                     <button
                       onClick={advanceChatManual}
                       className="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shrink-0 shadow-lg shadow-primary/30"
@@ -1101,7 +1205,7 @@ export default function Confess({
 
               <div className="mt-8 relative z-40 w-full flex justify-center">
                 <AnimatePresence>
-                  {chatStep >= qrMessages.length && (
+                  {(chatStep >= chatMessagesList.length || em) && (
                     <motion.button
                       initial={{ opacity: 0, y: 20, scale: 0.9 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -1580,14 +1684,13 @@ export default function Confess({
 
               <div className="mb-6 w-full max-w-[280px] md:max-w-xs">
                 <motion.img
-                  src={d.s8_img || "/templates/confess/bear3.gif"}
+                  src="/templates/confess/bear3.gif"
                   alt="Cute bear and panda kissing"
                   className="w-full h-auto drop-shadow-2xl"
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", damping: 15 }}
                 />
-                {em && <ImageUploader fid="s8_img" data={d} onChange={oc} defaultSrc="/templates/confess/bear3.gif" />}
               </div>
 
               <h2 className="text-3xl md:text-5xl font-bold mb-4">
