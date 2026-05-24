@@ -73,6 +73,7 @@ const LOVERS_SLIDES = [
 ];
 
 const WEDDING_SLIDES = [
+  { n: 0, label: "BG Music" },
   { n: 1, label: "Couple" },
   { n: 2, label: "Blessings" },
   { n: 3, label: "Ceremonies" },

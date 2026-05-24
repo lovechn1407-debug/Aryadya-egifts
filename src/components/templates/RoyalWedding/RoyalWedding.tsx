@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
 import { Play, Pause, Compass, Music, Share2, MapPin, Calendar, Clock, Heart, Flower } from "lucide-react";
+import SongLibraryPopup from "@/components/SongLibraryPopup";
 
 // Local ET Component for inline editing in Personalizer
 function ET({ fid, data, onChange, style, multiline = false, editMode = false }: {
@@ -190,6 +191,7 @@ export default function RoyalWedding({
   const [menuOpen, setMenuOpen] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
+  const [bgModalOpen, setBgModalOpen] = useState(false);
 
   // Audio elements
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -746,8 +748,7 @@ export default function RoyalWedding({
               <p className="royal-display" style={{ fontSize: 14, fontStyle: "italic", color: "#d8a957", marginTop: 4, letterSpacing: 0.5 }}>
                 at <ET fid="wedding_venue" data={d} onChange={oc} editMode={em} />
               </p>
-
-              <p className="royal-display" style={{ fontSize: 16, fontWeight: 700, color: "#f7eedc", opacity: 0.8, letterSpacing: 2, textTransform: "uppercase", marginTop: 24 }}>
+               <p className="royal-display" style={{ fontSize: 16, fontWeight: 700, color: "#f7eedc", opacity: 0.8, letterSpacing: 2, textTransform: "uppercase", marginTop: 24 }}>
                 <ET fid="hashtag" data={d} onChange={oc} editMode={em} />
               </p>
 
@@ -764,55 +765,6 @@ export default function RoyalWedding({
               >
                 Join the Celebration
               </button>
-
-              {/* Music Editor Panel in Edit Mode */}
-              {em && (
-                <div style={{
-                  marginTop: 32, padding: "16px", background: "rgba(216,169,87,0.06)",
-                  border: "1px dashed rgba(216,169,87,0.4)", borderRadius: 12, textAlign: "left",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)"
-                }}>
-                  <p style={{ margin: 0, fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, color: "#d8a957", fontWeight: 700 }}>Background Music Settings</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                      <span style={{ fontSize: 12, color: "#f7eedc" }}>Current URL:</span>
-                      <input
-                        type="text"
-                        value={d.bg_song_url || ""}
-                        placeholder="Default Royal Music (Active)"
-                        onChange={e => oc?.("bg_song_url", e.target.value)}
-                        style={{
-                          flex: 1, background: "#12211b", border: "1px solid rgba(216,169,87,0.3)",
-                          color: "#fff", padding: "6px 10px", borderRadius: 6, fontSize: 12, outline: "none"
-                        }}
-                      />
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button
-                        onClick={() => oc?.("bg_song_url", "")}
-                        style={{
-                          background: "rgba(255,255,255,0.08)", color: "#f7eedc", border: "1px solid rgba(216,169,87,0.3)",
-                          padding: "6px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer"
-                        }}
-                      >
-                        Reset to Default Music
-                      </button>
-                      <button
-                        onClick={() => {
-                          const url = prompt("Enter custom MP3 music URL:");
-                          if (url !== null) oc?.("bg_song_url", url);
-                        }}
-                        style={{
-                          background: "#a6384f", color: "#fff", border: "none",
-                          padding: "6px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer"
-                        }}
-                      >
-                        Paste Custom URL
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </header>
 
@@ -1431,6 +1383,74 @@ export default function RoyalWedding({
             )}
           </div>
           
+          {/* Background Music Settings (Slide 0 in editor) */}
+          {em && forcedSlide === 0 && (
+            <div style={{
+              position: "fixed", inset: 0, zIndex: 999, background: "rgba(6, 13, 11, 0.88)",
+              backdropFilter: "blur(8px)", display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center"
+            }}>
+              <div style={{
+                background: "#fcf8f0", border: "4px double #d8a957", borderRadius: 20,
+                padding: "40px 24px", maxWidth: 420, width: "100%", boxShadow: "0 20px 50px rgba(0,0,0,0.5)"
+              }}>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+                  <img src="/templates/royal-wedding/pn-inv-div-lotus-divider-x-v01.webp" alt="Lotus" style={{ width: 64 }} />
+                </div>
+                <h3 className="royal-display" style={{ fontStyle: "italic", fontSize: "2rem", color: "#a6384f", marginBottom: 12 }}>
+                  Background Music Settings
+                </h3>
+                <p style={{ fontSize: 14, color: "#3e2b22", lineHeight: 1.6, marginBottom: 28 }}>
+                  Select a majestic background soundtrack for your Royal Wedding invitation card from our curated library.
+                </p>
+
+                <div style={{ background: "rgba(216,169,87,0.06)", border: "1px dashed rgba(216,169,87,0.3)", borderRadius: 12, padding: "14px 18px", marginBottom: 28 }}>
+                  <p style={{ margin: 0, fontSize: 10, textTransform: "uppercase", letterSpacing: 1.5, color: "#8d9a7a", fontWeight: 700 }}>Active Soundtrack</p>
+                  <p style={{ margin: "6px 0 0", fontSize: 16, fontWeight: 700, color: "#3e2b22" }}>
+                    {d.bg_song_name || "Default Royal Music"}
+                  </p>
+                  {d.bg_song_url && (
+                    <button
+                      onClick={() => {
+                        oc?.("bg_song_name", "Default Royal Music");
+                        oc?.("bg_song_url", "");
+                      }}
+                      style={{
+                        marginTop: 10, background: "none", border: "none", color: "#a6384f",
+                        fontSize: 12, fontWeight: 700, cursor: "pointer", textDecoration: "underline"
+                      }}
+                    >
+                      Reset to Default
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setBgModalOpen(true)}
+                  style={{
+                    background: "linear-gradient(135deg, #a6384f, #77283a)", color: "#fff",
+                    border: "none", borderRadius: 30, padding: "14px 36px", fontSize: 13,
+                    fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", cursor: "pointer",
+                    boxShadow: "0 6px 20px rgba(166,56,79,0.3)"
+                  }}
+                >
+                  🎵 Open Audio Library
+                </button>
+              </div>
+            </div>
+          )}
+
+          {bgModalOpen && (
+            <SongLibraryPopup
+              onClose={() => setBgModalOpen(false)}
+              onSelect={(song) => {
+                oc?.("bg_song_name", song.name);
+                oc?.("bg_song_url", song.url || "");
+                setBgModalOpen(false);
+              }}
+            />
+          )}
+
         </div>
       )}
     </div>
