@@ -4,7 +4,6 @@ import { Balloon, generateBalloons } from "./Balloon";
 import { Cake } from "./Cake";
 import { Confetti, Popper } from "./Confetti";
 import { Sparkles, Play, Pause, Share2, RotateCcw, Stamp, ChevronUp } from "lucide-react";
-import html2canvas from "html2canvas";
 import SongLibraryPopup from "@/components/SongLibraryPopup";
 
 type Stage = "intro" | "balloons" | "cake" | "memories" | "envelope" | "letter";
@@ -585,8 +584,8 @@ function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>voi
     if (!letterRef.current) return;
     setSharing(true);
     try {
-      const canvas = await html2canvas(letterRef.current, { backgroundColor: null, scale: 2 });
-      const blob: Blob | null = await new Promise((r) => canvas.toBlob(r, "image/png"));
+      const { domToBlob } = await import("modern-screenshot");
+      const blob = await domToBlob(letterRef.current, { backgroundColor: "transparent", scale: 2 });
       if (!blob) throw new Error("blob failed");
       const file = new File([blob], "birthday-letter.png", { type: "image/png" });
       // @ts-ignore

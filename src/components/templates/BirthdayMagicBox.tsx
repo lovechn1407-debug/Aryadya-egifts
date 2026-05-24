@@ -670,17 +670,18 @@ function S9({ d, em, oc, onRestart }: { d: Record<string,string>; em: boolean; o
       }
 
       try {
-        const html2canvas = (await import("html2canvas")).default;
-        const canvas = await html2canvas(element, {
-          useCORS: true,
+        const { domToPng } = await import("modern-screenshot");
+        const dataUrl = await domToPng(element, {
           scale: 2,
           backgroundColor: "rgba(255,245,248,0.97)",
-          logging: false,
-          ignoreElements: (el) => {
-            return el.classList.contains("no-screenshot") || el.tagName === "BUTTON";
+          filter: (el) => {
+            if (el.nodeType === 1) {
+              const htmlEl = el as HTMLElement;
+              return !htmlEl.classList.contains("no-screenshot") && htmlEl.tagName !== "BUTTON";
+            }
+            return true;
           }
         });
-        const dataUrl = canvas.toDataURL("image/png");
         setScreenshotData(dataUrl);
         setOpenModal(true);
       } catch (err) {

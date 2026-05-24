@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
-import html2canvas from "html2canvas";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useSpring, animated } from "@react-spring/web";
 import confetti from "canvas-confetti";
@@ -1841,30 +1840,35 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
     if (!cardRef.current) return;
     setShareLoading(true);
     try {
-      const canvas = await html2canvas(cardRef.current, {
+      const { domToBlob } = await import("modern-screenshot");
+      const blob = await domToBlob(cardRef.current, {
         scale: 2,
-        useCORS: true,
-        backgroundColor: "#050A18",
-        onclone: (_doc, el) => {
-          try {
-            el.style.setProperty("backdrop-filter", "none", "important");
-            el.style.setProperty("-webkit-backdrop-filter", "none", "important");
-            el.style.setProperty("background-color", "#14081E", "important");
-            const children = el.querySelectorAll<HTMLElement>("*");
-            for (let i = 0; i < children.length; i++) {
-              if (children[i] && children[i].style) {
-                children[i].style.setProperty("backdrop-filter", "none", "important");
-                children[i].style.setProperty("-webkit-backdrop-filter", "none", "important");
-              }
-            }
-          } catch (e) {
-            console.log("Safe clone styling failed", e);
+        backgroundColor: "#14081E",
+        filter: (el) => {
+          if (el.nodeType === 1) {
+            return (el as HTMLElement).tagName !== "BUTTON";
           }
+          return true;
         },
-        ignoreElements: (el) => el.tagName === "BUTTON",
+        onCloneNode: (clonedNode) => {
+          if (clonedNode instanceof HTMLElement) {
+            try {
+              clonedNode.style.setProperty("backdrop-filter", "none", "important");
+              clonedNode.style.setProperty("-webkit-backdrop-filter", "none", "important");
+              clonedNode.style.setProperty("background-color", "#14081E", "important");
+              const children = clonedNode.querySelectorAll<HTMLElement>("*");
+              for (let i = 0; i < children.length; i++) {
+                if (children[i] && children[i].style) {
+                  children[i].style.setProperty("backdrop-filter", "none", "important");
+                  children[i].style.setProperty("-webkit-backdrop-filter", "none", "important");
+                }
+              }
+            } catch (e) {
+              console.log("Safe clone styling failed", e);
+            }
+          }
+        }
       });
-      
-      const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/png"));
       if (!blob) throw new Error("no blob");
 
       const file = new File([blob], `lovers-enchanted-proof.png`, { type: "image/png" });

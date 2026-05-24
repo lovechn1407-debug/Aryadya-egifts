@@ -1183,47 +1183,42 @@ function S6({ d, em, oc, onBack, onReset }: {
       }
 
       try {
-        const html2canvas = (await import("html2canvas")).default;
-        const canvas = await html2canvas(element, {
-          useCORS: true,
+        const { domToPng } = await import("modern-screenshot");
+        const dataUrl = await domToPng(element, {
           scale: 2,
-          backgroundColor: "#060c1e", // Cosmic dark background matching My Love's Universe
-          logging: false,
-          
-          onclone: (_clonedDoc, clonedEl) => {
-            // iOS Safari crash fix: backdrop-filter often causes SecurityError or blank canvas
-            clonedEl.style.setProperty('backdrop-filter', 'none', 'important');
-            clonedEl.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-            // Give it a solid background since the blur is gone
-            clonedEl.style.setProperty('background-color', '#120509', 'important');
-
-            // Remove any ignored elements from the clone so Safari doesn't attempt to load them
-            const ignored = clonedEl.querySelectorAll('.no-screenshot');
-            ignored.forEach(el => el.remove());
-
-            // Force the seal overlay fully visible in html2canvas cloned DOM.
-            // html2canvas re-applies CSS in the clone which can reset running
-            // animations to their initial frame (opacity:0). Overriding here
-            // with setProperty guarantees the stamp is always captured.
-            const backdrop = clonedEl.querySelector('.seal-backdrop') as HTMLElement | null;
-            if (backdrop) {
-              backdrop.style.setProperty('animation', 'none', 'important');
-              backdrop.style.setProperty('opacity', '1', 'important');
-              backdrop.style.setProperty('visibility', 'visible', 'important');
+          backgroundColor: "#060c1e",
+          filter: (el) => {
+            if (el.nodeType === 1) {
+              const htmlEl = el as HTMLElement;
+              return !htmlEl.classList.contains("no-screenshot") && htmlEl.tagName !== "BUTTON";
             }
-            const stamp = clonedEl.querySelector('.seal-pressing') as HTMLElement | null;
-            if (stamp) {
-              stamp.style.setProperty('animation', 'none', 'important');
-              stamp.style.setProperty('transform', 'rotate(-12deg) scale(1)', 'important');
-              stamp.style.setProperty('opacity', '1', 'important');
-              stamp.style.setProperty('visibility', 'visible', 'important');
-            }
+            return true;
           },
-          ignoreElements: (el) => {
-            return el.classList.contains('no-screenshot') || el.tagName === 'BUTTON';
+          onCloneNode: (clonedNode) => {
+            if (clonedNode instanceof HTMLElement) {
+              // iOS Safari crash fix: backdrop-filter often causes SecurityError or blank canvas
+              clonedNode.style.setProperty('backdrop-filter', 'none', 'important');
+              clonedNode.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+              // Give it a solid background since the blur is gone
+              clonedNode.style.setProperty('background-color', '#120509', 'important');
+
+              // Force the seal overlay fully visible in cloned DOM
+              const backdrop = clonedNode.querySelector('.seal-backdrop') as HTMLElement | null;
+              if (backdrop) {
+                backdrop.style.setProperty('animation', 'none', 'important');
+                backdrop.style.setProperty('opacity', '1', 'important');
+                backdrop.style.setProperty('visibility', 'visible', 'important');
+              }
+              const stamp = clonedNode.querySelector('.seal-pressing') as HTMLElement | null;
+              if (stamp) {
+                stamp.style.setProperty('animation', 'none', 'important');
+                stamp.style.setProperty('transform', 'rotate(-12deg) scale(1)', 'important');
+                stamp.style.setProperty('opacity', '1', 'important');
+                stamp.style.setProperty('visibility', 'visible', 'important');
+              }
+            }
           }
         });
-        const dataUrl = canvas.toDataURL("image/png");
         setScreenshotData(dataUrl);
         setOpenModal(true);
       } catch (err) {
