@@ -78,26 +78,27 @@ function ImageUploader({ fid, data, onChange, defaultSrc }: {
   const useDefault = () => { onChange?.(fid, ""); setPreview(null); };
 
   return (
-    <div style={{ padding: "8px 12px", background: "rgba(200, 150, 10, 0.04)", borderTop: "1px dashed rgba(200, 150, 10, 0.3)", width: "100%", borderRadius: 8, marginTop: 8 }}>
+    <div style={{ padding: "6px 8px", background: "rgba(200, 150, 10, 0.04)", borderTop: "1px dashed rgba(200, 150, 10, 0.3)", width: "100%", borderRadius: 8, marginTop: 8 }}>
       {preview && (
         <div style={{ marginBottom: 6, textAlign: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={preview} alt="Preview" style={{ maxHeight: 80, borderRadius: 8, border: "2px solid #C8960A" }} />
+          <img src={preview} alt="Preview" style={{ maxHeight: 60, borderRadius: 8, border: "2px solid #C8960A" }} />
         </div>
       )}
-      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
         <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
         <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{
           background: "#C84060", color: "#fff", border: "none", borderRadius: 8,
-          padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-          opacity: uploading ? 0.6 : 1,
-        }}>{uploading ? "Uploading…" : "📷 Change Image"}</button>
+          padding: "6px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+          opacity: uploading ? 0.6 : 1, width: "100%", whiteSpace: "normal", wordBreak: "break-word"
+        }}>{uploading ? "Uploading…" : "📷 Change"}</button>
         {currentSrc && (
           <button onClick={useDefault} style={{
             background: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb",
-            borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer"
+            borderRadius: 8, padding: "6px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+            width: "100%", whiteSpace: "normal", wordBreak: "break-word"
           }}>
-            {fid.startsWith("photo") && parseInt(fid.replace("photo", ""), 10) > 4 ? "🗑️ Remove Photo" : "🗑️ Reset to Default"}
+            {fid.startsWith("photo") && parseInt(fid.replace("photo", ""), 10) > 4 ? "🗑️ Remove" : "🗑️ Reset"}
           </button>
         )}
       </div>
@@ -386,11 +387,12 @@ export default function RoyalWedding2({
         /* Hero Sticky Parallax Pinning */
         .hero-wrap {
           position: relative;
-          height: 200vh;
+          height: 112vh;
+          background: #1A0C2E;
         }
         @media(max-width: 767px) {
           .hero-wrap {
-            height: 180vh;
+            height: 108vh;
           }
         }
         .hero-pin {
@@ -1141,41 +1143,45 @@ export default function RoyalWedding2({
         .gal-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 24px;
+          gap: 12px;
         }
         @media(min-width:640px) {
-          .gal-grid { grid-template-columns: repeat(4, 1fr); }
+          .gal-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+          }
         }
         .gal-item {
           background: #FDFBF7;
-          border: 1px solid rgba(200, 150, 10, 0.18);
-          box-shadow: 0 10px 25px rgba(26, 12, 46, 0.08);
-          border-radius: 6px;
-          padding: 12px 12px 36px 12px;
+          border: 4px solid #4A0E17; /* Deep Kanjivaram Maroon Red */
+          box-shadow: inset 0 0 0 2px #C8960A, 0 10px 25px rgba(26, 12, 46, 0.22); /* Inset gold border + soft shadow */
+          border-radius: 8px;
+          padding: 12px 12px 18px 12px;
           transition: transform 0.4s cubic-bezier(0.22,1.2,0.36,1), box-shadow 0.4s;
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
+          min-width: 0;
+          margin-top: 14px; /* Room for the hanging pin */
         }
         .gal-item:hover {
           transform: translateY(-8px) scale(1.03) rotate(1.5deg);
-          box-shadow: 0 20px 40px rgba(26, 12, 46, 0.15), 0 4px 12px rgba(200, 150, 10, 0.12);
-          border-color: rgba(200, 150, 10, 0.35);
+          box-shadow: inset 0 0 0 2px #E8C890, 0 20px 40px rgba(26, 12, 46, 0.35); /* Brighter gold line on hover */
+          border-color: #5C0612;
         }
         /* Pure CSS Golden Push-pins and Strings for hanging gallery feel */
         .gal-item::before {
-          content: '';
+          content: '✿';
           position: absolute;
-          top: -12px;
+          top: -18px;
           left: 50%;
           transform: translateX(-50%);
-          width: 8px;
-          height: 8px;
-          background: radial-gradient(circle, #E8C890 0%, #C8960A 100%);
-          border-radius: 50%;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          color: #C8960A;
+          font-size: 18px;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.4);
           z-index: 3;
+          line-height: 1;
         }
         .gal-item::after {
           content: '';
@@ -1183,13 +1189,13 @@ export default function RoyalWedding2({
           top: -12px;
           left: 50%;
           transform: translateX(-50%);
-          width: 1px;
-          height: 12px;
+          width: 1.5px;
+          height: 14px;
           background: linear-gradient(to bottom, #C8960A, rgba(200,150,10,0.4));
           z-index: 2;
         }
         .gal-tall {
-          aspect-ratio: 3/4.2;
+          aspect-ratio: 3/4.5;
         }
         @media(min-width:640px) {
           .gal-tall {
@@ -1198,7 +1204,7 @@ export default function RoyalWedding2({
           }
         }
         .gal-item:not(.gal-tall) {
-          aspect-ratio: 4/4.2;
+          aspect-ratio: 4/4.5;
         }
         .gal-ph {
           width: 100%;
@@ -1206,8 +1212,8 @@ export default function RoyalWedding2({
           background: #e5e7eb;
           border-radius: 4px;
           overflow: hidden;
-          border: 1px solid rgba(26, 12, 46, 0.06);
-          box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+          border: 1.5px solid #C8960A; /* Fine gold border around image */
+          box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
         }
         /* 3:4 aspect ratio for tall portrait cards */
         .gal-tall .gal-ph {
@@ -1890,7 +1896,13 @@ export default function RoyalWedding2({
                           />
                         </div>
 
-                        {/* CSS Polaroid Frame wraps photo automatically */}
+                        {/* Traditional South Indian Kolam motif below photo */}
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: 4, opacity: 0.7 }}>
+                          <svg viewBox="0 0 40 20" width="30" height="15" fill="none" stroke="#C8960A" strokeWidth="0.8">
+                            <path d="M20,2 Q10,18 2,10 Q20,10 38,10 Q30,18 20,2 Z" />
+                            <circle cx="20" cy="10" r="1.5" fill="#4A0E17" />
+                          </svg>
+                        </div>
 
                         {em && (
                           <div style={{ position: "relative", zIndex: 10, background: "rgba(26,12,46,0.9)", borderBottomLeftRadius: 8, borderBottomRightRadius: 8, padding: 4 }}>
@@ -1919,7 +1931,7 @@ export default function RoyalWedding2({
                   return numA - numB;
                 });
                 return (
-                  <div style={{ marginTop: 32, display: "flex", gap: 12, justifyContent: "center" }}>
+                  <div style={{ marginTop: 32, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", width: "100%" }}>
                     <button
                       onClick={() => {
                         const nextIdx = photoKeys.length + 1;
