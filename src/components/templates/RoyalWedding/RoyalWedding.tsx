@@ -208,6 +208,21 @@ export default function RoyalWedding({
   const dragStartY = useRef(0);
   const pullThreshold = 95;
 
+  // Prevent mobile browser pull-to-refresh during preloader/rope drag
+  useEffect(() => {
+    if (introState !== "complete") {
+      document.documentElement.style.overscrollBehaviorY = "contain";
+      document.body.style.overscrollBehaviorY = "contain";
+    } else {
+      document.documentElement.style.overscrollBehaviorY = "";
+      document.body.style.overscrollBehaviorY = "";
+    }
+    return () => {
+      document.documentElement.style.overscrollBehaviorY = "";
+      document.body.style.overscrollBehaviorY = "";
+    };
+  }, [introState]);
+
   // Setup unrolling scroll observers
   useEffect(() => {
     if (introState !== "complete") return;
@@ -574,7 +589,8 @@ export default function RoyalWedding({
         <div style={{
           position: "fixed", inset: 0, zIndex: 1000, background: "#060d0b",
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-          transition: "opacity 1.2s ease", overflow: "hidden"
+          transition: "opacity 1.2s ease", overflow: "hidden",
+          overscrollBehaviorY: "contain", overscrollBehavior: "none", touchAction: "none"
         }}>
           {/* Chandelier Overlay */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "100%", pointerEvents: "none" }}>
@@ -645,7 +661,8 @@ export default function RoyalWedding({
                 position: "absolute", top: 0, left: "50%",
                 width: 100, height: "60vh", zIndex: 10, cursor: isPullingRope ? "grabbing" : "grab",
                 transformOrigin: "top center",
-                transform: `translateX(-50%) translateY(${ropePulledDistance}px)`
+                transform: `translateX(-50%) translateY(${ropePulledDistance}px)`,
+                touchAction: "none"
               }}
             >
               <img
