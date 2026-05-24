@@ -476,31 +476,30 @@ export default function Confess({
   const slideTitle = d.s1_name || "Kinza";
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden select-none bg-[#060814] text-[#f8fafc] font-sans">
-      {/* CSS Injection for custom display fonts and animations */}
-      <style jsx global>{`
+    <div className="confess-container relative min-h-screen w-full overflow-hidden select-none bg-[#060814] text-[#f8fafc] font-sans">
+      <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;500;600;700&display=swap');
         
-        .font-display {
-          font-family: 'Dancing Script', cursive;
-        }
-        .font-body {
-          font-family: 'Quicksand', sans-serif;
-        }
-
-        :root {
+        .confess-container {
           --rose: 330 80% 65%;
           --primary: 180 80% 60%;
         }
 
-        .text-glow-rose {
+        .confess-container .font-display {
+          font-family: 'Dancing Script', cursive;
+        }
+        .confess-container .font-body {
+          font-family: 'Quicksand', sans-serif;
+        }
+
+        .confess-container .text-glow-rose {
           text-shadow: 0 0 20px hsl(var(--rose) / 0.5), 0 0 40px hsl(var(--rose) / 0.3);
         }
-        .glow-rose {
+        .confess-container .glow-rose {
           filter: drop-shadow(0 0 20px hsl(var(--rose) / 0.5));
         }
 
-        .btn-primary-depth {
+        .confess-container .btn-primary-depth {
           background: linear-gradient(180deg, #eb4799, #e61980);
           border: 1px solid hsl(330 80% 40%);
           color: #fff;
@@ -509,30 +508,30 @@ export default function Confess({
           transform: translateY(-2px);
           text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        .btn-primary-depth:hover {
+        .confess-container .btn-primary-depth:hover {
           background: linear-gradient(180deg, #ed5ea6, #e8308c);
           box-shadow: 0 1px #f28cbf80 inset, 0 8px #8a0f4d, 0 12px 25px -4px #a1125966;
           transform: translateY(-4px);
         }
-        .btn-primary-depth:active {
+        .confess-container .btn-primary-depth:active {
           transform: translateY(2px);
           box-shadow: 0 1px #e619804d inset, 0 2px #8a0f4d, 0 4px 10px -2px #a1125933;
         }
 
-        .btn-ghost-depth {
+        .confess-container .btn-ghost-depth {
           background: linear-gradient(180deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.6));
           border: 1px solid rgba(235, 71, 153, 0.3);
           box-shadow: 0 1px rgba(250, 209, 230, 0.1) inset, 0 4px rgba(184, 20, 102, 0.5), 0 6px 12px -2px rgba(230, 25, 128, 0.1);
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           transform: translateY(-1px);
         }
-        .btn-ghost-depth:hover {
+        .confess-container .btn-ghost-depth:hover {
           background: linear-gradient(180deg, rgba(30, 41, 59, 1), rgba(15, 23, 42, 0.8));
           border-color: rgba(230, 25, 128, 0.5);
           box-shadow: 0 1px rgba(250, 209, 230, 0.15) inset, 0 6px rgba(161, 18, 89, 0.6), 0 8px 16px -3px rgba(230, 25, 128, 0.15);
           transform: translateY(-3px);
         }
-        .btn-ghost-depth:active {
+        .confess-container .btn-ghost-depth:active {
           transform: translateY(1px);
           box-shadow: 0 1px rgba(250, 209, 230, 0.05) inset, 0 2px rgba(138, 15, 77, 0.4), 0 4px 8px -2px rgba(230, 25, 128, 0.1);
         }
@@ -541,7 +540,7 @@ export default function Confess({
           0%, 100% { opacity: 0.3; transform: scale(0.8); }
           50% { opacity: 1; transform: scale(1.2); }
         }
-        .animate-twinkle {
+        .confess-container .animate-twinkle {
           animation: twinkle 4s ease-in-out infinite;
           will-change: opacity, transform;
         }
@@ -552,18 +551,18 @@ export default function Confess({
           90% { opacity: 0.8; }
           100% { transform: translateY(-300px) rotate(180deg); opacity: 0; }
         }
-        .animate-float-emoji {
+        .confess-container .animate-float-emoji {
           animation: floatEmoji 4s ease-out infinite;
         }
 
-        .no-scrollbar::-webkit-scrollbar {
+        .confess-container .no-scrollbar::-webkit-scrollbar {
           display: none;
         }
-        .no-scrollbar {
+        .confess-container .no-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-      `}</style>
+      ` }} />
 
       {/* Global backgrounds */}
       <TwinkleBackground />
