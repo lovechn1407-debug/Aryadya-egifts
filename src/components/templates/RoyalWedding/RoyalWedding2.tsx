@@ -114,16 +114,11 @@ const getPhotoDefault = (key: string) => {
 };
 
 const getPhotoConfig = (key: string, index: number) => {
-  // Rotate frames based on index
-  const frames = [
-    "/templates/royal-wedding-2/kolam-frame.png",
-    "/templates/royal-wedding-2/kolam-frame.png",
-    "/templates/royal-wedding-2/kolam-frame.png",
-    "/templates/royal-wedding-2/kolam-frame.png",
-  ];
-  const frame = frames[index % frames.length];
   // Determine if it takes full width (landscape style)
-  const colSpan = index === 0 && (index % 4 === 0);
+  const colSpan = index === 0 || (index % 4 === 0);
+  const frame = colSpan
+    ? "/templates/royal-wedding-2/pn-gal-fr-hanging-landscape-x-v01.webp"
+    : "/templates/royal-wedding-2/pn-gal-fr-hanging-portrait-x-v01.webp";
   return { frame, colSpan };
 };
 
@@ -469,6 +464,746 @@ export default function RoyalWedding2({
           100% { transform: translateY(0px) rotate(0deg); }
         }
         .float-leaves { animation: floatLeaves 5.5s ease-in-out infinite; }
+
+        /* ── Section and Container ── */
+        .container {
+          max-width: 1080px;
+          margin: 0 auto;
+          padding: 0 24px;
+        }
+        section {
+          position: relative;
+          overflow: hidden;
+          padding: 100px 0;
+        }
+        .bg-fill {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .s-head {
+          text-align: center;
+          margin-bottom: 56px;
+          position: relative;
+          z-index: 1;
+        }
+        .sh-eye {
+          display: block;
+          font-weight: 300;
+          font-size: .52rem;
+          letter-spacing: .40em;
+          text-transform: uppercase;
+          color: #C8960A;
+          margin-bottom: 12px;
+        }
+        .sh-h {
+          font-family: 'Cinzel', Georgia, serif;
+          font-weight: 400;
+          letter-spacing: .06em;
+          font-size: clamp(1.9rem, 5vw, 3.2rem);
+          color: #1A0C2E;
+          line-height: 1.15;
+        }
+        .sh-h em {
+          font-style: italic;
+          color: #4A1E6E;
+        }
+        .sh-line-wrap {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 40px;
+        }
+
+        /* ── Water Flow Bridge ── */
+        .water-bridge {
+          position: relative;
+          width: 100%;
+          height: 420px;
+          overflow: hidden;
+          z-index: 10;
+        }
+        @media(max-width:768px) {
+          .water-bridge { height: 320px; }
+        }
+        .wb-sky {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, #1A0530 0%, #2E0D52 25%, #3C1268 55%, #2A0D4A 80%, #1A0835 100%);
+        }
+        .wb-horizon {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 120px;
+          background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(200,120,10,.22) 0%, rgba(180,80,10,.08) 40%, transparent 100%);
+          pointer-events: none;
+          z-index: 2;
+        }
+        .wb-water-wrap {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 68%;
+          overflow: hidden;
+        }
+        .wb-wave {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 200%;
+          height: 100%;
+          will-change: transform;
+        }
+        .wb-wave--1 {
+          animation: wbScroll 18s linear infinite;
+          top: -10px;
+        }
+        .wb-wave--2 {
+          animation: wbScroll 12s linear infinite reverse;
+          top: -5px;
+        }
+        .wb-wave--3 {
+          animation: wbScroll 7s linear infinite;
+          top: 0;
+        }
+        @keyframes wbScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .wb-shimmer {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 4;
+          overflow: hidden;
+        }
+        .wb-sh {
+          position: absolute;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(200,150,10,.35), rgba(255,200,80,.55), rgba(200,150,10,.35), transparent);
+          border-radius: 50%;
+          filter: blur(1px);
+          animation: shimmerDrift 6s ease-in-out infinite;
+        }
+        .wb-sh--1 { width: 28%; top: 22%; left: 8%; animation-delay: 0s; animation-duration: 7s; }
+        .wb-sh--2 { width: 18%; top: 44%; left: 55%; animation-delay: 2.2s; animation-duration: 9s; }
+        .wb-sh--3 { width: 22%; top: 33%; left: 30%; animation-delay: 4.1s; animation-duration: 6s; }
+        .wb-sh--4 { width: 14%; top: 58%; left: 72%; animation-delay: 1.5s; animation-duration: 8s; }
+        @keyframes shimmerDrift {
+          0%, 100% { opacity: .4; transform: translateX(0) scaleX(1); }
+          50% { opacity: .9; transform: translateX(18px) scaleX(1.12); }
+        }
+        .wb-swan {
+          position: absolute;
+          bottom: 20%;
+          z-index: 6;
+          filter: drop-shadow(0 8px 24px rgba(200,150,10,.50)) drop-shadow(0 2px 8px rgba(74,30,110,.60));
+        }
+        .wb-swan-wake {
+          position: absolute;
+          bottom: -4px;
+          height: 6px;
+          background: linear-gradient(90deg, rgba(200,150,10,.25), transparent);
+          border-radius: 0 50% 50% 0;
+          pointer-events: none;
+          filter: blur(2px);
+          animation: wakeBreath 4s ease-in-out infinite;
+        }
+        .wb-swan-wake--a { right: 100%; width: 60px; transform-origin: right center; }
+        .wb-swan-wake--b { left: 100%; width: 60px; transform: scaleX(-1); transform-origin: left center; }
+        @keyframes wakeBreath {
+          0%, 100% { opacity: .5; width: 50px; }
+          50% { opacity: .9; width: 80px; }
+        }
+        .wb-veil-bottom {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 80px;
+          background: linear-gradient(180deg, transparent 0%, #1A0535 100%);
+          pointer-events: none;
+          z-index: 20;
+        }
+
+        /* ── Toran ── */
+        .toran {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 160px;
+          overflow: hidden;
+          z-index: 2;
+          pointer-events: none;
+        }
+        .toran-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: top center;
+          animation: toranSway 9s ease-in-out infinite;
+          transform-origin: top center;
+        }
+        @keyframes toranSway {
+          0%, 100% { transform: scaleX(1) translateX(0); }
+          33% { transform: scaleX(1.005) translateX(-8px); }
+          66% { transform: scaleX(1.005) translateX(6px); }
+        }
+
+        /* ── Invitation Card ── */
+        .s-invite {
+          background: #1A0535;
+          padding-top: 0;
+          padding-bottom: 100px;
+          overflow: hidden;
+        }
+        .si-water-bg {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          overflow: hidden;
+          pointer-events: none;
+        }
+        .si-water-base {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, #1A0535 0%, #2A0A48 20%, #350E58 45%, #2A0A48 75%, #1A0535 100%);
+        }
+        .si-lotuses {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          overflow: hidden;
+        }
+        .si-lotus {
+          position: absolute;
+          mix-blend-mode: screen;
+          filter: drop-shadow(0 6px 20px rgba(200,150,10,.45)) drop-shadow(0 0 40px rgba(200,150,10,.20));
+          will-change: transform;
+        }
+        .si-lotus--1 {
+          width: clamp(80px, 9vw, 130px);
+          bottom: 8%;
+          left: 4%;
+          opacity: .70;
+          animation: siLotusFloat 7s ease-in-out infinite 0s, siLotusDrift 28s linear infinite 0s;
+        }
+        .si-lotus--2 {
+          width: clamp(60px, 7vw, 100px);
+          bottom: 14%;
+          right: 6%;
+          opacity: .65;
+          animation: siLotusFloat 8s ease-in-out infinite 2s, siLotusDrift 34s linear infinite reverse 0s;
+        }
+        .si-lotus--3 {
+          width: clamp(50px, 5.5vw, 80px);
+          bottom: 4%;
+          left: 30%;
+          opacity: .45;
+          animation: siLotusFloat 6s ease-in-out infinite 4s, siLotusDrift 40s linear infinite 5s;
+        }
+        @keyframes siLotusFloat {
+          0%, 100% { transform: translateY(0) rotate(-2deg) scale(1); }
+          50% { transform: translateY(-10px) rotate(2deg) scale(1.02); }
+        }
+        @keyframes siLotusDrift {
+          0% { margin-left: 0; }
+          50% { margin-left: 30px; }
+          100% { margin-left: 0; }
+        }
+        .invite-card {
+          max-width: 540px;
+          margin: 0 auto;
+          background: rgba(248, 242, 228, 0.12);
+          backdrop-filter: blur(24px) saturate(160%) brightness(1.10);
+          -webkit-backdrop-filter: blur(24px) saturate(160%) brightness(1.10);
+          border-top: 1px solid rgba(255, 255, 255, 0.50);
+          border-left: 1px solid rgba(255, 255, 255, 0.38);
+          border-right: 1px solid rgba(200, 150, 10, .35);
+          border-bottom: 1px solid rgba(200, 150, 10, .35);
+          padding: 52px 44px;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.40), 0 8px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(200,150,10,.15), 0 0 80px rgba(200,100,10,.12);
+        }
+        @media(max-width:480px) {
+          .invite-card { padding: 36px 18px; }
+        }
+        .card-tl, .card-tr {
+          position: absolute;
+          top: 0;
+        }
+        .card-tl { left: 0; }
+        .card-tr { right: 0; }
+        .i-ganesha {
+          margin-bottom: 16px;
+          display: flex;
+          justify-content: center;
+        }
+        .i-ganesha-img {
+          width: 100px;
+          height: 100px;
+          object-fit: contain;
+          mix-blend-mode: screen;
+          filter: drop-shadow(0 6px 20px rgba(200,150,10,.50));
+        }
+        .i-bless {
+          font-family: 'Lato', sans-serif;
+          font-style: italic;
+          font-size: .88rem;
+          line-height: 2.1;
+          color: #F8F2E4;
+          margin-bottom: 12px;
+          text-shadow: 0 1px 8px rgba(0,0,0,.40);
+        }
+        .i-label {
+          font-size: .50rem;
+          font-weight: 400;
+          letter-spacing: .34em;
+          text-transform: uppercase;
+          color: #E8C890;
+          margin-bottom: 12px;
+          opacity: .90;
+        }
+        .i-names {
+          display: flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 10px;
+          margin: 4px 0 16px;
+          flex-wrap: wrap;
+        }
+        .i-bride, .i-groom {
+          font-family: 'Cinzel', Georgia, serif;
+          font-weight: 400;
+          letter-spacing: .08em;
+          font-size: clamp(1.9rem, 5.8vw, 3.2rem);
+          color: #F8F2E4;
+          text-shadow: 0 2px 20px rgba(200,150,10,.50);
+        }
+        .i-amp {
+          font-family: 'Cinzel', Georgia, serif;
+          font-size: 1.4rem;
+          color: #C8960A;
+        }
+        .i-fam {
+          display: flex;
+          gap: 22px;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin: 14px 0;
+          font-family: 'Raleway', sans-serif;
+          font-weight: 300;
+          font-size: .77rem;
+          line-height: 2;
+          color: rgba(232, 200, 144, .75);
+        }
+        .i-fam em {
+          font-style: italic;
+          font-weight: 700;
+          color: #E8C890;
+          display: block;
+          font-size: .86rem;
+        }
+        .fam-dot {
+          color: #C8960A;
+          align-self: center;
+          font-size: .7rem;
+          opacity: .75;
+        }
+        .i-close {
+          font-family: 'Lato', sans-serif;
+          font-style: italic;
+          font-size: .83rem;
+          color: rgba(248, 242, 228, .70);
+          margin-top: 12px;
+        }
+
+        /* ── Events Schedule ── */
+        .s-events {
+          background: #E8E0F4;
+          padding: 120px 0 160px;
+          position: relative;
+        }
+        .s-events .bg-fill {
+          opacity: .09;
+          mix-blend-mode: multiply;
+        }
+        .ev-paper-veil {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          background: linear-gradient(180deg, rgba(238,232,248,.90) 0%, rgba(230,220,245,.82) 100%);
+          pointer-events: none;
+        }
+
+        /* ── Story Section (Parting Curtains & Couples) ── */
+        .s-story {
+          position: relative;
+          background: #1A0C2E;
+          padding: 0;
+          overflow: hidden;
+        }
+        .st-paper-bg {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background:
+            radial-gradient(ellipse 75% 60% at 50% 48%, rgba(200,120,10,.22) 0%, rgba(200,100,10,.10) 35%, transparent 65%),
+            radial-gradient(ellipse 55% 45% at 20% 80%, rgba(74,30,110,.35) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 40% at 80% 75%, rgba(74,30,110,.28) 0%, transparent 50%),
+            linear-gradient(180deg, #1A0C2E 0%, #2E0D52 30%, #3C1268 55%, #220A3A 80%, #120828 100%);
+        }
+        .st-stage {
+          position: relative;
+          width: 100%;
+          height: 720px;
+          overflow: hidden;
+        }
+        @media(max-width:900px) {
+          .st-stage { height: 600px; }
+        }
+        @media(max-width:600px) {
+          .st-stage { height: 520px; }
+        }
+        @media(max-width:420px) {
+          .st-stage { height: 460px; }
+        }
+        .st-reveal {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 2;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          text-align: center;
+          pointer-events: none;
+          padding: 48px 24px 60px;
+        }
+        .st-mandala {
+          position: absolute;
+          top: 38%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 0;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 1.6s ease .8s;
+          animation: storyMandalaSpin 45s linear infinite;
+        }
+        .st-reveal.revealed .st-mandala {
+          opacity: 0.14;
+        }
+        @keyframes storyMandalaSpin {
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        .st-rv-inner {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+        }
+        .st-rv-header {
+          margin-bottom: 14px;
+          opacity: 0;
+          transform: translateY(16px);
+          transition: opacity 1.0s cubic-bezier(0.22,1.2,0.36,1), transform 1.0s cubic-bezier(0.22,1.2,0.36,1);
+        }
+        .st-reveal.revealed .st-rv-header {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .st-rv-header .sh-eye {
+          color: rgba(200, 150, 10, .85);
+        }
+        .st-rv-header .sh-h {
+          font-size: clamp(1.7rem, 4vw, 2.8rem);
+          line-height: 1.15;
+          color: #F8F2E4;
+        }
+        .st-rv-header .sh-h em {
+          color: #C8960A;
+        }
+        .st-rv-names {
+          display: flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 10px;
+          opacity: 0;
+          transform: translateY(28px) scale(.82);
+          transition: opacity 1.2s cubic-bezier(0.22,1.2,0.36,1) .22s, transform 1.2s cubic-bezier(0.22,1.2,0.36,1) .22s;
+        }
+        .st-reveal.revealed .st-rv-names {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        .st-rv-bride, .st-rv-groom {
+          font-family: 'Cinzel', Georgia, serif;
+          font-weight: 400;
+          letter-spacing: .08em;
+          font-size: clamp(2.2rem, 5.2vw, 4rem);
+          color: #E8C890;
+          text-shadow: 0 2px 24px rgba(200, 150, 10, .40);
+        }
+        .st-rv-amp {
+          font-family: 'Cinzel', Georgia, serif;
+          font-size: clamp(1.1rem, 2.4vw, 1.7rem);
+          color: #C8960A;
+        }
+        .st-rv-verse {
+          font-family: 'Lato', sans-serif;
+          font-style: italic;
+          font-size: clamp(.84rem, 1.8vw, .98rem);
+          color: rgba(232, 200, 144, .80);
+          line-height: 2;
+          margin-bottom: 16px;
+          opacity: 0;
+          transform: translateY(14px);
+          transition: opacity .9s ease .44s, transform .9s ease .44s;
+        }
+        .st-reveal.revealed .st-rv-verse {
+          opacity: .80;
+          transform: translateY(0);
+        }
+        .st-rv-tags {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px 10px;
+          width: min(360px, 88%);
+          justify-items: stretch;
+        }
+        .st-rv-tag {
+          font-size: .52rem;
+          font-weight: 300;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+          color: #E8C890;
+          padding: 7px 14px;
+          background: rgba(255, 255, 255, .06);
+          border: 1px solid rgba(200, 150, 10, .30);
+          text-align: center;
+          opacity: 0;
+          transform: translateY(10px) scale(.95);
+          transition: opacity .6s cubic-bezier(0.22,1.2,0.36,1), transform .6s cubic-bezier(0.22,1.2,0.36,1);
+          backdrop-filter: blur(4px);
+        }
+        .st-reveal.revealed .st-rv-tag {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        .st-rv-tag:nth-child(1) { transition-delay: .58s; }
+        .st-rv-tag:nth-child(2) { transition-delay: .72s; }
+        .st-rv-tag:nth-child(3) { transition-delay: .86s; }
+        .st-rv-tag:nth-child(4) { transition-delay: 1.00s; }
+        .st-curtains {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 4;
+          pointer-events: none;
+        }
+        .st-curt {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 50%;
+          overflow: hidden;
+          will-change: transform;
+          transition: filter 1.6s ease;
+          background: linear-gradient(180deg, #2E0D52 0%, #3C1268 35%, #4A1878 60%, #2E0D52 100%);
+        }
+        .st-curt-l { left: 0; transform-origin: left center; }
+        .st-curt-r { right: 0; transform-origin: right center; }
+        .st-curt-img {
+          display: block;
+          position: absolute;
+          top: 0;
+          height: 100%;
+          width: auto;
+          max-width: none;
+        }
+        .st-curt-l .st-curt-img { right: 0; left: auto; filter: drop-shadow(8px 0 40px rgba(0, 0, 0, .60)); }
+        .st-curt-r .st-curt-img { left: 0; right: auto; transform: scaleX(-1); filter: drop-shadow(-8px 0 40px rgba(0, 0, 0, .60)); }
+        .st-curt-shadow {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 60px;
+          pointer-events: none;
+          z-index: 2;
+        }
+        .st-curt-shadow-l { right: 0; background: linear-gradient(to right, transparent, rgba(0,0,0,.45)); }
+        .st-curt-shadow-r { left: 0; background: linear-gradient(to left, transparent, rgba(0,0,0,.45)); }
+        .st-char {
+          position: absolute;
+          bottom: 0;
+          z-index: 6;
+          pointer-events: none;
+          width: clamp(150px, 18vw, 240px);
+        }
+        .st-bride { left: calc(50% - clamp(150px, 18vw, 240px) - 10px); transform-origin: right bottom; }
+        .st-groom { right: calc(50% - clamp(150px, 18vw, 240px) - 10px); transform-origin: left bottom; }
+        .st-char-img {
+          display: block;
+          width: 100%;
+          height: clamp(260px, 52vh, 460px);
+          object-fit: contain;
+          object-position: bottom center;
+          mix-blend-mode: normal;
+          filter: drop-shadow(0 8px 32px rgba(0,0,0,.50));
+        }
+        .st-groom .st-char-img { height: clamp(312px, 62vh, 552px); }
+        @media(max-width:600px) {
+          .st-bride { left: 0; }
+          .st-groom { right: 0; }
+          .st-char { width: clamp(110px, 28vw, 170px); }
+          .st-char-img { height: clamp(200px, 42vh, 320px); }
+        }
+
+        /* Divider */
+        .diya-div {
+          padding: 4px 0;
+          background: linear-gradient(180deg, #F2EAD4 0%, #1A0C2E 100%);
+          line-height: 0;
+        }
+        .diya-div svg {
+          width: 100%;
+          display: block;
+        }
+
+        /* ── Gallery Section ── */
+        .s-gallery {
+          background: linear-gradient(180deg, #1A0C2E 0%, #220A3A 40%, #1A0C2E 100%);
+          position: relative;
+          overflow: hidden;
+        }
+        .s-gallery::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 0;
+          background:
+            radial-gradient(ellipse 70% 55% at 50% 42%, rgba(200,150,10,.12) 0%, transparent 65%),
+            radial-gradient(ellipse 40% 35% at 10% 80%, rgba(74,30,110,.18) 0%, transparent 55%),
+            radial-gradient(ellipse 35% 30% at 90% 15%, rgba(74,30,110,.14) 0%, transparent 55%);
+        }
+        .gal-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+        @media(min-width:640px) {
+          .gal-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .gal-item {
+          aspect-ratio: 4/5;
+          overflow: visible;
+          transition: transform .5s cubic-bezier(0.22,1.2,0.36,1);
+          position: relative;
+        }
+        .gal-item:hover { transform: scale(1.02); }
+        .gal-tall { aspect-ratio: 3/5; }
+        @media(min-width:640px) {
+          .gal-tall { grid-row: span 2; aspect-ratio: auto; }
+        }
+        .gal-frame {
+          position: absolute;
+          inset: -8%;
+          width: 116%;
+          height: 116%;
+          object-fit: contain;
+          pointer-events: none;
+          z-index: 2;
+          mix-blend-mode: screen;
+          transition: transform .7s cubic-bezier(0.22,1.2,0.36,1);
+          transform-origin: center center;
+        }
+        .gal-item:hover .gal-frame {
+          transform: rotate(4deg) scale(1.03);
+        }
+        .gal-ph {
+          width: 100%;
+          height: 100%;
+          background: rgba(255, 255, 255, 0.04);
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(200, 150, 10, .22);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 24px rgba(0, 0, 0, .40);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        /* ── RSVP ── */
+        .s-rsvp {
+          position: relative;
+          background: #F8F2E4;
+          padding: 120px 0 100px;
+          overflow: hidden;
+        }
+        .rsvp-paper-veil {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background: radial-gradient(ellipse 62% 52% at 50% 32%, rgba(200,150,10,.14) 0%, transparent 60%), linear-gradient(180deg, #F8F2E4 0%, #E8C890 100%);
+        }
+
+        /* ── Floating leaf rules ── */
+        .hero-floats {
+          position: absolute;
+          inset: 0;
+          z-index: 8;
+          pointer-events: none;
+        }
+        .fl {
+          position: absolute;
+          mix-blend-mode: multiply;
+        }
+        .fall-l {
+          width: clamp(44px, 5.8vw, 80px);
+          left: 7%;
+          animation: fallLeaf 9s ease-in-out infinite;
+          opacity: .88;
+          filter: drop-shadow(0 4px 12px rgba(26,12,46,.18));
+        }
+        .fall-r {
+          width: clamp(38px, 5.2vw, 70px);
+          right: 7%;
+          animation: fallLeaf 11s ease-in-out infinite 3s;
+          opacity: .88;
+          filter: drop-shadow(0 4px 12px rgba(26,12,46,.18));
+        }
+        @keyframes fallLeaf {
+          0% { transform: translateY(-70px) rotate(-20deg); opacity: 0; }
+          6% { opacity: .75; }
+          40% { transform: translateY(28vh) rotate(14deg) translateX(18px); opacity: .75; }
+          75% { transform: translateY(62vh) rotate(-14deg) translateX(-12px); opacity: .45; }
+          100% { transform: translateY(102vh) rotate(7deg) translateX(9px); opacity: 0; }
+        }
       `}} />
 
       {/* ──────────────────────────────────────────────────────────
@@ -633,18 +1368,16 @@ export default function RoyalWedding2({
             </div>
 
             {/* Floating falling leaves */}
-            <div style={{ position: "absolute", inset: 0, zIndex: 4, pointerEvents: "none" }}>
+            <div className="hero-floats" aria-hidden="true">
               <img
-                className="swan-l"
-                src="/templates/royal-wedding-2/Element_4.png"
+                className="fl fall-l"
+                src="/templates/royal-wedding-2/Element_204.png"
                 alt="Leaf"
-                style={{ position: "absolute", width: 64, top: "25%", left: "10%", opacity: 0.85 }}
               />
               <img
-                className="swan-r"
-                src="/templates/royal-wedding-2/Element_5.png"
+                className="fl fall-r"
+                src="/templates/royal-wedding-2/Element_205.png"
                 alt="Leaf"
-                style={{ position: "absolute", width: 56, top: "35%", right: "12%", opacity: 0.85 }}
               />
             </div>
 
@@ -779,7 +1512,7 @@ export default function RoyalWedding2({
 
             {/* Banana Toran Swaying */}
             <div className="toran">
-              <img src="/templates/royal-wedding-2/Background_4.png" alt="Toran" className="toran-img" />
+              <img src="/templates/royal-wedding-2/Background_204.png" alt="Toran" className="toran-img" />
             </div>
 
             <div className="container" style={{ position: "relative", zIndex: 5 }}>
@@ -798,7 +1531,7 @@ export default function RoyalWedding2({
 
                 {/* Tanjore Ganesha Breathing */}
                 <div className="i-ganesha">
-                  <img src="/templates/royal-wedding-2/Element_6.png" alt="Ganesha" className="i-ganesha-img ganesha-pulse" />
+                  <img src="/templates/royal-wedding-2/Element_206.png" alt="Ganesha" className="i-ganesha-img ganesha-pulse" />
                 </div>
 
                 <p className="i-bless royal-display">
@@ -846,7 +1579,7 @@ export default function RoyalWedding2({
               ────────────────────────────────────────────────────────── */}
           <section id="events-section" className="s-events">
             {/* Background pattern */}
-            <img className="bg-fill" src="/templates/royal-wedding-2/Background_3.png" alt="Pattern" />
+            <img className="bg-fill" src="/templates/royal-wedding-2/Background_203.png" alt="Pattern" />
             <div className="ev-paper-veil" />
 
             <div className="container">
@@ -909,15 +1642,15 @@ export default function RoyalWedding2({
                         {evt.name}
                       </h3>
                       
-                      <p className="lato-text" style={{ fontSize: 12, fontWeight: 700, color: "#C8960A", letterSpacing: 1, margin: "0 0 10px" }}>
+                      <p className="lato-text" style={{ fontSize: 13, fontWeight: 700, color: "#C8960A", letterSpacing: 1, margin: "0 0 10px" }}>
                         <ET fid={`${evt.key}_date`} data={d} onChange={oc} editMode={em} />
                       </p>
 
                       <div style={{ borderTop: "1px dashed rgba(200,150,10,0.25)", paddingTop: 10, marginTop: 8 }}>
-                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1A0C2E" }}>
+                        <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1A0C2E" }}>
                           📍 <ET fid={`${evt.key}_venue`} data={d} onChange={oc} editMode={em} />
                         </p>
-                        <p style={{ margin: "4px 0 12px", fontSize: 12, fontStyle: "italic", color: "rgba(26,12,46,0.6)" }}>
+                        <p style={{ margin: "4px 0 12px", fontSize: 14, fontStyle: "italic", color: "rgba(26,12,46,0.6)" }}>
                           <ET fid={`${evt.key}_note`} data={d} onChange={oc} editMode={em} />
                         </p>
 
