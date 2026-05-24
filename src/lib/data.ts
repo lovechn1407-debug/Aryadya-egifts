@@ -988,6 +988,167 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       }
     ]
+  },
+  {
+    id: "confess",
+    name: "Interactive Love Confession 💖",
+    tagline: "A beautiful premium love confession site with interactive slides, chat simulator, memory gallery, 3D envelope letter, cute matching heart quiz, and romantic promise page",
+    category: "proposal" as const,
+    price: 13900,
+    visible: true,
+    thumbnail: "💌",
+    previewRoute: "/preview/confess",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 0,
+        title: "Background Music & Setup",
+        description: "Background music configuration",
+        fields: [
+          { id: "bg_song_name", label: "Soundtrack Name", type: "text", defaultValue: "Ed Sheeran - Perfect" },
+          { id: "bg_song_url", label: "Soundtrack URL (.mp3)", type: "text", defaultValue: "https://listenplaycreate.wordpress.com/wp-content/uploads/2019/06/ed-sheeran-perfect.mp3" }
+        ]
+      },
+      {
+        slideNumber: 1,
+        title: "Landing Slide",
+        description: "Welcoming landing slide with intro mascot",
+        fields: [
+          { id: "s1_name", label: "Beloved Name", type: "text", defaultValue: "Kinza" },
+          { id: "s1_welcome_text", label: "Welcome Message", type: "textarea", defaultValue: "I created a little something just for you, because there are words my heart needs you to hear." },
+          { id: "s1_signature", label: "Intro Signature", type: "text", defaultValue: "— this is my heart, speaking to yours 💕" },
+          { id: "s1_btn_text", label: "Button Text", type: "text", defaultValue: "Open My Heart 💌" },
+          { id: "s1_img", label: "Intro Bear Mascot", type: "image", defaultValue: "/templates/confess/dudu1.png" }
+        ]
+      },
+      {
+        slideNumber: 2,
+        title: "Why It's You",
+        description: "List of reasons why you love them",
+        fields: [
+          { id: "s2_heading", label: "Slide Heading", type: "text", defaultValue: "Why It's You, Kinza." },
+          { id: "s2_subtext", label: "Slide Subtext", type: "textarea", defaultValue: "There are billions of people in the world, yet my soul exclusively chose you out of the crowd. Here's exactly why." },
+          { id: "reason1", label: "Reason 1", type: "text", defaultValue: "Because you make the completely mundane feel extraordinary." },
+          { id: "reason2", label: "Reason 2", type: "text", defaultValue: "Because no one else can read my mind exactly the way you endlessly do." },
+          { id: "reason3", label: "Reason 3", type: "text", defaultValue: "Because my restless heart finally found its quiet, safe place residing with you." },
+          { id: "reason4", label: "Reason 4", type: "text", defaultValue: "Because you naturally challenge me to be a beautifully better version of myself." },
+          { id: "reason5", label: "Reason 5", type: "text", defaultValue: "Because loving you is the easiest, most peaceful thing I've ever inexplicably done." },
+          { id: "s2_btn_text", label: "Button Text", type: "text", defaultValue: "And so much more 💖" }
+        ]
+      },
+      {
+        slideNumber: 3,
+        title: "Every Version of You",
+        description: "Accordion showing appreciation of all their moods",
+        fields: [
+          { id: "s3_heading", label: "Slide Heading", type: "text", defaultValue: "Every Version of Kinza." },
+          { id: "s3_subtext", label: "Slide Subtext", type: "textarea", defaultValue: "I don't just love you at your absolute best. I completely accept, cherish, and adore every single phase of you." },
+          { id: "s3_rad_title", label: "Radiant Title", type: "text", defaultValue: "The Radiant You" },
+          { id: "s3_rad_sub", label: "Radiant Subtitle", type: "text", defaultValue: "When you're absolutely glowing" },
+          { id: "s3_rad_desc", label: "Radiant Description", type: "textarea", defaultValue: "There is nothing more infectious than your pure happiness. Your smile lights up every room, and seeing you genuinely happy is my favorite sight in the world." },
+          { id: "s3_rad_img", label: "Radiant Mascot Image", type: "image", defaultValue: "/templates/confess/bear4.gif" },
+          { id: "s3_exh_title", label: "Exhausted Title", type: "text", defaultValue: "The Exhausted You" },
+          { id: "s3_exh_sub", label: "Exhausted Subtitle", type: "text", defaultValue: "When the world gets too heavy" },
+          { id: "s3_exh_desc", label: "Exhausted Description", type: "textarea", defaultValue: "When you're burnt out and need a quiet place to hide, my arms will always be that safe space. You never have to pretend to be strong around me." },
+          { id: "s3_exh_img", label: "Exhausted Mascot Image", type: "image", defaultValue: "/templates/confess/bear6.gif" },
+          { id: "s3_pas_title", label: "Passionate Title", type: "text", defaultValue: "The Passionate You" },
+          { id: "s3_pas_sub", label: "Passionate Subtitle", type: "text", defaultValue: "When you talk about what you love" },
+          { id: "s3_pas_desc", label: "Passionate Description", type: "textarea", defaultValue: "The way your eyes physically light up and you start talking faster when explaining something you deeply care about—it's incredibly captivating. I could listen forever." },
+          { id: "s3_pas_img", label: "Passionate Mascot Image", type: "image", defaultValue: "/templates/confess/bear5.gif" },
+          { id: "s3_fla_title", label: "Flawed Title", type: "text", defaultValue: "The Imperfect You" },
+          { id: "s3_fla_sub", label: "Flawed Subtitle", type: "text", defaultValue: "When you doubt yourself" },
+          { id: "s3_fla_desc", label: "Flawed Description", type: "textarea", defaultValue: "The parts of yourself you try to hide or feel insecure about? Those are the very pieces that make you entirely irreplaceable. I love every single flaw." },
+          { id: "s3_fla_img", label: "Flawed Mascot Image", type: "image", defaultValue: "/templates/confess/bear9.gif" },
+          { id: "s3_btn_text", label: "Button Text", type: "text", defaultValue: "Continue Our Story" }
+        ]
+      },
+      {
+        slideNumber: 4,
+        title: "Chat Simulator",
+        description: "A cute automated messaging screen representing a personal conversation",
+        fields: [
+          { id: "s4_title", label: "Chat Window Title", type: "text", defaultValue: "My Favorite Person Kinza ❤️" },
+          { id: "s4_status", label: "Online Status Text", type: "text", defaultValue: "Online" },
+          { id: "s4_btn_text", label: "Continue Button Text", type: "text", defaultValue: "Continue" }
+        ]
+      },
+      {
+        slideNumber: 5,
+        title: "Memory Gallery",
+        description: "Grid of 3 couple photos & captions",
+        fields: [
+          { id: "s5_title", label: "Gallery Title", type: "text", defaultValue: "Our memories" },
+          { id: "s5_name", label: "Beloved Name", type: "text", defaultValue: "Kinza" },
+          { id: "s5_subtext", label: "Gallery Subtext", type: "textarea", defaultValue: "Every photo tells a piece of our story ✨" },
+          { id: "photo1", label: "Memory Photo 1", type: "image", defaultValue: "/templates/confess/bear11.gif" },
+          { id: "photo1_caption", label: "Photo 1 Caption", type: "text", defaultValue: "Our first adventure 🌄" },
+          { id: "photo2", label: "Memory Photo 2", type: "image", defaultValue: "/templates/confess/bear12.gif" },
+          { id: "photo2_caption", label: "Photo 2 Caption", type: "text", defaultValue: "That perfect sunset 🌅" },
+          { id: "photo3", label: "Memory Photo 3", type: "image", defaultValue: "/templates/confess/bear13.gif" },
+          { id: "photo3_caption", label: "Photo 3 Caption", type: "text", defaultValue: "Laughing together 😂" },
+          { id: "s5_btn_text", label: "Continue Button Text", type: "text", defaultValue: "Continue 💘" }
+        ]
+      },
+      {
+        slideNumber: 6,
+        title: "3D Love Letter Envelope",
+        description: "An envelope reveal and letter reading interaction",
+        fields: [
+          { id: "s6_heading", label: "Letter Title Prefix", type: "text", defaultValue: "A" },
+          { id: "s6_span", label: "Letter Highlighted Title", type: "text", defaultValue: "secret" },
+          { id: "s6_suffix", label: "Letter Title Suffix", type: "text", defaultValue: "for you" },
+          { id: "s6_hint", label: "Envelope Open Text Hint", type: "text", defaultValue: "Open Heart" },
+          { id: "s6_letter_title", label: "Letter Inner Title", type: "text", defaultValue: "My Dearest Kinza," },
+          { id: "s6_letter_tag", label: "Letter Stamp Tag", type: "text", defaultValue: "Confidential" },
+          { id: "s6_letter_p1", label: "Letter Paragraph 1", type: "textarea", defaultValue: "There are things I carry in my heart that words can barely hold. You are the quiet peace in my chaos, the warmth in my coldest days, and the reason I believe in forever." },
+          { id: "s6_letter_p2", label: "Letter Paragraph 2", type: "textarea", defaultValue: "Every time you smile, I fall in love all over again. Every time you hold my hand, I know I'm exactly where I'm meant to be." },
+          { id: "s6_letter_p3", label: "Letter Paragraph 3", type: "textarea", defaultValue: "This isn't just a letter; it's a piece of my soul left here for you to keep, always." },
+          { id: "s6_signoff", label: "Letter Sign-off", type: "text", defaultValue: "Forever yours" },
+          { id: "s6_envelope_img", label: "Envelope Closed Bear Icon", type: "image", defaultValue: "/templates/confess/bear14.gif" },
+          { id: "s6_btn_text", label: "Letter Continue Button", type: "text", defaultValue: "Continue 💘" }
+        ]
+      },
+      {
+        slideNumber: 7,
+        title: "Soulmates Quiz",
+        description: "Interactive relationship quiz screen",
+        fields: [
+          { id: "s7_heading", label: "Quiz Heading", type: "text", defaultValue: "Match My Heart" },
+          { id: "q1_text", label: "Question 1 Text", type: "text", defaultValue: "If I could be anywhere in the universe right now, where would it be?" },
+          { id: "q1_o1", label: "Q1 Option 1 Text", type: "text", defaultValue: "Exploring a beautiful new country ✈️" },
+          { id: "q1_o2", label: "Q1 Option 2 Text", type: "text", defaultValue: "Right here, by your side indefinitely 💕" },
+          { id: "q1_o3", label: "Q1 Option 3 Text", type: "text", defaultValue: "Stargazing on a quiet mountain 🌌" },
+          { id: "q2_text", label: "Question 2 Text", type: "text", defaultValue: "When I look at you, what is my very first thought?" },
+          { id: "q2_o1", label: "Q2 Option 1 Text", type: "text", defaultValue: "'How did I get so incredibly lucky?' ✨" },
+          { id: "q2_o2", label: "Q2 Option 2 Text", type: "text", defaultValue: "'I love their gorgeous smile.' 😊" },
+          { id: "q2_o3", label: "Q2 Option 3 Text", type: "text", defaultValue: "'We are going to have so much fun today.' 🎉" },
+          { id: "q3_text", label: "Question 3 Text", type: "text", defaultValue: "What is my absolute favorite thing about 'us'?" },
+          { id: "q3_o1", label: "Q3 Option 1 Text", type: "text", defaultValue: "The way we can laugh about anything 🤣" },
+          { id: "q3_o2", label: "Q3 Option 2 Text", type: "text", defaultValue: "Our deep, late-night conversations 🌙" },
+          { id: "q3_o3", label: "Q3 Option 3 Text", type: "text", defaultValue: "Knowing I found my forever best friend 💖" },
+          { id: "s7_res_high_title", label: "High Score Result Title", type: "text", defaultValue: "Absolute Soulmates, Kinza 💫" },
+          { id: "s7_res_high_msg", label: "High Score Result Msg", type: "textarea", defaultValue: "You know my heart inside and out! Every perfectly answered question just proves what I already knew: we are absolutely meant to be forever." },
+          { id: "s7_res_med_title", label: "Medium Score Result Title", type: "text", defaultValue: "My Favorite Person, Kinza 💖" },
+          { id: "s7_res_med_msg", label: "Medium Score Result Msg", type: "textarea", defaultValue: "You know me so wonderfully well. I love that no matter what, we're always learning new beautiful things about each other." },
+          { id: "s7_res_low_title", label: "Low Score Result Title", type: "text", defaultValue: "A Never-ending Discovery, Kinza ✨" },
+          { id: "s7_res_low_msg", label: "Low Score Result Msg", type: "textarea", defaultValue: "The best part of this relationship isn't knowing everything perfectly—it's that I get to spend the rest of my life letting you explore my heart." },
+          { id: "s7_btn_text", label: "Continue Button Text", type: "text", defaultValue: "See my final promise" }
+        ]
+      },
+      {
+        slideNumber: 8,
+        title: "Promise & Replay Slide",
+        description: "The final page containing your core love promise",
+        fields: [
+          { id: "s8_title", label: "Promise Title", type: "text", defaultValue: "My promise to Kinza" },
+          { id: "s8_promise_bold", label: "Bold Promise Text", type: "textarea", defaultValue: "I promise to be your safe place, your biggest cheerleader, and your forever person." },
+          { id: "s8_promise_italic", label: "Italic Promise Text", type: "textarea", defaultValue: "Through every storm and every beautiful sunrise — I'm here. Because you are my everything." },
+          { id: "s8_footer", label: "Footer Heading", type: "text", defaultValue: "Forever & Always" },
+          { id: "s8_btn_text", label: "Replay Button Text", type: "text", defaultValue: "Replay Story" },
+          { id: "s8_img", label: "Promise Mascot Image", type: "image", defaultValue: "/templates/confess/bear3.gif" }
+        ]
+      }
+    ]
   }
 ];
 
