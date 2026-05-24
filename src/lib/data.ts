@@ -655,6 +655,102 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       }
     ]
+  },
+  {
+    id: "royal-wedding-card-2",
+    name: "South Indian Wedding Invitation 🪔",
+    tagline: "A traditional South Indian grand wedding invitation featuring layered parallax gopuram, water flow swan animation, silk curtains reveal, and flower petal bursts",
+    category: "wedding" as const,
+    price: 14900,
+    visible: true,
+    thumbnail: "🪔",
+    previewRoute: "/preview/royal-wedding-card-2",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 1,
+        title: "Bride & Groom",
+        description: "Names of the wedding couple and basic details",
+        fields: [
+          { id: "bride_name", label: "Bride's Name", type: "text", defaultValue: "Priya" },
+          { id: "groom_name", label: "Groom's Name", type: "text", defaultValue: "Arjun" },
+          { id: "wedding_date", label: "Wedding Date", type: "text", defaultValue: "12 December 2026" },
+          { id: "wedding_venue", label: "Wedding Venue", type: "text", defaultValue: "Kapaleeshwarar Temple, Chennai" },
+          { id: "hashtag", label: "Wedding Hashtag", type: "text", defaultValue: "#PriyaWedsArjun" },
+        ]
+      },
+      {
+        slideNumber: 2,
+        title: "Invitation & Blessings",
+        description: "Blessing line and parents details",
+        fields: [
+          { id: "blessings", label: "Blessings line", type: "text", defaultValue: "Late Smt. Kamla Kapoor & Shri Harish Kapoor" },
+          { id: "blessings_2", label: "Blessings line 2", type: "text", defaultValue: "Smt. Leela Sharma & Shri Mohan Sharma" },
+          { id: "bride_parents", label: "Bride's Parents", type: "text", defaultValue: "Mr. & Mrs. Suresh Iyer" },
+          { id: "groom_parents", label: "Groom's Parents", type: "text", defaultValue: "Mr. & Mrs. Ramesh Nair" },
+        ]
+      },
+      {
+        slideNumber: 3,
+        title: "Events Schedule",
+        description: "Timings and venues for wedding events",
+        fields: [
+          { id: "mehendi_date", label: "Mehendi Date & Time", type: "text", defaultValue: "11 Dec 2026 · 3:00 PM" },
+          { id: "mehendi_venue", label: "Mehendi Venue", type: "text", defaultValue: "Garden Pavilion" },
+          { id: "mehendi_note", label: "Mehendi Dress Code/Note", type: "text", defaultValue: "Henna, jasmine, folk music and afternoon warmth." },
+          
+          { id: "haldi_date", label: "Haldi Date & Time", type: "text", defaultValue: "11 Dec 2026 · 9:00 AM" },
+          { id: "haldi_venue", label: "Haldi Venue", type: "text", defaultValue: "The Mandapam" },
+          { id: "haldi_note", label: "Haldi Dress Code/Note", type: "text", defaultValue: "Turmeric, coconut water, mango leaves and laughter." },
+          
+          { id: "cocktail_date", label: "Cocktail Date & Time", type: "text", defaultValue: "11 Dec 2026 · 7:00 PM" },
+          { id: "cocktail_venue", label: "Cocktail Venue", type: "text", defaultValue: "The Terrace" },
+          { id: "cocktail_note", label: "Cocktail Dress Code/Note", type: "text", defaultValue: "Fresh coconut, mocktails and a night breeze." },
+
+          { id: "sagan_date", label: "Nischayathartham Date & Time", type: "text", defaultValue: "11 Dec 2026 · 5:00 PM" },
+          { id: "sagan_venue", label: "Nischayathartham Venue", type: "text", defaultValue: "Family Hall" },
+          { id: "sagan_note", label: "Nischayathartham Dress Code/Note", type: "text", defaultValue: "Sacred engagement ceremony with family blessings." },
+          
+          { id: "shaadi_date", label: "Kalyanam Date & Time", type: "text", defaultValue: "12 Dec 2026 · 8:00 AM" },
+          { id: "shaadi_venue", label: "Kalyanam Venue", type: "text", defaultValue: "The Grand Mandapam" },
+          { id: "shaadi_note", label: "Kalyanam Dress Code/Note", type: "text", defaultValue: "The sacred Saptapadi — seven steps, one lifetime." },
+
+          { id: "reception_date", label: "Reception Date & Time", type: "text", defaultValue: "12 Dec 2026 · 7:00 PM" },
+          { id: "reception_venue", label: "Reception Venue", type: "text", defaultValue: "Grand Ballroom" },
+          { id: "reception_note", label: "Reception Dress Code/Note", type: "text", defaultValue: "Celebrate under the stars with a feast fit for royalty." },
+        ]
+      },
+      {
+        slideNumber: 4,
+        title: "Our Story",
+        description: "Brief background text of the couple",
+        fields: [
+          { id: "story_body", label: "Our Story Paragraph", type: "textarea", defaultValue: "Two souls, one sacred thread, a lifetime of grace." }
+        ]
+      },
+      {
+        slideNumber: 5,
+        title: "Memories Gallery",
+        description: "Kolam framed gallery photos",
+        fields: [
+          { id: "photo1", label: "Photo 1 URL (Portrait)", type: "image", defaultValue: "/templates/royal-wedding-2/photo1.jpg" },
+          { id: "photo2", label: "Photo 2 URL (Portrait)", type: "image", defaultValue: "/templates/royal-wedding-2/photo2.jpg" },
+          { id: "photo3", label: "Photo 3 URL (Landscape)", type: "image", defaultValue: "/templates/royal-wedding-2/photo3.png" },
+          { id: "photo4", label: "Photo 4 URL (Portrait)", type: "image", defaultValue: "/templates/royal-wedding-2/photo4.png" },
+        ]
+      },
+      {
+        slideNumber: 6,
+        title: "RSVP & Music",
+        description: "RSVP details, background music, etc.",
+        fields: [
+          { id: "rsvp_headline", label: "RSVP Headline", type: "text", defaultValue: "Will you join us?" },
+          { id: "rsvp_body", label: "RSVP Body Message", type: "textarea", defaultValue: "We have lit the kuthuvillakku, spread the kolam, and saved a seat for you in our mandapam. Come celebrate as we begin this sacred and joyful chapter of our lives." },
+          { id: "rsvp_phone", label: "RSVP WhatsApp Number (including Country Code)", type: "text", defaultValue: "910000000000" },
+          { id: "bg_song_url", label: "Background Music URL (.mp3)", type: "text", defaultValue: "" },
+        ]
+      }
+    ]
   }
 ];
 

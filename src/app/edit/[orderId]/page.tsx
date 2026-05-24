@@ -9,6 +9,7 @@ import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse";
 import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourney/LoversEnchantedJourney";
 import RoyalWedding from "@/components/templates/RoyalWedding/RoyalWedding";
+import RoyalWedding2 from "@/components/templates/RoyalWedding/RoyalWedding2";
 import QRSharePopup from "@/components/QRSharePopup";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
@@ -89,6 +90,7 @@ function getSlideList(productId: string) {
   if (productId === "birthday-bliss-microsite") return BLISS_SLIDES;
   if (productId === "my-love-s-universe") return UNIVERSE_SLIDES;
   if (productId === "royal-wedding-card") return WEDDING_SLIDES;
+  if (productId === "royal-wedding-card-2") return WEDDING_SLIDES;
   return [];
 }
 
@@ -151,6 +153,16 @@ function renderEditorTemplate(
   if (productId === "royal-wedding-card") {
     return (
       <RoyalWedding
+        customData={customData}
+        editMode={true}
+        onFieldChange={onFieldChange}
+        forcedSlide={forcedSlide}
+      />
+    );
+  }
+  if (productId === "royal-wedding-card-2") {
+    return (
+      <RoyalWedding2
         customData={customData}
         editMode={true}
         onFieldChange={onFieldChange}

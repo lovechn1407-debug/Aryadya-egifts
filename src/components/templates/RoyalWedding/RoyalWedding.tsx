@@ -91,12 +91,14 @@ function ImageUploader({ fid, data, onChange, defaultSrc }: {
           background: "#a6384f", color: "#fff", border: "none", borderRadius: 8,
           padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer",
           opacity: uploading ? 0.6 : 1,
-        }}>{uploading ? "Uploading…" : "📷 Upload Image"}</button>
+        }}>{uploading ? "Uploading…" : "📷 Change Image"}</button>
         {currentSrc && (
           <button onClick={useDefault} style={{
             background: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb",
             borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer"
-          }}>Reset</button>
+          }}>
+            {fid.startsWith("photo") && parseInt(fid.replace("photo", ""), 10) > 4 ? "🗑️ Remove Photo" : "🗑️ Reset to Default"}
+          </button>
         )}
       </div>
     </div>
