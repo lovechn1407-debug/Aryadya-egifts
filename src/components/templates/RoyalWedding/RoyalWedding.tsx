@@ -45,6 +45,86 @@ function ET({ fid, data, onChange, style, multiline = false, editMode = false }:
   );
 }
 
+// ── Image Uploader (imgbb) ──
+const IMGBB_KEY = "83e3f88941efd1059a89f016ff302d9e";
+
+function ImageUploader({ fid, data, onChange, defaultSrc }: {
+  fid: string; data: Record<string, string>; onChange?: (id: string, v: string) => void; defaultSrc: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const currentSrc = data[fid] || "";
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
+      const json = await res.json();
+      if (json.success) {
+        onChange?.(fid, json.data.url);
+        setPreview(null);
+      }
+    } catch { /* ignore */ }
+    setUploading(false);
+  };
+
+  const useDefault = () => { onChange?.(fid, ""); setPreview(null); };
+
+  return (
+    <div style={{ padding: "8px 12px", background: "rgba(216,169,87,0.04)", borderTop: "1px dashed rgba(216,169,87,0.3)", width: "100%", borderRadius: 8, marginTop: 8 }}>
+      {preview && (
+        <div style={{ marginBottom: 6, textAlign: "center" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={preview} alt="Preview" style={{ maxHeight: 80, borderRadius: 8, border: "2px solid #d8a957" }} />
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
+        <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{
+          background: "#a6384f", color: "#fff", border: "none", borderRadius: 8,
+          padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+          opacity: uploading ? 0.6 : 1,
+        }}>{uploading ? "Uploading…" : "📷 Upload Image"}</button>
+        {currentSrc && (
+          <button onClick={useDefault} style={{
+            background: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb",
+            borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer"
+          }}>Reset</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const getPhotoDefault = (key: string) => {
+  if (key === "photo1") return "/templates/royal-wedding/Arch_Demo2.png";
+  if (key === "photo2") return "/templates/royal-wedding/Arch_demo.png";
+  if (key === "photo3") return "/templates/royal-wedding/landscape_demo.png";
+  if (key === "photo4") return "/templates/royal-wedding/hero-arch_demo.png";
+  return "/templates/royal-wedding/Arch_Demo2.png";
+};
+
+const getPhotoConfig = (key: string, index: number) => {
+  if (key === "photo1") return { frame: "/templates/royal-wedding/pn-gal-fr-hanging-portrait-x-v01.webp", colSpan: false };
+  if (key === "photo2") return { frame: "/templates/royal-wedding/pn-gal-fr-hanging-portrait-x-v01.webp", colSpan: false };
+  if (key === "photo3") return { frame: "/templates/royal-wedding/pn-gal-fr-hanging-landscape-x-v01.webp", colSpan: true };
+  if (key === "photo4") return { frame: "/templates/royal-wedding/pn-gal-fr-hanging-portrait-x-v01.webp", colSpan: true };
+  
+  const isLandscape = index % 3 === 0;
+  return {
+    frame: isLandscape
+      ? "/templates/royal-wedding/pn-gal-fr-hanging-landscape-x-v01.webp"
+      : "/templates/royal-wedding/pn-gal-fr-hanging-portrait-x-v01.webp",
+    colSpan: isLandscape || index % 4 === 0
+  };
+};
+
 // Sound Synthesizer via Web Audio API (identical bell & ambient effects)
 const PlaySynth = {
   bell() {
@@ -165,6 +245,26 @@ export default function RoyalWedding({
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [introState]);
+
+  // Smooth scroll to slide section in editMode
+  useEffect(() => {
+    if (!em || forcedSlide === undefined || introState !== "complete") return;
+    const sectionMap: Record<number, string> = {
+      1: "welcome-section",
+      2: "invite-section",
+      3: "events-section",
+      4: "couple-section",
+      5: "gallery-section",
+      6: "rsvp-section",
+    };
+    const targetId = sectionMap[forcedSlide];
+    if (targetId) {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [forcedSlide, em, introState]);
 
   // Starfield loop
   useEffect(() => {
@@ -610,7 +710,7 @@ export default function RoyalWedding({
           {/* ──────────────────────────────────────────────────────────
               HERO / WELCOME SLIDE
               ────────────────────────────────────────────────────────── */}
-          <header style={{
+          <header id="welcome-section" style={{
             position: "relative", minHeight: "100vh", display: "flex", flexDirection: "column",
             alignItems: "center", justifyContent: "center", padding: "0 24px",
             background: "linear-gradient(to bottom, #060d0b, #12211b)"
@@ -664,6 +764,55 @@ export default function RoyalWedding({
               >
                 Join the Celebration
               </button>
+
+              {/* Music Editor Panel in Edit Mode */}
+              {em && (
+                <div style={{
+                  marginTop: 32, padding: "16px", background: "rgba(216,169,87,0.06)",
+                  border: "1px dashed rgba(216,169,87,0.4)", borderRadius: 12, textAlign: "left",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)"
+                }}>
+                  <p style={{ margin: 0, fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, color: "#d8a957", fontWeight: 700 }}>Background Music Settings</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <span style={{ fontSize: 12, color: "#f7eedc" }}>Current URL:</span>
+                      <input
+                        type="text"
+                        value={d.bg_song_url || ""}
+                        placeholder="Default Royal Music (Active)"
+                        onChange={e => oc?.("bg_song_url", e.target.value)}
+                        style={{
+                          flex: 1, background: "#12211b", border: "1px solid rgba(216,169,87,0.3)",
+                          color: "#fff", padding: "6px 10px", borderRadius: 6, fontSize: 12, outline: "none"
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        onClick={() => oc?.("bg_song_url", "")}
+                        style={{
+                          background: "rgba(255,255,255,0.08)", color: "#f7eedc", border: "1px solid rgba(216,169,87,0.3)",
+                          padding: "6px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer"
+                        }}
+                      >
+                        Reset to Default Music
+                      </button>
+                      <button
+                        onClick={() => {
+                          const url = prompt("Enter custom MP3 music URL:");
+                          if (url !== null) oc?.("bg_song_url", url);
+                        }}
+                        style={{
+                          background: "#a6384f", color: "#fff", border: "none",
+                          padding: "6px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer"
+                        }}
+                      >
+                        Paste Custom URL
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </header>
 
@@ -826,30 +975,87 @@ export default function RoyalWedding({
                             {/* Ceremony Icon */}
                             <img src={evt.icon} alt={evt.name} style={{ width: 44, height: 44, marginBottom: 8, objectFit: "contain" }} />
                             
-                            <h3 className="royal-display scroll-event-title" style={{ fontStyle: "italic", fontSize: "1.6rem", color: "#a6384f", marginBottom: 2 }}>
+                            <h3 className="royal-display scroll-event-title" style={{ fontStyle: "italic", fontSize: "1.8rem", color: "#a6384f", marginBottom: 2 }}>
                               {evt.name}
                             </h3>
                             <div style={{ width: 60, height: 1, background: "#d8a957", marginBottom: 6 }} />
                             
-                            <p style={{ fontSize: 13, fontWeight: 700, color: "#3e2b22" }}>
+                            <p style={{ fontSize: 15, fontWeight: 800, color: "#3e2b22" }}>
                               <ET fid={evt.dateKey} data={d} onChange={oc} editMode={em} />
                             </p>
-                            <p style={{ fontSize: 12, fontStyle: "italic", color: "#8d9a7a", marginTop: 2 }}>
+                            <p style={{ fontSize: 14, fontStyle: "italic", color: "#8d9a7a", marginTop: 2 }}>
                               <ET fid={evt.venueKey} data={d} onChange={oc} editMode={em} />
                             </p>
-                            <p style={{ fontSize: 10, textTransform: "uppercase", color: "#a6384f", fontWeight: 700, marginTop: 4, letterSpacing: 0.5 }}>
+                            <p style={{ fontSize: 12, textTransform: "uppercase", color: "#a6384f", fontWeight: 700, marginTop: 4, letterSpacing: 0.5 }}>
                               <ET fid={evt.noteKey} data={d} onChange={oc} editMode={em} />
                             </p>
                             
                             {/* Google Maps link */}
-                            <a
-                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d[evt.venueKey] || "The Oberoi Udaivilas Udaipur")}`}
-                              target="_blank" rel="noreferrer"
-                              style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "#a6384f", fontWeight: 700, marginTop: 10, textDecoration: "none" }}
-                            >
-                              <MapPin size={12} />
-                              Open in Maps
-                            </a>
+                            {(() => {
+                              const customMapUrl = d[`${evt.id}_map_url`] || "";
+                              const defaultSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d[evt.venueKey] || "The Oberoi Udaivilas Udaipur")}`;
+                              const finalMapUrl = customMapUrl ? customMapUrl : defaultSearchUrl;
+                              return (
+                                <>
+                                  <a
+                                    href={finalMapUrl}
+                                    target="_blank" rel="noreferrer"
+                                    style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: "#a6384f", fontWeight: 700, marginTop: 10, textDecoration: "none" }}
+                                  >
+                                    <MapPin size={12} />
+                                    Open in Maps
+                                  </a>
+
+                                  {/* Map Editing Options in Edit Mode */}
+                                  {em && (
+                                    <div style={{
+                                      marginTop: 8, padding: "8px", background: "rgba(166,56,79,0.03)",
+                                      border: "1px dashed rgba(166,56,79,0.2)", borderRadius: 8, display: "flex",
+                                      flexDirection: "column", gap: 6, width: "100%", alignItems: "center"
+                                    }}>
+                                      <span style={{ fontSize: 9, textTransform: "uppercase", color: "#a6384f", fontWeight: 700, letterSpacing: 1 }}>Map Action</span>
+                                      <div style={{ display: "flex", gap: 6 }}>
+                                        <button
+                                          onClick={() => {
+                                            oc?.(`${evt.id}_map_url`, "");
+                                            alert("Map link set to search by location name.");
+                                          }}
+                                          style={{
+                                            background: !customMapUrl ? "#a6384f" : "rgba(0,0,0,0.05)",
+                                            color: !customMapUrl ? "#fff" : "#3e2b22",
+                                            border: "1px solid rgba(166,56,79,0.3)", padding: "3px 8px",
+                                            borderRadius: 4, fontSize: 9, fontWeight: 700, cursor: "pointer"
+                                          }}
+                                        >
+                                          Search Location
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            const url = prompt("Paste your Google Maps link here:", customMapUrl || "");
+                                            if (url !== null) {
+                                              oc?.(`${evt.id}_map_url`, url);
+                                            }
+                                          }}
+                                          style={{
+                                            background: customMapUrl ? "#a6384f" : "rgba(0,0,0,0.05)",
+                                            color: customMapUrl ? "#fff" : "#3e2b22",
+                                            border: "1px solid rgba(166,56,79,0.3)", padding: "3px 8px",
+                                            borderRadius: 4, fontSize: 9, fontWeight: 700, cursor: "pointer"
+                                          }}
+                                        >
+                                          Paste Map URL
+                                        </button>
+                                      </div>
+                                      {customMapUrl && (
+                                        <span style={{ fontSize: 8, color: "#8d9a7a", wordBreak: "break-all", maxWidth: 180, display: "block" }}>
+                                          URL: {customMapUrl}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -945,44 +1151,106 @@ export default function RoyalWedding({
 
               {/* Grid of hanging polaroids */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-                {[
-                  { key: "photo1", frame: "/templates/royal-wedding/pn-gal-fr-hanging-portrait-x-v01.webp" },
-                  { key: "photo2", frame: "/templates/royal-wedding/pn-gal-fr-hanging-portrait-x-v01.webp" },
-                  { key: "photo3", frame: "/templates/royal-wedding/pn-gal-fr-hanging-landscape-x-v01.webp", colSpan: true },
-                  { key: "photo4", frame: "/templates/royal-wedding/pn-gal-fr-hanging-portrait-x-v01.webp", colSpan: true },
-                ].map((item, index) => {
-                  const imgUrl = d[item.key] || `/templates/royal-wedding/Arch_Demo2.png`;
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => !em && setActivePhoto(imgUrl)}
+                {(() => {
+                  const photoKeys = ["photo1", "photo2", "photo3", "photo4"];
+                  Object.keys(d).forEach(k => {
+                    if (k.startsWith("photo") && !photoKeys.includes(k) && /^\d+$/.test(k.replace("photo", ""))) {
+                      if (d[k]) {
+                        photoKeys.push(k);
+                      }
+                    }
+                  });
+                  photoKeys.sort((a, b) => {
+                    const numA = parseInt(a.replace("photo", ""), 10);
+                    const numB = parseInt(b.replace("photo", ""), 10);
+                    return numA - numB;
+                  });
+
+                  return photoKeys.map((key, index) => {
+                    const item = getPhotoConfig(key, index);
+                    const imgUrl = d[key] || getPhotoDefault(key);
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => !em && setActivePhoto(imgUrl)}
+                        style={{
+                          position: "relative", cursor: "pointer",
+                          gridColumn: item.colSpan ? "span 2" : "span 1",
+                          transform: index % 2 === 0 ? "rotate(-1deg)" : "rotate(1deg)",
+                          transition: "transform 0.3s"
+                        }}
+                      >
+                        {/* Outer Frame wrapper */}
+                        <div style={{ padding: "8px", background: "#fff", borderRadius: 8, boxShadow: "0 8px 20px rgba(0,0,0,0.3)", border: "1px solid #e9d7b8" }}>
+                          <div style={{ position: "relative", width: "100%", paddingTop: item.colSpan ? "56.25%" : "120%", overflow: "hidden", borderRadius: 4 }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={imgUrl}
+                              alt={`Gallery ${index}`}
+                              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                          </div>
+                          {em && (
+                            <ImageUploader fid={key} data={d} onChange={oc} defaultSrc={getPhotoDefault(key)} />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+
+              {/* Add/Remove Images in Edit Mode */}
+              {em && (() => {
+                const photoKeys = ["photo1", "photo2", "photo3", "photo4"];
+                Object.keys(d).forEach(k => {
+                  if (k.startsWith("photo") && !photoKeys.includes(k) && /^\d+$/.test(k.replace("photo", ""))) {
+                    if (d[k]) {
+                      photoKeys.push(k);
+                    }
+                  }
+                });
+                photoKeys.sort((a, b) => {
+                  const numA = parseInt(a.replace("photo", ""), 10);
+                  const numB = parseInt(b.replace("photo", ""), 10);
+                  return numA - numB;
+                });
+                return (
+                  <div style={{ marginTop: 32, display: "flex", gap: 12, justifyContent: "center" }}>
+                    <button
+                      onClick={() => {
+                        const nextIdx = photoKeys.length + 1;
+                        const nextKey = "photo" + nextIdx;
+                        oc?.(nextKey, "/templates/royal-wedding/Arch_Demo2.png");
+                      }}
                       style={{
-                        position: "relative", cursor: "pointer",
-                        gridColumn: item.colSpan ? "span 2" : "span 1",
-                        transform: index % 2 === 0 ? "rotate(-1deg)" : "rotate(1deg)",
-                        transition: "transform 0.3s"
+                        background: "linear-gradient(135deg, #d8a957, #b8860b)", color: "#fff",
+                        border: "none", borderRadius: 24, padding: "12px 28px", fontSize: 12,
+                        fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer",
+                        boxShadow: "0 6px 16px rgba(216,169,87,0.3)"
                       }}
                     >
-                      {/* Outer Frame wrapper */}
-                      <div style={{ padding: "8px", background: "#fff", borderRadius: 8, boxShadow: "0 8px 20px rgba(0,0,0,0.3)", border: "1px solid #e9d7b8" }}>
-                        <div style={{ position: "relative", width: "100%", paddingTop: item.colSpan ? "56.25%" : "120%", overflow: "hidden", borderRadius: 4 }}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={imgUrl}
-                            alt={`Gallery ${index}`}
-                            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                          />
-                        </div>
-                        {em && (
-                          <div style={{ marginTop: 8 }}>
-                            <ET fid={item.key} data={d} onChange={oc} editMode={em} style={{ fontSize: 12, display: "block" }} />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      ＋ Add More Images
+                    </button>
+                    {photoKeys.length > 4 && (
+                      <button
+                        onClick={() => {
+                          const lastKey = photoKeys[photoKeys.length - 1];
+                          oc?.(lastKey, "");
+                        }}
+                        style={{
+                          background: "rgba(255,255,255,0.08)", color: "#f7eedc",
+                          border: "1px solid rgba(216,169,87,0.3)", borderRadius: 24,
+                          padding: "12px 24px", fontSize: 12, fontWeight: 700,
+                          letterSpacing: 1, textTransform: "uppercase", cursor: "pointer"
+                        }}
+                      >
+                        － Remove Last Image
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Lightbox Overlay */}
