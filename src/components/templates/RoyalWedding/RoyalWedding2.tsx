@@ -114,11 +114,11 @@ const getPhotoDefault = (key: string) => {
 };
 
 const getPhotoConfig = (key: string, index: number) => {
-  // Determine if it takes full width (landscape style)
+  // Determine if it takes full width (landscape style / tall span)
   const colSpan = index === 0 || (index % 4 === 0);
   const frame = colSpan
-    ? "/templates/royal-wedding-2/pn-gal-fr-hanging-landscape-x-v01.webp"
-    : "/templates/royal-wedding-2/pn-gal-fr-hanging-portrait-x-v01.webp";
+    ? "/templates/royal-wedding-2/pn-gal-fr-hanging-portrait-x-v01.webp"
+    : "/templates/royal-wedding-2/pn-gal-fr-hanging-landscape-x-v01.webp";
   return { frame, colSpan };
 };
 
@@ -239,11 +239,11 @@ export default function RoyalWedding2({
     const handleScroll = () => {
       setScrollY(window.scrollY);
 
-      // Curtains calculation
+      // Curtains calculation (early and fast)
       if (storySectionRef.current) {
         const rect = storySectionRef.current.getBoundingClientRect();
-        const start = window.innerHeight * 0.55;
-        const range = window.innerHeight * 0.90;
+        const start = window.innerHeight * 0.95;
+        const range = window.innerHeight * 0.45;
         const p = Math.min(1, Math.max(0, (start - rect.top) / range));
         setCurtainPart(p);
       }
@@ -371,6 +371,23 @@ export default function RoyalWedding2({
           font-family: 'Lato', sans-serif;
         }
         
+        /* Hero Sticky Parallax Pinning */
+        .hero-wrap {
+          position: relative;
+          height: 200vh;
+        }
+        @media(max-width: 767px) {
+          .hero-wrap {
+            height: 180vh;
+          }
+        }
+        .hero-pin {
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          overflow: hidden;
+        }
+
         /* Preloader classes */
         .preloader {
           position: fixed; inset: 0; z-index: 2000;
@@ -1123,29 +1140,26 @@ export default function RoyalWedding2({
           transition: transform .5s cubic-bezier(0.22,1.2,0.36,1);
           position: relative;
         }
-        .gal-item:hover { transform: scale(1.02); }
+        .gal-item:hover {
+          transform: scale(1.03) rotate(2deg);
+        }
         .gal-tall { aspect-ratio: 3/5; }
         @media(min-width:640px) {
           .gal-tall { grid-row: span 2; aspect-ratio: auto; }
         }
         .gal-frame {
           position: absolute;
-          inset: -8%;
-          width: 116%;
-          height: 116%;
-          object-fit: contain;
-          pointer-events: none;
-          z-index: 2;
-          mix-blend-mode: screen;
-          transition: transform .7s cubic-bezier(0.22,1.2,0.36,1);
-          transform-origin: center center;
-        }
-        .gal-item:hover .gal-frame {
-          transform: rotate(4deg) scale(1.03);
-        }
-        .gal-ph {
+          inset: 0;
           width: 100%;
           height: 100%;
+          object-fit: fill;
+          pointer-events: none;
+          z-index: 2;
+          transition: transform .5s cubic-bezier(0.22,1.2,0.36,1);
+          transform-origin: center center;
+        }
+        .gal-ph {
+          position: absolute;
           background: rgba(255, 255, 255, 0.04);
           backdrop-filter: blur(6px);
           border: 1px solid rgba(200, 150, 10, .22);
@@ -1154,7 +1168,22 @@ export default function RoyalWedding2({
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 8px;
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        /* Portrait Photo bounds adjustment under hanging ropes */
+        .gal-tall .gal-ph {
+          top: 21%;
+          bottom: 3.5%;
+          left: 6.5%;
+          right: 6.5%;
+        }
+        /* Landscape/Square Photo bounds adjustment under hanging ropes */
+        .gal-item:not(.gal-tall) .gal-ph {
+          top: 25.5%;
+          bottom: 4%;
+          left: 6%;
+          right: 6%;
         }
 
         /* ── RSVP ── */
@@ -1271,11 +1300,13 @@ export default function RoyalWedding2({
           {/* ──────────────────────────────────────────────────────────
               HERO / WELCOME SLIDE
               ────────────────────────────────────────────────────────── */}
-          <header id="welcome-section" style={{
-            position: "relative", minHeight: "100vh", display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center", padding: "0 24px",
-            background: "linear-gradient(to bottom, #1A0C2E, #2E0D52)"
-          }}>
+          <div className="hero-wrap" id="welcome-section">
+            <div className="hero-pin">
+              <header style={{
+                position: "relative", height: "100%", display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center", padding: "0 24px",
+                background: "linear-gradient(to bottom, #1A0C2E, #2E0D52)"
+              }}>
             {/* Background Parallax Layers */}
             <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
               {/* Desktop background */}
@@ -1441,7 +1472,9 @@ export default function RoyalWedding2({
                 )}
               </button>
             )}
-          </header>
+              </header>
+            </div>
+          </div>
 
           {/* ──────────────────────────────────────────────────────────
               WATER FLOW BRIDGE (Swans swimming across waves)
