@@ -20,7 +20,7 @@ export interface Product {
   id: string;
   name: string;
   tagline: string;
-  category: "birthday" | "proposal" | "anniversary" | "friendship" | "love";
+  category: "birthday" | "proposal" | "anniversary" | "friendship" | "love" | "wedding";
   price: number; // in INR paise (multiply by 100)
   cuttedPrice?: number; // in INR paise (optional, for strikethrough display)
   badge?: "hot" | "new" | "specials" | "premium" | ""; // Product badge overlay
@@ -560,6 +560,98 @@ export const PRODUCT_REGISTRY: Product[] = [
           { id: "s9_viewer_name", label: "Viewer Name (Stamp & Finale)", type: "text", defaultValue: "MY LOVE" },
           { id: "s9_body", label: "Finale Message", type: "textarea", defaultValue: "From the lights we lit together,\nto every song, every memory, every moment —\nit has all been for you.\nThank you for existing.\nThank you for being mine." },
           { id: "s9_sign", label: "Finale Sign", type: "text", defaultValue: "— Yours, in every lifetime ♡" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "royal-wedding-card",
+    name: "Royal Wedding Invitation 💒",
+    tagline: "A majestic, interactive Indian wedding invitation featuring a cinematic preloader, unrolling scrolls, secret tree parted garden, and a grand fireworks finale",
+    category: "wedding" as const,
+    price: 14900,
+    visible: true,
+    thumbnail: "💒",
+    previewRoute: "/preview/royal-wedding-card",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 1,
+        title: "Bride & Groom",
+        description: "Names of the wedding couple and basic details",
+        fields: [
+          { id: "bride_name", label: "Bride's Name", type: "text", defaultValue: "Tanya" },
+          { id: "groom_name", label: "Groom's Name", type: "text", defaultValue: "Rohan" },
+          { id: "wedding_date", label: "Wedding Date", type: "text", defaultValue: "12 December 2026" },
+          { id: "wedding_venue", label: "Wedding Venue", type: "text", defaultValue: "The Oberoi Udaivilas, Udaipur" },
+          { id: "hashtag", label: "Wedding Hashtag", type: "text", defaultValue: "#TanyaWedsRohan" },
+        ]
+      },
+      {
+        slideNumber: 2,
+        title: "Invitation & Blessings",
+        description: "Blessing line and parents details",
+        fields: [
+          { id: "blessings", label: "Blessings line", type: "text", defaultValue: "Late Smt. Kamla Kapoor & Shri Harish Kapoor" },
+          { id: "blessings_2", label: "Blessings line 2", type: "text", defaultValue: "Smt. Leela Sharma & Shri Mohan Sharma" },
+          { id: "bride_parents", label: "Bride's Parents", type: "text", defaultValue: "D/O Mr. Rajesh Sharma & Mrs. Kavita Sharma" },
+          { id: "groom_parents", label: "Groom's Parents", type: "text", defaultValue: "S/O Mr. Sanjay Kapoor & Mrs. Neeta Kapoor" },
+        ]
+      },
+      {
+        slideNumber: 3,
+        title: "Events Schedule",
+        description: "Timings and venues for wedding events",
+        fields: [
+          { id: "mehendi_date", label: "Mehendi Date & Time", type: "text", defaultValue: "11 Dec 2026 · 4:00 PM" },
+          { id: "mehendi_venue", label: "Mehendi Venue", type: "text", defaultValue: "Lotus Courtyard" },
+          { id: "mehendi_note", label: "Mehendi Dress Code/Note", type: "text", defaultValue: "Greens & florals encouraged" },
+          
+          { id: "haldi_date", label: "Haldi Date & Time", type: "text", defaultValue: "12 Dec 2026 · 10:00 AM" },
+          { id: "haldi_venue", label: "Haldi Venue", type: "text", defaultValue: "Poolside Courtyard" },
+          { id: "haldi_note", label: "Haldi Dress Code/Note", type: "text", defaultValue: "Yellow / ivory tones" },
+          
+          { id: "sangeet_date", label: "Sangeet Date & Time", type: "text", defaultValue: "12 Dec 2026 · 7:30 PM" },
+          { id: "sangeet_venue", label: "Sangeet Venue", type: "text", defaultValue: "Royal Ballroom" },
+          { id: "sangeet_note", label: "Sangeet Dress Code/Note", type: "text", defaultValue: "An evening of music and performances" },
+          
+          { id: "shaadi_date", label: "Shaadi Date & Time", type: "text", defaultValue: "13 Dec 2026 · 9:30 AM" },
+          { id: "shaadi_venue", label: "Shaadi Venue", type: "text", defaultValue: "Lake Mandap" },
+          { id: "shaadi_note", label: "Shaadi Dress Code/Note", type: "text", defaultValue: "Traditional Indian attire" },
+
+          { id: "reception_date", label: "Reception Date & Time", type: "text", defaultValue: "13 Dec 2026 · 7:30 PM" },
+          { id: "reception_venue", label: "Reception Venue", type: "text", defaultValue: "Palace Lawns" },
+          { id: "reception_note", label: "Reception Dress Code/Note", type: "text", defaultValue: "Candlelit dinner and celebration" },
+        ]
+      },
+      {
+        slideNumber: 4,
+        title: "Our Story",
+        description: "Brief background text of the couple",
+        fields: [
+          { id: "story_body", label: "Our Story Paragraph", type: "textarea", defaultValue: "A monsoon evening in Udaipur, a marigold archway, and a girl laughing in the rain — that was all it took. Three years, countless chai mornings, and one nervous rooftop proposal in Jaipur later, Aarav & Meera are ready to begin their most beautiful chapter yet." }
+        ]
+      },
+      {
+        slideNumber: 5,
+        title: "Memories Gallery",
+        description: "Hanging photo frames",
+        fields: [
+          { id: "photo1", label: "Photo 1 URL (Portrait)", type: "image", defaultValue: "/templates/royal-wedding/Arch_Demo2.png" },
+          { id: "photo2", label: "Photo 2 URL (Portrait)", type: "image", defaultValue: "/templates/royal-wedding/Arch_demo.png" },
+          { id: "photo3", label: "Photo 3 URL (Landscape)", type: "image", defaultValue: "/templates/royal-wedding/landscape_demo.png" },
+          { id: "photo4", label: "Photo 4 URL (Portrait)", type: "image", defaultValue: "/templates/royal-wedding/hero-arch_demo.png" },
+        ]
+      },
+      {
+        slideNumber: 6,
+        title: "RSVP & Music",
+        description: "RSVP details, background music, etc.",
+        fields: [
+          { id: "rsvp_headline", label: "RSVP Headline", type: "text", defaultValue: "Will you JOIN US?" },
+          { id: "rsvp_body", label: "RSVP Body Message", type: "textarea", defaultValue: "We've saved a seat for you — at our table, in our hearts, and under the royal sky. Come celebrate with us as we begin this new chapter together." },
+          { id: "rsvp_phone", label: "RSVP WhatsApp Number (including Country Code)", type: "text", defaultValue: "910000000000" },
+          { id: "bg_song_url", label: "Background Music URL (.mp3)", type: "text", defaultValue: "" },
         ]
       }
     ]

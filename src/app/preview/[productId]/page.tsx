@@ -7,6 +7,7 @@ import SweetApologyBox from "@/components/templates/SweetApologyBox";
 import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse";
 import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourney/LoversEnchantedJourney";
+import RoyalWedding from "@/components/templates/RoyalWedding/RoyalWedding";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -22,6 +23,8 @@ function renderTemplate(productId: string, customData: Record<string, string>, a
       return <BirthdayMagicBox customData={customData} autoPlay={autoPlay} />;
     case "sweet-apology-box":
       return <SweetApologyBox customData={customData} autoPlay={autoPlay} />;
+    case "royal-wedding-card":
+      return <RoyalWedding customData={customData} autoPlay={autoPlay} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#fff" }}>

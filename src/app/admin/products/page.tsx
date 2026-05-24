@@ -11,6 +11,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   anniversary: "💑 Anniversary",
   friendship: "🤝 Friendship",
   love: "❤️ Love",
+  wedding: "💒 Wedding",
 };
 
 export default function AdminProductsPage() {

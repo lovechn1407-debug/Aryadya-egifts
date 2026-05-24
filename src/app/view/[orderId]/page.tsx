@@ -7,6 +7,7 @@ import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
 import MyLoveUniverse from "@/components/templates/MyLoveUniverse/MyLoveUniverse";
 import LoversEnchantedJourney from "@/components/templates/LoversEnchantedJourney/LoversEnchantedJourney";
+import RoyalWedding from "@/components/templates/RoyalWedding/RoyalWedding";
 import Link from "next/link";
 
 /* ── Vector SVG Components ── */
@@ -71,6 +72,8 @@ function renderFinalTemplate(productId: string, customData: Record<string, strin
       return <BirthdayMagicBox customData={customData} />;
     case "sweet-apology-box":
       return <SweetApologyBox customData={customData} />;
+    case "royal-wedding-card":
+      return <RoyalWedding customData={customData} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#FFF" }}>
