@@ -44,6 +44,12 @@ export default function AdminSectionsPage() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+  // Product Library Modal states
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryTarget, setLibraryTarget] = useState<"form" | DisplaySection | null>(null);
+  const [librarySelectedIds, setLibrarySelectedIds] = useState<string[]>([]);
+  const [libraryCategory, setLibraryCategory] = useState<string>("all");
+
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
   const reload = async () => {
@@ -177,18 +183,30 @@ export default function AdminSectionsPage() {
     setHeadingBgColor("#FFFFFF");
   };
 
-  const toggleProduct = (id: string) => {
-    setSelectedProducts(prev =>
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    );
+  const openProductLibraryForForm = () => {
+    setLibraryTarget("form");
+    setLibrarySelectedIds([...selectedProducts]);
+    setLibraryCategory("all");
+    setLibraryOpen(true);
   };
 
-  const toggleSectionProduct = async (sec: DisplaySection, prodId: string) => {
-    const ids = sec.productIds.includes(prodId)
-      ? sec.productIds.filter(p => p !== prodId)
-      : [...sec.productIds, prodId];
-    await saveSectionDB({ ...sec, productIds: ids });
-    await reload();
+  const openProductLibraryForSection = (sec: DisplaySection) => {
+    setLibraryTarget(sec);
+    setLibrarySelectedIds([...(sec.productIds || [])]);
+    setLibraryCategory("all");
+    setLibraryOpen(true);
+  };
+
+  const handleLibrarySave = async () => {
+    if (libraryTarget === "form") {
+      setSelectedProducts(librarySelectedIds);
+    } else if (libraryTarget) {
+      const updatedSection = { ...libraryTarget, productIds: librarySelectedIds };
+      await saveSectionDB(updatedSection);
+      await reload();
+    }
+    setLibraryOpen(false);
+    setLibraryTarget(null);
   };
 
   const toggleVisibility = async (sec: DisplaySection) => {
@@ -649,21 +667,38 @@ export default function AdminSectionsPage() {
           
           {!isHeading && (
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 8 }}>Select Products for this Section</label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, background: "#F8FAFC", padding: 16, borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                {products.map(p => (
-                  <label key={p.id} style={{
-                    display: "flex", alignItems: "center", gap: 8, padding: "8px 12px",
-                    background: selectedProducts.includes(p.id) ? "#E0E7FF" : "#FFFFFF",
-                    border: `1px solid ${selectedProducts.includes(p.id) ? "#A5B4FC" : "#CBD5E1"}`,
-                    borderRadius: 8, cursor: "pointer", fontSize: 13, transition: "all 0.2s"
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block" }}>Products in this Section</label>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openProductLibraryForForm();
+                  }}
+                  style={{
+                    background: "#0F172A", color: "#FFFFFF", border: "none",
+                    borderRadius: 8, padding: "8px 16px", fontSize: 13,
+                    fontWeight: 600, cursor: "pointer", display: "flex",
+                    alignItems: "center", gap: 6, transition: "background 0.2s"
+                  }}
+                >
+                  🛍️ Add Products
+                </button>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, background: "#F8FAFC", padding: 16, borderRadius: 8, border: "1px solid #E2E8F0", minHeight: 60 }}>
+                {products.filter(p => selectedProducts.includes(p.id)).map(p => (
+                  <span key={p.id} style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "6px 12px", background: "#EFF6FF", color: "#1E40AF",
+                    border: "1px solid #BFDBFE", borderRadius: 8, fontSize: 13, fontWeight: 600
                   }}>
-                    <input type="checkbox" checked={selectedProducts.includes(p.id)} onChange={() => toggleProduct(p.id)} style={{ display: "none" }} />
-                    <span>{p.thumbnail}</span>
-                    <span style={{ fontWeight: selectedProducts.includes(p.id) ? 600 : 500, color: "#0F172A" }}>{p.name}</span>
-                  </label>
+                    {p.thumbnail} {p.name}
+                  </span>
                 ))}
-                {products.length === 0 && <span style={{ fontSize: 13, color: "#64748B" }}>No products available. Create some first!</span>}
+                {selectedProducts.length === 0 && (
+                  <span style={{ fontSize: 13, color: "#94A3B8", fontStyle: "italic", alignSelf: "center" }}>
+                    No products selected yet. Click "Add Products" to browse and select.
+                  </span>
+                )}
               </div>
             </div>
           )}
@@ -736,26 +771,39 @@ export default function AdminSectionsPage() {
                 )}
 
                 {!sec.isHeading && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, background: "#F8FAFC", padding: 12, borderRadius: 8, border: "1px solid #E2E8F0", marginTop: 8 }}>
-                    {products.map(p => {
-                      const active = sec.productIds?.includes(p.id);
-                      return (
-                        <button
-                          key={p.id}
-                          onClick={() => toggleSectionProduct(sec, p.id)}
-                          style={{
-                            display: "flex", alignItems: "center", gap: 6, padding: "6px 10px",
-                            background: active ? "#DBEAFE" : "#FFFFFF",
-                            border: `1px solid ${active ? "#93C5FD" : "#CBD5E1"}`,
-                            borderRadius: 6, cursor: "pointer", fontSize: 12,
-                            color: active ? "#1D4ED8" : "#475569", fontWeight: active ? 600 : 500,
-                            transition: "all 0.2s"
-                          }}
-                        >
-                          {active && <span>✓</span>} {p.thumbnail} {p.name}
-                        </button>
-                      );
-                    })}
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#475569" }}>
+                        Selected Products:
+                      </span>
+                      <button
+                        onClick={() => openProductLibraryForSection(sec)}
+                        style={{
+                          background: "#0F172A", color: "#FFFFFF", border: "none",
+                          borderRadius: 6, padding: "6px 12px", fontSize: 12,
+                          fontWeight: 600, cursor: "pointer", display: "flex",
+                          alignItems: "center", gap: 6, transition: "background 0.2s"
+                        }}
+                      >
+                        🛍️ Add Products
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {products.filter(p => sec.productIds?.includes(p.id)).map(p => (
+                        <span key={p.id} style={{
+                          display: "inline-flex", alignItems: "center", gap: 4,
+                          padding: "4px 8px", background: "#EFF6FF", color: "#1E40AF",
+                          border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 12, fontWeight: 500
+                        }}>
+                          {p.thumbnail} {p.name}
+                        </span>
+                      ))}
+                      {(!sec.productIds || sec.productIds.length === 0) && (
+                        <span style={{ fontSize: 12, color: "#94A3B8", fontStyle: "italic" }}>
+                          No products selected. Click "Add Products" to browse and select.
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -792,6 +840,177 @@ export default function AdminSectionsPage() {
           </div>
         )}
       </div>
+
+      {/* Product Library Modal Overlay */}
+      {libraryOpen && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(4px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 16
+        }}>
+          <div style={{
+            background: "#FFFFFF", borderRadius: 16, width: "100%", maxWidth: 840,
+            height: "85vh", maxHeight: 680, display: "flex", flexDirection: "column",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)", overflow: "hidden"
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: "18px 24px", borderBottom: "1px solid #F1F5F9",
+              display: "flex", alignItems: "center", justifyContent: "space-between"
+            }}>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", margin: 0 }}>
+                  Product Library
+                </h3>
+                <p style={{ fontSize: 13, color: "#64748B", marginTop: 2, marginBottom: 0 }}>
+                  Browse and select products to display in the section
+                </p>
+              </div>
+              <button
+                onClick={() => setLibraryOpen(false)}
+                style={{
+                  background: "none", border: "none", fontSize: 20, color: "#94A3B8",
+                  cursor: "pointer", padding: 4
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+              {/* Left Sidebar Categories */}
+              <div style={{
+                width: 200, borderRight: "1px solid #F1F5F9", background: "#F8FAFC",
+                padding: "16px 12px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 4
+              }}>
+                {[
+                  { id: "all", label: "✨ All Products" },
+                  { id: "birthday", label: "🎂 Birthday" },
+                  { id: "proposal", label: "💍 Proposal" },
+                  { id: "anniversary", label: "💑 Anniversary" },
+                  { id: "friendship", label: "🤝 Friendship" },
+                  { id: "love", label: "💖 Love" },
+                  { id: "wedding", label: "💒 Wedding" }
+                ].map(cat => {
+                  const active = libraryCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setLibraryCategory(cat.id)}
+                      style={{
+                        width: "100%", padding: "10px 14px", borderRadius: 8,
+                        border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600,
+                        textAlign: "left", display: "flex", alignItems: "center",
+                        background: active ? "#EFF6FF" : "transparent",
+                        color: active ? "#1E40AF" : "#475569",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Right Content Grid */}
+              <div style={{ flex: 1, padding: 24, overflowY: "auto" }}>
+                <div style={{
+                  display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
+                  gap: 16
+                }}>
+                  {products
+                    .filter(p => libraryCategory === "all" || p.category === libraryCategory)
+                    .map(p => {
+                      const selected = librarySelectedIds.includes(p.id);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => {
+                            setLibrarySelectedIds(prev =>
+                              prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                            );
+                          }}
+                          style={{
+                            background: "#FFFFFF", border: `2px solid ${selected ? "#3B82F6" : "#E2E8F0"}`,
+                            borderRadius: 12, padding: 14, cursor: "pointer", position: "relative",
+                            display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
+                            boxShadow: selected ? "0 4px 12px rgba(59,130,246,0.12)" : "none",
+                            transition: "all 0.2s"
+                          }}
+                        >
+                          {selected && (
+                            <div style={{
+                              position: "absolute", top: 8, right: 8, width: 20, height: 20,
+                              background: "#3B82F6", borderRadius: "50%", display: "flex",
+                              alignItems: "center", justifyContent: "center", color: "#FFFFFF",
+                              fontSize: 11, fontWeight: "bold"
+                            }}>
+                              ✓
+                            </div>
+                          )}
+                          <span style={{ fontSize: 32, display: "block", marginBottom: 8 }}>
+                            {p.thumbnail || "🎁"}
+                          </span>
+                          <h4 style={{ fontSize: 13, fontWeight: 700, color: "#0F172A", margin: "4px 0", lineHeight: 1.3 }}>
+                            {p.name}
+                          </h4>
+                          <span style={{
+                            fontSize: 10, fontWeight: 600, padding: "2px 6px",
+                            background: "#F1F5F9", color: "#475569", borderRadius: 4,
+                            marginTop: 4, textTransform: "capitalize"
+                          }}>
+                            {p.category}
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
+                
+                {products.filter(p => libraryCategory === "all" || p.category === libraryCategory).length === 0 && (
+                  <div style={{ textAlign: "center", padding: "40px 0", color: "#64748B" }}>
+                    <p style={{ fontSize: 24 }}>🛍️</p>
+                    <p style={{ fontSize: 14, fontWeight: 600, marginTop: 8 }}>No products in this category</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              padding: "16px 24px", borderTop: "1px solid #F1F5F9", background: "#F8FAFC",
+              display: "flex", alignItems: "center", justifyContent: "space-between"
+            }}>
+              <span style={{ fontSize: 13, color: "#64748B", fontWeight: 500 }}>
+                {librarySelectedIds.length} product(s) selected
+              </span>
+              <div style={{ display: "flex", gap: 12 }}>
+                <button
+                  onClick={() => setLibraryOpen(false)}
+                  style={{
+                    background: "#FFFFFF", border: "1px solid #CBD5E1", borderRadius: 8,
+                    padding: "8px 16px", fontSize: 13, fontWeight: 600, color: "#334155",
+                    cursor: "pointer"
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLibrarySave}
+                  style={{
+                    background: "#3B82F6", border: "none", borderRadius: 8,
+                    padding: "8px 20px", fontSize: 13, fontWeight: 600, color: "#FFFFFF",
+                    cursor: "pointer", boxShadow: "0 2px 4px rgba(59,130,246,0.15)"
+                  }}
+                >
+                  Save Selection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
