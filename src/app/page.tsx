@@ -1816,6 +1816,8 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
               gridTemplateColumns: "repeat(2, 1fr)",
               gap: 12,
               padding: "18px clamp(14px,3vw,32px) 22px",
+              maxWidth: 600,
+              margin: "0 auto",
             }}
           >
             {sectionProducts.map(p => (
