@@ -1344,6 +1344,7 @@ export interface DisplaySection {
   order?: number; // for reordering
 
   // Plus features
+  gridChange?: "horizontal" | "vertical";
   countdownEnabled?: boolean;
   countdownEndTime?: string; // ISO string
   titleSize?: "small" | "normal" | "medium" | "big" | "bigger";

@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, Heart, Send, Volume2, VolumeX, ChevronDown, Smile, Frown, Flame } from "lucide-react";
+import SongLibraryPopup from "@/components/SongLibraryPopup";
 
 // Local ET Component for inline editing in Personalizer
 function ET({ fid, data, onChange, style, multiline = false, editMode = false }: {
@@ -367,6 +368,7 @@ export default function Confess({
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [showMusicHint, setShowMusicHint] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [bgModalOpen, setBgModalOpen] = useState(false);
 
   // Show button state after intro animation
   const [showIntroBtn, setShowIntroBtn] = useState(em);
@@ -403,12 +405,7 @@ export default function Confess({
   // Sync forcedSlide inside editor
   useEffect(() => {
     if (em && forcedSlide !== undefined) {
-      if (forcedSlide === -1) {
-        // Stay on the welcome slide when configuring background music
-        setActiveSlide(0);
-      } else {
-        setActiveSlide(forcedSlide);
-      }
+      setActiveSlide(forcedSlide);
     }
   }, [forcedSlide, em]);
 
@@ -778,6 +775,49 @@ export default function Confess({
       {/* Main Slides Selector */}
       <div className="relative z-10 w-full min-h-screen flex items-center justify-center">
         <AnimatePresence mode="wait">
+          {/* SLIDE -1: Background Music Configuration */}
+          {activeSlide === -1 && (
+            <motion.div
+              key="bgmusic"
+              className="flex flex-col items-center justify-center text-center z-10 min-h-screen px-6 w-full max-w-md mx-auto"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <div className="bg-card/85 backdrop-blur-2xl border border-primary/20 rounded-[2rem] p-8 shadow-[0_0_50px_rgba(var(--primary),0.2)] w-full flex flex-col items-center gap-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 pointer-events-none" />
+                
+                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary relative">
+                  <Heart size={28} className="fill-primary text-primary animate-pulse" />
+                </div>
+                
+                <div>
+                  <h2 className="text-2xl font-bold mb-2 tracking-wide text-foreground">
+                    Background Music
+                  </h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Choose the romantic melody that will play in the background when your love opens this page.
+                  </p>
+                </div>
+                
+                <div className="w-full p-5 rounded-2xl bg-[#060814]/60 border border-white/5 flex flex-col gap-2">
+                  <span className="text-xs text-primary/70 font-bold uppercase tracking-wider block text-left">Current Song</span>
+                  <span className="text-foreground font-bold text-lg text-left block truncate">
+                    {d.bg_song_name || "Perfect - Ed Sheeran"}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => setBgModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 btn-primary-depth text-primary-foreground py-4 rounded-2xl font-bold text-lg shadow-xl"
+                >
+                  🎵 Choose from Audio Library
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           {/* SLIDE 0: Landing Slide */}
           {activeSlide === 0 && (
             <motion.div
@@ -1746,6 +1786,17 @@ export default function Confess({
 
       {/* Floating brand button for Kinza Codes */}
       <Fj editMode={em} />
+
+      {bgModalOpen && (
+        <SongLibraryPopup
+          onClose={() => setBgModalOpen(false)}
+          onSelect={(song) => {
+            oc?.("bg_song_name", song.name);
+            oc?.("bg_song_url", song.url);
+            setBgModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

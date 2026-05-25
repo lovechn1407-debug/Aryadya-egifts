@@ -1803,39 +1803,62 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
         )}
 
         {/* Left arrow */}
-        {canLeft && <ArrowBtn dir="left" accent={theme.accent} onClick={() => scroll("left")} />}
+        {section.gridChange !== "vertical" && canLeft && <ArrowBtn dir="left" accent={theme.accent} onClick={() => scroll("left")} />}
         {/* Right arrow */}
-        {canRight && <ArrowBtn dir="right" accent={theme.accent} onClick={() => scroll("right")} />}
+        {section.gridChange !== "vertical" && canRight && <ArrowBtn dir="right" accent={theme.accent} onClick={() => scroll("right")} />}
 
-        {/* Scroll row */}
-        <div
-          ref={scrollRef}
-          onScroll={updateArrows}
-          style={{
-            position: "relative", zIndex: 1,
-            display: "flex",
-            gap: 12,
-            overflowX: "auto",
-            padding: "18px clamp(14px,3vw,32px) 22px",
-            scrollSnapType: "x mandatory",
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}
-        >
-          {sectionProducts.map(p => (
-            <div
-              key={p.id}
-              style={{
-                flexShrink: 0,
-                /* 2 cards on mobile → grow to 260px max on desktop */
-                width: "clamp(160px, calc(50vw - 26px), 260px)",
-                scrollSnapAlign: "start",
-              }}
-            >
-              <ProductCard product={p} accent={theme.accent} onCardClick={p => onCardClick(p, theme.accent)} />
-            </div>
-          ))}
-        </div>
+        {/* Scroll row or Vertical Grid */}
+        {section.gridChange === "vertical" ? (
+          <div
+            style={{
+              position: "relative", zIndex: 1,
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: 12,
+              padding: "18px clamp(14px,3vw,32px) 22px",
+            }}
+          >
+            {sectionProducts.map(p => (
+              <div
+                key={p.id}
+                style={{
+                  width: "100%",
+                }}
+              >
+                <ProductCard product={p} accent={theme.accent} onCardClick={p => onCardClick(p, theme.accent)} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            ref={scrollRef}
+            onScroll={updateArrows}
+            style={{
+              position: "relative", zIndex: 1,
+              display: "flex",
+              gap: 12,
+              overflowX: "auto",
+              padding: "18px clamp(14px,3vw,32px) 22px",
+              scrollSnapType: "x mandatory",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            {sectionProducts.map(p => (
+              <div
+                key={p.id}
+                style={{
+                  flexShrink: 0,
+                  /* 2 cards on mobile → grow to 260px max on desktop */
+                  width: "clamp(160px, calc(50vw - 26px), 260px)",
+                  scrollSnapAlign: "start",
+                }}
+              >
+                <ProductCard product={p} accent={theme.accent} onCardClick={p => onCardClick(p, theme.accent)} />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Bottom Fade Effect for Plus Themes */}
         {section.theme.includes("_plus") && section.fadeEnabled && (

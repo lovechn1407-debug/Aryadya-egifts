@@ -32,6 +32,7 @@ export default function AdminSectionsPage() {
   const [fadeLength, setFadeLength] = useState(100);
   const [bottomSpaceEnabled, setBottomSpaceEnabled] = useState(false);
   const [bottomSpacePx, setBottomSpacePx] = useState(40);
+  const [gridChange, setGridChange] = useState<"horizontal" | "vertical">("horizontal");
 
   // Heading form state
   const [isHeading, setIsHeading] = useState(false);
@@ -94,7 +95,8 @@ export default function AdminSectionsPage() {
           isHeading,
           headingColor,
           headingBgType,
-          headingBgColor
+          headingBgColor,
+          gridChange: isHeading ? "horizontal" : gridChange
         });
       } else {
         // Create new section (at the top)
@@ -124,6 +126,7 @@ export default function AdminSectionsPage() {
           headingColor,
           headingBgType,
           headingBgColor,
+          gridChange: isHeading ? "horizontal" : gridChange,
           createdAt: new Date().toISOString(),
         };
         await saveSectionDB(newSection);
@@ -157,6 +160,7 @@ export default function AdminSectionsPage() {
     setFadeLength(sec.fadeLength ?? 100);
     setBottomSpaceEnabled(sec.bottomSpaceEnabled || false);
     setBottomSpacePx(sec.bottomSpacePx ?? 40);
+    setGridChange(sec.gridChange || "horizontal");
     
     // Heading specific fields
     setIsHeading(sec.isHeading || false);
@@ -174,7 +178,7 @@ export default function AdminSectionsPage() {
     setEditingSectionId(null);
     setTitle(""); setSubtitle(""); setTheme("birthday"); setSelectedProducts([]); setCountdownEnabled(false); setCountdownEndTime("");
     setTitleSize("normal"); setHeaderStyle("normal"); setHeaderFontFamily("'Dancing Script', cursive"); setHeaderCutout("none"); setHeaderNote(""); setHeaderNoteEnabled(false);
-    setBottomCutout("none"); setFadeEnabled(false); setFadeLength(100); setBottomSpaceEnabled(false); setBottomSpacePx(40);
+    setBottomCutout("none"); setFadeEnabled(false); setFadeLength(100); setBottomSpaceEnabled(false); setBottomSpacePx(40); setGridChange("horizontal");
     
     // Heading specific fields
     setIsHeading(false);
@@ -501,6 +505,13 @@ export default function AdminSectionsPage() {
                   ))}
                 </select>
               </div>
+              <div>
+                <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Grid Layout (Desktop/Mobile Display)</label>
+                <select value={gridChange} onChange={e => setGridChange(e.target.value as "horizontal" | "vertical")} style={inputStyle}>
+                  <option value="horizontal">Horizontal (Scroll Row)</option>
+                  <option value="vertical">Vertical (2-Column Grid)</option>
+                </select>
+              </div>
               
               <div style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
                 <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#334155", padding: "10px 0" }}>
@@ -743,9 +754,14 @@ export default function AdminSectionsPage() {
                       ✍️ HEADING
                     </span>
                   ) : (
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: "#F1F5F9", color: "#475569" }}>
-                      Theme: {sec.theme}
-                    </span>
+                    <>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: "#F1F5F9", color: "#475569" }}>
+                        Theme: {sec.theme}
+                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: "#EFF6FF", color: "#1E40AF", border: "1px solid #BFDBFE" }}>
+                        Layout: {sec.gridChange === "vertical" ? "Vertical (Grid)" : "Horizontal (Scroll)"}
+                      </span>
+                    </>
                   )}
                   <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 999, background: sec.visible ? "#ECFDF5" : "#F1F5F9", color: sec.visible ? "#059669" : "#64748B" }}>
                     {sec.visible ? "🟢 Visible" : "⚫ Hidden"}
