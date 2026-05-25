@@ -1813,10 +1813,10 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
             style={{
               position: "relative", zIndex: 1,
               display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
               gap: 8,
               padding: "18px 10px 22px 10px",
-              maxWidth: 600,
+              maxWidth: 548,
               width: "100%",
               boxSizing: "border-box",
               margin: "0 auto",
