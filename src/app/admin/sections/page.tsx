@@ -505,12 +505,11 @@ export default function AdminSectionsPage() {
                   ))}
                 </select>
               </div>
-              <div>
-                <label style={{ fontSize: 13, color: "#334155", fontWeight: 600, display: "block", marginBottom: 6 }}>Grid Layout (Desktop/Mobile Display)</label>
-                <select value={gridChange} onChange={e => setGridChange(e.target.value as "horizontal" | "vertical")} style={inputStyle}>
-                  <option value="horizontal">Horizontal (Scroll Row)</option>
-                  <option value="vertical">Vertical (2-Column Grid)</option>
-                </select>
+              <div style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#334155", padding: "10px 0" }}>
+                  <input type="checkbox" checked={gridChange === "vertical"} onChange={e => setGridChange(e.target.checked ? "vertical" : "horizontal")} style={{ width: 16, height: 16, accentColor: "#0F172A" }} />
+                  Vertical Grid Layout (2 products/row)
+                </label>
               </div>
               
               <div style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
