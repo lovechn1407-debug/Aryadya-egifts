@@ -261,6 +261,16 @@ textarea.input-field { resize: vertical; min-height: 100px; }
 .sparkle-rotate { animation: sparkleRotate 3s linear infinite; }
 .ribbon-sway { animation: ribbonSway 3.5s ease-in-out infinite; }
 
+/* Card name marquee — shared animation using CSS custom property */
+@keyframes card-marquee {
+  0%, 15% { transform: translateX(0); }
+  85%, 100% { transform: translateX(var(--marquee-offset, 0)); }
+}
+.card-marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }

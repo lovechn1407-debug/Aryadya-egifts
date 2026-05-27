@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef, memo, createElement } from "react";
+import { useEffect, useState, useRef, memo, createElement, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSectionTheme } from "@/lib/data";
@@ -621,8 +621,28 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
   const color = accent || "#E91E8C";
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.35);
+  const [isVisible, setIsVisible] = useState(false);
 
+  // IntersectionObserver: only load iframe/video when card is near viewport
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Only measure scale when visible to avoid unnecessary ResizeObserver work
+  useEffect(() => {
+    if (!isVisible) return;
     const el = containerRef.current;
     if (!el) return;
     const update = () => setScale(el.offsetWidth / 390);
@@ -630,10 +650,15 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [isVisible]);
 
   const IW = 390, IH = IW * 4 / 3;
   const rating = (product as any).rating ?? 4.5;
+
+  // Compute marquee offset once
+  const cleanName = product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim();
+  const needsMarquee = cleanName.length > 22;
+  const marqueeOffset = needsMarquee ? (cleanName.length - 20) * 7.5 : 0;
 
   return (
     <div onClick={() => onCardClick(product)}
@@ -665,41 +690,67 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
       )}
       {/* Iframe or MP4 Video — maintains 3:4 ratio */}
       <div ref={containerRef} style={{ aspectRatio: "3/4", position: "relative", overflow: "hidden", background: `${color}08`, flexShrink: 0 }}>
-        {product.previewMode === "mp4" && product.previewVideoUrl ? (
-          <video
-            src={product.previewVideoUrl}
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block"
-            }}
-          />
+        {isVisible ? (
+          product.previewMode === "mp4" && product.previewVideoUrl ? (
+            <video
+              src={product.previewVideoUrl}
+              autoPlay
+              loop
+              muted
+              playsInline
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block"
+              }}
+            />
+          ) : (
+            <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
+          )
         ) : (
-          <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
+          /* Lightweight placeholder while offscreen */
+          <div style={{
+            width: "100%",
+            height: "100%",
+            background: `linear-gradient(135deg, ${color}15, ${color}08)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <div style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: `${color}18`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+              opacity: 0.6,
+            }}>
+              🎁
+            </div>
+          </div>
         )}
       </div>
       {/* Solid footer — always visible below iframe */}
       <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 800, color: "#1F2937", lineHeight: 1.3, height: 18, overflow: "hidden", whiteSpace: "nowrap", position: "relative" }}>
-          {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim().length > 22 ? (
-            <>
-              <style dangerouslySetInnerHTML={{__html: `
-                @keyframes marquee-${product.id} {
-                  0%, 15% { transform: translateX(0); }
-                  85%, 100% { transform: translateX(-${(product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim().length - 20) * 7.5}px); }
-                }
-              `}} />
-              <div style={{ animation: `marquee-${product.id} 4s linear infinite alternate`, display: "inline-block", whiteSpace: "nowrap" }}>
-                {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
-              </div>
-            </>
+          {needsMarquee ? (
+            <div
+              style={{
+                display: "inline-block",
+                whiteSpace: "nowrap",
+                animation: `card-marquee 4s linear infinite alternate`,
+                ["--marquee-offset" as any]: `-${marqueeOffset}px`,
+              }}
+              className="card-marquee-text"
+            >
+              {cleanName}
+            </div>
           ) : (
-            product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()
+            cleanName
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 2, marginTop: 5 }}>
@@ -2507,6 +2558,7 @@ function ReviewsShowcase({ reviews }: { reviews: CustomerReview[] }) {
                 <img 
                   src={rev.screenshotUrl} 
                   alt={`Feedback from ${rev.buyerName}`}
+                  loading="lazy"
                   style={{ width: "100%", height: "auto", maxHeight: 340, objectFit: "contain", borderRadius: 12 }} 
                 />
               </div>
