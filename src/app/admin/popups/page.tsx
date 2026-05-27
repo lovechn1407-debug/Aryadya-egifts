@@ -37,7 +37,7 @@ export default function PopupsPage() {
     if (!settings) return;
     const newPopup: PopupData = {
       id: `popup_${Date.now()}`,
-      enabled: false,
+      enabled: true,
       order: settings.popups ? settings.popups.length : 0,
       contentHtml: "<h2>Welcome!</h2><p>This is a new popup.</p>",
       frequency: "always"
