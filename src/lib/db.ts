@@ -70,6 +70,9 @@ export interface ProductOverride {
   showStock?: boolean;
   previewUrl?: string;
   previewData?: Record<string, string>;
+  previewMode?: "original" | "mp4";
+  previewVideoUrl?: string;
+  previewVideoVersions?: Array<{ id: string; name: string; url: string; size?: number; createdAt: string }>;
 }
 
 export async function getProductsDB(): Promise<Product[]> {

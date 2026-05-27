@@ -663,9 +663,25 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
           Only {(product as any).stockLeft} left
         </div>
       )}
-      {/* Iframe — maintains 3:4 ratio */}
+      {/* Iframe or MP4 Video — maintains 3:4 ratio */}
       <div ref={containerRef} style={{ aspectRatio: "3/4", position: "relative", overflow: "hidden", background: `${color}08`, flexShrink: 0 }}>
-        <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
+        {product.previewMode === "mp4" && product.previewVideoUrl ? (
+          <video
+            src={product.previewVideoUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block"
+            }}
+          />
+        ) : (
+          <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
+        )}
       </div>
       {/* Solid footer — always visible below iframe */}
       <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
@@ -703,7 +719,18 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
     </div>
   );
 }, (prev, next) => {
-  return prev.product.id === next.product.id && prev.accent === next.accent;
+  return (
+    prev.product.id === next.product.id &&
+    prev.accent === next.accent &&
+    prev.product.previewMode === next.product.previewMode &&
+    prev.product.previewVideoUrl === next.product.previewVideoUrl &&
+    prev.product.price === next.product.price &&
+    prev.product.cuttedPrice === next.product.cuttedPrice &&
+    prev.product.badge === next.product.badge &&
+    (prev.product as any).rating === (next.product as any).rating &&
+    (prev.product as any).stockLeft === (next.product as any).stockLeft &&
+    (prev.product as any).showStock === (next.product as any).showStock
+  );
 });
 
 

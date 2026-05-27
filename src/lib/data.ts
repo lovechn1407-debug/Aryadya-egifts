@@ -29,6 +29,9 @@ export interface Product {
   previewRoute: string; // e.g. "/preview/birthday-magic-box"
   slides: SlideDefinition[];
   createdAt: string;
+  previewMode?: "original" | "mp4";
+  previewVideoUrl?: string;
+  previewVideoVersions?: Array<{ id: string; name: string; url: string; size?: number; createdAt: string }>;
 }
 
 export interface Order {
