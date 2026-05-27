@@ -311,6 +311,11 @@ export default function DuduBirthday({
   const handlePopBalloon = (idx: number) => {
     if (poppedBalloons[idx]) return;
     PlaySynth.pop();
+    
+    if (!musicPlaying && audioRef.current && !em) {
+      audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => {});
+    }
+
     setPoppedBalloons(prev => ({ ...prev, [idx]: true }));
     
     // Spawn local sparkles

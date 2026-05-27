@@ -961,7 +961,13 @@ export default function Confess({
 
               {showIntroBtn && (
                 <motion.button
-                  onClick={() => setActiveSlide(1)}
+                  onClick={() => {
+                    setActiveSlide(1);
+                    if (!musicPlaying && audioRef.current && !em) {
+                      audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => {});
+                      setShowMusicHint(false);
+                    }
+                  }}
                   className="flex items-center gap-4 btn-primary-depth text-primary-foreground px-12 py-5 rounded-full font-bold text-xl md:text-2xl backdrop-blur-md shadow-2xl"
                   initial={{ opacity: 0, y: 30, scale: 0.8 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
