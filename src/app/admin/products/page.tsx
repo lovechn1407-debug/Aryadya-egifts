@@ -190,8 +190,12 @@ export default function AdminProductsPage() {
       const resData = await res.json();
       if (!resData.ok) throw new Error(resData.description || "Telegram upload failed");
 
-      const fileId = resData.result.video.file_id;
-      const sizeBytes = resData.result.video.file_size || recordedBlob.size;
+      const mediaObj = resData.result.video || resData.result.document || resData.result.animation || resData.result.audio;
+      if (!mediaObj || !mediaObj.file_id) {
+        throw new Error("Could not retrieve file_id from Telegram response. Result: " + JSON.stringify(resData.result));
+      }
+      const fileId = mediaObj.file_id;
+      const sizeBytes = mediaObj.file_size || recordedBlob.size;
       const newVideoUrl = `/api/tg-video/${fileId}`;
 
       const qualityLabel = recorderQuality === 100000 ? "Low (100k)" : recorderQuality === 250000 ? "Medium (250k)" : "High (500k)";
