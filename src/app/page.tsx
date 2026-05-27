@@ -2806,7 +2806,7 @@ export default function HomePage() {
             <div className="animate-pulse" style={{ width: 300, height: 16, background: "#f3f4f6", borderRadius: 8, marginBottom: 32 }} />
             <div style={{ display: "flex", gap: 20, overflowX: "hidden" }}>
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="animate-pulse" style={{ width: "clamp(160px, calc(50vw - 26px), 260px)", height: 340, background: "#f9fafb", borderRadius: 24, border: "1px solid rgba(0,0,0,0.04)" }} />
+                <div key={i} className="animate-pulse" style={{ flexShrink: 0, width: "clamp(160px, calc(50vw - 26px), 260px)", height: 340, background: "#f9fafb", borderRadius: 24, border: "1px solid rgba(0,0,0,0.04)" }} />
               ))}
             </div>
 
@@ -2815,7 +2815,7 @@ export default function HomePage() {
               <div className="animate-pulse" style={{ width: 340, height: 16, background: "#f3f4f6", borderRadius: 8, marginBottom: 32 }} />
               <div style={{ display: "flex", gap: 20, overflowX: "hidden" }}>
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="animate-pulse" style={{ width: "clamp(160px, calc(50vw - 26px), 260px)", height: 340, background: "#f9fafb", borderRadius: 24, border: "1px solid rgba(0,0,0,0.04)" }} />
+                  <div key={i} className="animate-pulse" style={{ flexShrink: 0, width: "clamp(160px, calc(50vw - 26px), 260px)", height: 340, background: "#f9fafb", borderRadius: 24, border: "1px solid rgba(0,0,0,0.04)" }} />
                 ))}
               </div>
             </div>
