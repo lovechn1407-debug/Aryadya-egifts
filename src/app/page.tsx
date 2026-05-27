@@ -2076,21 +2076,25 @@ function Footer({ settings }: { settings: Settings | null }) {
           {/* Column 3: Contact Details */}
           <div>
             <h4 style={{ color: "#F8FAFC", fontSize: 15, fontWeight: 800, marginBottom: 16, textTransform: "uppercase", letterSpacing: 0.5 }}>Get In Touch</h4>
-            {settings && (settings.contactEmail || settings.contactPhone || settings.contactAddress) ? (
+            {settings && (
+              (settings.showContactEmail !== false && settings.contactEmail) || 
+              (settings.showContactPhone !== false && settings.contactPhone) || 
+              (settings.showContactAddress !== false && settings.contactAddress)
+            ) ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 13 }}>
-                {settings.contactEmail && (
+                {settings.showContactEmail !== false && settings.contactEmail && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <MailSVG size={14} color="#A78BFA" />
                     <a href={`mailto:${settings.contactEmail}`} style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>{settings.contactEmail}</a>
                   </div>
                 )}
-                {settings.contactPhone && (
+                {settings.showContactPhone !== false && settings.contactPhone && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <PhoneSVG size={14} color="#A78BFA" />
                     <a href={`tel:${settings.contactPhone}`} style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>{settings.contactPhone}</a>
                   </div>
                 )}
-                {settings.contactAddress && (
+                {settings.showContactAddress !== false && settings.contactAddress && (
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                     <span style={{ display: "inline-flex", marginTop: 2 }}><MapPinSVG size={14} color="#A78BFA" /></span>
                     <span style={{ color: "#94A3B8", lineHeight: 1.4 }}>{settings.contactAddress}</span>
@@ -2098,7 +2102,7 @@ function Footer({ settings }: { settings: Settings | null }) {
                 )}
               </div>
             ) : (
-              <p style={{ fontSize: 13, color: "#64748B" }}>Support available 24/7. Reach out via email or phone for order queries.</p>
+              <p style={{ fontSize: 13, color: "#64748B" }}>Support available 24/7. Reach out via our social channels for order queries.</p>
             )}
           </div>
 

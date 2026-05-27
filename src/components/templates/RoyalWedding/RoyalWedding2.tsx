@@ -298,6 +298,7 @@ export default function RoyalWedding2({
     return () => {
       audio.pause();
       audio.src = "";
+      audioRef.current = null;
     };
   }, [d.bg_song_url, em]);
 

@@ -328,16 +328,31 @@ export default function SettingsPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <div>
-            <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Contact Email</label>
-            <input type="email" value={settings.contactEmail || ""} onChange={e => setSettings(s => ({ ...s, contactEmail: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>Contact Email</label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748B", cursor: "pointer" }}>
+                <input type="checkbox" checked={settings.showContactEmail ?? true} onChange={e => setSettings(s => ({ ...s, showContactEmail: e.target.checked }))} /> Show in Footer
+              </label>
+            </div>
+            <input type="email" value={settings.contactEmail || ""} onChange={e => setSettings(s => ({ ...s, contactEmail: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14, opacity: (settings.showContactEmail ?? true) ? 1 : 0.6 }} />
           </div>
           <div>
-            <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Contact Number</label>
-            <input type="text" value={settings.contactPhone || ""} onChange={e => setSettings(s => ({ ...s, contactPhone: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>Contact Number</label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748B", cursor: "pointer" }}>
+                <input type="checkbox" checked={settings.showContactPhone ?? true} onChange={e => setSettings(s => ({ ...s, showContactPhone: e.target.checked }))} /> Show in Footer
+              </label>
+            </div>
+            <input type="text" value={settings.contactPhone || ""} onChange={e => setSettings(s => ({ ...s, contactPhone: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14, opacity: (settings.showContactPhone ?? true) ? 1 : 0.6 }} />
           </div>
           <div>
-            <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Address / Main Site</label>
-            <input type="text" value={settings.contactAddress || ""} onChange={e => setSettings(s => ({ ...s, contactAddress: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>Address / Main Site</label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748B", cursor: "pointer" }}>
+                <input type="checkbox" checked={settings.showContactAddress ?? true} onChange={e => setSettings(s => ({ ...s, showContactAddress: e.target.checked }))} /> Show in Footer
+              </label>
+            </div>
+            <input type="text" value={settings.contactAddress || ""} onChange={e => setSettings(s => ({ ...s, contactAddress: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14, opacity: (settings.showContactAddress ?? true) ? 1 : 0.6 }} />
           </div>
           
           <div style={{ background: "#F8FAFC", padding: 20, borderRadius: 12, border: "1px solid #E2E8F0", display: "flex", flexDirection: "column", gap: 16 }}>

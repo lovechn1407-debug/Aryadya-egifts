@@ -470,6 +470,7 @@ export default function RoyalWedding({
     return () => {
       audio.pause();
       audio.src = "";
+      audioRef.current = null;
     };
   }, [d.bg_song_url, em]);
 

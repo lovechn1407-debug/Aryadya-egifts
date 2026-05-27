@@ -25,8 +25,11 @@ export interface Settings {
   };
   marquees?: Marquee[];
   contactEmail?: string;
+  showContactEmail?: boolean;
   contactPhone?: string;
+  showContactPhone?: boolean;
   contactAddress?: string;
+  showContactAddress?: boolean;
   emailServiceBuy?: boolean;
   emailServiceFinalize?: boolean;
   faviconUrl?: string;
@@ -34,7 +37,13 @@ export interface Settings {
 
 export async function getSettingsDB(): Promise<Settings> {
   const snap = await get(ref(database, "settings"));
-  if (snap.exists()) return snap.val() as Settings;
+  if (snap.exists()) {
+    const val = snap.val() as Settings;
+    if (val.showContactEmail === undefined) val.showContactEmail = true;
+    if (val.showContactPhone === undefined) val.showContactPhone = true;
+    if (val.showContactAddress === undefined) val.showContactAddress = true;
+    return val;
+  }
   return {
     maintenance: {
       enabled: false,
@@ -45,8 +54,11 @@ export async function getSettingsDB(): Promise<Settings> {
       countdownTarget: ""
     },
     contactEmail: "lovechn1407@gmail.com",
+    showContactEmail: true,
     contactPhone: "8383090874",
+    showContactPhone: true,
     contactAddress: "main site :",
+    showContactAddress: true,
     emailServiceBuy: true,
     emailServiceFinalize: true
   };
