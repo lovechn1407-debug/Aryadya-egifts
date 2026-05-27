@@ -48,8 +48,81 @@ export default function BirthdayBliss({ customData = {}, editMode = false, onFie
 
   const [bgModalOpen, setBgModalOpen] = useState(false);
 
+  const [preloading, setPreloading] = useState(false);
+  const [preloadProgress, setPreloadProgress] = useState(0);
+  const [preloadText, setPreloadText] = useState("");
+
+  useEffect(() => {
+    if (editMode || autoPlay) return;
+    setPreloading(true);
+    let isCancelled = false;
+    
+    const runPreload = async () => {
+      setPreloadProgress(10);
+      setPreloadText("Warming up the lights...");
+      await new Promise(r => setTimeout(r, 600));
+      
+      if (isCancelled) return;
+      setPreloadProgress(30);
+      setPreloadText("Tuning the background music...");
+      await new Promise(r => setTimeout(r, 500));
+      
+      if (isCancelled) return;
+      setPreloadProgress(60);
+      setPreloadText("Loading polaroids and stars...");
+      
+      const assets = [
+        customData.p_img1, customData.p_img2, customData.p_img3
+      ].filter(Boolean);
+      
+      let loaded = 0;
+      await Promise.all(assets.map(src => new Promise(res => {
+        if (!src) { res(null); return; }
+        const img = new Image();
+        img.onload = () => {
+          loaded++;
+          if (!isCancelled) setPreloadProgress(60 + Math.floor((loaded/Math.max(assets.length, 1))*30));
+          res(null);
+        };
+        img.onerror = () => res(null);
+        img.src = src;
+      })));
+      
+      if (isCancelled) return;
+      setPreloadProgress(95);
+      setPreloadText("Preparing the magic...");
+      await new Promise(r => setTimeout(r, 400));
+      
+      if (isCancelled) return;
+      setPreloadProgress(100);
+      setPreloadText("Ready.");
+      await new Promise(r => setTimeout(r, 200));
+      
+      if (!isCancelled) setPreloading(false);
+    };
+    
+    runPreload();
+    return () => { isCancelled = true; };
+  }, [editMode, autoPlay, customData]);
+
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {preloading && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 99999, background: "#06060A", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif" }}>
+          <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3.5px solid rgba(255,45,135,0.15)", borderTopColor: "#ff2d87", animation: "tmpl-spin 0.9s cubic-bezier(0.16, 1, 0.3, 1) infinite", marginBottom: 20 }} />
+          <h2 style={{ fontWeight: 800, color: "#FFF8F0", fontSize: 18, letterSpacing: -0.3, animation: "tmpl-pulse 2s infinite", marginBottom: 16 }}>Opening Your Surprise</h2>
+          
+          <div style={{ width: 240, height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden", marginBottom: 12 }}>
+            <div style={{ height: "100%", background: "#ff2d87", width: `${preloadProgress}%`, transition: "width 0.3s ease" }} />
+          </div>
+          <p style={{ color: "#F2C4CE", fontSize: 13 }}>{preloadText}</p>
+          
+          <style>{`
+            @keyframes tmpl-spin { 100% { transform: rotate(360deg); } }
+            @keyframes tmpl-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+          `}</style>
+        </div>
+      )}
       {autoPlay && (
         <div style={{ display: "none" }}>
           <img src={d.p_img1 || "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=600"} alt="preload" />

@@ -1036,6 +1036,64 @@ export default function BirthdayMagicBox({
   const fadeIntervalRef = useRef<any>(null);
   useEffect(() => { ytPlayerRef.current = ytPlayer; }, [ytPlayer]);
 
+  const [preloading, setPreloading] = useState(false);
+  const [preloadProgress, setPreloadProgress] = useState(0);
+  const [preloadText, setPreloadText] = useState("");
+
+  useEffect(() => {
+    if (editMode || autoPlay) return;
+    setPreloading(true);
+    let isCancelled = false;
+    
+    const runPreload = async () => {
+      setPreloadProgress(10);
+      setPreloadText("Warming up the lights...");
+      await new Promise(r => setTimeout(r, 600));
+      
+      if (isCancelled) return;
+      setPreloadProgress(30);
+      setPreloadText("Tuning the background music...");
+      await new Promise(r => setTimeout(r, 500));
+      
+      if (isCancelled) return;
+      setPreloadProgress(60);
+      setPreloadText("Loading polaroids and stars...");
+      
+      const assets = [
+        customData.s4_img, customData.s5_img,
+        customData.bg_song_url
+      ].filter(Boolean);
+      
+      let loaded = 0;
+      await Promise.all(assets.map(src => new Promise(res => {
+        if (!src) { res(null); return; }
+        const img = new Image();
+        img.onload = () => {
+          loaded++;
+          if (!isCancelled) setPreloadProgress(60 + Math.floor((loaded/Math.max(assets.length, 1))*30));
+          res(null);
+        };
+        img.onerror = () => res(null);
+        img.src = src;
+      })));
+      
+      if (isCancelled) return;
+      setPreloadProgress(95);
+      setPreloadText("Preparing the magic...");
+      await new Promise(r => setTimeout(r, 400));
+      
+      if (isCancelled) return;
+      setPreloadProgress(100);
+      setPreloadText("Ready.");
+      await new Promise(r => setTimeout(r, 200));
+      
+      if (!isCancelled) setPreloading(false);
+    };
+    
+    runPreload();
+    return () => { isCancelled = true; };
+  }, [editMode, autoPlay, customData]);
+
   useEffect(() => {
     const onInteract = () => {
       setHasInteracted(true);
@@ -1262,6 +1320,22 @@ export default function BirthdayMagicBox({
 
   return (
     <div style={{ position:"relative", minHeight:"100vh", overflow:"hidden" }}>
+      {preloading && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 99999, background: "#06060A", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif" }}>
+          <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3.5px solid rgba(233,30,140,0.15)", borderTopColor: "#E91E8C", animation: "tmpl-spin 0.9s cubic-bezier(0.16, 1, 0.3, 1) infinite", marginBottom: 20 }} />
+          <h2 style={{ fontWeight: 800, color: "#FFF", fontSize: 18, letterSpacing: -0.3, animation: "tmpl-pulse 2s infinite", marginBottom: 16 }}>Opening Your Surprise</h2>
+          
+          <div style={{ width: 240, height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden", marginBottom: 12 }}>
+            <div style={{ height: "100%", background: "#E91E8C", width: `${preloadProgress}%`, transition: "width 0.3s ease" }} />
+          </div>
+          <p style={{ color: "#E91E8C", fontSize: 13, opacity: 0.8 }}>{preloadText}</p>
+          
+          <style>{`
+            @keyframes tmpl-spin { 100% { transform: rotate(360deg); } }
+            @keyframes tmpl-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+          `}</style>
+        </div>
+      )}
       {/* Global Mute Button */}
       {customData.bg_song_url && !editMode && (
         <button
