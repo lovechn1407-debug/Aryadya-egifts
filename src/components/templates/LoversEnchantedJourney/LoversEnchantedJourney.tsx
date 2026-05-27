@@ -517,48 +517,8 @@ function BearChar({ size = 100, variant = "plain" as BearVariant, extStyle }: { 
 }
 
 // ── ImageUploader ───────────────────────────────────────────────────────────────
-const IMGBB_KEY = "83e3f88941efd1059a89f016ff302d9e";
-function ImageUploader({ fid, data, onChange, defaultSrc }: {
-  fid: string; data: Record<string, string>; onChange?: (id: string, v: string) => void; defaultSrc: string;
-}) {
-  const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const currentSrc = data[fid] || "";
-  void defaultSrc;
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
-    setPreview(URL.createObjectURL(file)); setUploading(true);
-    try {
-      const fd = new FormData(); fd.append("image", file);
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
-      const json = await res.json();
-      if (json.success) { onChange?.(fid, json.data.url); setPreview(null); }
-    } catch { /* ignore */ }
-    setUploading(false);
-  };
-  const useDefault = () => { onChange?.(fid, ""); setPreview(null); };
-  return (
-    <div style={{ padding: "8px 12px", background: "rgba(212,175,55,0.06)", borderTop: "1px dashed rgba(212,175,55,0.4)", borderRadius: "0 0 12px 12px", marginTop: 4 }}>
-      {preview && <div style={{ marginBottom: 6, textAlign: "center" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={preview} alt="Preview" style={{ maxHeight: 80, borderRadius: 8, border: "2px solid #D4AF37" }} />
-      </div>}
-      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
-        <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{
-          background: "linear-gradient(135deg,#D4AF37,#FFB347)", color: "#3D0C1A", border: "none", borderRadius: 8,
-          padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: uploading ? "not-allowed" : "pointer",
-          opacity: uploading ? 0.6 : 1,
-        }}>{uploading ? "Uploading…" : "📷 Replace Image"}</button>
-        {currentSrc && <button onClick={useDefault} style={{
-          background: "rgba(255,255,255,0.1)", color: "#fdf6e3", border: "1px solid rgba(255,255,255,0.2)",
-          borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 600, cursor: "pointer",
-        }}>↩ Use Default</button>}
-      </div>
-    </div>
-  );
-}
+import ImageUploader from "@/components/ImageCropperUploader";
+
 
 // ── SlideShell ─────────────────────────────────────────────────────────────────
 function SlideShell({ children, onBack, onNext, backLabel = "← Back", nextLabel = "Next →", showNext = true, background, isEditMode = false }: {

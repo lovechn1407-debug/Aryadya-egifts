@@ -46,64 +46,7 @@ function ET({ fid, data, onChange, style, multiline = false, editMode = false }:
   );
 }
 
-// ── Image Uploader (imgbb) ──
-const IMGBB_KEY = "83e3f88941efd1059a89f016ff302d9e";
-
-function ImageUploader({ fid, data, onChange, defaultSrc }: {
-  fid: string; data: Record<string, string>; onChange?: (id: string, v: string) => void; defaultSrc: string;
-}) {
-  const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const currentSrc = data[fid] || "";
-
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPreview(URL.createObjectURL(file));
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("image", file);
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
-      const json = await res.json();
-      if (json.success) {
-        onChange?.(fid, json.data.url);
-        setPreview(null);
-      }
-    } catch { /* ignore */ }
-    setUploading(false);
-  };
-
-  const useDefault = () => { onChange?.(fid, ""); setPreview(null); };
-
-  return (
-    <div style={{ padding: "8px 12px", background: "rgba(216,169,87,0.04)", borderTop: "1px dashed rgba(216,169,87,0.3)", width: "100%", borderRadius: 8, marginTop: 8 }}>
-      {preview && (
-        <div style={{ marginBottom: 6, textAlign: "center" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={preview} alt="Preview" style={{ maxHeight: 80, borderRadius: 8, border: "2px solid #d8a957" }} />
-        </div>
-      )}
-      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
-        <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{
-          background: "#a6384f", color: "#fff", border: "none", borderRadius: 8,
-          padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-          opacity: uploading ? 0.6 : 1,
-        }}>{uploading ? "Uploading…" : "📷 Change Image"}</button>
-        {currentSrc && (
-          <button onClick={useDefault} style={{
-            background: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb",
-            borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer"
-          }}>
-            {fid.startsWith("photo") && parseInt(fid.replace("photo", ""), 10) > 4 ? "🗑️ Remove Photo" : "🗑️ Reset to Default"}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
+import ImageUploader from "@/components/ImageCropperUploader";
 
 const getPhotoDefault = (key: string) => {
   if (key === "photo1") return "/templates/royal-wedding/Arch_Demo2.png";
