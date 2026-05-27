@@ -552,6 +552,11 @@ export default function DuduBirthday({
   // SLIDE 9: FINALE & WAX SEAL
   // ──────────────────────────────────────────────────────────
   const [sealed, setSealed] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [showShareModal, setShowShareModal] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
   const handleSeal = () => {
     if (sealed) return;
     PlaySynth.success();
@@ -561,6 +566,87 @@ export default function DuduBirthday({
       origin: { y: 0.65 }
     });
     setSealed(true);
+    setTimeout(() => handleShare(), 800);
+  };
+
+  const handleShare = async () => {
+    if (!cardRef.current) return;
+    setShareLoading(true);
+    try {
+      const { domToBlob } = await import("modern-screenshot");
+      const blob = await domToBlob(cardRef.current, {
+        scale: 2,
+        backgroundColor: "#FFFDF0",
+        filter: (el) => {
+          if (el.nodeType === 1) {
+            return (el as HTMLElement).tagName !== "BUTTON";
+          }
+          return true;
+        },
+        onCloneNode: (clonedNode) => {
+          if (clonedNode instanceof HTMLElement) {
+            try {
+              clonedNode.style.setProperty("backdrop-filter", "none", "important");
+              clonedNode.style.setProperty("-webkit-backdrop-filter", "none", "important");
+              clonedNode.style.setProperty("background-color", "#FFFDF0", "important");
+              const children = clonedNode.querySelectorAll<HTMLElement>("*");
+              for (let i = 0; i < children.length; i++) {
+                if (children[i] && children[i].style) {
+                  children[i].style.setProperty("backdrop-filter", "none", "important");
+                  children[i].style.setProperty("-webkit-backdrop-filter", "none", "important");
+                }
+              }
+            } catch (e) {
+              console.log("Safe clone styling failed", e);
+            }
+          }
+        }
+      });
+      if (!blob) throw new Error("no blob");
+
+      const file = new File([blob], `dudu-birthday-proof.png`, { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "Sealed With Love",
+            text: "Look at the love letter I sealed for you! ✦",
+          });
+          setShareLoading(false);
+          return;
+        } catch (err) {
+          console.log("Native share failed", err);
+        }
+      }
+
+      // Fallback to ImgBB
+      const fd = new FormData();
+      fd.append("image", blob, "dudu-birthday-proof.png");
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e`, { method: "POST", body: fd });
+      const json = await res.json();
+      if (json.success) { 
+        const url = json.data.url;
+        setShareUrl(url); 
+        
+        try {
+          await navigator.clipboard.writeText(url);
+        } catch (clipErr) {
+          console.log("Clipboard write failed", clipErr);
+        }
+
+        // Open WhatsApp Share with the generated link
+        const whatsappText = `Look at the birthday letter I sealed for you! ✦\n${url}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+        window.open(whatsappUrl, '_blank');
+        
+        setShowShareModal(true); 
+      }
+    } catch (e) {
+      console.error("Screenshot failed:", e);
+      alert("Oops, capturing the screenshot failed on your device. Please take a manual screenshot!");
+    }
+    setShareLoading(false);
   };
 
   return (
@@ -1335,35 +1421,39 @@ export default function DuduBirthday({
 
           {activeSlide === 9 && (
             <motion.div
+              ref={cardRef}
               key="slide9"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
               transition={{ type: "spring", stiffness: 90, damping: 15 }}
             >
+              <style>{`
+                @keyframes sealSlam {
+                  0% { transform: scale(3.5) rotate(-45deg); opacity: 0; filter: blur(6px); }
+                  70% { transform: scale(0.9) rotate(5deg); opacity: 1; filter: none; }
+                  85% { transform: scale(1.15) rotate(-3deg); }
+                  100% { transform: scale(1) rotate(-12deg); }
+                }
+                .seal-pressing {
+                  animation: sealSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                }
+                @keyframes fadeIn {
+                  from { opacity: 0; }
+                  to { opacity: 1; }
+                }
+                .seal-backdrop {
+                  animation: fadeIn 0.4s ease forwards;
+                }
+              `}</style>
               <span style={{ textTransform: "uppercase", fontSize: 11, fontWeight: 800, color: "#FF69B4", letterSpacing: 2 }}>Wax Seal Envelope</span>
               <h2 className="dudu-script" style={{ fontSize: "2.5rem", color: "#FF69B4", margin: "8px 0" }}>Lock with Love 💌</h2>
               
-              <div style={{ background: "#FFE5D9", padding: 24, borderRadius: 24, border: "2px dashed #FF69B4", margin: "20px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ position: "relative", width: 160, height: 110, background: "#FFF", borderRadius: 12, border: "1.5px solid #FFB7CE", boxShadow: "0 6px 14px rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ background: "#FFE5D9", padding: 24, borderRadius: 24, border: "2px dashed #FF69B4", margin: "20px 0", display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
+                <div style={{ position: "relative", width: 160, height: 110, background: "#FFF", borderRadius: 12, border: "1.5px solid #FFB7CE", boxShadow: "0 6px 14px rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1 }}>
                   
                   {/* Wax Seal Overlay */}
-                  {sealed ? (
-                    <motion.div
-                      initial={{ scale: 3, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 120 }}
-                      style={{
-                        background: "radial-gradient(circle, #C2185B 30%, #E91E63 100%)",
-                        width: 50, height: 50, borderRadius: "50%", border: "2.5px solid #C8960A",
-                        display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
-                        fontWeight: 900, fontSize: 10, textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                        boxShadow: "0 4px 10px rgba(194,24,91,0.4)"
-                      }}
-                    >
-                      SEALED
-                    </motion.div>
-                  ) : (
+                  {!sealed && (
                     <motion.div
                       animate={{ y: [0, -6, 0] }}
                       transition={{ repeat: Infinity, duration: 1.5 }}
@@ -1381,14 +1471,44 @@ export default function DuduBirthday({
                       background: "linear-gradient(135deg, #FF69B4, #FFB7CE)", color: "#fff",
                       border: "none", borderRadius: 24, padding: "12px 30px", fontSize: 13,
                       fontWeight: 800, cursor: "pointer", marginTop: 20,
-                      boxShadow: "0 6px 16px rgba(255,105,180,0.3)"
+                      boxShadow: "0 6px 16px rgba(255,105,180,0.3)", zIndex: 2
                     }}
                   >
                     <ET fid="s9_seal_label" data={d} onChange={oc} editMode={em} />
                   </button>
                 ) : (
-                  <div style={{ marginTop: 20, color: "#C2185B", fontWeight: 800, fontSize: 14 }}>
-                    💖 Sealed Permanently! 💖
+                  <div style={{ marginTop: 20, display: "flex", gap: 10, zIndex: 2 }}>
+                    <button onClick={handleShare} disabled={shareLoading}
+                      style={{ display:"flex", alignItems:"center", gap:8, borderRadius:9999, background:"linear-gradient(135deg,#C0395A,#8B1A3A)", padding:"12px 24px", color:"#fdf6e3", cursor:shareLoading?"wait":"pointer", fontSize:14, fontWeight:700, boxShadow:"0 8px 24px rgba(192,57,90,0.4)", border:"1px solid rgba(255,255,255,0.15)", opacity: shareLoading ? 0.7 : 1 }}>
+                      {shareLoading ? "Capturing…" : "Share Proof ✦"}
+                    </button>
+                  </div>
+                )}
+                
+                {/* Full screen blackout & hot wax slam */}
+                {sealed && (
+                  <div className="seal-backdrop" style={{ position:"absolute", inset:0, background:"rgba(18,5,9,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
+                    <div className="seal-pressing" style={{ filter:"drop-shadow(0 8px 24px rgba(183,28,28,0.4))", transform:"rotate(-12deg)", width: 140, height: 140 }}>
+                      <svg width="100%" height="100%" viewBox="0 0 200 200">
+                        <defs>
+                          <path id="stamp-top-path" d="M 35, 100 A 65,65 0 0,1 165, 100" fill="none" />
+                          <path id="stamp-bottom-path" d="M 165, 100 A 65,65 0 0,1 35, 100" fill="none" />
+                        </defs>
+                        <path d="M 100, 15 A 85,85 0 0,0 20, 110 A 80,85 0 0,0 100, 185 A 85,80 0 0,0 180, 95 A 85,85 0 0,0 100, 15 Z" fill="#B71C1C" stroke="#D32F2F" strokeWidth="4" />
+                        <circle cx="100" cy="100" r="78" fill="none" stroke="#FFCDD2" strokeWidth="2" strokeDasharray="4 2" opacity="0.6" />
+                        <circle cx="100" cy="100" r="62" fill="#800F0F" stroke="#B71C1C" strokeWidth="3" />
+                        <text fill="#FFCDD2" fontSize="9.5" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="1.5">
+                          <textPath href="#stamp-top-path" startOffset="50%" textAnchor="middle">ARADHYA EGIFTS</textPath>
+                        </text>
+                        <text fill="#FFCDD2" fontSize="8" fontFamily="'Inter', sans-serif" fontWeight="700" letterSpacing="0.8">
+                          <textPath href="#stamp-bottom-path" startOffset="50%" textAnchor="middle">{`SEEN ON ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}`}</textPath>
+                        </text>
+                        <text x="100" y="92" textAnchor="middle" fill="#FFF" fontSize="12" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="0.5">SEEN BY</text>
+                        <text x="100" y="112" textAnchor="middle" fill="#FFEB3B" fontSize="16" fontFamily="'Dancing Script', cursive" fontWeight="bold">{(d.beloved_name || "MY LOVE").toUpperCase()}</text>
+                        <text x="54" y="103" fill="#FFEB3B" fontSize="9">❤</text>
+                        <text x="146" y="103" fill="#FFEB3B" fontSize="9">❤</text>
+                      </svg>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1406,6 +1526,55 @@ export default function DuduBirthday({
               <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 16 }}>
                 <button onClick={() => { prevSlide(); setSealed(false); }} style={{ background: "none", border: "2px solid #FFB7CE", color: "#FF69B4", padding: "10px 24px", borderRadius: 24, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Back</button>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Share Proof Modal ── */}
+        <AnimatePresence>
+          {showShareModal && shareUrl && (
+            <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+              onClick={() => setShowShareModal(false)}
+              style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(6,12,30,0.88)", backdropFilter:"blur(12px)", padding:20 }}>
+              <motion.div initial={{ scale:0.88, y:24 }} animate={{ scale:1, y:0 }} exit={{ scale:0.88, opacity:0 }}
+                onClick={e => e.stopPropagation()}
+                style={{ width:"min(460px,92vw)", background:"rgba(18,5,9,0.97)", border:"2px solid #D4AF37", borderRadius:24, padding:"24px 20px", textAlign:"center", boxShadow:"0 24px 64px rgba(212,175,55,0.25)", position:"relative" }}>
+                <h3 style={{ fontFamily:"'Cormorant Garamond',serif", fontWeight:700, fontSize:22, color:"#D4AF37", marginBottom:6, fontStyle:"italic" }}>
+                  🌟 Sealed With Love 🌟
+                </h3>
+                <p style={{ fontSize:13, color:"#F2C4CE", marginBottom:16, fontFamily:"'Lora',serif" }}>
+                  Your love letter is sealed forever!
+                </p>
+                <div style={{ background:"#060C1E", padding:"12px 12px 32px", borderRadius:12, boxShadow:"0 10px 25px rgba(0,0,0,0.5)", border:"1px solid rgba(212,175,55,0.3)", marginBottom:20, transform:"rotate(-1.5deg)" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={shareUrl} alt="Sealed Proof" style={{ width:"100%", borderRadius:6, display:"block", maxHeight:280, objectFit:"contain", border:"1px solid rgba(212,175,55,0.2)" }} />
+                  <div style={{ fontFamily:"'Dancing Script',cursive", fontSize:20, color:"#D4AF37", marginTop:10, textAlign:"center" }}>Sealed with love ✦</div>
+                </div>
+                <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
+                  <button onClick={() => { 
+                      const whatsappText = `Look at the birthday letter I sealed for you! ✦\n${shareUrl}`;
+                      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+                      window.open(whatsappUrl, '_blank');
+                    }}
+                    style={{
+                      background: "#25D366", color: "#fff",
+                      border: "none", borderRadius: 999,
+                      padding: "10px 22px", fontSize: 13, fontWeight: 800,
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      boxShadow: "0 6px 16px rgba(37, 211, 102, 0.3)",
+                      flex: 1, fontFamily: "'Inter', sans-serif"
+                    }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51h-.57c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Share to WhatsApp
+                  </button>
+                  <button onClick={() => setShowShareModal(false)}
+                    style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, background:"rgba(255,255,255,0.08)", color:"#fdf6e3", fontWeight:600, border:"1px solid rgba(255,255,255,0.15)", padding:"10px 20px", fontSize:13, cursor:"pointer" }}>
+                    Close
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

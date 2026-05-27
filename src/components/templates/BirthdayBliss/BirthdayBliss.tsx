@@ -641,41 +641,185 @@ function EnvelopeSlide({ onOpen, editMode }: { onOpen: () => void; editMode: boo
 function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>void; d: Record<string,string>; editMode: boolean; onFieldChange?: (id:string,v:string)=>void }) {
   const [sealed, setSealed] = useState(false);
   const [animationDone, setAnimationDone] = useState(false);
-  const [sharing, setSharing] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
+  const [screenshotData, setScreenshotData] = useState<string | null>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const letterRef = useRef<HTMLDivElement>(null);
-  const date = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+
+  const currentDate = new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
 
   const handleSeal = () => {
     setSealed(true);
     setAnimationDone(false);
+
+    // After animation completes (1000ms), remove animation class to make stamp static
     setTimeout(() => {
       setAnimationDone(true);
     }, 1000);
+    
+    // Wait for stamp pressing animation to complete, then capture screenshot
+    setTimeout(async () => {
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 700);
+
+      const element = letterRef.current;
+      if (!element) {
+        console.error("Capture element not found");
+        const fallbackSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23fff5f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23e91e8c' font-size='16'>Sealed with Love! 💖</text></svg>`;
+        const fallbackData = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(fallbackSvg)))}`;
+        setScreenshotData(fallbackData);
+        setOpenModal(true);
+        return;
+      }
+
+      try {
+        const { domToPng } = await import("modern-screenshot");
+        const dataUrl = await domToPng(element, {
+          scale: 2,
+          backgroundColor: "rgba(255,245,248,0.97)",
+          filter: (el) => {
+            if (el.nodeType === 1) {
+              const htmlEl = el as HTMLElement;
+              return !htmlEl.classList.contains("no-screenshot") && htmlEl.tagName !== "BUTTON";
+            }
+            return true;
+          }
+        });
+        setScreenshotData(dataUrl);
+        setOpenModal(true);
+      } catch (err) {
+        console.error("Screenshot capture failed", err);
+        const fallbackSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%23fff5f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23e91e8c' font-size='16'>Sealed with Love! 💖</text></svg>`;
+        const fallbackData = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(fallbackSvg)))}`;
+        setScreenshotData(fallbackData);
+        setOpenModal(true);
+      }
+    }, 1500);
   };
 
   const handleShare = async () => {
-    if (!letterRef.current) return;
-    setSharing(true);
+    if (!screenshotData) return;
+    setUploading(true);
+    setError(null);
+
+    let isShared = false;
+
+    // 1. Try direct image file sharing if supported by browser/device
     try {
-      const { domToBlob } = await import("modern-screenshot");
-      const blob = await domToBlob(letterRef.current, { backgroundColor: "transparent", scale: 2 });
-      if (!blob) throw new Error("blob failed");
-      const file = new File([blob], "birthday-letter.png", { type: "image/png" });
-      // @ts-ignore
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "A Birthday Letter", text: `Happy Birthday ${d.s0_recipient||"Madam Ji"} ✨` });
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = "birthday-letter.png"; a.click();
-        URL.revokeObjectURL(url);
+      if (screenshotData.includes(";base64,")) {
+        const base64Data = screenshotData.split(",")[1];
+        const byteString = atob(base64Data);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: "image/png" });
+        const file = new File([blob], `seen-proof-${Date.now()}.png`, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "Birthday Sealed Proof 💖",
+            text: "My birthday letter is sealed and proof is locked! 🎂"
+          });
+          isShared = true;
+        }
       }
-    } catch (e) { console.error(e); }
-    setSharing(false);
+    } catch (err) {
+      console.log("Direct raw file sharing not supported or cancelled, trying link upload...", err);
+    }
+
+    if (isShared) {
+      setUploading(false);
+      return;
+    }
+
+    // 2. Fallback to ImgBB upload and WhatsApp Link
+    try {
+      let base64Data = "";
+      if (screenshotData.includes(";base64,")) {
+        base64Data = screenshotData.split(",")[1];
+      } else {
+        base64Data = btoa(unescape(encodeURIComponent(screenshotData.split(",")[1] || screenshotData)));
+      }
+
+      const fd = new FormData();
+      fd.append("image", base64Data);
+
+      const res = await fetch("https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e", {
+        method: "POST",
+        body: fd
+      });
+      const json = await res.json();
+      if (json.success) {
+        const url = json.data.url;
+        setShareUrl(url);
+
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 5000);
+        } catch (clipErr) {
+          console.log("Clipboard write failed", clipErr);
+        }
+
+        // Open WhatsApp Share with the generated link
+        const whatsappText = `My birthday letter is sealed and proof is locked! Check out the seen proof here: 🎂\n${url}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+        window.open(whatsappUrl, '_blank');
+      } else {
+        setError("Failed to upload image. Please try again.");
+      }
+    } catch (err) {
+      setError("An error occurred during upload. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
     <section className="min-h-screen bliss-gradient-bg flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+      <style>{`
+        @keyframes sealSlam {
+          0% { transform: scale(3.5) rotate(-45deg); opacity: 0; filter: blur(6px); }
+          70% { transform: scale(0.9) rotate(5deg); opacity: 1; filter: none; }
+          85% { transform: scale(1.15) rotate(-3deg); }
+          100% { transform: scale(1) rotate(-5deg); }
+        }
+        .seal-pressing {
+          animation: sealSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .seal-backdrop {
+          animation: fadeIn 0.4s ease forwards;
+        }
+        @keyframes cameraFlash {
+          0% { opacity: 0; }
+          15% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .camera-flash-overlay {
+          position: fixed; inset: 0; background: #fff; z-index: 99999; pointer-events: none;
+          animation: cameraFlash 0.7s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes popIn {
+          0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+          100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .pop-in-modal {
+          animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+      `}</style>
+      
+      {showFlash && <div className="camera-flash-overlay" />}
       <Confetti count={50} />
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full animate-bliss-shimmer" style={{ background: "radial-gradient(circle, #ff2d8755, transparent 70%)" }} />
@@ -686,7 +830,7 @@ function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>voi
         <div ref={letterRef} className="bliss-letter-paper relative w-full p-8 md:p-14">
           <div className="flex items-center justify-between text-[#7a4a5c] text-[11px] font-sans tracking-widest uppercase mb-10">
             <span>A Letter</span>
-            <span>{date}</span>
+            <span>{currentDate}</span>
           </div>
           <h1 className="bliss-font-display text-4xl md:text-[2.75rem] font-medium text-[#5a1d3a] mb-2 leading-tight">
             <ET darkText fid="l_greeting" d={d} onChange={onFieldChange} editMode={editMode} def={d.l_greeting||"Happy Birthday, my favorite person."} />
@@ -700,37 +844,178 @@ function LetterSlide({ onReset, d, editMode, onFieldChange }: { onReset: ()=>voi
           </p>
           <p className="text-2xl md:text-3xl text-[#5a1d3a]"><ET darkText fid="l_signoff" d={d} onChange={onFieldChange} editMode={editMode} def={d.l_signoff||"— with all my heart ❤"} /></p>
 
-          {sealed && (
-            <div
-              className="bliss-stamp"
-              style={animationDone ? {
-                animation: "none",
-                transform: "translate(-50%, -50%) rotate(-12deg) scale(1)",
-                opacity: 1
-              } : {}}
-            >
-              Seen by {d.s0_recipient||"Madam Ji"}<br />
-              <span className="text-[10px] opacity-80">on {date}</span><br />
-              <span className="text-[10px] opacity-80">Made by ARADHYA E-GIFT</span>
+          {sealed && !editMode && (
+            <div className="seal-backdrop" style={{ position:"absolute", inset:0, background:"rgba(255,245,248,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20, ...(animationDone ? { animation: "none", opacity: 1 } : {}) }}>
+              <div className="seal-pressing" style={{ transform: "rotate(-5deg)", filter: "drop-shadow(0 8px 24px rgba(183,28,28,0.4))", ...(animationDone ? { animation: "none" } : {}) }}>
+                <svg width="210" height="210" viewBox="0 0 200 200">
+                  <defs>
+                    <path id="stamp-top-path" d="M 35, 100 A 65,65 0 0,1 165, 100" fill="none" />
+                    <path id="stamp-bottom-path" d="M 165, 100 A 65,65 0 0,1 35, 100" fill="none" />
+                  </defs>
+                  
+                  {/* Irregular scalloped circle edge for a hyper-realistic hot wax look */}
+                  <path d="M 100, 15 A 85,85 0 0,0 20, 110 A 80,85 0 0,0 100, 185 A 85,80 0 0,0 180, 95 A 85,85 0 0,0 100, 15 Z" fill="#B71C1C" stroke="#D32F2F" strokeWidth="4" />
+                  <circle cx="100" cy="100" r="78" fill="none" stroke="#FFCDD2" strokeWidth="2" strokeDasharray="4 2" opacity="0.6" />
+                  <circle cx="100" cy="100" r="62" fill="#800F0F" stroke="#B71C1C" strokeWidth="3" />
+                  
+                  <text fill="#FFCDD2" fontSize="9.5" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="1.5">
+                    <textPath href="#stamp-top-path" startOffset="50%" textAnchor="middle">
+                      ARADHYA EGIFTS
+                    </textPath>
+                  </text>
+                  
+                  <text fill="#FFCDD2" fontSize="8" fontFamily="'Inter', sans-serif" fontWeight="700" letterSpacing="0.8">
+                    <textPath href="#stamp-bottom-path" startOffset="50%" textAnchor="middle">
+                      {`SEEN ON ${currentDate}`}
+                    </textPath>
+                  </text>
+                  
+                  <text x="100" y="92" textAnchor="middle" fill="#FFF" fontSize="12" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="0.5">
+                    SEEN BY
+                  </text>
+                  <text x="100" y="112" textAnchor="middle" fill="#FFEB3B" fontSize="16" fontFamily="'Dancing Script', cursive" fontWeight="bold">
+                    {d.s0_recipient || "Princess"}
+                  </text>
+                  
+                  <text x="54" y="103" fill="#FFEB3B" fontSize="9">❤</text>
+                  <text x="146" y="103" fill="#FFEB3B" fontSize="9">❤</text>
+                </svg>
+              </div>
             </div>
           )}
         </div>
 
-        <div className="flex flex-wrap gap-3 justify-center">
-          <button onClick={onReset} className="bliss-btn-pill inline-flex items-center gap-2">
-            <RotateCcw size={14} /> Experience again
-          </button>
-          {!sealed ? (
+        {!editMode && (
+          <div className="flex flex-wrap gap-3 justify-center no-screenshot">
+            <button onClick={onReset} className="bliss-btn-pill inline-flex items-center gap-2">
+              <RotateCcw size={14} /> Experience again
+            </button>
             <button onClick={handleSeal} className="bliss-btn-pill bliss-btn-pill-pink inline-flex items-center gap-2">
               <Stamp size={14} /> Seal the letter
             </button>
-          ) : (
-            <button onClick={handleShare} disabled={sharing} className="bliss-btn-pill bliss-btn-pill-pink inline-flex items-center gap-2">
-              <Share2 size={14} /> {sharing ? "Preparingâ€¦" : "Share"}
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+
+      {/* Screenshot Framed Preview Modal */}
+      {openModal && screenshotData && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(10, 5, 8, 0.8)", backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20
+        }} className="fade-in">
+          <div style={{
+            background: "rgba(255, 248, 250, 0.95)",
+            border: "2px solid #E91E8C",
+            borderRadius: 24,
+            padding: "24px 20px",
+            width: "100%",
+            maxWidth: 440,
+            boxShadow: "0 24px 64px rgba(233, 30, 140, 0.3)",
+            textAlign: "center",
+            position: "relative",
+          }} className="pop-in-modal">
+            <h3 style={{
+              fontFamily: "'Nunito', sans-serif", fontWeight: 900,
+              fontSize: 22, color: "#E91E8C", marginBottom: 6
+            }}>
+              💖 Seen Proof Sealed! 💖
+            </h3>
+            <p style={{ fontSize: 13, color: "#7a6b73", marginBottom: 16 }}>
+              Your letter is sealed and proof is captured!
+            </p>
+
+            <div style={{
+              background: "#fff",
+              padding: "12px 12px 24px",
+              borderRadius: 12,
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+              border: "1px solid #FFE4EE",
+              marginBottom: 20,
+              transform: "rotate(-1deg)",
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={screenshotData} alt="Sealed Proof" style={{
+                width: "100%", borderRadius: 6, display: "block",
+                maxHeight: 280, objectFit: "contain",
+                border: "1px solid rgba(233, 30, 140, 0.1)"
+              }} />
+              <div style={{
+                fontFamily: "'Dancing Script', cursive",
+                fontSize: 18, color: "#E91E8C", marginTop: 12, textAlign: "center"
+              }}>
+                Sealed with Love ✨
+              </div>
+            </div>
+
+            {shareUrl && (
+              <div style={{
+                background: "rgba(76, 175, 138, 0.08)",
+                border: "1px solid rgba(76, 175, 138, 0.3)",
+                borderRadius: 12, padding: "10px 14px", marginBottom: 16,
+                fontSize: 12, color: "#2E7D32", fontWeight: 600,
+                lineHeight: 1.4
+              }} className="fade-in">
+                <span style={{ fontSize: 14 }}>🎉</span> Link Copied to Clipboard!
+                <div style={{
+                  marginTop: 4, fontStyle: "italic", fontWeight: 400,
+                  color: "#388E3C", wordBreak: "break-all", background: "#fff",
+                  padding: "4px 8px", borderRadius: 6, border: "1px solid #E8F5E9"
+                }}>{shareUrl}</div>
+              </div>
+            )}
+
+            {error && (
+              <div style={{
+                background: "rgba(211, 47, 47, 0.08)",
+                border: "1px solid rgba(211, 47, 47, 0.3)",
+                borderRadius: 12, padding: "10px 14px", marginBottom: 16,
+                fontSize: 12, color: "#C62828", fontWeight: 600
+              }}>
+                ❌ {error}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+              <button
+                onClick={handleShare}
+                disabled={uploading}
+                style={{
+                  background: "#25D366", color: "#fff",
+                  border: "none", borderRadius: 999,
+                  padding: "12px 24px", fontSize: 13, fontWeight: 800,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  boxShadow: "0 6px 16px rgba(37, 211, 102, 0.3)",
+                  opacity: uploading ? 0.7 : 1, transition: "all 0.2s",
+                  flex: 1
+                }}
+              >
+                {uploading ? (
+                  "Uploading... ⏳"
+                ) : (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51h-.57c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Share to WhatsApp
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setOpenModal(false)}
+                style={{
+                  background: "#E0E0E0", color: "#333",
+                  border: "none", borderRadius: 999,
+                  padding: "12px 24px", fontSize: 13, fontWeight: 800,
+                  cursor: "pointer", transition: "all 0.2s", flex: 0.5
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -380,48 +380,39 @@ const getFormattedDate = () => {
 };
 
 function CircularWaxStamp({ viewerName = "MY LOVE", dateText = "MAY 21, 2026" }) {
-  const brandText = "ARADHYA E-GIFTS";
-  const fullText = `${brandText}   •   ${viewerName.toUpperCase()}   •   ${dateText}   •   `;
-  
   return (
-    <svg viewBox="0 0 200 200" style={{ width: 190, height: 190, filter: "drop-shadow(0 12px 30px rgba(139,0,0,0.6))" }}>
+    <svg width="210" height="210" viewBox="0 0 200 200">
       <defs>
-        {/* Organic wax shading gradients */}
-        <radialGradient id="waxGrad" cx="45%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#DF2020" />
-          <stop offset="65%" stopColor="#8A0808" />
-          <stop offset="100%" stopColor="#3F0000" />
-        </radialGradient>
-        {/* Luxury Gold Metallic text path gradient */}
-        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FFE57F" />
-          <stop offset="45%" stopColor="#FFC107" />
-          <stop offset="75%" stopColor="#FF8F00" />
-          <stop offset="100%" stopColor="#A66800" />
-        </linearGradient>
-        {/* Perfect text path radius */}
-        <path id="stampTextPath" d="M 100 100 m -66, 0 a 66,66 0 1,1 132,0 a 66,66 0 1,1 -132,0" fill="none" />
+        <path id="stamp-top-path" d="M 35, 100 A 65,65 0 0,1 165, 100" fill="none" />
+        <path id="stamp-bottom-path" d="M 165, 100 A 65,65 0 0,1 35, 100" fill="none" />
       </defs>
       
-      {/* Outer irregular handmade wax seal shapes */}
-      <path d="M 100,8 C 148,3 194,15 191,62 C 196,112 195,162 153,190 C 109,199 58,195 16,163 C 2,126 5,76 15,39 C 24,10 61,11 100,8 Z" fill="url(#waxGrad)" />
-      <path d="M 100,12 C 136,14 186,6 183,57 C 191,102 183,152 146,180 C 106,190 56,184 26,154 C 5,117 13,67 23,37 C 33,17 66,9 100,12 Z" fill="url(#waxGrad)" opacity="0.38" transform="rotate(22 100 100)" />
+      {/* Irregular scalloped circle edge for a hyper-realistic hot wax look */}
+      <path d="M 100, 15 A 85,85 0 0,0 20, 110 A 80,85 0 0,0 100, 185 A 85,80 0 0,0 180, 95 A 85,85 0 0,0 100, 15 Z" fill="#B71C1C" stroke="#D32F2F" strokeWidth="4" />
+      <circle cx="100" cy="100" r="78" fill="none" stroke="#FFCDD2" strokeWidth="2" strokeDasharray="4 2" opacity="0.6" />
+      <circle cx="100" cy="100" r="62" fill="#800F0F" stroke="#B71C1C" strokeWidth="3" />
       
-      {/* Inner thin golden circle borders */}
-      <circle cx="100" cy="100" r="74" fill="none" stroke="url(#goldGrad)" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.75" />
-      <circle cx="100" cy="100" r="56" fill="none" stroke="url(#goldGrad)" strokeWidth="1" opacity="0.4" />
-      
-      {/* Curved Text Path */}
-      <text fill="url(#goldGrad)" style={{ fontFamily: "'Outfit', sans-serif", fontSize: "8px", fontWeight: 900, letterSpacing: "2.1px", textTransform: "uppercase" }}>
-        <textPath href="#stampTextPath" startOffset="0%">
-          {fullText}
+      <text fill="#FFCDD2" fontSize="9.5" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="1.5">
+        <textPath href="#stamp-top-path" startOffset="50%" textAnchor="middle">
+          ARADHYA EGIFTS
         </textPath>
       </text>
       
-      {/* Central Majestic Gold Emblem: Gold Hearts */}
-      <g transform="translate(100, 102) scale(1.2)">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#goldGrad)" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }} />
-      </g>
+      <text fill="#FFCDD2" fontSize="8" fontFamily="'Inter', sans-serif" fontWeight="700" letterSpacing="0.8">
+        <textPath href="#stamp-bottom-path" startOffset="50%" textAnchor="middle">
+          {`SEEN ON ${dateText.toUpperCase()}`}
+        </textPath>
+      </text>
+      
+      <text x="100" y="92" textAnchor="middle" fill="#FFF" fontSize="12" fontFamily="'Inter', sans-serif" fontWeight="900" letterSpacing="0.5">
+        SEEN BY
+      </text>
+      <text x="100" y="112" textAnchor="middle" fill="#FFEB3B" fontSize="16" fontFamily="'Dancing Script', cursive" fontWeight="bold">
+        {viewerName}
+      </text>
+      
+      <text x="54" y="103" fill="#FFEB3B" fontSize="9">❤</text>
+      <text x="146" y="103" fill="#FFEB3B" fontSize="9">❤</text>
     </svg>
   );
 }
@@ -1893,7 +1884,20 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
       const res = await fetch(`https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e`, { method: "POST", body: fd });
       const json = await res.json();
       if (json.success) { 
-        setShareUrl(json.data.url); 
+        const url = json.data.url;
+        setShareUrl(url); 
+        
+        try {
+          await navigator.clipboard.writeText(url);
+        } catch (clipErr) {
+          console.log("Clipboard write failed", clipErr);
+        }
+
+        // Open WhatsApp Share with the generated link
+        const whatsappText = `Look at the love letter I sealed for you! ✦\n${url}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+        window.open(whatsappUrl, '_blank');
+        
         setShowShareModal(true); 
       }
     } catch (e) {
@@ -2014,14 +2018,31 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
         </motion.div>
 
         {/* Stamp – rendered inside the card on seal */}
-        <AnimatePresence>
-          {sealed && (
-            <motion.div initial={{ scale:0, rotate:-40 }} animate={{ scale:1, rotate:-12 }} transition={{ type:"spring", stiffness:200, damping:14 }}
-              style={{ position:"absolute", bottom:20, right:20, zIndex:20, pointerEvents:"none" }}>
+        <style>{`
+          @keyframes sealSlam {
+            0% { transform: scale(3.5) rotate(-45deg); opacity: 0; filter: blur(6px); }
+            70% { transform: scale(0.9) rotate(5deg); opacity: 1; filter: none; }
+            85% { transform: scale(1.15) rotate(-3deg); }
+            100% { transform: scale(1) rotate(-12deg); }
+          }
+          .seal-pressing {
+            animation: sealSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          .seal-backdrop {
+            animation: fadeIn 0.4s ease forwards;
+          }
+        `}</style>
+        {sealed && (
+          <div className="seal-backdrop" style={{ position:"absolute", inset:0, background:"rgba(18,5,9,0.95)", borderRadius:28, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
+            <div className="seal-pressing" style={{ filter:"drop-shadow(0 8px 24px rgba(183,28,28,0.4))", transform:"rotate(-12deg)" }}>
               <CircularWaxStamp viewerName={viewerName} dateText={dateText} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        )}
 
         {/* ── Share Proof Modal (MLU-style polaroid frame) ── */}
         <AnimatePresence>
@@ -2045,9 +2066,23 @@ function Slide9Finale({ d, onBack, onReset, em, oc }: { d:Record<string,string>;
                   <div style={{ fontFamily:"'Dancing Script',cursive", fontSize:20, color:"#D4AF37", marginTop:10, textAlign:"center" }}>Sealed with love ✦</div>
                 </div>
                 <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
-                  <button onClick={() => { navigator.clipboard?.writeText(shareUrl); }}
-                    style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, background:"#C0395A", color:"#FFF8F0", fontWeight:700, border:"1px solid #D4AF37", padding:"10px 22px", fontSize:13, cursor:"pointer", boxShadow:"0 6px 16px rgba(192,57,90,0.3)", flex:1, justifyContent:"center" }}>
-                    🔗 Share Seen Proof
+                  <button onClick={() => { 
+                      const whatsappText = `Look at the love letter I sealed for you! ✦\n${shareUrl}`;
+                      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+                      window.open(whatsappUrl, '_blank');
+                    }}
+                    style={{
+                      background: "#25D366", color: "#fff",
+                      border: "none", borderRadius: 999,
+                      padding: "10px 22px", fontSize: 13, fontWeight: 800,
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      boxShadow: "0 6px 16px rgba(37, 211, 102, 0.3)",
+                      flex: 1, fontFamily: "'Inter', sans-serif"
+                    }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51h-.57c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Share to WhatsApp
                   </button>
                   <button onClick={() => setShowShareModal(false)}
                     style={{ display:"flex", alignItems:"center", gap:6, borderRadius:9999, background:"rgba(255,255,255,0.08)", color:"#fdf6e3", fontWeight:600, border:"1px solid rgba(255,255,255,0.15)", padding:"10px 20px", fontSize:13, cursor:"pointer" }}>
