@@ -61,7 +61,11 @@ export default function AdminProductsPage() {
           width: { ideal: 1920 },
           height: { ideal: 1080 }
         },
-        audio: false
+        audio: false,
+        // @ts-ignore
+        selfBrowserSurface: "include",
+        // @ts-ignore
+        preferCurrentTab: true
       });
 
       const track = stream.getVideoTracks()[0];
