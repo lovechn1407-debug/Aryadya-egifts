@@ -14,6 +14,19 @@ export interface Marquee {
   order: number;
 }
 
+export interface PopupData {
+  id: string;
+  enabled: boolean;
+  order: number;
+  contentHtml: string;
+  imageUrl?: string;
+  linkedProductIds?: string[];
+  showCountdown?: boolean;
+  countdownTarget?: string;
+  frequency: "always" | "once_a_day" | "dont_show_again";
+  autoCloseSeconds?: number;
+}
+
 export interface Settings {
   maintenance: {
     enabled: boolean;
@@ -24,6 +37,7 @@ export interface Settings {
     countdownTarget: string;
   };
   marquees?: Marquee[];
+  popups?: PopupData[];
   contactEmail?: string;
   showContactEmail?: boolean;
   contactPhone?: string;

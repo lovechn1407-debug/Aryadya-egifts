@@ -8,6 +8,7 @@ import type { Product, DisplaySection, SectionThemeConfig } from "@/lib/data";
 import type { Order } from "@/lib/data";
 import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB, Settings, getFAQsDB, getReviewsDB } from "@/lib/db";
 import type { FAQItem, CustomerReview } from "@/lib/db";
+import HomepagePopups from "@/components/HomepagePopups";
 
 /* ── Modern UI SVG Icons ── */
 function GiftSVG({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
@@ -2748,6 +2749,7 @@ export default function HomePage() {
 
   return (
     <div>
+      {settings && <HomepagePopups popups={settings.popups} />}
       {/* ── Page Loader Overlay ── */}
       {isNavigating && (
         <div style={{

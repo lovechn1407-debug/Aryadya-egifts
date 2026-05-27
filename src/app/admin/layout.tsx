@@ -14,6 +14,7 @@ const NAV = [
   { href: "/admin/songs", icon: "🎵", label: "Songs" },
   { href: "/admin/faqs", icon: "❓", label: "FAQs" },
   { href: "/admin/reviews", icon: "⭐", label: "Reviews" },
+  { href: "/admin/popups", icon: "💬", label: "Popups" },
   { href: "/admin/settings", icon: "⚙️", label: "Settings" },
 ];
 
