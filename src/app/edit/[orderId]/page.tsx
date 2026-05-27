@@ -269,6 +269,9 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
 
   useEffect(() => {
+    import("@/lib/analytics").then(({ trackEvent }) => {
+      trackEvent("editor_view", { orderId, isPreview: isPreviewEditor });
+    });
     (async () => {
       setLoading(true);
       try {
@@ -337,6 +340,9 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
     } else {
       await updateOrderCustomizationsDB(orderId, customizations);
     }
+    import("@/lib/analytics").then(({ trackEvent }) => {
+      trackEvent("editor_save", { orderId, isPreview: isPreviewEditor });
+    });
     setTimeout(() => { setSaving(false); setSaved(true); }, 700);
   };
 

@@ -324,3 +324,26 @@ export async function saveReviewDB(review: CustomerReview): Promise<void> {
 export async function deleteReviewDB(id: string): Promise<void> {
   await remove(ref(database, `reviews/${id}`));
 }
+
+// ── ANALYTICS ─────────────────────────────────────────────────────────────────
+export interface AnalyticsEvent {
+  id: string;
+  sessionId: string; // Anonymous ID stored in localStorage
+  eventType: string; // e.g. 'page_view', 'product_click', 'checkout_step', 'dropoff'
+  eventData: Record<string, any>;
+  timestamp: string; // ISO string
+}
+
+export async function logAnalyticsEventDB(event: Omit<AnalyticsEvent, "id" | "timestamp">): Promise<void> {
+  const id = `evt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const timestamp = new Date().toISOString();
+  const fullEvent: AnalyticsEvent = { ...event, id, timestamp };
+  await set(ref(database, `analytics/${id}`), fullEvent);
+}
+
+export async function getAnalyticsEventsDB(): Promise<AnalyticsEvent[]> {
+  const snap = await get(ref(database, "analytics"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, AnalyticsEvent>)
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}

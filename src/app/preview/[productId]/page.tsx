@@ -14,6 +14,7 @@ import Propose3 from "@/components/templates/Propose3/Propose3";
 import Confess from "@/components/templates/Confess/Confess";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { trackEvent } from "@/lib/analytics";
 
 function renderTemplate(productId: string, customData: Record<string, string>, autoPlay?: boolean) {
   switch (productId) {
@@ -182,6 +183,7 @@ function PreviewContent({ productId }: { productId: string }) {
           href={`/order/${productId}`}
           onClick={(e) => {
             e.preventDefault();
+            trackEvent("preview_personalize_click", { productId });
             setIsNavigating(true);
             router.push(`/order/${productId}`);
           }}

@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, memo, createElement, useCallback } from "r
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSectionTheme } from "@/lib/data";
+import { trackEvent } from "@/lib/analytics";
 import type { Product, DisplaySection, SectionThemeConfig } from "@/lib/data";
 import type { Order } from "@/lib/data";
 import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB, Settings, getFAQsDB, getReviewsDB } from "@/lib/db";
@@ -660,8 +661,13 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
   const needsMarquee = cleanName.length > 22;
   const marqueeOffset = needsMarquee ? (cleanName.length - 20) * 7.5 : 0;
 
+  const handleCardClick = () => {
+    trackEvent("product_click", { productId: product.id, productName: product.name });
+    onCardClick(product);
+  };
+
   return (
-    <div onClick={() => onCardClick(product)}
+    <div onClick={handleCardClick}
       style={{ cursor: "pointer", borderRadius: 10, overflow: "hidden", border: `1.5px solid ${color}22`, boxShadow: `0 4px 16px ${color}12`, transition: "transform 0.22s, box-shadow 0.22s", background: "#fff", display: "flex", flexDirection: "column", position: "relative" }}
       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 14px 36px ${color}28`; }}
       onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${color}12`; }}
@@ -2712,6 +2718,7 @@ export default function HomePage() {
   const [reviews, setReviews] = useState<CustomerReview[]>([]);
 
   useEffect(() => {
+    trackEvent("page_view", { page: "home" });
     Promise.all([
       getProductsDB(),
       getVisibleSectionsDB(),

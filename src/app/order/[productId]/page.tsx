@@ -1,5 +1,5 @@
 "use client";
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getProduct } from "@/lib/data";
 import { createOrderDB, getCouponDB, getOrdersByBuyerDB, saveCouponDB } from "@/lib/db";
@@ -63,6 +63,12 @@ export default function OrderPage({ params }: { params: Promise<{ productId: str
   const [step, setStep] = useState<"details" | "payment" | "processing">("details");
   const [isNavigating, setIsNavigating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    import("@/lib/analytics").then(({ trackEvent }) => {
+      trackEvent("checkout_step", { productId, step });
+    });
+  }, [step, productId]);
 
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);

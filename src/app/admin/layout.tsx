@@ -6,6 +6,7 @@ import Link from "next/link";
 
 const NAV = [
   { href: "/admin/dashboard", icon: "📊", label: "Dashboard" },
+  { href: "/admin/analytics", icon: "📈", label: "Analytics" },
   { href: "/admin/products", icon: "🎁", label: "Products" },
   { href: "/admin/orders", icon: "📦", label: "Orders" },
   { href: "/admin/coupons", icon: "🎟️", label: "Coupons" },
