@@ -2071,6 +2071,11 @@ function Footer({ settings }: { settings: Settings | null }) {
                   <PencilSVG size={14} color="currentColor" /> Personalise Drafts
                 </a>
               </li>
+              <li>
+                <a href="/legal" style={{ color: "#94A3B8", textDecoration: "none", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 8 }} onMouseEnter={e => e.currentTarget.style.color = "#A78BFA"} onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}>
+                  <FolderSVG size={14} color="currentColor" /> Legal (Terms & Privacy)
+                </a>
+              </li>
             </ul>
           </div>
 
