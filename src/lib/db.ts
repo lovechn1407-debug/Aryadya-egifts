@@ -47,6 +47,15 @@ export interface Settings {
   emailServiceBuy?: boolean;
   emailServiceFinalize?: boolean;
   faviconUrl?: string;
+  // Social Media
+  instagramUrl?: string;
+  showInstagram?: boolean;
+  youtubeUrl?: string;
+  showYoutube?: boolean;
+  linkedinUrl?: string;
+  showLinkedin?: boolean;
+  facebookUrl?: string;
+  showFacebook?: boolean;
 }
 
 export async function getSettingsDB(): Promise<Settings> {
@@ -56,6 +65,10 @@ export async function getSettingsDB(): Promise<Settings> {
     if (val.showContactEmail === undefined) val.showContactEmail = true;
     if (val.showContactPhone === undefined) val.showContactPhone = true;
     if (val.showContactAddress === undefined) val.showContactAddress = true;
+    if (val.showInstagram === undefined) val.showInstagram = true;
+    if (val.showYoutube === undefined) val.showYoutube = true;
+    if (val.showLinkedin === undefined) val.showLinkedin = true;
+    if (val.showFacebook === undefined) val.showFacebook = true;
     return val;
   }
   return {

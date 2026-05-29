@@ -2114,6 +2114,117 @@ function Footer({ settings }: { settings: Settings | null }) {
 
         </div>
 
+        {/* Social Media Links */}
+        {settings && (
+          (settings.showInstagram !== false && settings.instagramUrl) ||
+          (settings.showYoutube !== false && settings.youtubeUrl) ||
+          (settings.showLinkedin !== false && settings.linkedinUrl) ||
+          (settings.showFacebook !== false && settings.facebookUrl)
+        ) ? (
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 32,
+            flexWrap: "wrap"
+          }}>
+            {settings!.showInstagram !== false && settings!.instagramUrl && (
+              <a
+                href={settings!.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Instagram"
+                style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  background: "linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                  boxShadow: "0 2px 12px rgba(253,29,29,0.25)",
+                  flexShrink: 0
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.15)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(253,29,29,0.45)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(253,29,29,0.25)"; }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                </svg>
+              </a>
+            )}
+            {settings!.showYoutube !== false && settings!.youtubeUrl && (
+              <a
+                href={settings!.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="YouTube"
+                style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  background: "#FF0000",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                  boxShadow: "0 2px 12px rgba(255,0,0,0.3)",
+                  flexShrink: 0
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.15)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(255,0,0,0.5)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(255,0,0,0.3)"; }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                  <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+                  <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#FF0000" />
+                </svg>
+              </a>
+            )}
+            {settings!.showLinkedin !== false && settings!.linkedinUrl && (
+              <a
+                href={settings!.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="LinkedIn"
+                style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  background: "#0A66C2",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                  boxShadow: "0 2px 12px rgba(10,102,194,0.3)",
+                  flexShrink: 0
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.15)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(10,102,194,0.5)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(10,102,194,0.3)"; }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                  <rect x="2" y="9" width="4" height="12" />
+                  <circle cx="4" cy="4" r="2" />
+                </svg>
+              </a>
+            )}
+            {settings!.showFacebook !== false && settings!.facebookUrl && (
+              <a
+                href={settings!.facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Facebook"
+                style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  background: "#1877F2",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                  boxShadow: "0 2px 12px rgba(24,119,242,0.3)",
+                  flexShrink: 0
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.15)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(24,119,242,0.5)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(24,119,242,0.3)"; }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                </svg>
+              </a>
+            )}
+          </div>
+        ) : null}
+
         {/* Bottom copyright / India love bar */}
         <div style={{
           borderTop: "1px solid rgba(255,255,255,0.08)",

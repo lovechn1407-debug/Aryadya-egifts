@@ -383,6 +383,81 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <div style={{ background: "#fff", padding: 32, borderRadius: 16, border: "1px solid #E2E8F0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginTop: 24 }}>
+        <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Social Media</h2>
+          <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>Configure your social media handles. They appear as icon buttons in the site footer.</p>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+          {/* Instagram */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ width: 20, height: 20, borderRadius: "50%", background: "linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </span>
+                Instagram
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748B", cursor: "pointer" }}>
+                <input type="checkbox" checked={settings.showInstagram ?? true} onChange={e => setSettings(s => ({ ...s, showInstagram: e.target.checked }))} /> Show in Footer
+              </label>
+            </div>
+            <input type="url" placeholder="https://instagram.com/yourusername" value={settings.instagramUrl || ""} onChange={e => setSettings(s => ({ ...s, instagramUrl: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14, opacity: (settings.showInstagram ?? true) ? 1 : 0.6 }} />
+          </div>
+
+          {/* YouTube */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ width: 20, height: 20, borderRadius: "50%", background: "#FF0000", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#FF0000"/></svg>
+                </span>
+                YouTube
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748B", cursor: "pointer" }}>
+                <input type="checkbox" checked={settings.showYoutube ?? true} onChange={e => setSettings(s => ({ ...s, showYoutube: e.target.checked }))} /> Show in Footer
+              </label>
+            </div>
+            <input type="url" placeholder="https://youtube.com/@yourchannel" value={settings.youtubeUrl || ""} onChange={e => setSettings(s => ({ ...s, youtubeUrl: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14, opacity: (settings.showYoutube ?? true) ? 1 : 0.6 }} />
+          </div>
+
+          {/* LinkedIn */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ width: 20, height: 20, borderRadius: "50%", background: "#0A66C2", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                </span>
+                LinkedIn
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748B", cursor: "pointer" }}>
+                <input type="checkbox" checked={settings.showLinkedin ?? true} onChange={e => setSettings(s => ({ ...s, showLinkedin: e.target.checked }))} /> Show in Footer
+              </label>
+            </div>
+            <input type="url" placeholder="https://linkedin.com/company/yourcompany" value={settings.linkedinUrl || ""} onChange={e => setSettings(s => ({ ...s, linkedinUrl: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14, opacity: (settings.showLinkedin ?? true) ? 1 : 0.6 }} />
+          </div>
+
+          {/* Facebook */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ width: 20, height: 20, borderRadius: "50%", background: "#1877F2", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                </span>
+                Facebook
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748B", cursor: "pointer" }}>
+                <input type="checkbox" checked={settings.showFacebook ?? true} onChange={e => setSettings(s => ({ ...s, showFacebook: e.target.checked }))} /> Show in Footer
+              </label>
+            </div>
+            <input type="url" placeholder="https://facebook.com/yourpage" value={settings.facebookUrl || ""} onChange={e => setSettings(s => ({ ...s, facebookUrl: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14, opacity: (settings.showFacebook ?? true) ? 1 : 0.6 }} />
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }
