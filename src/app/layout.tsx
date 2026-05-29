@@ -5,19 +5,27 @@ import MaintenanceWrapper from "@/components/MaintenanceWrapper";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettingsDB();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aradhyagifts.in";
   return {
+    metadataBase: new URL(siteUrl),
     title: "Aradhya E-Gifts — Personalised Digital Surprises",
     description:
       "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more. Preview, personalise and share instantly.",
-    keywords: "e-gift, digital gift, birthday surprise, personalised webpage, proposal gift, anniversary",
+    keywords: "e-gift, digital gift, birthday surprise, personalised webpage, proposal gift, anniversary, India",
     openGraph: {
-      title: "Aradhya E-Gifts",
-      description: "Magical personalised digital gift pages",
+      title: "Aradhya E-Gifts — Personalised Digital Surprises",
+      description: "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more.",
       type: "website",
+      url: siteUrl,
+      siteName: "Aradhya E-Gifts",
     },
     icons: {
       icon: settings.faviconUrl || "/favicon.ico",
-    }
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
   };
 }
 

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Block admin and internal pages from indexing
+Disallow: /admin/
+Disallow: /edit/
+Disallow: /api/
+
+# Sitemap location - update with your actual domain
+Sitemap: https://aradhyagifts.in/sitemap.xml
