@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more.",
       type: "website",
       url: siteUrl,
-      siteName: "Aradhya E-Gifts",
+      siteName: "Aradhya E-Giftings",
     },
     // ⚠️ Always use a real hosted URL here — Google cannot crawl base64 data URLs.
     // The admin-uploaded favicon is injected via <link> in <head> below for browser tabs.
@@ -58,6 +58,25 @@ export default async function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Dancing+Script:wght@600;700&family=Nunito:wght@400;600;700;800;900&family=Special+Elite&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:wght@500;700&family=Cinzel:wght@400;700&family=Great+Vibes&family=Sacramento&family=Pacifico&family=Parisienne&family=Montserrat:wght@300;400;500;600;700&family=Alex+Brush&family=Lobster&display=swap"
           rel="stylesheet"
+        />
+        {/* JSON-LD: WebSite schema — tells Google the site name to show in search results */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Aradhya E-Giftings",
+              "alternateName": "Aradhya E-Gifts",
+              "url": "https://aradhyagifts.in",
+              "description": "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more.",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://aradhyagifts.in/?s={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
         />
       </head>
       <body>
