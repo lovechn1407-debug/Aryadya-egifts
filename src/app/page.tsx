@@ -700,53 +700,55 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
       <div ref={containerRef} style={{ aspectRatio: "3/4", position: "relative", overflow: "hidden", background: `${color}08`, flexShrink: 0 }}>
         {isVisible ? (
           product.previewMode === "mp4" && product.previewVideoUrl ? (
-            <video
-              src={product.previewVideoUrl}
-              autoPlay
-              loop
-              muted
-              playsInline
-              onCanPlay={() => setVideoLoaded(true)}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block"
-              }}
-            />
-            {/* Skeleton + spinner overlay while video buffers */}
-            {!videoLoaded && (
-              <div style={{
-                position: "absolute",
-                inset: 0,
-                zIndex: 5,
-                overflow: "hidden",
-                background: `linear-gradient(135deg, ${color}12, ${color}06)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}>
-                {/* Shimmer sweep */}
+            <>
+              <video
+                src={product.previewVideoUrl}
+                autoPlay
+                loop
+                muted
+                playsInline
+                onCanPlay={() => setVideoLoaded(true)}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block"
+                }}
+              />
+              {/* Skeleton + spinner overlay while video buffers */}
+              {!videoLoaded && (
                 <div style={{
                   position: "absolute",
                   inset: 0,
-                  background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%)`,
-                  backgroundSize: "200% 100%",
-                  animation: "card-skeleton-sweep 1.4s ease-in-out infinite",
-                }} />
-                {/* Spinner */}
-                <div style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  border: `3px solid ${color}30`,
-                  borderTopColor: color,
-                  animation: "card-video-spin 0.75s linear infinite",
-                  flexShrink: 0,
-                  zIndex: 2,
-                }} />
-              </div>
-            )}
+                  zIndex: 5,
+                  overflow: "hidden",
+                  background: `linear-gradient(135deg, ${color}12, ${color}06)`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                  {/* Shimmer sweep */}
+                  <div style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%)`,
+                    backgroundSize: "200% 100%",
+                    animation: "card-skeleton-sweep 1.4s ease-in-out infinite",
+                  }} />
+                  {/* Spinner */}
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    border: `3px solid ${color}30`,
+                    borderTopColor: color,
+                    animation: "card-video-spin 0.75s linear infinite",
+                    flexShrink: 0,
+                    zIndex: 2,
+                  }} />
+                </div>
+              )}
+            </>
           ) : (
             <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
           )
