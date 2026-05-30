@@ -271,6 +271,17 @@ textarea.input-field { resize: vertical; min-height: 100px; }
   white-space: nowrap;
 }
 
+/* Video card skeleton shimmer sweep */
+@keyframes card-skeleton-sweep {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Video card buffering spinner */
+@keyframes card-video-spin {
+  to { transform: rotate(360deg); }
+}
+
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }
