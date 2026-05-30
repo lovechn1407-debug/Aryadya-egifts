@@ -24,9 +24,12 @@ export async function generateMetadata(): Promise<Metadata> {
     // ⚠️ Always use a real hosted URL here — Google cannot crawl base64 data URLs.
     // The admin-uploaded favicon is injected via <link> in <head> below for browser tabs.
     icons: {
-      icon: `${siteUrl}/favicon.ico`,
-      shortcut: `${siteUrl}/favicon.ico`,
-      apple: `${siteUrl}/favicon.ico`,
+      icon: [
+        { url: `${siteUrl}/favicon.png`, type: "image/png" },
+        { url: `${siteUrl}/favicon.ico` },
+      ],
+      shortcut: `${siteUrl}/favicon.png`,
+      apple: `${siteUrl}/favicon.png`,
     },
     robots: {
       index: true,
@@ -46,7 +49,7 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         {/* Admin-configurable favicon for browser tab (base64 or URL) */}
-        <link rel="icon" href={browserFavicon} />
+        <link rel="icon" type="image/png" href={browserFavicon} />
         <link rel="shortcut icon" href={browserFavicon} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
