@@ -42,15 +42,17 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const settings = await getSettingsDB();
-  // Use admin-uploaded favicon for browser tab if available, otherwise fall back to file
-  const browserFavicon = settings.faviconUrl || "/favicon.ico";
 
   return (
     <html lang="en">
       <head>
-        {/* Admin-configurable favicon for browser tab (base64 or URL) */}
-        <link rel="icon" type="image/png" href={browserFavicon} />
-        <link rel="shortcut icon" href={browserFavicon} />
+        {/* ✅ Real URL favicon — Google crawls this one (must be first) */}
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="shortcut icon" href="/favicon.png" />
+        {/* Browser tab override: admin-uploaded favicon (base64 or URL). Browsers use the last matching <link>, so this wins for the tab display. Google uses the first one above. */}
+        {settings.faviconUrl && settings.faviconUrl !== "/favicon.ico" && (
+          <link rel="icon" type="image/png" href={settings.faviconUrl} />
+        )}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
