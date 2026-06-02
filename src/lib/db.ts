@@ -47,6 +47,8 @@ export interface Settings {
   emailServiceBuy?: boolean;
   emailServiceFinalize?: boolean;
   faviconUrl?: string;
+  logoUrl?: string;
+  whiteLogoUrl?: string;
   businessName?: string;
   businessEntity?: string;
   // Social Media
@@ -71,7 +73,7 @@ export async function getSettingsDB(): Promise<Settings> {
     if (val.showYoutube === undefined) val.showYoutube = true;
     if (val.showLinkedin === undefined) val.showLinkedin = true;
     if (val.showFacebook === undefined) val.showFacebook = true;
-    if (!val.businessName) val.businessName = "Aradhya E-Gifts";
+    if (!val.businessName) val.businessName = "Aradhya E-Giftings";
     if (!val.businessEntity) val.businessEntity = "AS-Studios";
     return val;
   }
@@ -92,7 +94,7 @@ export async function getSettingsDB(): Promise<Settings> {
     showContactAddress: true,
     emailServiceBuy: true,
     emailServiceFinalize: true,
-    businessName: "Aradhya E-Gifts",
+    businessName: "Aradhya E-Giftings",
     businessEntity: "AS-Studios"
   };
 }

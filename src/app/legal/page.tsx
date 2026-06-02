@@ -117,7 +117,7 @@ const liStyle: React.CSSProperties = {
 };
 
 const LAST_UPDATED = "June 2, 2025";
-let BUSINESS_NAME = "Aradhya E-Gifts";
+let BUSINESS_NAME = "Aradhya E-Giftings";
 let BUSINESS_ENTITY = "AS-Studios";
 
 /* ────────────────────────────────────────────────────────────
@@ -626,7 +626,7 @@ export default function LegalPage() {
       }}>
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", flexShrink: 0 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 38, objectFit: "contain" }} />
+          <img src={settings?.logoUrl || "/logo.png"} alt="Aradhya E-Giftings" style={{ height: 38, objectFit: "contain" }} />
         </Link>
         <div style={{ flex: 1 }} />
         <Link href="/" style={{

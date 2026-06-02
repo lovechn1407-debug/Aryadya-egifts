@@ -193,7 +193,7 @@ function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> 
 }
 
 /* ── Navbar ── */
-function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
+function Navbar({ onMenuClick, settings }: { onMenuClick: () => void; settings: Settings | null }) {
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 100,
@@ -203,7 +203,7 @@ function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
       display: "flex", alignItems: "center", height: 60, gap: 14,
     }}>
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
-        <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 44, objectFit: "contain" }} />
+        <img src={settings?.logoUrl || "/logo.png"} alt="Aradhya E-Giftings" style={{ height: 44, objectFit: "contain" }} />
       </Link>
       <div style={{ flex: 1 }} />
       <Link href="/my-orders" style={{
@@ -2071,7 +2071,7 @@ function Footer({ settings }: { settings: Settings | null }) {
           {/* Column 1: Brand & Info (Both logos paired) */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-              <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 36, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+              <img src={settings?.whiteLogoUrl || "/logo.png"} alt="Aradhya E-Giftings" style={{ height: 36, objectFit: "contain", filter: settings?.whiteLogoUrl ? undefined : "brightness(0) invert(1)" }} />
               <span style={{ fontSize: 13, color: "#334155", fontWeight: 700 }}>|</span>
               <img src="/as-studios.png" alt="AS Studios" style={{ height: 26, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
             </div>
@@ -2295,7 +2295,7 @@ function Footer({ settings }: { settings: Settings | null }) {
           color: "#64748B"
         }}>
           <div>
-            <span>© {new Date().getFullYear()} A Product of <strong>AS-STUDIOS</strong></span>
+            <span>© {new Date().getFullYear()} {settings?.businessName || "Aradhya E-Giftings"} — A Product of <strong>{(settings?.businessEntity || "AS-Studios").toUpperCase()}</strong> (Merchant Legal Name: {settings?.businessEntity || "AS-Studios"})</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span>Made with</span>
@@ -2363,7 +2363,7 @@ function getCategorySVG(themeId: string, color = "currentColor", size = 12) {
 }
 
 /* ── Menu Drawer (Slide-out Sidebar Navigation) ── */
-function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: () => void; sections: DisplaySection[] }) {
+function MenuDrawer({ isOpen, onClose, sections, settings }: { isOpen: boolean; onClose: () => void; sections: DisplaySection[]; settings: Settings | null }) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -2689,7 +2689,7 @@ function MenuDrawer({ isOpen, onClose, sections }: { isOpen: boolean; onClose: (
 
         {/* Footer Brand Logo Section */}
         <div style={{ marginTop: "auto", paddingTop: 28, borderTop: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-          <img src="/logo.png" alt="Aradhya E-Gifts" style={{ height: 32, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+          <img src={settings?.whiteLogoUrl || "/logo.png"} alt="Aradhya E-Giftings" style={{ height: 32, objectFit: "contain", filter: settings?.whiteLogoUrl ? undefined : "brightness(0) invert(1)" }} />
           <span style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Aradhya E-Gifting</span>
         </div>
       </div>
@@ -2987,8 +2987,8 @@ export default function HomePage() {
       )}
 
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
-      <Navbar onMenuClick={() => setShowMenu(true)} />
-      <MenuDrawer isOpen={showMenu} onClose={() => setShowMenu(false)} sections={sections} />
+      <Navbar onMenuClick={() => setShowMenu(true)} settings={settings} />
+      <MenuDrawer isOpen={showMenu} onClose={() => setShowMenu(false)} sections={sections} settings={settings} />
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onNavigate={(url) => { setIsNavigating(true); router.push(url); }} />}
       {selectedProduct && (
         <ProductModal 

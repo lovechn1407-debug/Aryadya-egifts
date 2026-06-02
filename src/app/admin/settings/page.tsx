@@ -319,6 +319,70 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        <div>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Header Logo (Main Colored Logo)</label>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
+            <div style={{ width: 120, height: 48, borderRadius: 8, border: "1px solid #CBD5E1", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8FAFC", padding: 4 }}>
+              {settings.logoUrl ? (
+                <img src={settings.logoUrl} alt="Header Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+              ) : (
+                <span style={{ fontSize: 11, color: "#94A3B8" }}>Default /logo.png</span>
+              )}
+            </div>
+            <label style={{ background: "#10B981", color: "#fff", padding: "8px 16px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
+              Upload Header Logo
+              <input type="file" accept="image/png, image/jpeg, image/svg+xml, image/gif, image/webp" style={{ display: "none" }} onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  const base64String = reader.result as string;
+                  setSettings(s => ({ ...s, logoUrl: base64String }));
+                };
+                reader.readAsDataURL(file);
+              }} />
+            </label>
+            {settings.logoUrl && (
+              <button onClick={() => setSettings(s => ({ ...s, logoUrl: "" }))} style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FCA5A5", padding: "7px 16px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Footer Logo (White Logo for Dark Backgrounds)</label>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
+            <div style={{ width: 120, height: 48, borderRadius: 8, border: "1px solid #CBD5E1", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#0F172A", padding: 4 }}>
+              {settings.whiteLogoUrl ? (
+                <img src={settings.whiteLogoUrl} alt="Footer Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+              ) : (
+                <span style={{ fontSize: 11, color: "#475569" }}>Default (White overlay)</span>
+              )}
+            </div>
+            <label style={{ background: "#10B981", color: "#fff", padding: "8px 16px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
+              Upload Footer Logo
+              <input type="file" accept="image/png, image/jpeg, image/svg+xml, image/gif, image/webp" style={{ display: "none" }} onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  const base64String = reader.result as string;
+                  setSettings(s => ({ ...s, whiteLogoUrl: base64String }));
+                };
+                reader.readAsDataURL(file);
+              }} />
+            </label>
+            {settings.whiteLogoUrl && (
+              <button onClick={() => setSettings(s => ({ ...s, whiteLogoUrl: "" }))} style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FCA5A5", padding: "7px 16px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Business Name</label>
           <input type="text" value={settings.businessName || ""} onChange={e => setSettings(s => ({ ...s, businessName: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} placeholder="e.g. Aradhya E-Gifts" />

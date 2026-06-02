@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Legal & Policy Centre — Aradhya E-Gifts | Terms, Privacy, Refund, Return, Disclaimer",
+  title: "Legal & Policy Centre — Aradhya E-Giftings | Terms, Privacy, Refund, Return, Disclaimer",
   description:
-    "Complete legal information for Aradhya E-Gifts including Terms & Conditions, Privacy Policy, Refund Policy, Return Policy, and Disclaimer. Read our policies before using our digital gifting platform.",
+    "Complete legal information for Aradhya E-Giftings including Terms & Conditions, Privacy Policy, Refund Policy, Return Policy, and Disclaimer. Read our policies before using our digital gifting platform.",
   keywords:
-    "legal, terms and conditions, privacy policy, refund policy, return policy, disclaimer, Aradhya E-Gifts, digital gifts, e-gifts India",
+    "legal, terms and conditions, privacy policy, refund policy, return policy, disclaimer, Aradhya E-Giftings, digital gifts, e-gifts India",
   robots: {
     index: true,
     follow: true,
