@@ -145,14 +145,14 @@ function TermsContent({ siteUrl, contactEmail }: { siteUrl: string; contactEmail
 
       <h3 style={heading3Style}>2. Description of Services</h3>
       <p style={paragraphStyle}>
-        {BUSINESS_NAME} provides a platform for creating, personalizing, and sharing premium interactive digital greeting cards, digital surprise webpages, and microsites (collectively referred to as &ldquo;E-Gifts&rdquo; or &ldquo;Digital Gifts&rdquo;). Our services include but are not limited to:
+        {BUSINESS_NAME} provides a platform for creating, personalizing, and sharing premium interactive digital greeting cards, digital surprise webpages, and microsites (collectively referred to as &ldquo;E-Giftings&rdquo; or &ldquo;Digital Gifts&rdquo;). Our services include but are not limited to:
       </p>
       <ul style={ulStyle}>
         <li style={liStyle}><strong>Digital Gift Template Selection:</strong> Browsing and selecting from a curated collection of professionally designed, fully animated digital gift templates for various occasions including birthdays, anniversaries, proposals, confessions, farewells, and more.</li>
         <li style={liStyle}><strong>Live Preview:</strong> Previewing the selected template before purchase to view its complete look, feel, and interactive features.</li>
         <li style={liStyle}><strong>Secure One-Time Payment:</strong> Making a single, non-recurring payment via secure payment gateways (UPI, Credit/Debit Card, Net Banking, Wallets) to purchase a selected template.</li>
-        <li style={liStyle}><strong>Personalisation via Live Editor:</strong> After purchase, customising the E-Gift with personal names, messages, images, audio tracks, and other content through our intuitive Live Editor.</li>
-        <li style={liStyle}><strong>Finalisation &amp; Sharing:</strong> Generating a unique, permanent URL and a scannable QR code to share the finalized E-Gift with the intended recipient via WhatsApp, email, social media, or direct link sharing.</li>
+        <li style={liStyle}><strong>Personalisation via Live Editor:</strong> After purchase, customising the E-Gifting with personal names, messages, images, audio tracks, and other content through our intuitive Live Editor.</li>
+        <li style={liStyle}><strong>Finalisation &amp; Sharing:</strong> Generating a unique, permanent URL and a scannable QR code to share the finalized E-Gifting with the intended recipient via WhatsApp, email, social media, or direct link sharing.</li>
       </ul>
 
       <h3 style={heading3Style}>3. User Eligibility</h3>
@@ -165,26 +165,26 @@ function TermsContent({ siteUrl, contactEmail }: { siteUrl: string; contactEmail
         Our Platform does not require traditional user account registration. Instead, each purchase generates a unique order identified by an Order ID and secured with a buyer-provided passkey. You are solely responsible for:
       </p>
       <ul style={ulStyle}>
-        <li style={liStyle}>Safeguarding your Order ID and passkey. Anyone with access to these credentials can access and edit your E-Gift.</li>
+        <li style={liStyle}>Safeguarding your Order ID and passkey. Anyone with access to these credentials can access and edit your E-Gifting.</li>
         <li style={liStyle}>The accuracy of all personal information provided during checkout, including your email address and phone number used for order confirmations.</li>
-        <li style={liStyle}>Ensuring the content you upload and customise within your E-Gift complies with applicable laws and these Terms.</li>
+        <li style={liStyle}>Ensuring the content you upload and customise within your E-Gifting complies with applicable laws and these Terms.</li>
       </ul>
 
       <h3 style={heading3Style}>5. User Generated Content (UGC)</h3>
       <p style={paragraphStyle}>
-        Our service allows you to input custom names, write personal messages, embed audio links (e.g., from YouTube, Spotify, or SoundCloud), and upload images to personalize your E-Gifts. Regarding User Generated Content:
+        Our service allows you to input custom names, write personal messages, embed audio links (e.g., from YouTube, Spotify, or SoundCloud), and upload images to personalize your E-Giftings. Regarding User Generated Content:
       </p>
       <ul style={ulStyle}>
-        <li style={liStyle}><strong>Sole Responsibility:</strong> You are solely responsible for all content you upload, submit, or embed into your E-Gift. You must ensure that you have all necessary rights, licenses, and permissions for any content you use.</li>
+        <li style={liStyle}><strong>Sole Responsibility:</strong> You are solely responsible for all content you upload, submit, or embed into your E-Gifting. You must ensure that you have all necessary rights, licenses, and permissions for any content you use.</li>
         <li style={liStyle}><strong>Prohibited Content:</strong> You must not upload, embed, or include any content that is: (a) copyrighted material without proper authorization, (b) defamatory, obscene, pornographic, or sexually explicit, (c) promoting violence, hatred, discrimination, or illegal activities, (d) containing personally identifiable information of third parties without their consent, (e) containing malicious code, malware, viruses, or any harmful digital content.</li>
         <li style={liStyle}><strong>Audio Links &amp; Third-Party Embeds:</strong> Embedded audio links or media must respect the terms of service of the respective third-party platforms (YouTube, Spotify, etc.). We are not responsible for the availability or legality of third-party embedded content.</li>
-        <li style={liStyle}><strong>License Grant:</strong> By uploading content to the Platform, you grant {BUSINESS_NAME} a limited, non-exclusive, royalty-free, temporary license to process, host, display, and render your uploaded content strictly for the purpose of generating and serving your personalized E-Gift. This license terminates when the E-Gift or associated data is deleted.</li>
-        <li style={liStyle}><strong>Right to Remove:</strong> We reserve the right to remove, disable, or restrict access to any E-Gift or User Generated Content that we determine, in our sole discretion, violates these Terms, applicable laws, or community standards, without prior notice.</li>
+        <li style={liStyle}><strong>License Grant:</strong> By uploading content to the Platform, you grant {BUSINESS_NAME} a limited, non-exclusive, royalty-free, temporary license to process, host, display, and render your uploaded content strictly for the purpose of generating and serving your personalized E-Gifting. This license terminates when the E-Gifting or associated data is deleted.</li>
+        <li style={liStyle}><strong>Right to Remove:</strong> We reserve the right to remove, disable, or restrict access to any E-Gifting or User Generated Content that we determine, in our sole discretion, violates these Terms, applicable laws, or community standards, without prior notice.</li>
       </ul>
 
       <h3 style={heading3Style}>6. &ldquo;Share Proof&rdquo; &amp; Third-Party Integrations</h3>
       <p style={paragraphStyle}>
-        Some of our interactive E-Gift templates include a &ldquo;Share Proof&rdquo; feature, which allows the recipient to capture a screenshot of a sealed digital letter or card for sharing. Regarding this feature:
+        Some of our interactive E-Gifting templates include a &ldquo;Share Proof&rdquo; feature, which allows the recipient to capture a screenshot of a sealed digital letter or card for sharing. Regarding this feature:
       </p>
       <ul style={ulStyle}>
         <li style={liStyle}><strong>Image Hosting:</strong> If the recipient&apos;s device does not support the native Web Share API, the generated screenshot may be temporarily uploaded to a third-party image hosting provider (e.g., ImgBB) to create a shareable URL link. These images are uploaded on a temporary basis.</li>
@@ -201,11 +201,11 @@ function TermsContent({ siteUrl, contactEmail }: { siteUrl: string; contactEmail
         <li style={liStyle}>Use any automated means (bots, scrapers, crawlers) to extract data, designs, or content from the Platform.</li>
         <li style={liStyle}>Remove, alter, or obscure any copyright, trademark, or other proprietary notices from the Platform.</li>
       </ul>
-      <p style={paragraphStyle}><strong>Your Content:</strong> You retain ownership of any original content you upload to the Platform. The limited license granted to us is solely for the purpose of delivering the E-Gift service.</p>
+      <p style={paragraphStyle}><strong>Your Content:</strong> You retain ownership of any original content you upload to the Platform. The limited license granted to us is solely for the purpose of delivering the E-Gifting service.</p>
 
       <h3 style={heading3Style}>8. Payment Terms</h3>
       <ul style={ulStyle}>
-        <li style={liStyle}><strong>One-Time Payment:</strong> All E-Gift purchases require a single, one-time payment. There are no recurring charges, subscriptions, or hidden fees.</li>
+        <li style={liStyle}><strong>One-Time Payment:</strong> All E-Gifting purchases require a single, one-time payment. There are no recurring charges, subscriptions, or hidden fees.</li>
         <li style={liStyle}><strong>Pricing:</strong> All prices are displayed in Indian Rupees (INR) and are inclusive of all applicable taxes (GST) unless stated otherwise.</li>
         <li style={liStyle}><strong>Payment Processing:</strong> Payments are securely processed through Razorpay, a PCI-DSS compliant payment gateway. We do not store or have direct access to your credit/debit card details, UPI PIN, or net banking credentials.</li>
         <li style={liStyle}><strong>Payment Confirmation:</strong> Upon successful payment, you will receive an order confirmation via the email address provided at checkout. Your unique Order ID and access passkey will be displayed on-screen and sent to your email.</li>
@@ -215,10 +215,10 @@ function TermsContent({ siteUrl, contactEmail }: { siteUrl: string; contactEmail
       <h3 style={heading3Style}>9. Order Delivery</h3>
       <p style={paragraphStyle}>Since {BUSINESS_NAME} deals exclusively in digital products, delivery is instant and electronic:</p>
       <ul style={ulStyle}>
-        <li style={liStyle}>Upon successful payment, you gain immediate access to the Live Editor for your purchased E-Gift template.</li>
+        <li style={liStyle}>Upon successful payment, you gain immediate access to the Live Editor for your purchased E-Gifting template.</li>
         <li style={liStyle}>Once finalized, a permanent URL and QR code are generated for sharing.</li>
         <li style={liStyle}>There is no physical product or physical delivery involved at any stage.</li>
-        <li style={liStyle}>The E-Gift link remains active and accessible indefinitely, subject to our data retention policies.</li>
+        <li style={liStyle}>The E-Gifting link remains active and accessible indefinitely, subject to our data retention policies.</li>
       </ul>
 
       <h3 style={heading3Style}>10. Limitation of Liability</h3>
@@ -230,12 +230,12 @@ function TermsContent({ siteUrl, contactEmail }: { siteUrl: string; contactEmail
         <li style={liStyle}>Any third-party conduct, content, services, or links accessed through the Platform.</li>
         <li style={liStyle}>Service interruptions, downtime, errors, or bugs in the Platform.</li>
       </ul>
-      <p style={paragraphStyle}>Our total aggregate liability for any claims arising from or related to these Terms or the use of the Platform shall not exceed the amount paid by you for the specific E-Gift in question.</p>
+      <p style={paragraphStyle}>Our total aggregate liability for any claims arising from or related to these Terms or the use of the Platform shall not exceed the amount paid by you for the specific E-Gifting in question.</p>
 
       <h3 style={heading3Style}>11. Indemnification</h3>
       <p style={paragraphStyle}>You agree to indemnify, defend, and hold harmless {BUSINESS_NAME}, {BUSINESS_ENTITY}, and their owners, directors, employees, and agents from and against any and all claims, liabilities, damages, losses, costs, and expenses (including reasonable attorney&apos;s fees) arising from or related to:</p>
       <ul style={ulStyle}>
-        <li style={liStyle}>Your use of the Platform or any E-Gift created through it.</li>
+        <li style={liStyle}>Your use of the Platform or any E-Gifting created through it.</li>
         <li style={liStyle}>Your User Generated Content or any content you upload, embed, or share.</li>
         <li style={liStyle}>Your violation of these Terms or any applicable laws or regulations.</li>
         <li style={liStyle}>Your infringement of any intellectual property or other rights of any third party.</li>
@@ -278,7 +278,7 @@ function PrivacyContent({ siteUrl, contactEmail }: { siteUrl: string; contactEma
       <p style={{ ...paragraphStyle, fontWeight: 700, marginBottom: 6 }}>a) Information You Provide Directly:</p>
       <ul style={ulStyle}>
         <li style={liStyle}><strong>Order Information:</strong> When you make a purchase, we collect your email address, phone number (optional), and the buyer passkey you create for accessing your order.</li>
-        <li style={liStyle}><strong>E-Gift Content:</strong> The personalised text (names, messages, wishes), images you upload, and audio/media URLs you embed in your E-Gift.</li>
+        <li style={liStyle}><strong>E-Gifting Content:</strong> The personalised text (names, messages, wishes), images you upload, and audio/media URLs you embed in your E-Gifting.</li>
         <li style={liStyle}><strong>Payment Information:</strong> We do NOT directly collect or store any credit/debit card numbers, UPI PINs, CVVs, or net banking passwords. All payment processing is handled securely by our payment gateway provider (Razorpay), which is PCI-DSS compliant.</li>
         <li style={liStyle}><strong>Contact Form Submissions:</strong> If you contact us via email or a contact form, we collect your name, email address, and the content of your message.</li>
       </ul>
@@ -292,7 +292,7 @@ function PrivacyContent({ siteUrl, contactEmail }: { siteUrl: string; contactEma
       <h3 style={heading3Style}>2. How We Use Your Information</h3>
       <p style={paragraphStyle}>We use the collected information for the following purposes:</p>
       <ul style={ulStyle}>
-        <li style={liStyle}><strong>Service Delivery:</strong> To process your order, generate your E-Gift, provide access to the Live Editor, and deliver the finalized shareable link and QR code.</li>
+        <li style={liStyle}><strong>Service Delivery:</strong> To process your order, generate your E-Gifting, provide access to the Live Editor, and deliver the finalized shareable link and QR code.</li>
         <li style={liStyle}><strong>Order Communication:</strong> To send you order confirmations, receipt emails, and important updates related to your purchase.</li>
         <li style={liStyle}><strong>Customer Support:</strong> To respond to your inquiries, troubleshoot issues, and provide assistance.</li>
         <li style={liStyle}><strong>Platform Improvement:</strong> To analyse usage patterns, identify bugs, and improve the overall user experience, design, and performance of the Platform.</li>
@@ -304,7 +304,7 @@ function PrivacyContent({ siteUrl, contactEmail }: { siteUrl: string; contactEma
       <p style={paragraphStyle}>Our Platform utilises browser technologies to enhance your experience:</p>
       <ul style={ulStyle}>
         <li style={liStyle}><strong>Local Storage (localStorage):</strong> We use browser local storage to save your preferences (e.g., popup dismissal preferences, draft customization progress). This data stays on your device and is not transmitted to our servers.</li>
-        <li style={liStyle}><strong>Session Storage:</strong> Used temporarily for maintaining your active session data while editing an E-Gift.</li>
+        <li style={liStyle}><strong>Session Storage:</strong> Used temporarily for maintaining your active session data while editing an E-Gifting.</li>
         <li style={liStyle}><strong>Cookies:</strong> We may use essential cookies for site functionality and optional analytics cookies to understand user behaviour. No advertising or tracking cookies are used. You can manage cookie preferences through your browser settings.</li>
       </ul>
 
@@ -335,12 +335,12 @@ function PrivacyContent({ siteUrl, contactEmail }: { siteUrl: string; contactEma
         <li style={liStyle}>PCI-DSS compliant payment processing through Razorpay.</li>
         <li style={liStyle}>Access controls and authentication for administrative functions.</li>
       </ul>
-      <p style={paragraphStyle}><strong>Important:</strong> Since E-Gifts are designed to be shared via unique URLs, any person who possesses the link to your finalized E-Gift will be able to view its contents. Do not include highly sensitive personal information (such as passwords, Aadhaar numbers, bank details, or other financial data) in your E-Gifts.</p>
+      <p style={paragraphStyle}><strong>Important:</strong> Since E-Giftings are designed to be shared via unique URLs, any person who possesses the link to your finalized E-Gifting will be able to view its contents. Do not include highly sensitive personal information (such as passwords, Aadhaar numbers, bank details, or other financial data) in your E-Giftings.</p>
 
       <h3 style={heading3Style}>7. Data Retention</h3>
       <p style={paragraphStyle}>We retain your data for as long as it is necessary to provide the services and fulfil the purposes described in this Privacy Policy:</p>
       <ul style={ulStyle}>
-        <li style={liStyle}><strong>Order Data:</strong> Retained for as long as your E-Gift link is active, plus a reasonable period for customer support purposes.</li>
+        <li style={liStyle}><strong>Order Data:</strong> Retained for as long as your E-Gifting link is active, plus a reasonable period for customer support purposes.</li>
         <li style={liStyle}><strong>Payment Records:</strong> Retained as required by applicable tax and financial regulations (typically 7 years for financial records in India).</li>
         <li style={liStyle}><strong>Analytics Data:</strong> Retained in anonymised or aggregated form and is not linked to individual identities.</li>
       </ul>
@@ -350,7 +350,7 @@ function PrivacyContent({ siteUrl, contactEmail }: { siteUrl: string; contactEma
       <ul style={ulStyle}>
         <li style={liStyle}><strong>Right to Access:</strong> You may request access to the personal data we hold about you.</li>
         <li style={liStyle}><strong>Right to Correction:</strong> You may request correction of inaccurate or incomplete personal data.</li>
-        <li style={liStyle}><strong>Right to Deletion:</strong> You may request the deletion of your personal data and associated E-Gift, subject to our legal obligations to retain certain records.</li>
+        <li style={liStyle}><strong>Right to Deletion:</strong> You may request the deletion of your personal data and associated E-Gifting, subject to our legal obligations to retain certain records.</li>
         <li style={liStyle}><strong>Right to Withdraw Consent:</strong> Where processing is based on your consent, you may withdraw consent at any time by contacting us.</li>
       </ul>
       <p style={paragraphStyle}>To exercise any of these rights, please contact us at <a href={`mailto:${contactEmail}`} style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 700 }}>{contactEmail}</a>. We will respond to all legitimate requests within 30 business days.</p>
@@ -384,14 +384,14 @@ function RefundContent({ contactEmail }: { contactEmail: string }) {
       <p style={paragraphStyle}>At {BUSINESS_NAME}, we strive to ensure that every customer has a positive experience with our digital gifting platform. Please read our Refund Policy carefully before making a purchase. By completing a purchase on our Platform, you acknowledge and agree to the following refund terms.</p>
 
       <h3 style={heading3Style}>1. Nature of Products</h3>
-      <p style={paragraphStyle}>All products sold on {BUSINESS_NAME} are <strong>digital products</strong> — specifically, personalised digital greeting cards, surprise webpages, and interactive microsites (E-Gifts). These are non-physical, intangible goods that are delivered instantly and electronically upon successful payment.</p>
+      <p style={paragraphStyle}>All products sold on {BUSINESS_NAME} are <strong>digital products</strong> — specifically, personalised digital greeting cards, surprise webpages, and interactive microsites (E-Giftings). These are non-physical, intangible goods that are delivered instantly and electronically upon successful payment.</p>
 
       <h3 style={heading3Style}>2. No Refund Policy (General Rule)</h3>
-      <p style={paragraphStyle}>Due to the instant, digital nature of our products, <strong>all sales are final and non-refundable</strong> under normal circumstances. Once a payment is successfully processed and you gain access to the Live Editor for your purchased E-Gift, we consider the product as delivered. Reasons for this policy include:</p>
+      <p style={paragraphStyle}>Due to the instant, digital nature of our products, <strong>all sales are final and non-refundable</strong> under normal circumstances. Once a payment is successfully processed and you gain access to the Live Editor for your purchased E-Gifting, we consider the product as delivered. Reasons for this policy include:</p>
       <ul style={ulStyle}>
         <li style={liStyle}>The product (digital template access) is delivered instantly and cannot be &ldquo;returned&rdquo; once accessed.</li>
         <li style={liStyle}>You have the opportunity to fully preview every template before making a purchase decision.</li>
-        <li style={liStyle}>The E-Gift is personalised with your own custom content, making it a bespoke digital product.</li>
+        <li style={liStyle}>The E-Gifting is personalised with your own custom content, making it a bespoke digital product.</li>
       </ul>
 
       <h3 style={heading3Style}>3. Exceptions — When Refunds May Be Considered</h3>
@@ -399,18 +399,18 @@ function RefundContent({ contactEmail }: { contactEmail: string }) {
       <ul style={ulStyle}>
         <li style={liStyle}><strong>Duplicate Payment:</strong> If you were charged multiple times for the same order due to a payment gateway error or network issue, we will refund the duplicate charge(s) in full.</li>
         <li style={liStyle}><strong>Payment Debited but Order Not Created:</strong> If the payment was debited from your account but no order was created or confirmed on our Platform due to a technical error, we will issue a full refund.</li>
-        <li style={liStyle}><strong>Critical Technical Defect:</strong> If the purchased E-Gift template has a critical technical defect (e.g., the template fails to load, the editor is completely non-functional for your specific purchase, or the finalized link does not work), and we are unable to resolve the issue within a reasonable timeframe (72 hours from the report), we may issue a refund.</li>
-        <li style={liStyle}><strong>Service Discontinuation:</strong> If we permanently discontinue the Platform or specific E-Gift services before you have had a reasonable opportunity to customize and share your purchased E-Gift.</li>
+        <li style={liStyle}><strong>Critical Technical Defect:</strong> If the purchased E-Gifting template has a critical technical defect (e.g., the template fails to load, the editor is completely non-functional for your specific purchase, or the finalized link does not work), and we are unable to resolve the issue within a reasonable timeframe (72 hours from the report), we may issue a refund.</li>
+        <li style={liStyle}><strong>Service Discontinuation:</strong> If we permanently discontinue the Platform or specific E-Gifting services before you have had a reasonable opportunity to customize and share your purchased E-Gifting.</li>
       </ul>
 
       <h3 style={heading3Style}>4. Non-Refundable Scenarios</h3>
       <p style={paragraphStyle}>Refunds will <strong>NOT</strong> be provided in the following situations:</p>
       <ul style={ulStyle}>
         <li style={liStyle}>Change of mind or dissatisfaction after purchase (you had the opportunity to preview the template before buying).</li>
-        <li style={liStyle}>Failure to customize or use the E-Gift within the editing window.</li>
+        <li style={liStyle}>Failure to customize or use the E-Gifting within the editing window.</li>
         <li style={liStyle}>Issues caused by the buyer&apos;s own device, browser incompatibility, poor internet connection, or user error.</li>
-        <li style={liStyle}>Dissatisfaction with the recipient&apos;s reaction or the recipient not viewing the E-Gift.</li>
-        <li style={liStyle}>E-Gifts that have already been fully customized and finalized with a shareable link.</li>
+        <li style={liStyle}>Dissatisfaction with the recipient&apos;s reaction or the recipient not viewing the E-Gifting.</li>
+        <li style={liStyle}>E-Giftings that have already been fully customized and finalized with a shareable link.</li>
         <li style={liStyle}>Content-related issues arising from User Generated Content (e.g., spelling mistakes in your personalised messages).</li>
         <li style={liStyle}>Third-party service issues (e.g., YouTube/Spotify audio link not working, ImgBB image hosting downtime).</li>
       </ul>
@@ -429,7 +429,7 @@ function RefundContent({ contactEmail }: { contactEmail: string }) {
         <li style={liStyle}>The refund will be processed through the original payment method used for the purchase.</li>
         <li style={liStyle}>Refunds typically take <strong>5-10 business days</strong> to reflect in your account, depending on your bank or payment provider&apos;s processing times.</li>
         <li style={liStyle}>We will notify you via email once the refund has been initiated from our end.</li>
-        <li style={liStyle}>Upon refund, access to the associated E-Gift and editor will be revoked, and any finalized links may be deactivated.</li>
+        <li style={liStyle}>Upon refund, access to the associated E-Gifting and editor will be revoked, and any finalized links may be deactivated.</li>
       </ul>
 
       <h3 style={heading3Style}>7. Chargebacks &amp; Payment Disputes</h3>
@@ -455,21 +455,21 @@ function ReturnContent({ siteUrl, contactEmail }: { siteUrl: string; contactEmai
       <p style={{ color: "#7C3AED", fontSize: 12, fontWeight: 700, marginBottom: 20 }}>Last Updated: {LAST_UPDATED}</p>
 
       <h3 style={heading3Style}>1. Digital-Only Products — No Physical Returns</h3>
-      <p style={paragraphStyle}>{BUSINESS_NAME} exclusively sells <strong>digital products</strong> — personalised interactive digital greeting cards, surprise webpages, and microsites (E-Gifts). Since our products are entirely digital and intangible in nature, there is <strong>no physical product to return</strong>.</p>
+      <p style={paragraphStyle}>{BUSINESS_NAME} exclusively sells <strong>digital products</strong> — personalised interactive digital greeting cards, surprise webpages, and microsites (E-Giftings). Since our products are entirely digital and intangible in nature, there is <strong>no physical product to return</strong>.</p>
       <p style={paragraphStyle}>The concept of a traditional &ldquo;return&rdquo; (sending back a physical item) does not apply to our business model. Once a digital product is purchased and delivered (i.e., access to the Live Editor is granted), the product is considered consumed and cannot be &ldquo;returned.&rdquo;</p>
 
       <h3 style={heading3Style}>2. Why Returns Are Not Applicable</h3>
       <ul style={ulStyle}>
-        <li style={liStyle}><strong>Instant Digital Delivery:</strong> The E-Gift template and editor access are delivered instantly upon successful payment. There is no shipping or physical logistics involved.</li>
+        <li style={liStyle}><strong>Instant Digital Delivery:</strong> The E-Gifting template and editor access are delivered instantly upon successful payment. There is no shipping or physical logistics involved.</li>
         <li style={liStyle}><strong>Non-Tangible Product:</strong> Digital products cannot be physically returned, repackaged, or resold once delivered to the buyer.</li>
-        <li style={liStyle}><strong>Preview Before Purchase:</strong> Every E-Gift template can be fully previewed (with live animations and interactions) before purchase, allowing you to make an informed decision.</li>
-        <li style={liStyle}><strong>Personalized &amp; Customized:</strong> Once purchased, the E-Gift is personalized with your unique content, making it a bespoke product created specifically for you.</li>
+        <li style={liStyle}><strong>Preview Before Purchase:</strong> Every E-Gifting template can be fully previewed (with live animations and interactions) before purchase, allowing you to make an informed decision.</li>
+        <li style={liStyle}><strong>Personalized &amp; Customized:</strong> Once purchased, the E-Gifting is personalized with your unique content, making it a bespoke product created specifically for you.</li>
       </ul>
 
       <h3 style={heading3Style}>3. Issues After Purchase?</h3>
-      <p style={paragraphStyle}>If you experience any technical issues, defects, or problems with your purchased E-Gift, please do not hesitate to contact us. We are committed to resolving any legitimate technical issues:</p>
+      <p style={paragraphStyle}>If you experience any technical issues, defects, or problems with your purchased E-Gifting, please do not hesitate to contact us. We are committed to resolving any legitimate technical issues:</p>
       <ul style={ulStyle}>
-        <li style={liStyle}><strong>Technical Support:</strong> If your E-Gift template is not functioning correctly (e.g., template not loading, editor crashing, finalized link not working), our technical team will work to resolve the issue promptly.</li>
+        <li style={liStyle}><strong>Technical Support:</strong> If your E-Gifting template is not functioning correctly (e.g., template not loading, editor crashing, finalized link not working), our technical team will work to resolve the issue promptly.</li>
         <li style={liStyle}><strong>Template Replacement:</strong> In rare cases where a template is severely defective and cannot be fixed, we may offer a replacement with an equivalent template at no additional cost.</li>
         <li style={liStyle}><strong>Refund Consideration:</strong> For critical unresolvable issues, please refer to our <a href="#refund" style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 700 }}>Refund Policy</a> for scenarios where a refund may be considered.</li>
       </ul>
@@ -482,7 +482,7 @@ function ReturnContent({ siteUrl, contactEmail }: { siteUrl: string; contactEmai
       </ul>
 
       <h3 style={heading3Style}>5. Contact Us</h3>
-      <p style={paragraphStyle}>For any questions about our Return Policy or for technical assistance with your E-Gift, please contact us:</p>
+      <p style={paragraphStyle}>For any questions about our Return Policy or for technical assistance with your E-Gifting, please contact us:</p>
       <ul style={ulStyle}>
         <li style={liStyle}><strong>Email:</strong> <a href={`mailto:${contactEmail}`} style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 700 }}>{contactEmail}</a></li>
         <li style={liStyle}><strong>Website:</strong> <a href={siteUrl} style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 700 }}>{siteUrl}</a></li>
@@ -503,7 +503,7 @@ function DisclaimerContent({ siteUrl, contactEmail }: { siteUrl: string; contact
       <p style={paragraphStyle}>The information, content, and services provided on {BUSINESS_NAME} (<a href={siteUrl} style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 700 }}>{siteUrl}</a>) are provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis. Please read this disclaimer carefully before using our Platform.</p>
 
       <h3 style={heading3Style}>1. General Disclaimer</h3>
-      <p style={paragraphStyle}>{BUSINESS_NAME} and {BUSINESS_ENTITY} make no representations or warranties of any kind, express or implied, regarding the operation, availability, accuracy, completeness, or reliability of the Platform, its content, or the E-Gift services provided. To the fullest extent permissible by applicable law, we disclaim all warranties, including but not limited to:</p>
+      <p style={paragraphStyle}>{BUSINESS_NAME} and {BUSINESS_ENTITY} make no representations or warranties of any kind, express or implied, regarding the operation, availability, accuracy, completeness, or reliability of the Platform, its content, or the E-Gifting services provided. To the fullest extent permissible by applicable law, we disclaim all warranties, including but not limited to:</p>
       <ul style={ulStyle}>
         <li style={liStyle}>Implied warranties of merchantability, fitness for a particular purpose, and non-infringement.</li>
         <li style={liStyle}>Warranties that the Platform will be uninterrupted, error-free, secure, or free from viruses or other harmful components.</li>
@@ -519,7 +519,7 @@ function DisclaimerContent({ siteUrl, contactEmail }: { siteUrl: string; contact
         <li style={liStyle}>The accuracy, truthfulness, or appropriateness of text, messages, names, or other content entered by users.</li>
         <li style={liStyle}>The legality, ownership rights, or licensing of images uploaded by users.</li>
         <li style={liStyle}>The content, availability, or licensing status of third-party audio/video links embedded by users (e.g., YouTube, Spotify, SoundCloud links).</li>
-        <li style={liStyle}>Any emotional or personal impact resulting from the content of an E-Gift on its intended or unintended recipient.</li>
+        <li style={liStyle}>Any emotional or personal impact resulting from the content of an E-Gifting on its intended or unintended recipient.</li>
       </ul>
 
       <h3 style={heading3Style}>4. Third-Party Links &amp; Services</h3>
@@ -531,12 +531,12 @@ function DisclaimerContent({ siteUrl, contactEmail }: { siteUrl: string; contact
       </ul>
       <p style={paragraphStyle}>We encourage you to review the privacy policies and terms of service of any third-party services you interact with through our Platform.</p>
 
-      <h3 style={heading3Style}>5. E-Gift Availability &amp; Link Permanence</h3>
-      <p style={paragraphStyle}>While we endeavour to keep all finalized E-Gift links active and accessible permanently, we cannot guarantee indefinite availability. Circumstances that may affect link availability include:</p>
+      <h3 style={heading3Style}>5. E-Gifting Availability &amp; Link Permanence</h3>
+      <p style={paragraphStyle}>While we endeavour to keep all finalized E-Gifting links active and accessible permanently, we cannot guarantee indefinite availability. Circumstances that may affect link availability include:</p>
       <ul style={ulStyle}>
         <li style={liStyle}>Server outages, infrastructure changes, or technical maintenance.</li>
         <li style={liStyle}>Discontinuation of the Platform or specific services.</li>
-        <li style={liStyle}>Removal of E-Gifts that violate our Terms &amp; Conditions.</li>
+        <li style={liStyle}>Removal of E-Giftings that violate our Terms &amp; Conditions.</li>
         <li style={liStyle}>Force majeure events beyond our reasonable control.</li>
       </ul>
 
