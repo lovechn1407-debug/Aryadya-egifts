@@ -385,7 +385,7 @@ export default function SettingsPage() {
 
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Business Name</label>
-          <input type="text" value={settings.businessName || ""} onChange={e => setSettings(s => ({ ...s, businessName: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} placeholder="e.g. Aradhya E-Gifts" />
+          <input type="text" value={settings.businessName || ""} onChange={e => setSettings(s => ({ ...s, businessName: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} placeholder="e.g. Aradhya E-Giftings" />
         </div>
 
         <div>

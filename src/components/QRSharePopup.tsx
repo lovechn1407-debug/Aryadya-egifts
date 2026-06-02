@@ -133,7 +133,7 @@ export default function QRSharePopup({ url, onClose }: { url: string; onClose: (
     ctx.fillStyle = "#E91E8C";
     ctx.font = "bold 20px 'Nunito', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("🎁 Aradhya E-Gifts", w / 2, qrY + qrSize + 44);
+    ctx.fillText("🎁 Aradhya E-Giftings", w / 2, qrY + qrSize + 44);
     ctx.fillStyle = "#7C3AED";
     ctx.font = "bold 13px 'Inter', sans-serif";
     ctx.fillText("Scan to view your gift page ✨", w / 2, qrY + qrSize + 66);

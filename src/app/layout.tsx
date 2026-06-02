@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aradhyagifts.in";
   return {
     metadataBase: new URL(siteUrl),
-    title: "Aradhya E-Gifts — Personalised Digital Surprises",
+    title: "Aradhya E-Giftings — Personalised Digital Surprises",
     description:
       "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more. Preview, personalise and share instantly.",
     keywords: "e-gift, digital gift, birthday surprise, personalised webpage, proposal gift, anniversary, India",
@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
       canonical: siteUrl,
     },
     openGraph: {
-      title: "Aradhya E-Gifts — Personalised Digital Surprises",
+      title: "Aradhya E-Giftings — Personalised Digital Surprises",
       description: "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more.",
       type: "website",
       url: siteUrl,
@@ -67,7 +67,7 @@ export default async function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "Aradhya E-Giftings",
-              "alternateName": "Aradhya E-Gifts",
+              "alternateName": "Aradhya E-Giftings",
               "url": "https://aradhyagifts.in",
               "description": "Send magical, customised digital gifting pages for birthdays, proposals, anniversaries & more.",
               "potentialAction": {
