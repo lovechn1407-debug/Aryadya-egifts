@@ -287,7 +287,7 @@ export default function SettingsPage() {
 
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Favicon (Website Icon)</label>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
             <div style={{ width: 48, height: 48, borderRadius: 8, border: "1px solid #CBD5E1", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8FAFC" }}>
               {settings.faviconUrl ? (
                 <img src={settings.faviconUrl} alt="Favicon" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
@@ -317,6 +317,16 @@ export default function SettingsPage() {
               </button>
             )}
           </div>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Business Name</label>
+          <input type="text" value={settings.businessName || ""} onChange={e => setSettings(s => ({ ...s, businessName: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} placeholder="e.g. Aradhya E-Gifts" />
+        </div>
+
+        <div>
+          <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Business Entity Name</label>
+          <input type="text" value={settings.businessEntity || ""} onChange={e => setSettings(s => ({ ...s, businessEntity: e.target.value }))} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", outline: "none", fontSize: 14 }} placeholder="e.g. AS-Studios" />
         </div>
       </div>
 
