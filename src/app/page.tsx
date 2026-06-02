@@ -2295,7 +2295,7 @@ function Footer({ settings }: { settings: Settings | null }) {
           color: "#64748B"
         }}>
           <div>
-            <span>© {new Date().getFullYear()} {settings?.businessName || "Aradhya E-Giftings"} — A Product of <strong>{(settings?.businessEntity || "AS-Studios").toUpperCase()}</strong> (Merchant Legal Name: {settings?.businessEntity || "AS-Studios"})</span>
+            <span>© {new Date().getFullYear()} <strong>{settings?.businessName || "Aradhya E-Giftings"}</strong> — A Product of <strong>{(settings?.businessEntity || "AS-Studios").toUpperCase()}</strong> (Merchant Legal Name: {settings?.businessEntity || "AS-Studios"})</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span>Made with</span>

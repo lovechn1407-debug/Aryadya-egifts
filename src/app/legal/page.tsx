@@ -821,7 +821,7 @@ export default function LegalPage() {
           justifyContent: "center", alignItems: "center", gap: "6px 20px",
         }}>
           <span>
-            {new Date().getFullYear()} {BUSINESS_NAME} — A Product of <strong style={{ color: "#94A3B8" }}>{BUSINESS_ENTITY}</strong>
+            {new Date().getFullYear()} <strong>{BUSINESS_NAME}</strong> — A Product of <strong style={{ color: "#94A3B8" }}>{BUSINESS_ENTITY}</strong>
           </span>
           <span style={{ color: "#334155" }}>|</span>
           <Link href="/" style={{ color: "#7C3AED", textDecoration: "none", fontWeight: 700, transition: "color 0.2s" }}>Home</Link>
