@@ -162,6 +162,38 @@ export async function deleteSectionDB(id: string): Promise<void> {
 }
 
 // ── ORDERS ────────────────────────────────────────────────────────────────────
+export async function createPendingOrderDB(data: {
+  productId: string;
+  productName: string;
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  amount: number;
+  couponCode?: string;
+  discountAmount?: number;
+}): Promise<Order> {
+  const id = `order_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const order: Order = {
+    id,
+    productId: data.productId,
+    productName: data.productName,
+    buyerName: data.buyerName,
+    buyerEmail: data.buyerEmail,
+    buyerPhone: data.buyerPhone,
+    amount: data.amount,
+    status: "pending",
+    customizations: {},
+    createdAt: new Date().toISOString(),
+    // Only include optional fields if they have actual values
+    ...(data.couponCode ? { couponCode: data.couponCode } : {}),
+    ...(data.discountAmount !== undefined && data.discountAmount > 0
+      ? { discountAmount: data.discountAmount }
+      : {}),
+  };
+  await set(ref(database, `orders/${id}`), order);
+  return order;
+}
+
 export async function createOrderDB(data: {
   productId: string;
   productName: string;
@@ -210,6 +242,22 @@ export async function finalizeOrderDB(orderId: string): Promise<void> {
     status: "finalized",
     finalizedAt: new Date().toISOString(),
   });
+}
+
+export async function updateOrderStatusDB(
+  orderId: string,
+  status: Order["status"],
+  extra?: Partial<Order>
+): Promise<void> {
+  await update(ref(database, `orders/${orderId}`), { status, ...extra });
+}
+
+export async function updateOrderCouponDB(
+  orderId: string,
+  couponCode: string,
+  discountAmount: number
+): Promise<void> {
+  await update(ref(database, `orders/${orderId}`), { couponCode, discountAmount });
 }
 
 // ── BUYER LOGIN LOOKUP ────────────────────────────────────────────────────────
