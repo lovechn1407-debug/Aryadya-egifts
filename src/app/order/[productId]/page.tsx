@@ -55,7 +55,8 @@ function SpinnerSVG({ size = 22 }: { size?: number }) {
 
 function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) {
   const { productId } = use(params);
-  const product = getProduct(productId);
+  const initialProduct = getProduct(productId);
+  const [product, setProduct] = useState(initialProduct);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -69,6 +70,17 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponMsg, setCouponMsg] = useState({ type: "", text: "" });
   const [couponLoading, setCouponLoading] = useState(false);
+
+  // Fetch updated product price/details from Firebase
+  useEffect(() => {
+    import("@/lib/db").then(({ getProductDB }) => {
+      getProductDB(productId).then(p => {
+        if (p) {
+          setProduct(p);
+        }
+      });
+    });
+  }, [productId]);
 
   // Show payment failed toast if redirected back from Cashfree
   useEffect(() => {

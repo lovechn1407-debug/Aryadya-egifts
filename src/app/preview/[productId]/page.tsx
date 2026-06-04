@@ -53,14 +53,21 @@ function PreviewContent({ productId }: { productId: string }) {
   const [showTip, setShowTip] = useState(true);
   const searchParams = useSearchParams();
   const isEmbed = searchParams.get("embed") === "1";
-  const product = getProduct(productId);
+  
+  const initialProduct = getProduct(productId);
+  const [product, setProduct] = useState(initialProduct);
   const [dbData, setDbData] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
     import("@/lib/db").then(({ getProductDB }) => {
       getProductDB(productId).then(p => {
-        if (p && (p as any).previewData) {
-          setDbData((p as any).previewData);
+        if (p) {
+          setProduct(p);
+          if ((p as any).previewData) {
+            setDbData((p as any).previewData);
+          } else {
+            setDbData({});
+          }
         } else {
           setDbData({});
         }
