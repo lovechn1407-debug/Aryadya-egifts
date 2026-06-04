@@ -227,6 +227,7 @@ export async function POST(req: NextRequest) {
       payment_session_id: cfData.payment_session_id,
       cashfree_order_id: cfData.cf_order_id,
       order_id: order.id,
+      cashfree_mode: process.env.CASHFREE_MODE || "sandbox",
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";

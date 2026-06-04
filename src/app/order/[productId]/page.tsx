@@ -205,7 +205,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
 
       const { load } = await import("@cashfreepayments/cashfree-js");
       const cashfree = await load({
-        mode: (process.env.NEXT_PUBLIC_CASHFREE_MODE as "sandbox" | "production") || "sandbox",
+        mode: (data.cashfree_mode as "sandbox" | "production") || "sandbox",
       });
 
       await cashfree.checkout({
