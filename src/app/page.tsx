@@ -1182,7 +1182,7 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
           
           <p style={{ fontSize: 14, color: "#475569", marginTop: 16, lineHeight: 1.6, margin: 0 }}>{product.tagline}</p>
           
-          <div style={{ margin: "24px 0 0", padding: "16px", background: \`linear-gradient(145deg, \${accent}08, \${accent}02)\`, borderRadius: 14, border: \`1px solid \${accent}15\`, boxShadow: \`inset 0 2px 10px \${accent}05\` }}>
+          <div style={{ margin: "24px 0 0", padding: "16px", background: `linear-gradient(145deg, ${accent}08, ${accent}02)`, borderRadius: 14, border: `1px solid ${accent}15`, boxShadow: `inset 0 2px 10px ${accent}05` }}>
             <p style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.8, color: accent, marginBottom: 14, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               Premium Features
