@@ -1076,7 +1076,7 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, zIndex: 10, background: "rgba(255,255,255,0.8)", backdropFilter: "blur(4px)", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 20, color: "#1E293B", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>×</button>
 
         {/* Preview pane */}
-        <div ref={containerRef} style={{ width: "100%", aspectRatio: "3/4", position: "relative", overflow: "hidden", borderRadius: "24px 24px 0 0", background: `${accent}05` }}>
+        <div ref={containerRef} style={{ width: "100%", aspectRatio: "3/4", position: "relative", overflow: "hidden", borderRadius: "24px 24px 0 0", background: `${accent}05`, flexShrink: 0 }}>
           <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
         </div>
         
