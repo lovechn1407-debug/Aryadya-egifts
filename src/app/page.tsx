@@ -1081,7 +1081,7 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
         </div>
         
         {/* Product Info (Title, Rating, Description) */}
-        <div style={{ padding: "24px 24px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+        <div style={{ padding: "24px 24px 16px", display: "flex", flexDirection: "column", alignItems: "flex-start", textAlign: "left" }}>
           <h2 style={{ fontSize: 24, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif", lineHeight: 1.3, margin: 0, letterSpacing: -0.5 }}>
             {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
           </h2>
@@ -1110,7 +1110,7 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
         
         {/* Quick Actions (Price & Buttons) */}
         <div style={{ padding: "0 24px 16px", display: "flex", flexDirection: "column", gap: 12, borderBottom: "1px solid #F1F5F9" }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, justifyContent: "center", marginBottom: 4 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, justifyContent: "flex-start", marginBottom: 4 }}>
             <span style={{ fontSize: 32, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
             {product.cuttedPrice && <span style={{ fontSize: 16, color: "#94A3B8", textDecoration: "line-through", fontWeight: 700 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
           </div>
