@@ -1070,152 +1070,163 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
   return (
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.4)", backdropFilter: "blur(8px)", zIndex: 900 }} />
-      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 901, width: "min(860px,95vw)", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: 24, boxShadow: "0 40px 100px rgba(15,23,42,0.22)", display: "flex", flexWrap: "wrap", fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 901, width: "min(460px,95vw)", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: "24px 24px 0 0", boxShadow: "0 40px 100px rgba(15,23,42,0.22)", display: "flex", flexDirection: "column", fontFamily: "'Inter', sans-serif" }}>
+        
+        {/* Close Button positioned absolutely on top of preview */}
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, zIndex: 10, background: "rgba(255,255,255,0.8)", backdropFilter: "blur(4px)", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 20, color: "#1E293B", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>×</button>
+
         {/* Preview pane */}
-        <div ref={containerRef} style={{ flex: "1 1 300px", minHeight: 280, position: "relative", overflow: "hidden", borderRadius: "24px 0 0 24px", background: `${accent}05` }}>
+        <div ref={containerRef} style={{ width: "100%", aspectRatio: "3/4", position: "relative", overflow: "hidden", borderRadius: "24px 24px 0 0", background: `${accent}05` }}>
           <iframe src={(product as any).previewUrl || `/preview/${product.id}?embed=1`} style={{ width: IW, height: IH, border: "none", transformOrigin: "top left", transform: `scale(${scale})`, pointerEvents: "none" }} scrolling="no" loading="lazy" />
         </div>
-        {/* Details pane */}
-        <div style={{ flex: "1 1 260px", padding: "32px 28px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div>
-            <button onClick={onClose} style={{ float: "right", background: "#F1F5F9", border: "none", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 18, color: "#64748B" }}>×</button>
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif", lineHeight: 1.3, marginTop: 4, paddingRight: 36, letterSpacing: -0.5, marginInline: 0 }}>
-              {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
-            </h2>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 10 }}>
-              {[1, 2, 3, 4, 5].map((s) => (
-                <svg 
-                  key={s} 
-                  width="13" 
-                  height="13" 
-                  viewBox="0 0 24 24" 
-                  fill={s <= Math.round(rating) ? "#F59E0B" : "none"} 
-                  stroke={s <= Math.round(rating) ? "#F59E0B" : "#CBD5E1"} 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-              ))}
-              <span style={{ fontSize: 12, fontWeight: 800, color: "#64748B", marginLeft: 6 }}>{rating.toFixed(1)}{reviewCount ? ` (${reviewCount} Reviews)` : ""}</span>
-            </div>
-            
-            <p style={{ fontSize: 13, color: "#64748B", marginTop: 14, lineHeight: 1.6, marginInline: 0 }}>{product.tagline}</p>
-            
-            <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 8 }}>
-              {product.slides.slice(0, 5).map(s => (
-                <div key={s.slideNumber} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span style={{ fontSize: 12, color: "#334155", fontWeight: 600 }}>{s.title}</span>
-                </div>
-              ))}
-            </div>
+        
+        {/* Quick Actions (Buy & Preview on top) */}
+        <div style={{ padding: "20px 24px 12px", display: "flex", flexDirection: "column", gap: 12, borderBottom: "1px solid #F1F5F9" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, justifyContent: "center", marginBottom: 4 }}>
+            <span style={{ fontSize: 32, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
+            {product.cuttedPrice && <span style={{ fontSize: 16, color: "#94A3B8", textDecoration: "line-through", fontWeight: 700 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
           </div>
+          
+          <div style={{ display: "flex", gap: 10 }}>
+            <Link 
+              href={`/order/${product.id}`} 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                onNavigate?.(`/order/${product.id}`);
+              }}
+              style={{ 
+                flex: 1,
+                display: "flex", 
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                background: `linear-gradient(135deg,${accent},${accent}DD)`, 
+                color: "#fff", 
+                padding: "14px", 
+                borderRadius: 12, 
+                textDecoration: "none", 
+                fontWeight: 900, 
+                fontSize: 15, 
+                fontFamily: "'Nunito',sans-serif", 
+                boxShadow: `0 8px 24px ${accent}25` 
+              }}
+            >
+              Buy Now
+            </Link>
+            <Link 
+              href={`/preview/${product.id}`} 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                onNavigate?.(`/preview/${product.id}`);
+              }}
+              style={{ 
+                flex: 1,
+                display: "flex", 
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                background: "#F8FAFC", 
+                color: "#475569", 
+                padding: "14px", 
+                borderRadius: 12, 
+                textDecoration: "none", 
+                fontWeight: 800, 
+                fontSize: 14, 
+                border: "1.5px solid #E2E8F0" 
+              }}
+            >
+              Live Preview
+            </Link>
+          </div>
+          
+          <div style={{ display: "flex", justifyContent: "center", marginTop: 8, color: "#94A3B8", animation: "modal-bounce 2s infinite" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes modal-bounce {
+              0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+              40% { transform: translateY(5px); }
+              60% { transform: translateY(3px); }
+            }
+          `}} />
+        </div>
 
-          <div>
-            <div style={{ margin: "20px 0 0", padding: "16px", background: `linear-gradient(145deg, ${accent}08, ${accent}02)`, borderRadius: 14, border: `1px solid ${accent}15`, boxShadow: `inset 0 2px 10px ${accent}05` }}>
-              <p style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.8, color: accent, marginBottom: 14, marginInline: 0, display: "flex", alignItems: "center", gap: 6 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                Premium Features
-              </p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "8px 10px", borderRadius: 8, border: "1px solid #f1f5f9", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
-                  <span style={{ fontSize: 15 }}>🎵</span>
-                  <span style={{ fontSize: 12, color: "#334155", fontWeight: 700 }}>Custom Music</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "8px 10px", borderRadius: 8, border: "1px solid #f1f5f9", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
-                  <span style={{ fontSize: 15 }}>🖼️</span>
-                  <span style={{ fontSize: 12, color: "#334155", fontWeight: 700 }}>Your Photos</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "8px 10px", borderRadius: 8, border: "1px solid #f1f5f9", gridColumn: "span 2", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
-                  <span style={{ fontSize: 15 }}>✍️</span>
-                  <span style={{ fontSize: 12, color: "#334155", fontWeight: 700 }}>Personalized Text & Messages</span>
-                </div>
+        {/* Details pane below */}
+        <div style={{ padding: "20px 24px 32px", display: "flex", flexDirection: "column" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif", lineHeight: 1.3, margin: 0, letterSpacing: -0.5 }}>
+            {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
+          </h2>
+          
+          <div style={{ display: "flex", alignItems: "center", gap: 3, marginTop: 10 }}>
+            {[1, 2, 3, 4, 5].map((s) => (
+              <svg 
+                key={s} 
+                width="14" 
+                height="14" 
+                viewBox="0 0 24 24" 
+                fill={s <= Math.round(rating) ? "#F59E0B" : "none"} 
+                stroke={s <= Math.round(rating) ? "#F59E0B" : "#CBD5E1"} 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            ))}
+            <span style={{ fontSize: 13, fontWeight: 800, color: "#64748B", marginLeft: 6 }}>{rating.toFixed(1)}{reviewCount ? ` (${reviewCount} Reviews)` : ""}</span>
+          </div>
+          
+          <p style={{ fontSize: 14, color: "#475569", marginTop: 16, lineHeight: 1.6, margin: 0 }}>{product.tagline}</p>
+          
+          <div style={{ margin: "24px 0 0", padding: "16px", background: \`linear-gradient(145deg, \${accent}08, \${accent}02)\`, borderRadius: 14, border: \`1px solid \${accent}15\`, boxShadow: \`inset 0 2px 10px \${accent}05\` }}>
+            <p style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.8, color: accent, marginBottom: 14, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Premium Features
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "10px", borderRadius: 8, border: "1px solid #f1f5f9", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
+                <span style={{ fontSize: 16 }}>🎵</span>
+                <span style={{ fontSize: 13, color: "#334155", fontWeight: 700 }}>Custom Music</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "10px", borderRadius: 8, border: "1px solid #f1f5f9", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
+                <span style={{ fontSize: 16 }}>🖼️</span>
+                <span style={{ fontSize: 13, color: "#334155", fontWeight: 700 }}>Your Photos</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", padding: "10px", borderRadius: 8, border: "1px solid #f1f5f9", gridColumn: "span 2", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
+                <span style={{ fontSize: 16 }}>✍️</span>
+                <span style={{ fontSize: 13, color: "#334155", fontWeight: 700 }}>Personalized Text & Messages</span>
               </div>
             </div>
-
-            <div style={{ margin: "24px 0 16px", padding: "16px 0 0 0", borderTop: "1px solid #F1F5F9", display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span style={{ fontSize: 30, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
-              {product.cuttedPrice && <span style={{ fontSize: 15, color: "#94A3B8", textDecoration: "line-through", fontWeight: 700 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
-              <span style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600 }}>one-time</span>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <Link 
-                href={`/order/${product.id}`} 
-                onClick={(e) => {
-                  e.preventDefault();
-                  onClose();
-                  onNavigate?.(`/order/${product.id}`);
-                }}
-                style={{ 
-                  display: "flex", 
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  background: `linear-gradient(135deg,${accent},${accent}DD)`, 
-                  color: "#fff", 
-                  padding: "14px", 
-                  borderRadius: 12, 
-                  textDecoration: "none", 
-                  fontWeight: 900, 
-                  fontSize: 14, 
-                  fontFamily: "'Nunito',sans-serif", 
-                  boxShadow: `0 8px 24px ${accent}25` 
-                }}
-              >
-                Buy &amp; Personalise
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </Link>
-              <Link 
-                href={`/preview/${product.id}`} 
-                onClick={(e) => {
-                  e.preventDefault();
-                  onClose();
-                  onNavigate?.(`/preview/${product.id}`);
-                }}
-                style={{ 
-                  display: "flex", 
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  background: "#F8FAFC", 
-                  color: "#475569", 
-                  padding: "12px", 
-                  borderRadius: 12, 
-                  textDecoration: "none", 
-                  fontWeight: 800, 
-                  fontSize: 12, 
-                  border: "1.5px solid #E2E8F0" 
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                View Full Live Preview
-              </Link>
-            </div>
-
-            <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 20 }}>
-              {[
-                { label: "Secure Pay", icon: <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> },
-                { label: "Instant Access", icon: <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg> },
-                { label: "Shareable Link", icon: <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" /></svg> }
-              ].map(b => (
-                <span key={b.label} style={{ fontSize: 10, color: "#94A3B8", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
-                  {b.icon} {b.label}
-                </span>
-              ))}
-            </div>
           </div>
+          
+          <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 10 }}>
+            <p style={{ fontSize: 13, fontWeight: 800, color: "#1E293B", margin: "0 0 4px 0" }}>Template Highlights</p>
+            {product.slides.slice(0, 5).map(s => (
+              <div key={s.slideNumber} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>{s.title}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 28 }}>
+            {[
+              { label: "Secure Pay", icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> },
+              { label: "Instant Access", icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg> },
+              { label: "Shareable Link", icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" /></svg> }
+            ].map(b => (
+              <span key={b.label} style={{ fontSize: 11, color: "#94A3B8", fontWeight: 750, display: "flex", alignItems: "center", gap: 4 }}>
+                {b.icon} {b.label}
+              </span>
+            ))}
+          </div>
+
         </div>
       </div>
     </>
