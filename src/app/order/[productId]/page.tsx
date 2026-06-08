@@ -245,9 +245,9 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
       <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #F8F5FF 0%, #FFF0F8 100%)", fontFamily: "'Inter', sans-serif" }}>
         {/* Header */}
         <div style={{ background: "#fff", borderBottom: "1px solid #F3F4F6", padding: "0 clamp(16px, 4vw, 48px)", height: 56, display: "flex", alignItems: "center", position: "sticky", top: 0, zIndex: 10 }}>
-          <Link href={`/preview/${productId}`} style={{ color: "#7C3AED", textDecoration: "none", fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", gap: 8 }}>
-            <ArrowLeftSVG /> Back to Preview
-          </Link>
+          <button onClick={() => router.back()} style={{ background: "none", border: "none", padding: 0, color: "#7C3AED", fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <ArrowLeftSVG /> Back
+          </button>
         </div>
 
         <div style={{ maxWidth: 540, margin: "0 auto", padding: "32px 20px 60px" }}>
