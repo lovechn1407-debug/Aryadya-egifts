@@ -30,11 +30,32 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${siteUrl}/?payment=error`);
   }
 
+  const shouldFinalize = searchParams.get("finalize") === "true";
+
   // ── If already paid (webhook processed first), just redirect ──────────────
   if (order.status === "finalized") {
     return NextResponse.redirect(`${siteUrl}/view/${orderId}`);
   }
   if (order.status === "paid" || order.status === "editing") {
+    // Webhook fired first — if this was a post-pay finalize flow, complete it now
+    if (shouldFinalize) {
+      try {
+        await updateOrderStatusDB(orderId, "finalized", { finalizedAt: new Date().toISOString() });
+        const settings = await getSettingsDB();
+        if (settings.emailServiceFinalize) {
+          const { sendFinalizationEmail } = await import("@/lib/email");
+          sendFinalizationEmail({
+            buyer_name: order.buyerName,
+            email: order.buyerEmail,
+            order_id: orderId,
+            product_name: order.productName,
+            product_emoji: "🎁",
+            view_link: `${siteUrl}/view/${orderId}`,
+          });
+        }
+      } catch (_) { /* non-fatal */ }
+      return NextResponse.redirect(`${siteUrl}/view/${orderId}`);
+    }
     return NextResponse.redirect(`${siteUrl}/edit/${orderId}`);
   }
 
@@ -65,7 +86,6 @@ export async function GET(req: NextRequest) {
     );
 
     if (successPayment) {
-      const shouldFinalize = searchParams.get("finalize") === "true";
       const newStatus = shouldFinalize ? "finalized" : "paid";
       const extraPayload = shouldFinalize ? { finalizedAt: new Date().toISOString() } : {};
 
