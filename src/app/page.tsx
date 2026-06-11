@@ -1971,6 +1971,9 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
                 <ProductCard product={p} accent={theme.accent} onCardClick={p => onCardClick(p, theme.accent)} />
               </div>
             ))}
+            <div style={{ width: "100%" }}>
+              <AdsterraNativeAd adKey="7e37617b7730bee23bde81a412cda931" />
+            </div>
           </div>
         ) : (
           <div
@@ -2000,6 +2003,15 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
                 <ProductCard product={p} accent={theme.accent} onCardClick={p => onCardClick(p, theme.accent)} />
               </div>
             ))}
+            <div
+              style={{
+                flexShrink: 0,
+                width: "clamp(160px, calc(50vw - 26px), 260px)",
+                scrollSnapAlign: "start",
+              }}
+            >
+              <AdsterraNativeAd adKey="7e37617b7730bee23bde81a412cda931" />
+            </div>
           </div>
         )}
 
@@ -2044,6 +2056,9 @@ function AllGifts({ products, onCardClick }: { products: Product[]; onCardClick:
           {products.map(p => (
             <ProductCard key={p.id} product={p} onCardClick={onCardClick} />
           ))}
+          <div style={{ width: "100%" }}>
+            <AdsterraNativeAd adKey="7e37617b7730bee23bde81a412cda931" />
+          </div>
         </div>
       </div>
     </section>
