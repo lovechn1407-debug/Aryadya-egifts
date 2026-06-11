@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import GoogleBannerAd from "./GoogleBannerAd";
+import AdsterraBannerAd from "./AdsterraBannerAd";
 
 interface AdSequenceModalProps {
   requiredAds: number;
@@ -75,14 +75,9 @@ export default function AdSequenceModal({ requiredAds, onComplete, onCancel }: A
               position: "relative",
               overflow: "hidden"
             }}>
-              {/* Google AdSense Rectangle Ad */}
-              {/* Replace client and slot with your actual ad details */}
-              <GoogleBannerAd 
-                client="ca-pub-3771794594420823" 
-                slot="1234567890" 
-                format="auto" 
-                responsive={true} 
-              />
+              {/* Adsterra Banner Ad */}
+              {/* Replace adKey with your actual Adsterra banner key */}
+              <AdsterraBannerAd adKey="YOUR_ADSTERRA_KEY" width={300} height={250} />
               
               <div style={{
                 position: "absolute", top: 12, right: 12,

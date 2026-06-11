@@ -36,9 +36,6 @@ export async function generateMetadata(): Promise<Metadata> {
       index: true,
       follow: true,
     },
-    other: {
-      "google-adsense-account": "ca-pub-3771794594420823",
-    },
   };
 }
 
@@ -50,13 +47,6 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google AdSense Configuration. Replace client ID with your actual publisher ID. */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3771794594420823"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
         {/* ✅ Real URL favicon — Google crawls this one (must be first) */}
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="shortcut icon" href="/favicon.png" />

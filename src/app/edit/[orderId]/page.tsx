@@ -18,7 +18,7 @@ import AdSequenceModal from "@/components/AdSequenceModal";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
 import { isAdminLoggedIn } from "@/lib/data";
-import GoogleBannerAd from "@/components/GoogleBannerAd";
+import AdsterraBannerAd from "@/components/AdsterraBannerAd";
 
 
 // Slide map for the top tab bar
@@ -1038,12 +1038,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
         {renderEditorTemplate(product.id, customizations, handleFieldChange, activeSlide)}
         
         <div style={{ padding: "40px 20px" }}>
-          <GoogleBannerAd 
-            client="ca-pub-3771794594420823" 
-            slot="1234567890" 
-            format="auto" 
-            responsive={true} 
-          />
+          <AdsterraBannerAd adKey="YOUR_ADSTERRA_KEY" width={300} height={250} />
         </div>
       </div>
 
