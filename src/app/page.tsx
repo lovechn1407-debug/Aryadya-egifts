@@ -804,7 +804,9 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 7 }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             {product.cuttedPrice && <span style={{ fontSize: 11, color: "#9CA3AF", textDecoration: "line-through", lineHeight: 1 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
-            <span style={{ fontSize: 17, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", lineHeight: 1.1 }}>₹{Math.floor(product.price / 100)}</span>
+            <span style={{ fontSize: 17, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", lineHeight: 1.1 }}>
+              {product.price === 0 ? "FREE" : `₹${Math.floor(product.price / 100)}`}
+            </span>
           </div>
           <button style={{ background: `linear-gradient(135deg,${color},${color}CC)`, color: "#fff", border: "none", borderRadius: 7, padding: "6px 13px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 10px ${color}30` }}>
             View →
@@ -1111,7 +1113,7 @@ function ProductModal({ product, accent, paymentMode, onClose, onNavigate }: { p
         {/* Quick Actions (Price & Buttons) */}
         <div style={{ padding: "0 24px 16px", display: "flex", flexDirection: "column", gap: 12, borderBottom: "1px solid #F1F5F9" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, justifyContent: "flex-start", marginBottom: 4 }}>
-            <span style={{ fontSize: 32, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif" }}>₹{Math.floor(product.price / 100)}</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: "#1E293B", fontFamily: "'Nunito',sans-serif" }}>{product.price === 0 ? "FREE" : '₹' + Math.floor(product.price / 100)}</span>
             {product.cuttedPrice && <span style={{ fontSize: 16, color: "#94A3B8", textDecoration: "line-through", fontWeight: 700 }}>₹{Math.floor(product.cuttedPrice / 100)}</span>}
           </div>
           

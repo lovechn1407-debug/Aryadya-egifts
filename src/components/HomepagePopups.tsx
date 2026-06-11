@@ -188,9 +188,9 @@ export default function HomepagePopups({ popups }: Props) {
                         <div style={{ width: "100%", height: 120, background: "#E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 }}>
                           {p.thumbnail?.length < 5 ? p.thumbnail : "🎁"}
                         </div>
-                        <div style={{ padding: 12 }}>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>{p.name}</div>
-                          <div style={{ fontSize: 13, color: "#10B981", fontWeight: 800 }}>₹{p.price / 100}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", justifyContent: "center", padding: 12 }}>
+                          {p.cuttedPrice && <div style={{ fontSize: 10, color: "#94A3B8", textDecoration: "line-through" }}>₹{p.cuttedPrice / 100}</div>}
+                          <div style={{ fontSize: 13, color: "#10B981", fontWeight: 800 }}>{p.price === 0 ? "FREE" : `₹${p.price / 100}`}</div>
                         </div>
                       </div>
                     </Link>

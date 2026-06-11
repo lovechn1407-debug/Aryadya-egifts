@@ -478,7 +478,7 @@ export default function AdminProductsPage() {
                     <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#F1F5F9", color: "#334155", border: "none", cursor: "pointer" }} onClick={() => setEditingPrice(null)}>✕</button>
                   </div>
                 ) : (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <p style={{ fontSize: 24, fontWeight: 700, color: "#0F172A", margin: 0 }}>₹{Math.floor(product.price / 100)}</p>
                     {product.cuttedPrice && (
                       <p style={{ fontSize: 15, fontWeight: 500, color: "#94A3B8", textDecoration: "line-through", margin: 0 }}>
@@ -495,6 +495,20 @@ export default function AdminProductsPage() {
                     >
                       ✏️
                     </button>
+                    {product.price === 0 && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#FEF3C7", padding: "4px 8px", borderRadius: 6, marginLeft: 8 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "#D97706" }}>Required Ads:</span>
+                        <input 
+                          type="number" 
+                          style={{...inputStyle, width: 50, padding: "4px", fontSize: 12, height: 24, minHeight: 24}}
+                          value={product.requiredAdsCount || 1}
+                          onChange={(e) => {
+                            updateProductOverrideDB(product.id, { requiredAdsCount: Math.max(1, Number(e.target.value)) }).then(reload);
+                          }}
+                          min={1}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

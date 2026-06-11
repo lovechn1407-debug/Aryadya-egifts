@@ -128,6 +128,8 @@ export interface ProductOverride {
   previewMode?: "original" | "mp4";
   previewVideoUrl?: string;
   previewVideoVersions?: Array<{ id: string; name: string; url: string; size?: number; createdAt: string }>;
+  checkoutMethod?: "global" | "cash" | "ads";
+  requiredAdsCount?: number;
 }
 
 export async function getProductsDB(): Promise<Product[]> {

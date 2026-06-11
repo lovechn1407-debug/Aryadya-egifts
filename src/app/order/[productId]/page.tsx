@@ -82,15 +82,27 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
   // Fetch updated product price/details and settings from Firebase
   useEffect(() => {
     import("@/lib/db").then(({ getProductDB, getSettingsDB }) => {
-      getProductDB(productId).then(p => {
+      Promise.all([getProductDB(productId), getSettingsDB()]).then(([p, s]) => {
         if (p) {
           setProduct(p);
         }
-      });
-      getSettingsDB().then(s => {
         if (s?.paymentMode) setPaymentMode(s.paymentMode);
-        if (s?.checkoutMethod) setCheckoutMethod(s.checkoutMethod);
-        if (s?.requiredAdsCount) setRequiredAdsCount(s.requiredAdsCount);
+        
+        let cMethod = s?.checkoutMethod || "cash";
+        let cAds = s?.requiredAdsCount || 1;
+
+        if (p?.price === 0) {
+          cMethod = "ads";
+          if (p.requiredAdsCount) cAds = p.requiredAdsCount;
+        } else if (p?.checkoutMethod && p.checkoutMethod !== "global") {
+          cMethod = p.checkoutMethod;
+          if (p.checkoutMethod === "ads" && p.requiredAdsCount) {
+            cAds = p.requiredAdsCount;
+          }
+        }
+
+        setCheckoutMethod(cMethod as "cash" | "ads");
+        setRequiredAdsCount(cAds);
       });
     });
   }, [productId]);

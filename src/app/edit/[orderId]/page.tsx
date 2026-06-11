@@ -290,6 +290,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
     });
     (async () => {
       setLoading(true);
+      let finalProduct: Product | null = null;
       try {
         if (isPreviewEditor) {
           if (!isAdminLoggedIn()) {
@@ -299,6 +300,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
           const targetId = orderId.replace("preview_", "");
           const p = await getProductDB(targetId);
           if (!p) { setLoading(false); return; }
+          finalProduct = p;
           setProduct(p);
           
           const cust = (p as any).previewData || {};
@@ -316,6 +318,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
           if (o.status === "finalized") setLocked(true);
           const p = await getProductDB(o.productId);
           if (!p) { setLoading(false); return; }
+          finalProduct = p;
           setProduct(p);
           const defaults: Record<string, string> = { ...o.customizations };
           const cust = o.customizations || {};
@@ -333,8 +336,22 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       }
       const { getSettingsDB } = await import("@/lib/db");
       const s = await getSettingsDB();
-      if (s?.checkoutMethod) setCheckoutMethod(s.checkoutMethod);
-      if (s?.requiredAdsCount) setRequiredAdsCount(s.requiredAdsCount);
+      
+      let cMethod = s?.checkoutMethod || "cash";
+      let cAds = s?.requiredAdsCount || 1;
+
+      if (finalProduct?.price === 0) {
+        cMethod = "ads";
+        if (finalProduct.requiredAdsCount) cAds = finalProduct.requiredAdsCount;
+      } else if (finalProduct?.checkoutMethod && finalProduct.checkoutMethod !== "global") {
+        cMethod = finalProduct.checkoutMethod;
+        if (finalProduct.checkoutMethod === "ads" && finalProduct.requiredAdsCount) {
+          cAds = finalProduct.requiredAdsCount;
+        }
+      }
+
+      setCheckoutMethod(cMethod as "cash" | "ads");
+      setRequiredAdsCount(cAds);
     })();
   }, [orderId, isPreviewEditor]);
 
