@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdsterraBannerAd from "./AdsterraBannerAd";
 
 interface AdSequenceModalProps {
   requiredAds: number;
@@ -13,18 +12,25 @@ export default function AdSequenceModal({ requiredAds, onComplete, onCancel }: A
   const [currentAd, setCurrentAd] = useState(1);
   const [timeLeft, setTimeLeft] = useState(15); // 15 seconds per ad
   const [isFinished, setIsFinished] = useState(false);
+  const [hasClickedAd, setHasClickedAd] = useState(false);
 
   useEffect(() => {
-    if (timeLeft > 0 && !isFinished) {
+    if (hasClickedAd && timeLeft > 0 && !isFinished) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     }
-  }, [timeLeft, isFinished]);
+  }, [hasClickedAd, timeLeft, isFinished]);
+
+  const handleAdClick = () => {
+    window.open("https://www.effectivecpmnetwork.com/qwwhwdqkx?key=4580e62c4f36e8e176f4b34dc57cb5bd", "_blank");
+    setHasClickedAd(true);
+  };
 
   const handleNext = () => {
     if (currentAd < requiredAds) {
       setCurrentAd(currentAd + 1);
       setTimeLeft(15); // Reset timer for next ad
+      setHasClickedAd(false); // Require click for next ad
     } else {
       setIsFinished(true);
       onComplete();
@@ -75,21 +81,51 @@ export default function AdSequenceModal({ requiredAds, onComplete, onCancel }: A
               position: "relative",
               overflow: "hidden"
             }}>
-              {/* Adsterra In-Page Banner Ad */}
-              {/* Replace YOUR_ADSTERRA_KEY with your actual Adsterra banner key */}
-              <AdsterraBannerAd adKey="2d25c9abf4054b74051fa1fafb84c223" width={300} height={250} />
-              
-              <div style={{
-                position: "absolute", top: 12, right: 12,
-                width: 40, height: 40, borderRadius: "50%",
-                background: "rgba(0,0,0,0.6)",
-                backdropFilter: "blur(4px)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#FFF", fontSize: 16, fontWeight: 800,
-                border: "1px solid rgba(255,255,255,0.2)"
-              }}>
-                {timeLeft}
-              </div>
+              {!hasClickedAd ? (
+                <>
+                  <div style={{
+                    width: 60, height: 60, borderRadius: "50%",
+                    background: "rgba(255,255,255,0.05)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "rgba(255,255,255,0.4)", marginBottom: 16
+                  }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </div>
+                  <h3 style={{ color: "#FFF", fontSize: 18, marginBottom: 12 }}>Unlock Required</h3>
+                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, marginBottom: 24, maxWidth: 300 }}>
+                    Click the button below to view our sponsor's page. The countdown will begin immediately after.
+                  </p>
+                  <button
+                    onClick={handleAdClick}
+                    style={{
+                      background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                      color: "#FFF", border: "none", padding: "14px 28px", borderRadius: 12,
+                      fontWeight: 700, fontSize: 15, cursor: "pointer", transition: "0.2s",
+                      boxShadow: "0 4px 12px rgba(37,99,235,0.3)"
+                    }}
+                  >
+                    View Sponsor to Unlock
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{
+                    width: 80, height: 80, borderRadius: "50%",
+                    background: "linear-gradient(135deg, #7C3AED, #4F46E5)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#FFF", fontSize: 32, fontWeight: 800, marginBottom: 16
+                  }}>
+                    {timeLeft}
+                  </div>
+                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, maxWidth: 250 }}>
+                    Please wait for the timer to finish before proceeding.
+                  </p>
+                </>
+              )}
             </div>
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
