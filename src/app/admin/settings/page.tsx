@@ -172,6 +172,31 @@ export default function SettingsPage() {
           </label>
         </div>
 
+        {/* Payment Mode */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Checkout Mode</h2>
+            <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>
+              <strong>Pre-Pay:</strong> Customers pay before editing.<br/>
+              <strong>Post-Pay:</strong> Customers edit first, then pay to finalize.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 12, background: "#F1F5F9", padding: 4, borderRadius: 8 }}>
+            <button 
+              onClick={() => setSettings(s => ({ ...s, paymentMode: "pre-pay" }))} 
+              style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.paymentMode === "pre-pay" ? "#fff" : "transparent", color: settings.paymentMode === "pre-pay" ? "#1E293B" : "#64748B", boxShadow: settings.paymentMode === "pre-pay" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
+            >
+              Pre-Pay
+            </button>
+            <button 
+              onClick={() => setSettings(s => ({ ...s, paymentMode: "post-pay" }))} 
+              style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.paymentMode === "post-pay" ? "#fff" : "transparent", color: settings.paymentMode === "post-pay" ? "#1E293B" : "#64748B", boxShadow: settings.paymentMode === "post-pay" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
+            >
+              Post-Pay
+            </button>
+          </div>
+        </div>
+
         {/* Templates */}
         <div style={{ marginBottom: 24 }}>
           <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Quick Templates</label>

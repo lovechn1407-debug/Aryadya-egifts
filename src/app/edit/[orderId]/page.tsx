@@ -1,8 +1,8 @@
 "use client";
 import { use, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { getProductDB, getOrderDB, updateOrderCustomizationsDB, finalizeOrderDB, updateProductOverrideDB } from "@/lib/db";
-import type { Order, Product } from "@/lib/data";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getProductDB, getOrderDB, updateOrderCustomizationsDB, finalizeOrderDB, updateProductOverrideDB, getCouponDB } from "@/lib/db";
+import type { Order, Product, Coupon } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
 import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
@@ -264,6 +264,15 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
   const [finalizing, setFinalizing] = useState(false);
   const [showFinalPanel, setShowFinalPanel] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Post-pay state
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [couponMsg, setCouponMsg] = useState({ type: "", text: "" });
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
   
   // Tutorial State
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -317,6 +326,13 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       }
     })();
   }, [orderId, isPreviewEditor]);
+
+  // Handle post-pay success return
+  useEffect(() => {
+    if (searchParams.get("success") === "1" && locked) {
+      setShowQR(true);
+    }
+  }, [searchParams, locked]);
 
   useEffect(() => {
     if (!loading && order && !locked) {
@@ -388,6 +404,117 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       setLocked(true);
       setShowQR(true);
     }, 1200);
+  };
+
+  const applyCoupon = async () => {
+    if (!couponInput.trim() || !product || !order) return;
+    setCouponLoading(true);
+    setCouponMsg({ type: "", text: "" });
+    try {
+      const c = await getCouponDB(couponInput);
+      if (!c) { setCouponMsg({ type: "error", text: "Invalid coupon code." }); return; }
+      if (!c.active) { setCouponMsg({ type: "error", text: "Coupon is no longer active." }); return; }
+      if (c.totalStocks <= c.usedCount) { setCouponMsg({ type: "error", text: "Coupon usage limit reached." }); return; }
+      if (c.minimumOrderValue > product.price) {
+        setCouponMsg({ type: "error", text: `Minimum order value for this coupon is ₹${Math.floor(c.minimumOrderValue/100)}` });
+        return;
+      }
+      const now = new Date();
+      if (c.validFrom && now < new Date(c.validFrom)) { setCouponMsg({ type: "error", text: "Coupon is not valid yet." }); return; }
+      if (c.validTo && now > new Date(c.validTo)) { setCouponMsg({ type: "error", text: "Coupon has expired." }); return; }
+      
+      const { getOrdersByBuyerDB } = await import("@/lib/db");
+      const pastOrders = await getOrdersByBuyerDB(order.buyerPhone, order.buyerEmail);
+      const usedPast = pastOrders.filter(o => o.couponCode === c.id).length;
+      if (usedPast >= c.perPersonLimit) {
+        setCouponMsg({ type: "error", text: "You have reached the usage limit for this coupon." });
+        return;
+      }
+
+      setAppliedCoupon(c);
+      setCouponMsg({ type: "success", text: "Coupon applied successfully!" });
+    } catch {
+      setCouponMsg({ type: "error", text: "Error verifying coupon." });
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponMsg({ type: "", text: "" });
+  };
+
+  const handlePayment = async () => {
+    if (!order || !product) return;
+    setPayLoading(true);
+    setPaymentError("");
+
+    // Save customisations first
+    await updateOrderCustomizationsDB(orderId, customizations);
+
+    try {
+      const res = await fetch("/api/cashfree/pay-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: order.id,
+          couponCode: appliedCoupon?.id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        setPaymentError(
+          data.retryable
+            ? "Payment gateway is temporarily slow. Please try again."
+            : (data.message || "Something went wrong. Please try again.")
+        );
+        setPayLoading(false);
+        return;
+      }
+
+      if (data.free) {
+        // Automatically finalized by our pay-order logic (if free)
+        // Wait, pay-order doesn't finalize if free! Let me check...
+        // If it's free, we should finalize it here.
+        await finalizeOrderDB(order.id);
+        const { getSettingsDB } = await import("@/lib/db");
+        const settings = await getSettingsDB();
+        if (settings.emailServiceFinalize) {
+          const { sendFinalizationEmail } = await import("@/lib/email");
+          sendFinalizationEmail({
+            buyer_name: order.buyerName,
+            email: order.buyerEmail,
+            order_id: orderId,
+            product_name: product.name,
+            product_emoji: product.thumbnail || "🎁",
+            view_link: `${window.location.origin}/view/${orderId}`,
+          });
+        }
+        setShowFinalPanel(false);
+        setLocked(true);
+        setShowQR(true);
+        return;
+      }
+
+      // Open Cashfree
+      const { load } = await import("@cashfreepayments/cashfree-js");
+      const cashfree = await load({
+        mode: (data.cashfree_mode as "sandbox" | "production") || "sandbox",
+      });
+
+      await cashfree.checkout({
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_self",
+      });
+    } catch (err) {
+      console.error("[handlePayment]", err);
+      setPaymentError("An unexpected error occurred. Please try again.");
+      setPayLoading(false);
+    }
   };
 
   const renderTutorial = () => {
@@ -660,7 +787,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                   className="btn-primary"
                   style={{ padding: "5px 12px", fontSize: 12, background: showFinalPanel ? "#00D9A0" : undefined }}
                 >
-                  {showFinalPanel ? "✕" : "Finalise"}
+                  {showFinalPanel ? "✕" : (order?.status === "pending" ? "Pay & Finalise" : "Finalise")}
                 </button>
               </>
             )}
@@ -708,37 +835,118 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
         )}
       </div>
 
-      {/* ── FINALIZE PANEL (slides down from toolbar) ── */}
+      {/* ── FINALIZE / PAYMENT PANEL (slides down from toolbar) ── */}
       {showFinalPanel && !locked && (
         <div style={{
           position: "fixed", top: 90, right: 16, zIndex: 490, width: 340,
           background: "rgba(17,17,24,0.98)", border: "1px solid rgba(255,45,120,0.25)",
           borderRadius: 20, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
         }} className="fade-in-up">
-          <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>🎯 Finalise Your Page</h3>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginBottom: 16 }}>
-            Once you finalise, your page is <strong style={{ color: "#fff" }}>locked permanently</strong> and a unique shareable link is generated.{" "}
-            <strong style={{ color: "#FF6B6B" }}>You cannot edit after this.</strong>
-          </p>
-          <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", marginBottom: 18 }}>
-            <input
-              type="checkbox"
-              checked={agreed}
-              onChange={e => setAgreed(e.target.checked)}
-              style={{ marginTop: 3, width: 17, height: 17, accentColor: "#FF2D78", flexShrink: 0 }}
-            />
-            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
-              I've reviewed all slides and I'm happy with my edits. This action is <strong style={{ color: "#fff" }}>final</strong>.
-            </span>
-          </label>
-          <button
-            className="btn-primary pulse-glow"
-            style={{ width: "100%", justifyContent: "center", opacity: agreed ? 1 : 0.4, cursor: agreed ? "pointer" : "not-allowed" }}
-            disabled={!agreed || finalizing}
-            onClick={handleFinalize}
-          >
-            {finalizing ? "Finalising…" : "✅ Lock & Get My Link 🔗"}
-          </button>
+          {order?.status === "pending" ? (
+            <>
+              <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: "#fff" }}>💳 Pay & Finalise</h3>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginBottom: 16 }}>
+                You are about to complete your order. Once paid, the page will be locked and your shareable link will be generated.
+              </p>
+
+              {/* Price Details */}
+              <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>Subtotal</span>
+                  <span style={{ color: "#fff", fontWeight: 600, fontSize: 13 }}>₹{Math.floor(product!.price / 100)}</span>
+                </div>
+                {appliedCoupon && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#10B981" }}>
+                    <span style={{ fontSize: 13 }}>Discount ({appliedCoupon.id})</span>
+                    <span style={{ fontWeight: 600, fontSize: 13 }}>-₹{
+                      appliedCoupon.discountType === "percentage" 
+                        ? Math.floor(product!.price * (appliedCoupon.discountAmount / 100) / 100)
+                        : appliedCoupon.discountAmount
+                    }</span>
+                  </div>
+                )}
+                <div style={{ borderTop: "1px dashed rgba(255,255,255,0.1)", margin: "8px 0" }}></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Total</span>
+                  <span style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>₹{
+                    Math.max(0, Math.floor(product!.price / 100) - (appliedCoupon 
+                      ? (appliedCoupon.discountType === "percentage" ? Math.floor(product!.price * (appliedCoupon.discountAmount / 100) / 100) : appliedCoupon.discountAmount) 
+                      : 0))
+                  }</span>
+                </div>
+              </div>
+
+              {/* Coupon Code */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="Coupon code"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    disabled={!!appliedCoupon || couponLoading}
+                    style={{ flex: 1, padding: "10px 14px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", outline: "none", fontSize: 13 }}
+                  />
+                  {!appliedCoupon ? (
+                    <button onClick={applyCoupon} disabled={!couponInput || couponLoading} style={{ padding: "0 16px", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 600, cursor: couponInput ? "pointer" : "not-allowed", opacity: couponInput ? 1 : 0.5 }}>
+                      {couponLoading ? "..." : "Apply"}
+                    </button>
+                  ) : (
+                    <button onClick={removeCoupon} style={{ padding: "0 16px", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, color: "#EF4444", fontWeight: 600, cursor: "pointer" }}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+                {couponMsg.text && (
+                  <p style={{ color: couponMsg.type === "error" ? "#EF4444" : "#10B981", fontSize: 12, marginTop: 6, marginBottom: 0 }}>
+                    {couponMsg.text}
+                  </p>
+                )}
+              </div>
+
+              {paymentError && (
+                <div style={{ background: "rgba(239, 68, 68, 0.1)", color: "#EF4444", padding: 10, borderRadius: 8, fontSize: 12, marginBottom: 16, border: "1px solid rgba(239,68,68,0.2)" }}>
+                  {paymentError}
+                </div>
+              )}
+
+              <button
+                className="btn-primary pulse-glow"
+                style={{ width: "100%", justifyContent: "center", cursor: payLoading ? "not-allowed" : "pointer" }}
+                disabled={payLoading}
+                onClick={handlePayment}
+              >
+                {payLoading ? "Processing…" : "Pay & Lock Design 🔒"}
+              </button>
+            </>
+          ) : (
+            <>
+              <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>🎯 Finalise Your Page</h3>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginBottom: 16 }}>
+                Once you finalise, your page is <strong style={{ color: "#fff" }}>locked permanently</strong> and a unique shareable link is generated.{" "}
+                <strong style={{ color: "#FF6B6B" }}>You cannot edit after this.</strong>
+              </p>
+              <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", marginBottom: 18 }}>
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={e => setAgreed(e.target.checked)}
+                  style={{ marginTop: 3, width: 17, height: 17, accentColor: "#FF2D78", flexShrink: 0 }}
+                />
+                <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
+                  I've reviewed all slides and I'm happy with my edits. This action is <strong style={{ color: "#fff" }}>final</strong>.
+                </span>
+              </label>
+              <button
+                className="btn-primary pulse-glow"
+                style={{ width: "100%", justifyContent: "center", opacity: agreed ? 1 : 0.4, cursor: agreed ? "pointer" : "not-allowed" }}
+                disabled={!agreed || finalizing}
+                onClick={handleFinalize}
+              >
+                {finalizing ? "Finalising…" : "✅ Lock & Get My Link 🔗"}
+              </button>
+            </>
+          )}
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 12, textAlign: "center" }}>
             Order: {orderId.slice(0, 20)}…
           </p>

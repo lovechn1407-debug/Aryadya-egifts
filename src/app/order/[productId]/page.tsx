@@ -111,7 +111,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = "Full name is required";
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = "Please provide a valid email address";
-    if (!form.phone.trim() || form.phone.replace(/\D/g,"").length < 10) e.phone = "Valid 10-digit phone number required";
+    if (!form.phone.trim() || form.phone.replace(/\D/g, "").length < 10) e.phone = "Valid 10-digit phone number required";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -128,13 +128,13 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
       if (!c.active) { setCouponMsg({ type: "error", text: "Coupon is no longer active." }); return; }
       if (c.totalStocks <= c.usedCount) { setCouponMsg({ type: "error", text: "Coupon usage limit reached." }); return; }
       if (c.minimumOrderValue > product.price) {
-        setCouponMsg({ type: "error", text: `Minimum order value for this coupon is ₹${Math.floor(c.minimumOrderValue/100)}` });
+        setCouponMsg({ type: "error", text: `Minimum order value for this coupon is ₹${Math.floor(c.minimumOrderValue / 100)}` });
         return;
       }
       const now = new Date();
       if (c.validFrom && now < new Date(c.validFrom)) { setCouponMsg({ type: "error", text: "Coupon is not valid yet." }); return; }
       if (c.validTo && now > new Date(c.validTo)) { setCouponMsg({ type: "error", text: "Coupon has expired." }); return; }
-      
+
       if (form.email && form.phone) {
         const pastOrders = await getOrdersByBuyerDB(form.phone, form.email);
         const usedPast = pastOrders.filter(o => o.couponCode === c.id).length;
@@ -252,30 +252,30 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
 
         <div style={{ maxWidth: 540, margin: "0 auto", padding: "32px 20px 60px" }}>
           {/* Product card */}
-          <div style={{ 
-            background: "#fff", borderRadius: 24, padding: "24px", marginBottom: 24, 
-            display: "flex", alignItems: "center", gap: 16, 
-            boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", border: "1px solid #F3E8FF" 
+          <div style={{
+            background: "#fff", borderRadius: 24, padding: "24px", marginBottom: 24,
+            display: "flex", alignItems: "center", gap: 16,
+            boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", border: "1px solid #F3E8FF"
           }}>
             <div style={{ width: 52, height: 52, borderRadius: 14, background: "linear-gradient(135deg, #F3E8FF, #FCE7F3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <GiftCardSVG size={24} color="#7C3AED" />
             </div>
             <div style={{ flex: 1 }}>
               <h2 style={{ fontWeight: 850, fontSize: 16, color: "#1F2937", margin: 0, fontFamily: "'Nunito', sans-serif" }}>
-                {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu,"").trim()}
+                {product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}
               </h2>
               <p style={{ color: "#8A94A6", fontSize: 12, marginTop: 4, margin: 0 }}>{product.tagline}</p>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: "#7C3AED", fontFamily: "'Nunito', sans-serif" }}>₹{Math.floor(product.price/100)}</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: "#7C3AED", fontFamily: "'Nunito', sans-serif" }}>₹{Math.floor(product.price / 100)}</div>
               <div style={{ fontSize: 10, color: "#22C55E", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 2 }}>One-time</div>
             </div>
           </div>
 
           {/* Payment failed banner */}
           {paymentError && (
-            <div style={{ 
-              background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 14, 
+            <div style={{
+              background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 14,
               padding: "14px 16px", marginBottom: 20, animation: "fadeIn 0.3s ease",
               display: "flex", alignItems: "center", gap: 10
             }}>
@@ -320,8 +320,8 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
                 ))}
               </div>
 
-              <button 
-                onClick={handleDetailsSubmit} 
+              <button
+                onClick={handleDetailsSubmit}
                 style={{
                   width: "100%", marginTop: 28, padding: "15px", borderRadius: 14, border: "none",
                   background: "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff",
@@ -333,6 +333,13 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
               </button>
             </div>
           )}
+
+
+
+
+
+
+
 
           {/* Step: Payment */}
           {step === "payment" && (
@@ -347,22 +354,22 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
                 <p style={{ fontSize: 11, fontWeight: 800, color: "#475569", marginBottom: 10, letterSpacing: 0.5 }}>HAVE A COUPON CODE?</p>
                 {!appliedCoupon ? (
                   <div style={{ display: "flex", gap: 8 }}>
-                    <input 
-                      type="text" 
-                      value={couponInput} 
+                    <input
+                      type="text"
+                      value={couponInput}
                       onChange={e => setCouponInput(e.target.value.toUpperCase())}
                       placeholder="ENTER CODE"
                       style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1.5px solid #CBD5E1", outline: "none", fontSize: 13, fontWeight: 700, textTransform: "uppercase" }}
                     />
-                    <button 
+                    <button
                       onClick={applyCoupon}
                       disabled={couponLoading || !couponInput.trim()}
-                      style={{ 
-                        padding: "0 16px", 
-                        background: couponInput.trim() ? "#7C3AED" : "#E2E8F0", 
-                        color: "#fff", border: "none", borderRadius: 10, 
+                      style={{
+                        padding: "0 16px",
+                        background: couponInput.trim() ? "#7C3AED" : "#E2E8F0",
+                        color: "#fff", border: "none", borderRadius: 10,
                         fontWeight: 800, fontSize: 13,
-                        cursor: couponInput.trim() ? "pointer" : "default" 
+                        cursor: couponInput.trim() ? "pointer" : "default"
                       }}
                     >
                       {couponLoading ? "..." : "Apply"}
@@ -427,14 +434,14 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
 
               <div style={{ display: "flex", gap: 12 }}>
                 <button onClick={() => setStep("details")} style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1.5px solid #E2E8F0", background: "#fff", color: "#475569", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>← Back</button>
-                <button 
+                <button
                   onClick={handlePayment}
                   disabled={payLoading}
-                  style={{ 
-                    flex: 2, padding: "14px", borderRadius: 14, border: "none", 
-                    background: payLoading ? "#C4B5FD" : "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff", 
-                    fontWeight: 900, fontSize: 14, cursor: payLoading ? "not-allowed" : "pointer", 
-                    fontFamily: "'Nunito', sans-serif", 
+                  style={{
+                    flex: 2, padding: "14px", borderRadius: 14, border: "none",
+                    background: payLoading ? "#C4B5FD" : "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff",
+                    fontWeight: 900, fontSize: 14, cursor: payLoading ? "not-allowed" : "pointer",
+                    fontFamily: "'Nunito', sans-serif",
                     boxShadow: payLoading ? "none" : "0 8px 24px rgba(124,58,237,0.25)",
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                     transition: "all 0.2s"

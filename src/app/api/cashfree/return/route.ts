@@ -66,8 +66,12 @@ export async function GET(req: NextRequest) {
     );
 
     if (successPayment) {
-      // Mark as paid (idempotent)
-      await updateOrderStatusDB(orderId, "paid");
+      const shouldFinalize = searchParams.get("finalize") === "true";
+      const newStatus = shouldFinalize ? "finalized" : "paid";
+      const extraPayload = shouldFinalize ? { finalizedAt: new Date().toISOString() } : {};
+
+      // Mark as paid or finalized
+      await updateOrderStatusDB(orderId, newStatus, extraPayload);
 
       // Increment coupon usage
       if (order.couponCode) {
@@ -80,7 +84,20 @@ export async function GET(req: NextRequest) {
       // Send confirmation email (if webhook hasn't already done it)
       try {
         const settings = await getSettingsDB();
-        if (settings.emailServiceBuy) {
+        
+        if (shouldFinalize && settings.emailServiceFinalize) {
+          // Send finalize email if we just finalized it
+          const { sendFinalizationEmail } = await import("@/lib/email");
+          const editLink = `${siteUrl}/view/${orderId}`;
+          sendFinalizationEmail({
+            buyer_name: order.buyerName,
+            email: order.buyerEmail,
+            order_id: orderId,
+            product_name: order.productName,
+            product_emoji: "🎁",
+            view_link: editLink,
+          });
+        } else if (settings.emailServiceBuy) {
           const editLink = `${siteUrl}/edit/${orderId}`;
           await sendOrderConfirmationEmailServer({
             buyer_name: order.buyerName,
@@ -101,7 +118,7 @@ export async function GET(req: NextRequest) {
         // Non-fatal
       }
 
-      return NextResponse.redirect(`${siteUrl}/edit/${orderId}`);
+      return NextResponse.redirect(`${siteUrl}/edit/${orderId}${shouldFinalize ? "?success=1" : ""}`);
     } else {
       // Payment failed or pending
       return NextResponse.redirect(
