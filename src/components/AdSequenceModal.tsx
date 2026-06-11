@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getSettingsDB, Settings } from "@/lib/db";
-import Script from "next/script";
+import AdsterraBannerAd from "@/components/AdsterraBannerAd";
 
 interface AdSequenceModalProps {
   requiredAds: number;
@@ -104,26 +104,7 @@ export default function AdSequenceModal({ requiredAds, onComplete, onCancel }: A
                   <div style={{ position: "absolute", top: 12, right: 12, width: 40, height: 40, borderRadius: "50%", background: "rgba(0,0,0,0.5)", color: "#FFF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, zIndex: 10 }}>
                     {timeLeft}
                   </div>
-                  <div id="container-2d25c9abf4054b74051fa1fafb84c223"></div>
-                  <Script 
-                    id="adsterra-banner-script"
-                    strategy="afterInteractive"
-                    dangerouslySetInnerHTML={{
-                      __html: `
-                        atOptions = {
-                          'key' : '2d25c9abf4054b74051fa1fafb84c223',
-                          'format' : 'iframe',
-                          'height' : 250,
-                          'width' : 300,
-                          'params' : {}
-                        };
-                      `
-                    }}
-                  />
-                  <Script 
-                    strategy="lazyOnload" 
-                    src="https://www.highperformanceformat.com/2d25c9abf4054b74051fa1fafb84c223/invoke.js" 
-                  />
+                  <AdsterraBannerAd adKey="2d25c9abf4054b74051fa1fafb84c223" width={300} height={250} />
                 </>
               ) : (
                 !hasClickedAd ? (
