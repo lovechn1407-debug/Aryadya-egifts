@@ -18,7 +18,6 @@ import AdSequenceModal from "@/components/AdSequenceModal";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
 import { isAdminLoggedIn } from "@/lib/data";
-import AdsterraBannerAd from "@/components/AdsterraBannerAd";
 
 
 // Slide map for the top tab bar
@@ -1036,10 +1035,6 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       {/* ── TEMPLATE (full page, offset top for toolbar) ── */}
       <div style={{ paddingTop: slides.length > 0 ? 100 : 48, pointerEvents: locked ? "none" : "auto" }}>
         {renderEditorTemplate(product.id, customizations, handleFieldChange, activeSlide)}
-        
-        <div style={{ padding: "40px 20px" }}>
-          <AdsterraBannerAd adKey="2d25c9abf4054b74051fa1fafb84c223" width={300} height={250} />
-        </div>
       </div>
 
       {/* ── QR SHARE POPUP ── */}
