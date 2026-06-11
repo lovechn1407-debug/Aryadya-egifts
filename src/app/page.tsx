@@ -9,6 +9,7 @@ import type { Order } from "@/lib/data";
 import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB, Settings, getFAQsDB, getReviewsDB } from "@/lib/db";
 import type { FAQItem, CustomerReview } from "@/lib/db";
 import HomepagePopups from "@/components/HomepagePopups";
+import AdsterraNativeAd from "@/components/AdsterraNativeAd";
 
 /* ── Modern UI SVG Icons ── */
 function GiftSVG({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
@@ -3054,6 +3055,11 @@ export default function HomePage() {
       <HowItWorks />
       <ReviewsShowcase reviews={reviews} />
       <FAQShowcase faqs={faqs} />
+      
+      <div style={{ padding: "40px 20px", maxWidth: 1100, margin: "0 auto" }}>
+        <AdsterraNativeAd adKey="7e37617b7730bee23bde81a412cda931" />
+      </div>
+
       <Footer settings={settings} />
     </div>
   );
