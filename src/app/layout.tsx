@@ -36,6 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
       index: true,
       follow: true,
     },
+    other: {
+      "google-adsense-account": "ca-pub-3771794594420823",
+    },
   };
 }
 
