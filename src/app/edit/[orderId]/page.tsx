@@ -1,5 +1,5 @@
 "use client";
-import { use, useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getProductDB, getOrderDB, updateOrderCustomizationsDB, finalizeOrderDB, updateProductOverrideDB, getCouponDB } from "@/lib/db";
 import type { Order, Product, Coupon } from "@/lib/data";
@@ -14,6 +14,7 @@ import DuduBirthday from "@/components/templates/DuduBirthday/DuduBirthday";
 import Propose3 from "@/components/templates/Propose3/Propose3";
 import Confess from "@/components/templates/Confess/Confess";
 import QRSharePopup from "@/components/QRSharePopup";
+import AdSequenceModal from "@/components/AdSequenceModal";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
 import { isAdminLoggedIn } from "@/lib/data";
@@ -275,6 +276,11 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
   const [paymentError, setPaymentError] = useState("");
   const [postPayAgreed, setPostPayAgreed] = useState(false);
   
+  // Ad Unlock State
+  const [checkoutMethod, setCheckoutMethod] = useState<"cash"|"ads">("cash");
+  const [requiredAdsCount, setRequiredAdsCount] = useState(1);
+  const [showAdModal, setShowAdModal] = useState(false);
+
   // Tutorial State
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
 
@@ -325,6 +331,10 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       } finally {
         setLoading(false);
       }
+      const { getSettingsDB } = await import("@/lib/db");
+      const s = await getSettingsDB();
+      if (s?.checkoutMethod) setCheckoutMethod(s.checkoutMethod);
+      if (s?.requiredAdsCount) setRequiredAdsCount(s.requiredAdsCount);
     })();
   }, [orderId, isPreviewEditor]);
 
@@ -510,6 +520,37 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
     } catch (err) {
       console.error("[handlePayment]", err);
       setPaymentError("An unexpected error occurred. Please try again.");
+      setPayLoading(false);
+    }
+  };
+
+  const handleAdUnlockComplete = async () => {
+    setShowAdModal(false);
+    setPayLoading(true);
+    setPaymentError("");
+
+    try {
+      // Save customisations first
+      await updateOrderCustomizationsDB(orderId, customizations);
+
+      const res = await fetch("/api/order/ad-unlock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, finalize: true })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setLocked(true);
+        setShowFinalPanel(false);
+        router.replace(`/view/${orderId}?success=1`);
+      } else {
+        setPaymentError(data.message || "Error finalizing unlock. Please try again.");
+        setPayLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setPaymentError("Error finalizing unlock. Please try again.");
       setPayLoading(false);
     }
   };
@@ -784,7 +825,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                   className="btn-primary"
                   style={{ padding: "5px 12px", fontSize: 12, background: showFinalPanel ? "#00D9A0" : undefined }}
                 >
-                  {showFinalPanel ? "✕" : (order?.status === "pending" ? "Pay & Finalise" : "Finalise")}
+                  {showFinalPanel ? "✕" : (order?.status === "pending" ? (checkoutMethod === "ads" ? "Unlock" : "Pay & Finalise") : "Finalise")}
                 </button>
               </>
             )}
@@ -841,65 +882,69 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
         }} className="fade-in-up">
           {order?.status === "pending" ? (
             <>
-              <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: "#fff" }}>💳 Pay & Finalise</h3>
+              <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: "#fff" }}>{checkoutMethod === "ads" ? "🔓 Unlock & Finalise" : "💳 Pay & Finalise"}</h3>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginBottom: 16 }}>
-                You are about to complete your order. Once paid, the page will be locked and your shareable link will be generated.
+                You are about to complete your order. Once {checkoutMethod === "ads" ? "unlocked" : "paid"}, the page will be locked and your shareable link will be generated.
               </p>
 
-              {/* Price Details */}
-              <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>Subtotal</span>
-                  <span style={{ color: "#fff", fontWeight: 600, fontSize: 13 }}>₹{Math.floor(product!.price / 100)}</span>
-                </div>
-                {appliedCoupon && (
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#10B981" }}>
-                    <span style={{ fontSize: 13 }}>Discount ({appliedCoupon.id})</span>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>-₹{
-                      appliedCoupon.discountType === "percentage" 
-                        ? Math.floor(product!.price * (appliedCoupon.discountAmount / 100) / 100)
-                        : appliedCoupon.discountAmount
-                    }</span>
+              {/* Price Details - Hide if Ads mode */}
+              {checkoutMethod !== "ads" && (
+                <>
+                  <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>Subtotal</span>
+                      <span style={{ color: "#fff", fontWeight: 600, fontSize: 13 }}>₹{Math.floor(product!.price / 100)}</span>
+                    </div>
+                    {appliedCoupon && (
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#10B981" }}>
+                        <span style={{ fontSize: 13 }}>Discount ({appliedCoupon.id})</span>
+                        <span style={{ fontWeight: 600, fontSize: 13 }}>-₹{
+                          appliedCoupon.discountType === "percentage" 
+                            ? Math.floor(product!.price * (appliedCoupon.discountAmount / 100) / 100)
+                            : appliedCoupon.discountAmount
+                        }</span>
+                      </div>
+                    )}
+                    <div style={{ borderTop: "1px dashed rgba(255,255,255,0.1)", margin: "8px 0" }}></div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Total</span>
+                      <span style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>₹{
+                        Math.max(0, Math.floor(product!.price / 100) - (appliedCoupon 
+                          ? (appliedCoupon.discountType === "percentage" ? Math.floor(product!.price * (appliedCoupon.discountAmount / 100) / 100) : appliedCoupon.discountAmount) 
+                          : 0))
+                      }</span>
+                    </div>
                   </div>
-                )}
-                <div style={{ borderTop: "1px dashed rgba(255,255,255,0.1)", margin: "8px 0" }}></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Total</span>
-                  <span style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>₹{
-                    Math.max(0, Math.floor(product!.price / 100) - (appliedCoupon 
-                      ? (appliedCoupon.discountType === "percentage" ? Math.floor(product!.price * (appliedCoupon.discountAmount / 100) / 100) : appliedCoupon.discountAmount) 
-                      : 0))
-                  }</span>
-                </div>
-              </div>
 
-              {/* Coupon Code */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input
-                    type="text"
-                    placeholder="Coupon code"
-                    value={couponInput}
-                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                    disabled={!!appliedCoupon || couponLoading}
-                    style={{ flex: 1, padding: "10px 14px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", outline: "none", fontSize: 13 }}
-                  />
-                  {!appliedCoupon ? (
-                    <button onClick={applyCoupon} disabled={!couponInput || couponLoading} style={{ padding: "0 16px", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 600, cursor: couponInput ? "pointer" : "not-allowed", opacity: couponInput ? 1 : 0.5 }}>
-                      {couponLoading ? "..." : "Apply"}
-                    </button>
-                  ) : (
-                    <button onClick={removeCoupon} style={{ padding: "0 16px", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, color: "#EF4444", fontWeight: 600, cursor: "pointer" }}>
-                      Remove
-                    </button>
-                  )}
-                </div>
-                {couponMsg.text && (
-                  <p style={{ color: couponMsg.type === "error" ? "#EF4444" : "#10B981", fontSize: 12, marginTop: 6, marginBottom: 0 }}>
-                    {couponMsg.text}
-                  </p>
-                )}
-              </div>
+                  {/* Coupon Code */}
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <input
+                        type="text"
+                        placeholder="Coupon code"
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                        disabled={!!appliedCoupon || couponLoading}
+                        style={{ flex: 1, padding: "10px 14px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", outline: "none", fontSize: 13 }}
+                      />
+                      {!appliedCoupon ? (
+                        <button onClick={applyCoupon} disabled={!couponInput || couponLoading} style={{ padding: "0 16px", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 600, cursor: couponInput ? "pointer" : "not-allowed", opacity: couponInput ? 1 : 0.5 }}>
+                          {couponLoading ? "..." : "Apply"}
+                        </button>
+                      ) : (
+                        <button onClick={removeCoupon} style={{ padding: "0 16px", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, color: "#EF4444", fontWeight: 600, cursor: "pointer" }}>
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    {couponMsg.text && (
+                      <p style={{ color: couponMsg.type === "error" ? "#EF4444" : "#10B981", fontSize: 12, marginTop: 6, marginBottom: 0 }}>
+                        {couponMsg.text}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
 
               {paymentError && (
                 <div style={{ background: "rgba(239, 68, 68, 0.1)", color: "#EF4444", padding: 10, borderRadius: 8, fontSize: 12, marginBottom: 16, border: "1px solid rgba(239,68,68,0.2)" }}>
@@ -916,7 +961,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                   style={{ marginTop: 3, width: 17, height: 17, accentColor: "#FF2D78", flexShrink: 0 }}
                 />
                 <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
-                  I've reviewed all slides and I'm happy with my edits. Once paid, the design is <strong style={{ color: "#fff" }}>locked permanently</strong>.
+                  I've reviewed all slides and I'm happy with my edits. Once {checkoutMethod === "ads" ? "unlocked" : "paid"}, the design is <strong style={{ color: "#fff" }}>locked permanently</strong>.
                 </span>
               </label>
 
@@ -924,9 +969,9 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                 className="btn-primary pulse-glow"
                 style={{ width: "100%", justifyContent: "center", cursor: (payLoading || !postPayAgreed) ? "not-allowed" : "pointer", opacity: postPayAgreed ? 1 : 0.4 }}
                 disabled={payLoading || !postPayAgreed}
-                onClick={handlePayment}
+                onClick={checkoutMethod === "ads" ? () => setShowAdModal(true) : handlePayment}
               >
-                {payLoading ? "Processing…" : "Continue to Payment 🔒"}
+                {payLoading ? "Processing…" : (checkoutMethod === "ads" ? `Watch ${requiredAdsCount} Ad${requiredAdsCount > 1 ? "s" : ""} to Lock 🔒` : "Continue to Payment 🔒")}
               </button>
             </>
           ) : (
@@ -985,6 +1030,15 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
         <QRSharePopup
           url={`${typeof window !== "undefined" ? window.location.origin : ""}/view/${orderId}`}
           onClose={() => setShowQR(false)}
+        />
+      )}
+
+      {/* ── AD SEQUENCE MODAL ── */}
+      {showAdModal && (
+        <AdSequenceModal
+          requiredAds={requiredAdsCount}
+          onComplete={handleAdUnlockComplete}
+          onCancel={() => setShowAdModal(false)}
         />
       )}
 

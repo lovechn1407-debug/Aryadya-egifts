@@ -5,6 +5,7 @@ import { getProduct } from "@/lib/data";
 import { getCouponDB, getOrdersByBuyerDB, getSettingsDB } from "@/lib/db";
 import type { Coupon } from "@/lib/data";
 import Link from "next/link";
+import AdSequenceModal from "@/components/AdSequenceModal";
 
 /* ── Vector SVG Components ── */
 function ArrowLeftSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
@@ -73,6 +74,11 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
   const [couponMsg, setCouponMsg] = useState({ type: "", text: "" });
   const [couponLoading, setCouponLoading] = useState(false);
 
+  // Ad Unlock State
+  const [checkoutMethod, setCheckoutMethod] = useState<"cash"|"ads">("cash");
+  const [requiredAdsCount, setRequiredAdsCount] = useState(1);
+  const [showAdModal, setShowAdModal] = useState(false);
+
   // Fetch updated product price/details and settings from Firebase
   useEffect(() => {
     import("@/lib/db").then(({ getProductDB, getSettingsDB }) => {
@@ -83,6 +89,8 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
       });
       getSettingsDB().then(s => {
         if (s?.paymentMode) setPaymentMode(s.paymentMode);
+        if (s?.checkoutMethod) setCheckoutMethod(s.checkoutMethod);
+        if (s?.requiredAdsCount) setRequiredAdsCount(s.requiredAdsCount);
       });
     });
   }, [productId]);
@@ -274,6 +282,56 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
     }
   };
 
+  const handleAdUnlockComplete = async () => {
+    setShowAdModal(false);
+    setPayLoading(true);
+    setPaymentError("");
+    setStep("processing");
+
+    try {
+      // 1. Create order on the server
+      const res = await fetch("/api/order/create-pending", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product.id,
+          buyerName: form.name,
+          buyerEmail: form.email,
+          buyerPhone: form.phone
+        })
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        setPaymentError(data.message || "Could not unlock order. Please try again.");
+        setStep("payment");
+        setPayLoading(false);
+        return;
+      }
+
+      // 2. Mark order as paid directly because they watched ads
+      const unlockRes = await fetch("/api/order/ad-unlock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: data.order_id, finalize: false })
+      });
+      const unlockData = await unlockRes.json();
+      
+      if (unlockData.success) {
+        router.push(`/edit/${data.order_id}`);
+      } else {
+        setPaymentError(unlockData.message || "Error finalizing unlock.");
+        setStep("payment");
+        setPayLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setPaymentError("Error finalizing unlock. Please try again.");
+      setStep("payment");
+      setPayLoading(false);
+    }
+  };
+
   return (
     <>
       <style>{`
@@ -305,8 +363,17 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
               <p style={{ color: "#8A94A6", fontSize: 12, marginTop: 4, margin: 0 }}>{product.tagline}</p>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: "#7C3AED", fontFamily: "'Nunito', sans-serif" }}>₹{Math.floor(product.price / 100)}</div>
-              <div style={{ fontSize: 10, color: "#22C55E", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 2 }}>One-time</div>
+              {checkoutMethod === "ads" ? (
+                <>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: "#10B981", fontFamily: "'Nunito', sans-serif" }}>FREE</div>
+                  <div style={{ fontSize: 10, color: "#64748B", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 2 }}>WITH ADS</div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: "#7C3AED", fontFamily: "'Nunito', sans-serif" }}>₹{Math.floor(product.price / 100)}</div>
+                  <div style={{ fontSize: 10, color: "#22C55E", fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 2 }}>One-time</div>
+                </>
+              )}
             </div>
           </div>
 
@@ -383,12 +450,13 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
           {step === "payment" && (
             <div style={{ background: "#fff", borderRadius: 24, padding: "28px 24px", boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", border: "1px solid #F3E8FF" }}>
               <h1 style={{ fontSize: 22, fontWeight: 900, color: "#1F2937", marginBottom: 6, fontFamily: "'Nunito', sans-serif", letterSpacing: -0.5 }}>
-                Complete <span style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Payment</span>
+                Complete <span style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{checkoutMethod === "ads" ? "Unlock" : "Payment"}</span>
               </h1>
-              <p style={{ color: "#64748B", fontSize: 13, marginBottom: 24, marginTop: 0 }}>Your customization editor will open automatically post payment.</p>
+              <p style={{ color: "#64748B", fontSize: 13, marginBottom: 24, marginTop: 0 }}>Your customization editor will open automatically {checkoutMethod === "ads" ? "after watching the ads" : "post payment"}.</p>
 
-              {/* Coupon Section */}
-              <div style={{ background: "#F8FAFC", borderRadius: 16, padding: "18px 20px", marginBottom: 20, border: "1px solid #F1F5F9" }}>
+              {/* Coupon Section - Hide if Ads mode */}
+              {checkoutMethod !== "ads" && (
+                <div style={{ background: "#F8FAFC", borderRadius: 16, padding: "18px 20px", marginBottom: 20, border: "1px solid #F1F5F9" }}>
                 <p style={{ fontSize: 11, fontWeight: 800, color: "#475569", marginBottom: 10, letterSpacing: 0.5 }}>HAVE A COUPON CODE?</p>
                 {!appliedCoupon ? (
                   <div style={{ display: "flex", gap: 8 }}>
@@ -431,6 +499,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
                   <p style={{ fontSize: 12, marginTop: 8, color: couponMsg.type === "error" ? "#EF4444" : "#10B981", fontWeight: 700, margin: "8px 0 0" }}>{couponMsg.text}</p>
                 )}
               </div>
+              )}
 
               {/* Summary */}
               <div style={{ background: "#F8FAFC", borderRadius: 16, padding: "18px 20px", marginBottom: 20, border: "1px solid #F1F5F9" }}>
@@ -454,33 +523,34 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
                   <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid #E2E8F0" }}>
                     <span style={{ fontWeight: 800, fontSize: 15, color: "#1E293B" }}>Total Payable</span>
                     <span style={{ fontWeight: 900, fontSize: 24, background: "linear-gradient(135deg, #7C3AED, #EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Nunito', sans-serif" }}>
-                      ₹{Math.floor(finalPrice / 100)}
+                      {checkoutMethod === "ads" ? "FREE" : `₹${Math.floor(finalPrice / 100)}`}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Cashfree security badge */}
-              <div style={{ background: "#ECFDF5", borderRadius: 12, padding: "14px 16px", marginBottom: 20, display: "flex", gap: 10, border: "1px solid #A7F3D0", alignItems: "center" }}>
-                <span style={{ display: "flex", alignItems: "center", color: "#15803d" }}>
-                  <PadlockSVG size={16} color="#15803d" />
-                </span>
-                <p style={{ fontSize: 12, color: "#15803d", lineHeight: 1.5, margin: 0, fontWeight: 600 }}>
-                  Secured by Cashfree Payments. 100+ payment methods supported — UPI, Cards, Netbanking, Wallets.
-                </p>
-              </div>
+              {checkoutMethod !== "ads" && (
+                <div style={{ background: "#ECFDF5", borderRadius: 12, padding: "14px 16px", marginBottom: 20, display: "flex", gap: 10, border: "1px solid #A7F3D0", alignItems: "center" }}>
+                  <span style={{ display: "flex", alignItems: "center", color: "#15803d" }}>
+                    <PadlockSVG size={16} color="#15803d" />
+                  </span>
+                  <p style={{ fontSize: 12, color: "#15803d", lineHeight: 1.5, margin: 0, fontWeight: 600 }}>
+                    Secured by Cashfree Payments. 100+ payment methods supported — UPI, Cards, Netbanking, Wallets.
+                  </p>
+                </div>
+              )}
 
               <div style={{ display: "flex", gap: 12 }}>
                 <button onClick={() => setStep("details")} style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1.5px solid #E2E8F0", background: "#fff", color: "#475569", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>← Back</button>
                 <button
-                  onClick={handlePayment}
+                  onClick={checkoutMethod === "ads" ? () => setShowAdModal(true) : handlePayment}
                   disabled={payLoading}
                   style={{
                     flex: 2, padding: "14px", borderRadius: 14, border: "none",
-                    background: payLoading ? "#C4B5FD" : "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff",
+                    background: payLoading ? "#C4B5FD" : (checkoutMethod === "ads" ? "linear-gradient(135deg, #10B981, #059669)" : "linear-gradient(135deg, #7C3AED, #EC4899)"), color: "#fff",
                     fontWeight: 900, fontSize: 14, cursor: payLoading ? "not-allowed" : "pointer",
                     fontFamily: "'Nunito', sans-serif",
-                    boxShadow: payLoading ? "none" : "0 8px 24px rgba(124,58,237,0.25)",
+                    boxShadow: payLoading ? "none" : (checkoutMethod === "ads" ? "0 8px 24px rgba(16, 185, 129, 0.25)" : "0 8px 24px rgba(124,58,237,0.25)"),
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                     transition: "all 0.2s"
                   }}
@@ -488,8 +558,10 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
                   {payLoading ? (
                     <>
                       <SpinnerSVG size={18} />
-                      Opening Cashfree...
+                      Processing...
                     </>
+                  ) : checkoutMethod === "ads" ? (
+                    `Unlock via ${requiredAdsCount} Ad${requiredAdsCount > 1 ? "s" : ""}`
                   ) : (
                     `Pay ₹${Math.floor(finalPrice / 100)} & Personalise`
                   )}
@@ -536,6 +608,14 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
           </div>
         </div>
       </div>
+
+      {showAdModal && (
+        <AdSequenceModal
+          requiredAds={requiredAdsCount}
+          onComplete={handleAdUnlockComplete}
+          onCancel={() => setShowAdModal(false)}
+        />
+      )}
     </>
   );
 }

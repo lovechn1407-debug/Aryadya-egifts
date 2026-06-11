@@ -62,6 +62,8 @@ export interface Settings {
   showFacebook?: boolean;
   // Checkout Settings
   paymentMode?: "pre-pay" | "post-pay";
+  checkoutMethod?: "cash" | "ads";
+  requiredAdsCount?: number;
 }
 
 export async function getSettingsDB(): Promise<Settings> {
@@ -78,6 +80,8 @@ export async function getSettingsDB(): Promise<Settings> {
     if (!val.businessName) val.businessName = "Aradhya E-Giftings";
     if (!val.businessEntity) val.businessEntity = "AS-Studios";
     if (!val.paymentMode) val.paymentMode = "pre-pay";
+    if (!val.checkoutMethod) val.checkoutMethod = "cash";
+    if (val.requiredAdsCount === undefined) val.requiredAdsCount = 1;
     return val;
   }
   return {
