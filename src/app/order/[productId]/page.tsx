@@ -75,7 +75,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
   const [couponLoading, setCouponLoading] = useState(false);
 
   // Ad Unlock State
-  const [checkoutMethod, setCheckoutMethod] = useState<"cash"|"ads">("cash");
+  const [checkoutMethod, setCheckoutMethod] = useState<"cash"|"ads"|"free">("cash");
   const [requiredAdsCount, setRequiredAdsCount] = useState(1);
   const [showAdModal, setShowAdModal] = useState(false);
 
@@ -88,20 +88,15 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
         }
         if (s?.paymentMode) setPaymentMode(s.paymentMode);
         
-        let cMethod = s?.checkoutMethod || "cash";
-        let cAds = s?.requiredAdsCount || 1;
+        let cMethod = "cash";
+        let cAds = 1;
 
         if (p?.price === 0) {
-          cMethod = "ads";
+          cMethod = p.checkoutMethod === "ads" ? "ads" : "free";
           if (p.requiredAdsCount) cAds = p.requiredAdsCount;
-        } else if (p?.checkoutMethod && p.checkoutMethod !== "global") {
-          cMethod = p.checkoutMethod;
-          if (p.checkoutMethod === "ads" && p.requiredAdsCount) {
-            cAds = p.requiredAdsCount;
-          }
         }
 
-        setCheckoutMethod(cMethod as "cash" | "ads");
+        setCheckoutMethod(cMethod as "cash" | "ads" | "free");
         setRequiredAdsCount(cAds);
       });
     });
@@ -574,6 +569,8 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
                     </>
                   ) : checkoutMethod === "ads" ? (
                     `Unlock via ${requiredAdsCount} Ad${requiredAdsCount > 1 ? "s" : ""}`
+                  ) : checkoutMethod === "free" ? (
+                    "Get for FREE & Personalise"
                   ) : (
                     `Pay ₹${Math.floor(finalPrice / 100)} & Personalise`
                   )}

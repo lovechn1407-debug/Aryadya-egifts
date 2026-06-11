@@ -197,47 +197,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Checkout Method (Cash vs Ads) */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Checkout Method</h2>
-            <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>
-              <strong>Cash:</strong> Users pay the fixed price via Cashfree.<br/>
-              <strong>Ads:</strong> Users unlock the site for free by watching Ads.
-            </p>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-end" }}>
-            <div style={{ display: "flex", gap: 12, background: "#F1F5F9", padding: 4, borderRadius: 8 }}>
-              <button 
-                onClick={() => setSettings(s => ({ ...s, checkoutMethod: "cash" }))} 
-                style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.checkoutMethod === "cash" ? "#fff" : "transparent", color: settings.checkoutMethod === "cash" ? "#1E293B" : "#64748B", boxShadow: settings.checkoutMethod === "cash" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
-              >
-                Cash Payment
-              </button>
-              <button 
-                onClick={() => setSettings(s => ({ ...s, checkoutMethod: "ads" }))} 
-                style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.checkoutMethod === "ads" ? "#fff" : "transparent", color: settings.checkoutMethod === "ads" ? "#1E293B" : "#64748B", boxShadow: settings.checkoutMethod === "ads" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
-              >
-                Unlock via Ads
-              </button>
-            </div>
-            
-            {settings.checkoutMethod === "ads" && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#475569" }}>Ads Required:</span>
-                <input 
-                  type="number" 
-                  min="1" 
-                  max="10"
-                  value={settings.requiredAdsCount || 1} 
-                  onChange={e => handleChange("requiredAdsCount", parseInt(e.target.value) || 1)}
-                  style={{ width: 60, padding: "6px 12px", borderRadius: 6, border: "1px solid #E2E8F0", outline: "none", textAlign: "center", fontWeight: 600 }}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Templates */}
         <div style={{ marginBottom: 24 }}>
           <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", marginBottom: 8, display: "block" }}>Quick Templates</label>

@@ -295,11 +295,11 @@ export default function AdminProductsPage() {
     const cn = parseInt(cuttedPriceInput, 10);
     
     const updates: Partial<Product> = {};
-    if (!isNaN(n) && n > 0) updates.price = n * 100;
+    if (!isNaN(n) && n >= 0) updates.price = n * 100;
     if (!isNaN(cn) && cn > 0) updates.cuttedPrice = cn * 100;
     else if (cuttedPriceInput === "") updates.cuttedPrice = undefined; // allow clearing
     
-    if (Object.keys(updates).length > 0) {
+    if (Object.keys(updates).length > 0 || cuttedPriceInput === "") {
       await updateProductOverrideDB(id, updates);
     }
     setEditingPrice(null);
@@ -496,17 +496,32 @@ export default function AdminProductsPage() {
                       ✏️
                     </button>
                     {product.price === 0 && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#FEF3C7", padding: "4px 8px", borderRadius: 6, marginLeft: 8 }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: "#D97706" }}>Required Ads:</span>
-                        <input 
-                          type="number" 
-                          style={{...inputStyle, width: 50, padding: "4px", fontSize: 12, height: 24, minHeight: 24}}
-                          value={product.requiredAdsCount || 1}
-                          onChange={(e) => {
-                            updateProductOverrideDB(product.id, { requiredAdsCount: Math.max(1, Number(e.target.value)) }).then(reload);
-                          }}
-                          min={1}
-                        />
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: 16 }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                          <input 
+                            type="checkbox" 
+                            checked={product.checkoutMethod === "ads"}
+                            onChange={(e) => {
+                              updateProductOverrideDB(product.id, { checkoutMethod: e.target.checked ? "ads" : "free" }).then(reload);
+                            }}
+                            style={{ accentColor: "#10B981", width: 16, height: 16 }}
+                          />
+                          <span style={{ fontSize: 13, fontWeight: 600, color: "#10B981" }}>Enable View Ads</span>
+                        </label>
+                        {product.checkoutMethod === "ads" && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#FEF3C7", padding: "4px 8px", borderRadius: 6 }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "#D97706" }}>Required Ads:</span>
+                            <input 
+                              type="number" 
+                              style={{...inputStyle, width: 50, padding: "4px", fontSize: 12, height: 24, minHeight: 24}}
+                              value={product.requiredAdsCount || 1}
+                              onChange={(e) => {
+                                updateProductOverrideDB(product.id, { requiredAdsCount: Math.max(1, Number(e.target.value)) }).then(reload);
+                              }}
+                              min={1}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

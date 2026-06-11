@@ -277,7 +277,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
   const [postPayAgreed, setPostPayAgreed] = useState(false);
   
   // Ad Unlock State
-  const [checkoutMethod, setCheckoutMethod] = useState<"cash"|"ads">("cash");
+  const [checkoutMethod, setCheckoutMethod] = useState<"cash"|"ads"|"free">("cash");
   const [requiredAdsCount, setRequiredAdsCount] = useState(1);
   const [showAdModal, setShowAdModal] = useState(false);
 
@@ -337,20 +337,15 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       const { getSettingsDB } = await import("@/lib/db");
       const s = await getSettingsDB();
       
-      let cMethod = s?.checkoutMethod || "cash";
-      let cAds = s?.requiredAdsCount || 1;
+      let cMethod = "cash";
+      let cAds = 1;
 
       if (finalProduct?.price === 0) {
-        cMethod = "ads";
+        cMethod = finalProduct.checkoutMethod === "ads" ? "ads" : "free";
         if (finalProduct.requiredAdsCount) cAds = finalProduct.requiredAdsCount;
-      } else if (finalProduct?.checkoutMethod && finalProduct.checkoutMethod !== "global") {
-        cMethod = finalProduct.checkoutMethod;
-        if (finalProduct.checkoutMethod === "ads" && finalProduct.requiredAdsCount) {
-          cAds = finalProduct.requiredAdsCount;
-        }
       }
 
-      setCheckoutMethod(cMethod as "cash" | "ads");
+      setCheckoutMethod(cMethod as "cash" | "ads" | "free");
       setRequiredAdsCount(cAds);
     })();
   }, [orderId, isPreviewEditor]);
@@ -899,13 +894,13 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
         }} className="fade-in-up">
           {order?.status === "pending" ? (
             <>
-              <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: "#fff" }}>{checkoutMethod === "ads" ? "🔓 Unlock & Finalise" : "💳 Pay & Finalise"}</h3>
+              <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: "#fff" }}>{checkoutMethod === "ads" ? "🔓 Unlock & Finalise" : checkoutMethod === "free" ? "✨ Finalise for Free" : "💳 Pay & Finalise"}</h3>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginBottom: 16 }}>
-                You are about to complete your order. Once {checkoutMethod === "ads" ? "unlocked" : "paid"}, the page will be locked and your shareable link will be generated.
+                You are about to complete your order. Once {checkoutMethod === "ads" ? "unlocked" : checkoutMethod === "free" ? "finalised" : "paid"}, the page will be locked and your shareable link will be generated.
               </p>
 
-              {/* Price Details - Hide if Ads mode */}
-              {checkoutMethod !== "ads" && (
+              {/* Price Details - Hide if Ads mode or Free mode */}
+              {(checkoutMethod !== "ads" && checkoutMethod !== "free") && (
                 <>
                   <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
@@ -978,7 +973,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                   style={{ marginTop: 3, width: 17, height: 17, accentColor: "#FF2D78", flexShrink: 0 }}
                 />
                 <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
-                  I've reviewed all slides and I'm happy with my edits. Once {checkoutMethod === "ads" ? "unlocked" : "paid"}, the design is <strong style={{ color: "#fff" }}>locked permanently</strong>.
+                  I've reviewed all slides and I'm happy with my edits. Once {checkoutMethod === "ads" ? "unlocked" : checkoutMethod === "free" ? "finalised" : "paid"}, the design is <strong style={{ color: "#fff" }}>locked permanently</strong>.
                 </span>
               </label>
 
@@ -988,7 +983,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                 disabled={payLoading || !postPayAgreed}
                 onClick={checkoutMethod === "ads" ? () => setShowAdModal(true) : handlePayment}
               >
-                {payLoading ? "Processing…" : (checkoutMethod === "ads" ? `Watch ${requiredAdsCount} Ad${requiredAdsCount > 1 ? "s" : ""} to Lock 🔒` : "Continue to Payment 🔒")}
+                {payLoading ? "Processing…" : (checkoutMethod === "ads" ? `Watch ${requiredAdsCount} Ad${requiredAdsCount > 1 ? "s" : ""} to Lock 🔒` : checkoutMethod === "free" ? "Finalise for FREE 🔒" : "Continue to Payment 🔒")}
               </button>
             </>
           ) : (
