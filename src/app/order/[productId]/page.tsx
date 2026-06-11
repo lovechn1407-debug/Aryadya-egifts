@@ -2,7 +2,7 @@
 import { use, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getProduct } from "@/lib/data";
-import { getCouponDB, getOrdersByBuyerDB } from "@/lib/db";
+import { getCouponDB, getOrdersByBuyerDB, getSettingsDB } from "@/lib/db";
 import type { Coupon } from "@/lib/data";
 import Link from "next/link";
 
@@ -65,19 +65,23 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [paymentError, setPaymentError] = useState("");
   const [payLoading, setPayLoading] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<"pre-pay"|"post-pay">("pre-pay");
 
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponMsg, setCouponMsg] = useState({ type: "", text: "" });
   const [couponLoading, setCouponLoading] = useState(false);
 
-  // Fetch updated product price/details from Firebase
+  // Fetch updated product price/details and settings from Firebase
   useEffect(() => {
-    import("@/lib/db").then(({ getProductDB }) => {
+    import("@/lib/db").then(({ getProductDB, getSettingsDB }) => {
       getProductDB(productId).then(p => {
         if (p) {
           setProduct(p);
         }
+      });
+      getSettingsDB().then(s => {
+        if (s?.paymentMode) setPaymentMode(s.paymentMode);
       });
     });
   }, [productId]);
@@ -116,7 +120,37 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
     return Object.keys(e).length === 0;
   };
 
-  const handleDetailsSubmit = () => { if (validate()) setStep("payment"); };
+  const handleDetailsSubmit = async () => { 
+    if (validate()) {
+      if (paymentMode === "post-pay") {
+        setStep("processing");
+        try {
+          const res = await fetch("/api/order/create-pending", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              productId: product.id,
+              buyerName: form.name,
+              buyerEmail: form.email,
+              buyerPhone: form.phone
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            router.push(`/edit/${data.orderId}`);
+          } else {
+            setPaymentError(data.message || "Could not create order. Please try again.");
+            setStep("details");
+          }
+        } catch(e) {
+          setPaymentError("Network error. Please try again.");
+          setStep("details");
+        }
+      } else {
+        setStep("payment"); 
+      }
+    }
+  };
 
   const applyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -329,7 +363,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
                   boxShadow: "0 8px 24px rgba(124, 58, 237, 0.25)",
                 }}
               >
-                Continue to Payment
+                {paymentMode === "post-pay" ? "Start Customising ➜" : "Continue to Payment"}
               </button>
             </div>
           )}
