@@ -1049,7 +1049,7 @@ function LoginModal({ onClose, onNavigate }: { onClose: () => void; onNavigate?:
 }
 
 /* ── Product Quick-View Modal ── */
-function ProductModal({ product, accent, onClose, onNavigate }: { product: Product; accent: string; onClose: () => void; onNavigate?: (url: string) => void }) {
+function ProductModal({ product, accent, paymentMode, onClose, onNavigate }: { product: Product; accent: string; paymentMode?: string; onClose: () => void; onNavigate?: (url: string) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
 
@@ -1140,7 +1140,7 @@ function ProductModal({ product, accent, onClose, onNavigate }: { product: Produ
                 boxShadow: `0 8px 24px ${accent}25` 
               }}
             >
-              Buy Now
+              {paymentMode === "post-pay" ? "Edit Now" : "Buy Now"}
             </Link>
             <Link 
               href={`/preview/${product.id}`} 
@@ -3008,6 +3008,7 @@ export default function HomePage() {
         <ProductModal 
           product={selectedProduct} 
           accent={selectedAccent} 
+          paymentMode={settings?.paymentMode}
           onClose={() => setSelectedProduct(null)} 
           onNavigate={(url) => { setIsNavigating(true); router.push(url); }} 
         />
