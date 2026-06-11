@@ -273,6 +273,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
   const [couponLoading, setCouponLoading] = useState(false);
   const [payLoading, setPayLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [postPayAgreed, setPostPayAgreed] = useState(false);
   
   // Tutorial State
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -477,9 +478,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       }
 
       if (data.free) {
-        // Automatically finalized by our pay-order logic (if free)
-        // Wait, pay-order doesn't finalize if free! Let me check...
-        // If it's free, we should finalize it here.
+        // Free after coupon — finalize and redirect to /view/
         await finalizeOrderDB(order.id);
         const { getSettingsDB } = await import("@/lib/db");
         const settings = await getSettingsDB();
@@ -494,9 +493,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
             view_link: `${window.location.origin}/view/${orderId}`,
           });
         }
-        setShowFinalPanel(false);
-        setLocked(true);
-        setShowQR(true);
+        router.replace(`/view/${orderId}`);
         return;
       }
 
@@ -910,13 +907,26 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                 </div>
               )}
 
+              {/* Disclaimer checkbox — must agree before paying */}
+              <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", marginBottom: 16 }}>
+                <input
+                  type="checkbox"
+                  checked={postPayAgreed}
+                  onChange={e => setPostPayAgreed(e.target.checked)}
+                  style={{ marginTop: 3, width: 17, height: 17, accentColor: "#FF2D78", flexShrink: 0 }}
+                />
+                <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
+                  I've reviewed all slides and I'm happy with my edits. Once paid, the design is <strong style={{ color: "#fff" }}>locked permanently</strong>.
+                </span>
+              </label>
+
               <button
                 className="btn-primary pulse-glow"
-                style={{ width: "100%", justifyContent: "center", cursor: payLoading ? "not-allowed" : "pointer" }}
-                disabled={payLoading}
+                style={{ width: "100%", justifyContent: "center", cursor: (payLoading || !postPayAgreed) ? "not-allowed" : "pointer", opacity: postPayAgreed ? 1 : 0.4 }}
+                disabled={payLoading || !postPayAgreed}
                 onClick={handlePayment}
               >
-                {payLoading ? "Processing…" : "Pay & Lock Design 🔒"}
+                {payLoading ? "Processing…" : "Continue to Payment 🔒"}
               </button>
             </>
           ) : (
