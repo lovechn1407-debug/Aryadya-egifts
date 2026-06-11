@@ -66,6 +66,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
   const [paymentError, setPaymentError] = useState("");
   const [payLoading, setPayLoading] = useState(false);
   const [paymentMode, setPaymentMode] = useState<"pre-pay"|"post-pay">("pre-pay");
+  const [isPostPayProcessing, setIsPostPayProcessing] = useState(false);
 
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
@@ -123,6 +124,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
   const handleDetailsSubmit = async () => { 
     if (validate()) {
       if (paymentMode === "post-pay") {
+        setIsPostPayProcessing(true);
         setStep("processing");
         try {
           const res = await fetch("/api/order/create-pending", {
@@ -137,13 +139,15 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
           });
           const data = await res.json();
           if (data.success) {
-            router.push(`/edit/${data.orderId}`);
+            router.push(`/edit/${data.order_id}`);
           } else {
             setPaymentError(data.message || "Could not create order. Please try again.");
+            setIsPostPayProcessing(false);
             setStep("details");
           }
         } catch(e) {
           setPaymentError("Network error. Please try again.");
+          setIsPostPayProcessing(false);
           setStep("details");
         }
       } else {
@@ -500,14 +504,25 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
               <div style={{ width: 80, height: 80, borderRadius: "50%", background: "linear-gradient(135deg, #F3E8FF, #FCE7F3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
                 <SpinnerSVG size={36} />
               </div>
-              <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito', sans-serif", margin: 0 }}>Opening Payment...</h2>
-              <p style={{ color: "#64748B", marginTop: 12, fontSize: 14, margin: "12px 0 0 0", lineHeight: 1.6 }}>
-                Please do not close this page.<br />You will be redirected to Cashfree&apos;s secure checkout.
-              </p>
-              <div style={{ marginTop: 24, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <PadlockSVG size={14} color="#7C3AED" />
-                <span style={{ fontSize: 12, color: "#7C3AED", fontWeight: 700 }}>Powered by Cashfree Payments</span>
-              </div>
+              {isPostPayProcessing ? (
+                <>
+                  <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito', sans-serif", margin: 0 }}>Setting up your editor...</h2>
+                  <p style={{ color: "#64748B", marginTop: 12, fontSize: 14, margin: "12px 0 0 0", lineHeight: 1.6 }}>
+                    Please wait while we create your personalisation session.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito', sans-serif", margin: 0 }}>Opening Payment...</h2>
+                  <p style={{ color: "#64748B", marginTop: 12, fontSize: 14, margin: "12px 0 0 0", lineHeight: 1.6 }}>
+                    Please do not close this page.<br />You will be redirected to Cashfree&apos;s secure checkout.
+                  </p>
+                  <div style={{ marginTop: 24, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                    <PadlockSVG size={14} color="#7C3AED" />
+                    <span style={{ fontSize: 12, color: "#7C3AED", fontWeight: 700 }}>Powered by Cashfree Payments</span>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
