@@ -6,6 +6,7 @@ import { getCouponDB, getOrdersByBuyerDB, getSettingsDB } from "@/lib/db";
 import type { Coupon } from "@/lib/data";
 import Link from "next/link";
 import AdSequenceModal from "@/components/AdSequenceModal";
+import GoogleBannerAd from "@/components/GoogleBannerAd";
 
 /* ── Vector SVG Components ── */
 function ArrowLeftSVG({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
@@ -614,6 +615,15 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
                 <span style={{ color: "#22C55E" }}>✓</span> {b}
               </span>
             ))}
+          </div>
+
+          <div style={{ marginTop: 32 }}>
+            <GoogleBannerAd 
+              client="ca-pub-3771794594420823" 
+              slot="1234567890" 
+              format="auto" 
+              responsive={true} 
+            />
           </div>
         </div>
       </div>

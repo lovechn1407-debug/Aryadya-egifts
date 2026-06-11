@@ -18,6 +18,7 @@ import AdSequenceModal from "@/components/AdSequenceModal";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
 import { isAdminLoggedIn } from "@/lib/data";
+import GoogleBannerAd from "@/components/GoogleBannerAd";
 
 
 // Slide map for the top tab bar
@@ -1035,6 +1036,15 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       {/* ── TEMPLATE (full page, offset top for toolbar) ── */}
       <div style={{ paddingTop: slides.length > 0 ? 100 : 48, pointerEvents: locked ? "none" : "auto" }}>
         {renderEditorTemplate(product.id, customizations, handleFieldChange, activeSlide)}
+        
+        <div style={{ padding: "40px 20px" }}>
+          <GoogleBannerAd 
+            client="ca-pub-3771794594420823" 
+            slot="1234567890" 
+            format="auto" 
+            responsive={true} 
+          />
+        </div>
       </div>
 
       {/* ── QR SHARE POPUP ── */}

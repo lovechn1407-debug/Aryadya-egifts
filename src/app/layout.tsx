@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { getSettingsDB } from "@/lib/db";
 import MaintenanceWrapper from "@/components/MaintenanceWrapper";
+import Script from "next/script";
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aradhyagifts.in";
@@ -46,6 +47,13 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Google AdSense Configuration. Replace client ID with your actual publisher ID. */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3771794594420823"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         {/* ✅ Real URL favicon — Google crawls this one (must be first) */}
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="shortcut icon" href="/favicon.png" />

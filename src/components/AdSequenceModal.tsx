@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import GoogleBannerAd from "./GoogleBannerAd";
 
 interface AdSequenceModalProps {
   requiredAds: number;
@@ -63,26 +64,37 @@ export default function AdSequenceModal({ requiredAds, onComplete, onCancel }: A
             <div style={{
               background: "#1A1A24",
               borderRadius: 16,
-              height: 200,
+              minHeight: 250,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: 24,
-              border: "1px dashed rgba(255,255,255,0.2)"
+              border: "1px dashed rgba(255,255,255,0.2)",
+              padding: 16,
+              position: "relative",
+              overflow: "hidden"
             }}>
-              {/* This is where a real ad iframe or video would go */}
+              {/* Google AdSense Rectangle Ad */}
+              {/* Replace client and slot with your actual ad details */}
+              <GoogleBannerAd 
+                client="ca-pub-3771794594420823" 
+                slot="1234567890" 
+                format="auto" 
+                responsive={true} 
+              />
+              
               <div style={{
-                width: 60, height: 60, borderRadius: "50%",
-                background: "linear-gradient(135deg, #7C3AED, #4F46E5)",
+                position: "absolute", top: 12, right: 12,
+                width: 40, height: 40, borderRadius: "50%",
+                background: "rgba(0,0,0,0.6)",
+                backdropFilter: "blur(4px)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#FFF", fontSize: 24, fontWeight: 800, marginBottom: 16
+                color: "#FFF", fontSize: 16, fontWeight: 800,
+                border: "1px solid rgba(255,255,255,0.2)"
               }}>
                 {timeLeft}
               </div>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, maxWidth: 250 }}>
-                Please wait for the timer to finish to unlock your site.
-              </p>
             </div>
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
