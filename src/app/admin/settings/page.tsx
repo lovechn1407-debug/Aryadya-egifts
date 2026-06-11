@@ -172,7 +172,7 @@ export default function SettingsPage() {
           </label>
         </div>
 
-        {/* Payment Mode */}
+        {/* Checkout Mode */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Checkout Mode</h2>
@@ -193,6 +193,31 @@ export default function SettingsPage() {
               style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.paymentMode === "post-pay" ? "#fff" : "transparent", color: settings.paymentMode === "post-pay" ? "#1E293B" : "#64748B", boxShadow: settings.paymentMode === "post-pay" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
             >
               Post-Pay
+            </button>
+          </div>
+        </div>
+
+        {/* Ad Mode */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Unlock via Ads Format</h2>
+            <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>
+              <strong>Direct Link:</strong> User clicks a button to open an ad in a new tab.<br/>
+              <strong>Banner Ad:</strong> Auto-running timer with a banner displayed on screen.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 12, background: "#F1F5F9", padding: 4, borderRadius: 8 }}>
+            <button 
+              onClick={() => setSettings(s => ({ ...s, unlockAdType: "link" }))} 
+              style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.unlockAdType !== "banner" ? "#fff" : "transparent", color: settings.unlockAdType !== "banner" ? "#1E293B" : "#64748B", boxShadow: settings.unlockAdType !== "banner" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
+            >
+              Direct Link
+            </button>
+            <button 
+              onClick={() => setSettings(s => ({ ...s, unlockAdType: "banner" }))} 
+              style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.unlockAdType === "banner" ? "#fff" : "transparent", color: settings.unlockAdType === "banner" ? "#1E293B" : "#64748B", boxShadow: settings.unlockAdType === "banner" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
+            >
+              Banner Ad
             </button>
           </div>
         </div>

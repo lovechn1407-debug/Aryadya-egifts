@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { getSettingsDB, Settings } from "@/lib/db";
+import Script from "next/script";
 
 interface AdSequenceModalProps {
   requiredAds: number;
@@ -9,17 +11,31 @@ interface AdSequenceModalProps {
 }
 
 export default function AdSequenceModal({ requiredAds, onComplete, onCancel }: AdSequenceModalProps) {
+  const [settings, setSettings] = useState<Settings | null>(null);
   const [currentAd, setCurrentAd] = useState(1);
   const [timeLeft, setTimeLeft] = useState(15); // 15 seconds per ad
   const [isFinished, setIsFinished] = useState(false);
   const [hasClickedAd, setHasClickedAd] = useState(false);
+  
+  const unlockAdType = settings?.unlockAdType || "link";
 
   useEffect(() => {
-    if (hasClickedAd && timeLeft > 0 && !isFinished) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
+    getSettingsDB().then(setSettings);
+  }, []);
+
+  useEffect(() => {
+    if (unlockAdType === "banner" && !isFinished) {
+      if (timeLeft > 0) {
+        const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      if (hasClickedAd && timeLeft > 0 && !isFinished) {
+        const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [hasClickedAd, timeLeft, isFinished]);
+  }, [hasClickedAd, timeLeft, isFinished, unlockAdType]);
 
   const handleAdClick = () => {
     window.open("https://www.effectivecpmnetwork.com/qwwhwdqkx?key=4580e62c4f36e8e176f4b34dc57cb5bd", "_blank");
@@ -83,50 +99,78 @@ export default function AdSequenceModal({ requiredAds, onComplete, onCancel }: A
               position: "relative",
               overflow: "hidden"
             }}>
-              {!hasClickedAd ? (
+              {unlockAdType === "banner" ? (
                 <>
-                  <div style={{
-                    width: 60, height: 60, borderRadius: "50%",
-                    background: "rgba(255,255,255,0.05)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "rgba(255,255,255,0.4)", marginBottom: 16
-                  }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                  </div>
-                  <h3 style={{ color: "#FFF", fontSize: 18, marginBottom: 12 }}>Unlock Required</h3>
-                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, marginBottom: 24, maxWidth: 300 }}>
-                    Click the button below to view our sponsor's page. The countdown will begin immediately after.
-                  </p>
-                  <button
-                    onClick={handleAdClick}
-                    style={{
-                      background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                      color: "#FFF", border: "none", padding: "14px 28px", borderRadius: 12,
-                      fontWeight: 700, fontSize: 15, cursor: "pointer", transition: "0.2s",
-                      boxShadow: "0 4px 12px rgba(37,99,235,0.3)"
-                    }}
-                  >
-                    View Sponsor to Unlock
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div style={{
-                    width: 80, height: 80, borderRadius: "50%",
-                    background: "linear-gradient(135deg, #7C3AED, #4F46E5)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "#FFF", fontSize: 32, fontWeight: 800, marginBottom: 16
-                  }}>
+                  <div style={{ position: "absolute", top: 12, right: 12, width: 40, height: 40, borderRadius: "50%", background: "rgba(0,0,0,0.5)", color: "#FFF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, zIndex: 10 }}>
                     {timeLeft}
                   </div>
-                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, maxWidth: 250 }}>
-                    Please wait for the timer to finish before proceeding.
-                  </p>
+                  <div id="container-2d25c9abf4054b74051fa1fafb84c223"></div>
+                  <Script 
+                    id="adsterra-banner-script"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                      __html: `
+                        atOptions = {
+                          'key' : '2d25c9abf4054b74051fa1fafb84c223',
+                          'format' : 'iframe',
+                          'height' : 250,
+                          'width' : 300,
+                          'params' : {}
+                        };
+                      `
+                    }}
+                  />
+                  <Script 
+                    strategy="lazyOnload" 
+                    src="https://www.highperformanceformat.com/2d25c9abf4054b74051fa1fafb84c223/invoke.js" 
+                  />
                 </>
+              ) : (
+                !hasClickedAd ? (
+                  <>
+                    <div style={{
+                      width: 60, height: 60, borderRadius: "50%",
+                      background: "rgba(255,255,255,0.05)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: "rgba(255,255,255,0.4)", marginBottom: 16
+                    }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </div>
+                    <h3 style={{ color: "#FFF", fontSize: 18, marginBottom: 12 }}>Unlock Required</h3>
+                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, marginBottom: 24, maxWidth: 300 }}>
+                      Click the button below to view our sponsor's page. The countdown will begin immediately after.
+                    </p>
+                    <button
+                      onClick={handleAdClick}
+                      style={{
+                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                        color: "#FFF", border: "none", padding: "14px 28px", borderRadius: 12,
+                        fontWeight: 700, fontSize: 15, cursor: "pointer", transition: "0.2s",
+                        boxShadow: "0 4px 12px rgba(37,99,235,0.3)"
+                      }}
+                    >
+                      View Sponsor to Unlock
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div style={{
+                      width: 80, height: 80, borderRadius: "50%",
+                      background: "linear-gradient(135deg, #7C3AED, #4F46E5)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: "#FFF", fontSize: 32, fontWeight: 800, marginBottom: 16
+                    }}>
+                      {timeLeft}
+                    </div>
+                    <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, maxWidth: 250 }}>
+                      Please wait for the timer to finish before proceeding.
+                    </p>
+                  </>
+                )
               )}
             </div>
 

@@ -62,6 +62,7 @@ export interface Settings {
   showFacebook?: boolean;
   // Checkout Settings
   paymentMode?: "pre-pay" | "post-pay";
+  unlockAdType?: "link" | "banner";
 }
 
 export async function getSettingsDB(): Promise<Settings> {
@@ -78,6 +79,7 @@ export async function getSettingsDB(): Promise<Settings> {
     if (!val.businessName) val.businessName = "Aradhya E-Giftings";
     if (!val.businessEntity) val.businessEntity = "AS-Studios";
     if (!val.paymentMode) val.paymentMode = "pre-pay";
+    if (!val.unlockAdType) val.unlockAdType = "link";
     return val;
   }
   return {
@@ -99,7 +101,8 @@ export async function getSettingsDB(): Promise<Settings> {
     emailServiceFinalize: true,
     businessName: "Aradhya E-Giftings",
     businessEntity: "AS-Studios",
-    paymentMode: "pre-pay"
+    paymentMode: "pre-pay",
+    unlockAdType: "link"
   };
 }
 
