@@ -618,7 +618,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
           </div>
 
           <div style={{ marginTop: 32 }}>
-            <AdsterraBannerAd adKey="YOUR_ADSTERRA_KEY" width={300} height={250} />
+            <AdsterraBannerAd adKey="2d25c9abf4054b74051fa1fafb84c223" width={300} height={250} />
           </div>
         </div>
       </div>

@@ -1038,7 +1038,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
         {renderEditorTemplate(product.id, customizations, handleFieldChange, activeSlide)}
         
         <div style={{ padding: "40px 20px" }}>
-          <AdsterraBannerAd adKey="YOUR_ADSTERRA_KEY" width={300} height={250} />
+          <AdsterraBannerAd adKey="2d25c9abf4054b74051fa1fafb84c223" width={300} height={250} />
         </div>
       </div>
 

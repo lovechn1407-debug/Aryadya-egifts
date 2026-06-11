@@ -77,7 +77,7 @@ export default function AdSequenceModal({ requiredAds, onComplete, onCancel }: A
             }}>
               {/* Adsterra In-Page Banner Ad */}
               {/* Replace YOUR_ADSTERRA_KEY with your actual Adsterra banner key */}
-              <AdsterraBannerAd adKey="YOUR_ADSTERRA_KEY" width={300} height={250} />
+              <AdsterraBannerAd adKey="2d25c9abf4054b74051fa1fafb84c223" width={300} height={250} />
               
               <div style={{
                 position: "absolute", top: 12, right: 12,
