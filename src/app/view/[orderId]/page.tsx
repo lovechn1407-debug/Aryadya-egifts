@@ -1,7 +1,9 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { getOrderDB, getProductDB } from "@/lib/db";
 import type { Order, Product } from "@/lib/data";
+import QRSharePopup from "@/components/QRSharePopup";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import BirthdayBliss from "@/components/templates/BirthdayBliss/BirthdayBliss";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";
@@ -95,13 +97,15 @@ function renderFinalTemplate(productId: string, customData: Record<string, strin
   }
 }
 
-export default function ViewPage({ params }: { params: Promise<{ orderId: string }> }) {
+function ViewPageInner({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = use(params);
   const [order, setOrder] = useState<Order | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [copied, setCopied] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [showQR, setShowQR] = useState(false);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     (async () => {
@@ -113,6 +117,15 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
       setLoading(false);
     })();
   }, [orderId]);
+
+  // Auto-show QR popup when coming from post-pay success
+  useEffect(() => {
+    if (searchParams.get("success") === "1") {
+      // Small delay to let the page render first
+      const t = setTimeout(() => setShowQR(true), 800);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams]);
 
   const pageUrl = typeof window !== "undefined" ? window.location.href : "";
 
@@ -329,6 +342,26 @@ export default function ViewPage({ params }: { params: Promise<{ orderId: string
       <div style={{ paddingTop: (!isFinalized && showBanner) ? 62 : 0 }}>
         {renderFinalTemplate(product.id, mergedData)}
       </div>
+
+      {/* QR Share Popup — auto-shown on post-pay success */}
+      {showQR && (
+        <QRSharePopup
+          url={typeof window !== "undefined" ? window.location.origin + `/view/${orderId}` : ""}
+          onClose={() => setShowQR(false)}
+        />
+      )}
     </div>
+  );
+}
+
+export default function ViewPage({ params }: { params: Promise<{ orderId: string }> }) {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: "100vh", background: "#06060A", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3.5px solid rgba(124,58,237,0.15)", borderTopColor: "#7C3AED", animation: "viewSpin 0.9s linear infinite" }} />
+      </div>
+    }>
+      <ViewPageInner params={params} />
+    </Suspense>
   );
 }

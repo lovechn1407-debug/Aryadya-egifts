@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
           });
         }
       } catch (_) { /* non-fatal */ }
-      return NextResponse.redirect(`${siteUrl}/view/${orderId}`);
+      return NextResponse.redirect(`${siteUrl}/view/${orderId}?success=1`);
     }
     return NextResponse.redirect(`${siteUrl}/edit/${orderId}`);
   }
@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.redirect(
         shouldFinalize
-          ? `${siteUrl}/view/${orderId}`
+          ? `${siteUrl}/view/${orderId}?success=1`
           : `${siteUrl}/edit/${orderId}`
       );
     } else {
