@@ -31,11 +31,10 @@ export async function GET(req: NextRequest) {
   }
 
   // ── If already paid (webhook processed first), just redirect ──────────────
-  if (
-    order.status === "paid" ||
-    order.status === "editing" ||
-    order.status === "finalized"
-  ) {
+  if (order.status === "finalized") {
+    return NextResponse.redirect(`${siteUrl}/view/${orderId}`);
+  }
+  if (order.status === "paid" || order.status === "editing") {
     return NextResponse.redirect(`${siteUrl}/edit/${orderId}`);
   }
 
@@ -118,7 +117,11 @@ export async function GET(req: NextRequest) {
         // Non-fatal
       }
 
-      return NextResponse.redirect(`${siteUrl}/edit/${orderId}${shouldFinalize ? "?success=1" : ""}`);
+      return NextResponse.redirect(
+        shouldFinalize
+          ? `${siteUrl}/view/${orderId}`
+          : `${siteUrl}/edit/${orderId}`
+      );
     } else {
       // Payment failed or pending
       return NextResponse.redirect(
