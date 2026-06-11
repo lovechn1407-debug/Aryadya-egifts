@@ -84,11 +84,6 @@ export default async function RootLayout({
         <MaintenanceWrapper>
           {children}
         </MaintenanceWrapper>
-        {/* Adsterra Popunder Script */}
-        <Script 
-          strategy="lazyOnload" 
-          src="https://pl29711666.effectivecpmnetwork.com/25/68/77/256877a7ef9eb733811163ccce2b6ade.js" 
-        />
       </body>
     </html>
   );
