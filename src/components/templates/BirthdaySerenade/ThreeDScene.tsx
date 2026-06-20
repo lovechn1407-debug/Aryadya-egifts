@@ -47,7 +47,7 @@ function PearlRing({ tierRadius, y, count, color, scale = 1 }: { tierRadius: num
         return (
           <mesh key={i} position={[Math.cos(a) * tierRadius, y, Math.sin(a) * tierRadius]}>
             <sphereGeometry args={[0.08 * scale, 16, 16]} />
-            <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
+            <meshStandardMaterial color={color} metalness={0.2} roughness={0.3} />
           </mesh>
         );
       })}
@@ -74,7 +74,7 @@ function Cake({ onClick }: { onClick: () => void }) {
         <meshStandardMaterial color="#FBCFE8" roughness={0.3} metalness={0.05} />
       </mesh>
       {/* White Icing Ring */}
-      <mesh position={[0, 0.85, 0]}>
+      <mesh position={[0, 0.85, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <torusGeometry args={[2.1, 0.12, 16, 64]} />
         <meshStandardMaterial color="#FFFFFF" roughness={0.2} />
       </mesh>
@@ -87,7 +87,7 @@ function Cake({ onClick }: { onClick: () => void }) {
         <meshStandardMaterial color="#F9A8D4" roughness={0.3} />
       </mesh>
       {/* White Icing Ring */}
-      <mesh position={[0, 1.65, 0]}>
+      <mesh position={[0, 1.65, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <torusGeometry args={[1.5, 0.1, 16, 64]} />
         <meshStandardMaterial color="#FFFFFF" roughness={0.2} />
       </mesh>
@@ -99,7 +99,7 @@ function Cake({ onClick }: { onClick: () => void }) {
         <meshStandardMaterial color="#F472B6" roughness={0.3} />
       </mesh>
       {/* White Icing Ring */}
-      <mesh position={[0, 2.5, 0]}>
+      <mesh position={[0, 2.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.9, 0.08, 16, 64]} />
         <meshStandardMaterial color="#FFFFFF" roughness={0.2} />
       </mesh>
@@ -129,15 +129,15 @@ function Cake({ onClick }: { onClick: () => void }) {
       ))}
 
       {/* Elegant 3D Happy Birthday Plaque */}
-      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-        <mesh position={[0, 1.3, 1.6]} rotation={[-0.1, 0, 0]}>
-          <boxGeometry args={[2.2, 0.6, 0.05]} />
-          <meshStandardMaterial color="#FFFFFF" metalness={0.2} roughness={0.1} />
+      <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
+        <mesh position={[0, 1.3, 1.53]} rotation={[-0.05, 0, 0]}>
+          <boxGeometry args={[2.0, 0.5, 0.05]} />
+          <meshStandardMaterial color="#FFFFFF" metalness={0.1} roughness={0.2} />
         </mesh>
         <Text
-          position={[0, 1.3, 1.63]}
-          rotation={[-0.1, 0, 0]}
-          fontSize={0.26}
+          position={[0, 1.3, 1.58]}
+          rotation={[-0.05, 0, 0]}
+          fontSize={0.24}
           color="#D81B60"
           anchorX="center"
           anchorY="middle"
@@ -372,11 +372,11 @@ export default function ThreeDScene({ onCut }: { onCut: () => void }) {
       >
         <OrbitControls enablePan={false} minDistance={5} maxDistance={16} />
         
-        <ambientLight intensity={0.6} color="#FDF2F8" />
-        <pointLight position={[0, 10, 0]} intensity={1.5} color="#FFFFFF" />
-        <pointLight position={[-5, 4, 5]} intensity={1.2} color="#F472B6" />
-        <pointLight position={[5, 2, -5]} intensity={0.8} color="#FBBF24" />
-        <spotLight position={[6, 12, 6]} angle={0.4} penumbra={1} intensity={2.5} castShadow />
+        <ambientLight intensity={1.5} color="#FFFFFF" />
+        <directionalLight position={[5, 10, 5]} intensity={2} color="#FFFFFF" castShadow />
+        <pointLight position={[0, 10, 0]} intensity={2.5} color="#FFFFFF" />
+        <pointLight position={[-5, 4, 5]} intensity={1.8} color="#F472B6" />
+        <pointLight position={[5, 2, -5]} intensity={1.2} color="#FBBF24" />
         
         <fog attach="fog" args={["#1A1A2E", 12, 28]} />
         
