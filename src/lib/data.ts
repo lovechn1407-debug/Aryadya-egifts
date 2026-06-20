@@ -1151,7 +1151,103 @@ export const PRODUCT_REGISTRY: Product[] = [
         ]
       }
     ]
-  }
+  },
+  {
+    id: "birthday-serenade",
+    name: "Birthday Serenade 🎂",
+    tagline: "A cinematic 7-chapter birthday surprise: envelope letter, 3D cake box, fireworks, photo album, scratch card gift reveal, love letter with seal stamp & grand outro",
+    category: "birthday" as const,
+    price: 14900,
+    visible: true,
+    badge: "new" as const,
+    thumbnail: "🎂",
+    previewRoute: "/preview/birthday-serenade",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 0,
+        title: "Envelope & Letter",
+        description: "Animated envelope with sliding letter — recipient name, sender name, letter message & background music",
+        fields: [
+          { id: "bs_recipient", label: "Recipient Name", type: "text" as const, defaultValue: "Priya" },
+          { id: "bs_sender", label: "Sender Name", type: "text" as const, defaultValue: "Rohan" },
+          { id: "bs_letter_msg", label: "Letter Message", type: "textarea" as const, defaultValue: "Every single day I spend knowing you exist in this world feels like a gift I never deserved. You walk into a room and everything gets a little warmer. Happy Birthday, my love." },
+          { id: "bs_bg_song_name", label: "Background Song Name", type: "text" as const, defaultValue: "" },
+          { id: "bs_bg_song_url", label: "Background Song URL", type: "text" as const, defaultValue: "" },
+        ],
+      },
+      {
+        slideNumber: 1,
+        title: "Cake Box Opening",
+        description: "Animated gift box with lid opening + video overlay transition",
+        fields: [
+          { id: "bs_box_video_url", label: "Box Opening Video URL (optional)", type: "text" as const, defaultValue: "" },
+        ],
+      },
+      {
+        slideNumber: 2,
+        title: "Fireworks & Wishes",
+        description: "Canvas fireworks with 3 custom birthday wish messages",
+        fields: [
+          { id: "bs_wish1", label: "Birthday Wish 1", type: "text" as const, defaultValue: "May every dream you've whispered to the stars finally come true this year 🌟" },
+          { id: "bs_wish2", label: "Birthday Wish 2", type: "text" as const, defaultValue: "May joy follow you like a loyal friend wherever you go 💛" },
+          { id: "bs_wish3", label: "Birthday Wish 3", type: "text" as const, defaultValue: "May this chapter of your life be your most magical, most beautiful yet ✨" },
+        ],
+      },
+      {
+        slideNumber: 3,
+        title: "Photo Album & Playlist",
+        description: "3 polaroid photos with captions + 3 songs in a playlist",
+        fields: [
+          { id: "bs_p_img1", label: "Photo 1", type: "image" as const, defaultValue: "https://picsum.photos/seed/bday1/400/500" },
+          { id: "bs_p_cap1", label: "Photo 1 Caption", type: "text" as const, defaultValue: "Our first adventure together 🌊" },
+          { id: "bs_p_song1", label: "Song 1 Title", type: "text" as const, defaultValue: "Our Song" },
+          { id: "bs_p_artist1", label: "Song 1 Artist", type: "text" as const, defaultValue: "Special Vibe" },
+          { id: "bs_p_url1", label: "Song 1 Audio URL", type: "text" as const, defaultValue: "" },
+          { id: "bs_p_img2", label: "Photo 2", type: "image" as const, defaultValue: "https://picsum.photos/seed/bday2/400/600" },
+          { id: "bs_p_cap2", label: "Photo 2 Caption", type: "text" as const, defaultValue: "The day we laughed till we cried 😂" },
+          { id: "bs_p_song2", label: "Song 2 Title", type: "text" as const, defaultValue: "Beautiful" },
+          { id: "bs_p_artist2", label: "Song 2 Artist", type: "text" as const, defaultValue: "Forever Mood" },
+          { id: "bs_p_url2", label: "Song 2 Audio URL", type: "text" as const, defaultValue: "" },
+          { id: "bs_p_img3", label: "Photo 3", type: "image" as const, defaultValue: "https://picsum.photos/seed/bday3/400/500" },
+          { id: "bs_p_cap3", label: "Photo 3 Caption", type: "text" as const, defaultValue: "This moment is everything 💕" },
+          { id: "bs_p_song3", label: "Song 3 Title", type: "text" as const, defaultValue: "Always" },
+          { id: "bs_p_artist3", label: "Song 3 Artist", type: "text" as const, defaultValue: "Always Yours" },
+          { id: "bs_p_url3", label: "Song 3 Audio URL", type: "text" as const, defaultValue: "" },
+        ],
+      },
+      {
+        slideNumber: 4,
+        title: "Scratch Card Gift",
+        description: "Scratch to reveal a Myntra/brand gift code",
+        fields: [
+          { id: "bs_gift_brand", label: "Gift Brand (e.g. Myntra)", type: "text" as const, defaultValue: "Myntra" },
+          { id: "bs_gift_code", label: "Gift Code", type: "text" as const, defaultValue: "BDAY2025LOVE" },
+          { id: "bs_gift_worth", label: "Gift Worth (₹)", type: "text" as const, defaultValue: "500" },
+          { id: "bs_gift_valid", label: "Valid Till", type: "text" as const, defaultValue: "31 Dec 2025" },
+        ],
+      },
+      {
+        slideNumber: 5,
+        title: "Birthday Letter + Seal",
+        description: "A heartfelt letter with animated wax seal stamp",
+        fields: [
+          { id: "bs_l_greeting", label: "Letter Greeting", type: "text" as const, defaultValue: "Happy Birthday, my favorite person." },
+          { id: "bs_l_msg", label: "Main Message", type: "textarea" as const, defaultValue: "Thanks for coming into my life and making it better with your presence." },
+          { id: "bs_l_closing", label: "Closing Line", type: "textarea" as const, defaultValue: "Here's to your laughter, your light, and every wish I'm quietly making for you tonight." },
+          { id: "bs_l_signoff", label: "Sign Off", type: "text" as const, defaultValue: "— with all my heart ❤" },
+        ],
+      },
+      {
+        slideNumber: 6,
+        title: "Grand Outro",
+        description: "Cinematic final screen with confetti, frosted glass card & final message",
+        fields: [
+          { id: "bs_final_msg", label: "Final Message", type: "textarea" as const, defaultValue: "You make the world a more beautiful place just by being in it. Thank you for being you. Here's to you — the most incredible person I know. Happy Birthday, always and forever." },
+        ],
+      },
+    ],
+  },
 ];
 
 // ─── LOCALSTORAGE HELPERS ─────────────────────────────────────────────────────
