@@ -1186,6 +1186,12 @@ export const PRODUCT_REGISTRY: Product[] = [
       },
       {
         slideNumber: 2,
+        title: "3D Cake Cutting",
+        description: "Interactive 3D cake you can rotate and cut",
+        fields: [],
+      },
+      {
+        slideNumber: 3,
         title: "Fireworks & Wishes",
         description: "Canvas fireworks with 3 custom birthday wish messages",
         fields: [
@@ -1195,29 +1201,20 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 3,
-        title: "Photo Album & Playlist",
-        description: "3 polaroid photos with captions + 3 songs in a playlist",
+        slideNumber: 4,
+        title: "Photo Album",
+        description: "3 polaroid photos with custom captions in a beautiful masonry grid layout",
         fields: [
           { id: "bs_p_img1", label: "Photo 1", type: "image" as const, defaultValue: "https://picsum.photos/seed/bday1/400/500" },
           { id: "bs_p_cap1", label: "Photo 1 Caption", type: "text" as const, defaultValue: "Our first adventure together 🌊" },
-          { id: "bs_p_song1", label: "Song 1 Title", type: "text" as const, defaultValue: "Our Song" },
-          { id: "bs_p_artist1", label: "Song 1 Artist", type: "text" as const, defaultValue: "Special Vibe" },
-          { id: "bs_p_url1", label: "Song 1 Audio URL", type: "text" as const, defaultValue: "" },
           { id: "bs_p_img2", label: "Photo 2", type: "image" as const, defaultValue: "https://picsum.photos/seed/bday2/400/600" },
           { id: "bs_p_cap2", label: "Photo 2 Caption", type: "text" as const, defaultValue: "The day we laughed till we cried 😂" },
-          { id: "bs_p_song2", label: "Song 2 Title", type: "text" as const, defaultValue: "Beautiful" },
-          { id: "bs_p_artist2", label: "Song 2 Artist", type: "text" as const, defaultValue: "Forever Mood" },
-          { id: "bs_p_url2", label: "Song 2 Audio URL", type: "text" as const, defaultValue: "" },
           { id: "bs_p_img3", label: "Photo 3", type: "image" as const, defaultValue: "https://picsum.photos/seed/bday3/400/500" },
           { id: "bs_p_cap3", label: "Photo 3 Caption", type: "text" as const, defaultValue: "This moment is everything 💕" },
-          { id: "bs_p_song3", label: "Song 3 Title", type: "text" as const, defaultValue: "Always" },
-          { id: "bs_p_artist3", label: "Song 3 Artist", type: "text" as const, defaultValue: "Always Yours" },
-          { id: "bs_p_url3", label: "Song 3 Audio URL", type: "text" as const, defaultValue: "" },
         ],
       },
       {
-        slideNumber: 4,
+        slideNumber: 5,
         title: "Scratch Card Gift",
         description: "Scratch to reveal a Myntra/brand gift code",
         fields: [
@@ -1228,7 +1225,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 5,
+        slideNumber: 6,
         title: "Birthday Letter + Seal",
         description: "A heartfelt letter with animated wax seal stamp",
         fields: [
@@ -1239,7 +1236,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 6,
+        slideNumber: 7,
         title: "Grand Outro",
         description: "Cinematic final screen with confetti, frosted glass card & final message",
         fields: [

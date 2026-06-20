@@ -3,6 +3,10 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import ScratchCard from "./ScratchCard";
 import SongLibraryPopup from "@/components/SongLibraryPopup";
 import ImageUploader from "@/components/ImageCropperUploader";
+import { Suspense } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import ThreeDScene from "./ThreeDScene";
+import PolaroidCard from "./PolaroidCard";
 
 /* ─────────────────────────────────────────
    TYPES
@@ -23,7 +27,7 @@ function d(data: Record<string, string>, key: string, def = "") {
 }
 
 /** Editable text field — click to edit in editor, plain text in view */
-function ET({
+export function ET({
   fid, data, onChange, editMode = false, def = "", multiline = false, darkText = false,
 }: {
   fid: string; data: Record<string, string>; onChange?: (id: string, v: string) => void;
@@ -187,7 +191,7 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
       {bgSongUrl && !editMode && <audio src={bgSongUrl} autoPlay loop style={{display:"none"}} />}
 
       {/* Chapter Progress */}
-      <ChapterNav total={7} active={activeChapter} onSelect={scrollTo} />
+      <ChapterNav total={8} active={activeChapter} onSelect={scrollTo} />
 
       {/* Song Library */}
       {showSongLibrary && (
@@ -215,37 +219,43 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
         onNext={() => scrollTo(2)}
       />
 
+      {/* CHAPTER 2.5 — THREE D SCENE */}
+      <Chapter2_5
+        id="bs-chapter-2" ref={setRef(2)} data={2}
+        onNext={() => scrollTo(3)}
+      />
+
       {/* CHAPTER 3 — FIREWORKS */}
       <Chapter3
-        id="bs-chapter-2" ref={setRef(2)} data={2}
+        id="bs-chapter-3" ref={setRef(3)} data={3}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(3)}
+        onNext={() => scrollTo(4)}
       />
 
       {/* CHAPTER 4 — ALBUM */}
       <Chapter4
-        id="bs-chapter-3" ref={setRef(3)} data={3}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(4)} onSongLibrary={openSongLibrary}
-      />
-
-      {/* CHAPTER 5 — SCRATCH CARD */}
-      <Chapter5
         id="bs-chapter-4" ref={setRef(4)} data={4}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
         onNext={() => scrollTo(5)}
       />
 
-      {/* CHAPTER 6 — LETTER / SEAL */}
-      <Chapter6
+      {/* CHAPTER 5 — SCRATCH CARD */}
+      <Chapter5
         id="bs-chapter-5" ref={setRef(5)} data={5}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
         onNext={() => scrollTo(6)}
       />
 
+      {/* CHAPTER 6 — LETTER / SEAL */}
+      <Chapter6
+        id="bs-chapter-6" ref={setRef(6)} data={6}
+        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+        onNext={() => scrollTo(7)}
+      />
+
       {/* CHAPTER 7 — OUTRO */}
       <Chapter7
-        id="bs-chapter-6" ref={setRef(6)} data={6}
+        id="bs-chapter-7" ref={setRef(7)} data={7}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
       />
     </div>
@@ -434,6 +444,27 @@ const Chapter2 = React.forwardRef<HTMLElement, any>(function Chapter2({ id, cust
 });
 
 /* ─────────────────────────────────────────
+   CH2.5 — 3D CAKE SCENE
+───────────────────────────────────────── */
+const Chapter2_5 = React.forwardRef<HTMLElement, any>(function Chapter2_5({ id, onNext }, ref) {
+  const [fade, setFade] = useState(false);
+  const triggerNext = () => {
+    setFade(true);
+    setTimeout(() => { onNext(); setTimeout(() => setFade(false), 600); }, 900);
+  };
+  return (
+    <section id={id} data-chapter="3" ref={ref as any} className="bs-snap" style={{ background: "#0F172A", position:"relative", overflow:"hidden" }}>
+      <Suspense fallback={<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff"}}>Loading...</div>}>
+        <ThreeDScene onCut={triggerNext} />
+      </Suspense>
+      <AnimatePresence>
+        {fade && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} style={{ position: "fixed", inset: 0, zIndex: 600, background: "black", pointerEvents: "none" }} />}
+      </AnimatePresence>
+    </section>
+  );
+});
+
+/* ─────────────────────────────────────────
    CH3 — FIREWORKS + FADING MESSAGES
 ───────────────────────────────────────── */
 const Chapter3 = React.forwardRef<HTMLElement, any>(function Chapter3({ id, customData, editMode, onFieldChange, onNext }, ref) {
@@ -483,7 +514,7 @@ const Chapter3 = React.forwardRef<HTMLElement, any>(function Chapter3({ id, cust
   const m = messages[Math.min(msgIdx, messages.length-1)];
 
   return (
-    <section id={id} data-chapter="2" ref={(el) => { (ref as any)(el); (sectionRef as any).current = el; }} className="bs-snap"
+    <section id={id} data-chapter="3" ref={(el) => { (ref as any)(el); (sectionRef as any).current = el; }} className="bs-snap"
       style={{ background:"radial-gradient(ellipse at top, #1e1b4b 0%, #0F172A 70%)", position:"relative" }}>
       <canvas ref={canvasRef} style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:1 }} />
       
@@ -522,34 +553,18 @@ const Chapter3 = React.forwardRef<HTMLElement, any>(function Chapter3({ id, cust
 });
 
 /* ─────────────────────────────────────────
-   CH4 — PHOTO ALBUM + SONG PLAYLIST
+   CH4 — PHOTO ALBUM (MASONRY)
 ───────────────────────────────────────── */
-const Chapter4 = React.forwardRef<HTMLElement, any>(function Chapter4({ id, customData, editMode, onFieldChange, onNext, onSongLibrary }, ref) {
-  const [activePolaroid, setActivePolaroid] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
+const Chapter4 = React.forwardRef<HTMLElement, any>(function Chapter4({ id, customData, editMode, onFieldChange, onNext }, ref) {
   const photos = [
-    { imgFid:"bs_p_img1", capFid:"bs_p_cap1", songFid:"bs_p_song1", artistFid:"bs_p_artist1", urlFid:"bs_p_url1", def_img:"https://picsum.photos/seed/bday1/400/500", def_cap:"Our first adventure together 🌊", def_song:"Our Song", def_artist:"Special Vibe" },
-    { imgFid:"bs_p_img2", capFid:"bs_p_cap2", songFid:"bs_p_song2", artistFid:"bs_p_artist2", urlFid:"bs_p_url2", def_img:"https://picsum.photos/seed/bday2/400/600", def_cap:"The day we laughed till we cried 😂", def_song:"Beautiful", def_artist:"Forever Mood" },
-    { imgFid:"bs_p_img3", capFid:"bs_p_cap3", songFid:"bs_p_song3", artistFid:"bs_p_artist3", urlFid:"bs_p_url3", def_img:"https://picsum.photos/seed/bday3/400/500", def_cap:"This moment is everything 💕", def_song:"Always", def_artist:"Always Yours" },
+    { imgFid:"bs_p_img1", capFid:"bs_p_cap1", def_img:"https://picsum.photos/seed/bday1/400/500", def_cap:"Our first adventure together 🌊" },
+    { imgFid:"bs_p_img2", capFid:"bs_p_cap2", def_img:"https://picsum.photos/seed/bday2/400/600", def_cap:"The day we laughed till we cried 😂" },
+    { imgFid:"bs_p_img3", capFid:"bs_p_cap3", def_img:"https://picsum.photos/seed/bday3/400/500", def_cap:"This moment is everything 💕" },
   ];
 
-  const active = photos[activePolaroid];
-  const activeUrl = d(customData, active.urlFid);
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (playing) { audioRef.current.pause(); setPlaying(false); }
-    else { audioRef.current.play().then(() => setPlaying(true)).catch(console.error); }
-  };
-
-  const rotations = [-5, 3, -4, 6, -3, 5, -6, 4];
-
   return (
-    <section id={id} data-chapter="3" ref={ref as any} className="bs-snap"
+    <section id={id} data-chapter="4" ref={ref as any} className="bs-snap"
       style={{ background:"linear-gradient(180deg, #FFFBF5 0%, rgba(253,230,138,0.13) 100%)", padding:"60px 20px" }}>
-      {/* Header */}
       <div style={{ textAlign:"center", maxWidth:700, margin:"0 auto" }}>
         <div className="bs-spin-slow" style={{ display:"inline-block", fontSize:48 }}>📷</div>
         <h2 className="bs-font-display" style={{ fontSize:"clamp(28px,5vw,48px)", fontWeight:700, color:"#1A1A2E", marginTop:12 }}>
@@ -561,55 +576,26 @@ const Chapter4 = React.forwardRef<HTMLElement, any>(function Chapter4({ id, cust
         <div style={{ height:2, width:200, background:"linear-gradient(90deg, transparent, #E91E8C, #F59E0B, transparent)", margin:"16px auto 0" }} />
       </div>
 
-      {/* Polaroid + Playlist grid */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:24, maxWidth:900, margin:"40px auto 0" }}>
-        {/* Active Polaroid */}
-        <div style={{ background:"#fff", padding:"16px 16px 48px", boxShadow:"0 8px 32px rgba(0,0,0,0.12)", borderRadius:4, transform:`rotate(${rotations[activePolaroid]}deg)`, transition:"transform 0.4s, box-shadow 0.4s", maxWidth:300, margin:"0 auto" }}
-          onMouseEnter={e => { e.currentTarget.style.transform="rotate(0deg)"; e.currentTarget.style.boxShadow="0 24px 64px rgba(0,0,0,0.25)"; }}
-          onMouseLeave={e => { e.currentTarget.style.transform=`rotate(${rotations[activePolaroid]}deg)`; e.currentTarget.style.boxShadow="0 8px 32px rgba(0,0,0,0.12)"; }}>
-          <img src={d(customData, active.imgFid, active.def_img)} alt="Memory" style={{ width:"100%", height:200, objectFit:"cover", borderRadius:2, display:"block" }} />
-          <p className="bs-font-script" style={{ textAlign:"center", marginTop:12, fontSize:18, color:"#4A4A68" }}>
-            <ET fid={active.capFid} data={customData} onChange={onFieldChange} editMode={editMode} def={active.def_cap} />
-          </p>
-          {editMode && <div style={{ marginTop:12 }}><ImageUploader fid={active.imgFid} data={customData} onChange={onFieldChange} defaultSrc={active.def_img} /></div>}
+      <div style={{ marginTop:48, maxWidth:1152, margin:"48px auto 0" }}>
+        {/* Desktop masonry */}
+        <div className="hidden md:block" style={{ columnCount: 3, columnGap: 24 }}>
+          {photos.map((p, i) => (
+            <PolaroidCard key={i} index={i} src={d(customData, p.imgFid, p.def_img)} caption={d(customData, p.capFid, p.def_cap)} captionId={p.capFid} imageId={p.imgFid} editMode={editMode} onFieldChange={onFieldChange} />
+          ))}
         </div>
-
-        {/* Playlist */}
-        <div style={{ background:"rgba(15,23,42,0.95)", borderRadius:24, padding:"28px 24px", color:"#fff", display:"flex", flexDirection:"column", gap:12 }}>
-          <div style={{ fontSize:11, letterSpacing:"0.3em", color:"rgba(255,255,255,0.5)", textTransform:"uppercase", marginBottom:4 }}>Memories Playlist</div>
-          <h3 className="bs-font-display" style={{ fontSize:26, fontWeight:700, color:"#fff", marginBottom:8 }}>Songs for you 🎵</h3>
-          {photos.map((p, i) => {
-            const isActive = i === activePolaroid;
-            return (
-              <div key={i} style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <button onClick={() => { setActivePolaroid(i); if (!editMode && d(customData, p.urlFid)) { setPlaying(true); setTimeout(() => audioRef.current?.play().catch(console.error), 50); } }}
-                  style={{ flex:1, display:"flex", alignItems:"center", gap:12, padding:"12px 16px", borderRadius:16, cursor:"pointer", border:"none", background: isActive ? "linear-gradient(90deg, #b84c8a, #823e8e)" : "rgba(255,255,255,0.05)", transition:"all 0.2s", textAlign:"left" }}>
-                  <div style={{ width:36, height:36, borderRadius:"50%", border:"1px solid rgba(255,255,255,0.6)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                    {isActive && playing ? "⏸" : "▶"}
-                  </div>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:15, fontWeight:600, color:"#fff" }}>
-                      <ET fid={p.songFid} data={customData} onChange={onFieldChange} editMode={editMode} def={p.def_song} />
-                    </div>
-                    <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)" }}>
-                      <ET fid={p.artistFid} data={customData} onChange={onFieldChange} editMode={editMode} def={p.def_artist} />
-                    </div>
-                  </div>
-                </button>
-                {editMode && (
-                  <button onClick={() => { setActivePolaroid(i); onSongLibrary(p.urlFid.replace("_url","")); }}
-                    style={{ padding:"5px 10px", borderRadius:8, fontSize:11, fontWeight:600, border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"#fff", cursor:"pointer", flexShrink:0 }}>
-                    Choose Audio
-                  </button>
-                )}
-              </div>
-            );
-          })}
-          <button className="bs-cta-btn" style={{ width:"100%", marginTop:8, borderRadius:16, padding:"14px 0" }} onClick={() => !editMode && onNext()}>Continue →</button>
+        {/* Mobile horizontal scroll */}
+        <div className="md:hidden flex gap-5 px-1 pb-4" style={{ overflowX: "auto", scrollSnapType: "x mandatory", display:"flex" }}>
+          {photos.map((p, i) => (
+            <div key={i} style={{ scrollSnapAlign: "start", flexShrink: 0 }}>
+              <PolaroidCard index={i} src={d(customData, p.imgFid, p.def_img)} caption={d(customData, p.capFid, p.def_cap)} captionId={p.capFid} imageId={p.imgFid} editMode={editMode} onFieldChange={onFieldChange} />
+            </div>
+          ))}
         </div>
       </div>
 
-      {activeUrl && <audio ref={audioRef} src={activeUrl} onEnded={() => setPlaying(false)} />}
+      <div style={{ display:"flex", justifyContent:"center", marginTop:40 }}>
+        <button className="bs-cta-btn" onClick={onNext}>🎁 Tap to reveal your gift!</button>
+      </div>
     </section>
   );
 });
@@ -638,7 +624,7 @@ const Chapter5 = React.forwardRef<HTMLElement, any>(function Chapter5({ id, cust
   };
 
   return (
-    <section id={id} data-chapter="4" ref={ref as any} className="bs-snap"
+    <section id={id} data-chapter="7" ref={ref as any} className="bs-snap"
       style={{ background:"linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"60px 20px", position:"relative" }}>
       <div style={{ position:"absolute", inset:0, overflow:"hidden", pointerEvents:"none" }}>
         {sparkles.map((s,i) => (
@@ -718,7 +704,7 @@ const Chapter6 = React.forwardRef<HTMLElement, any>(function Chapter6({ id, cust
   };
 
   return (
-    <section id={id} data-chapter="5" ref={ref as any} className="bs-snap"
+    <section id={id} data-chapter="7" ref={ref as any} className="bs-snap"
       style={{ background:"linear-gradient(180deg, #0F172A 0%, #1a0a2e 100%)", display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px", position:"relative", overflow:"hidden" }}>
       <style>{`
         @keyframes seal-slam { 0%{transform:scale(3.5) rotate(-45deg);opacity:0;filter:blur(6px)} 70%{transform:scale(0.9) rotate(5deg);opacity:1;filter:none} 85%{transform:scale(1.15) rotate(-3deg)} 100%{transform:scale(1) rotate(-5deg)} }
@@ -789,7 +775,7 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
   })), []);
 
   return (
-    <section id={id} data-chapter="6" ref={ref as any} className="bs-snap"
+    <section id={id} data-chapter="7" ref={ref as any} className="bs-snap"
       style={{ background:"linear-gradient(135deg, #E91E8C, #7C3AED, #0F172A, #C2185B)", backgroundSize:"400% 400%", animation:"bs-gradient-shift 8s ease infinite", position:"relative", overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px" }}>
 
       {/* Confetti rain */}

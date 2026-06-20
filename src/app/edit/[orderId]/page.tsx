@@ -128,11 +128,12 @@ const CONFESS_SLIDES = [
 const SERENADE_SLIDES = [
   { n: 0, label: "Envelope" },
   { n: 1, label: "Cake Box" },
-  { n: 2, label: "Fireworks" },
-  { n: 3, label: "Album" },
-  { n: 4, label: "Scratch Card" },
-  { n: 5, label: "Letter" },
-  { n: 6, label: "Outro" },
+  { n: 2, label: "3D Cake" },
+  { n: 3, label: "Fireworks" },
+  { n: 4, label: "Album" },
+  { n: 5, label: "Scratch Card" },
+  { n: 6, label: "Letter" },
+  { n: 7, label: "Outro" },
 ];
 
 function getSlideList(productId: string) {
