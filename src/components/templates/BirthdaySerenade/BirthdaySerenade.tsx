@@ -231,7 +231,9 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
       {/* CHAPTER 2.5 — THREE D SCENE */}
       <Chapter2_5
         id="bs-chapter-3" ref={setRef(3)} data={3}
-        recipientName={d(customData, "bs_recipient") || "Beautiful"}
+        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+        recipientName={d(customData, "bs_cake_name") || d(customData, "bs_recipient") || "Beautiful"}
+        cakeStickUrl={d(customData, "bs_cake_stick")}
         onNext={() => scrollTo(4)}
       />
 
@@ -479,17 +481,56 @@ const Chapter2 = React.forwardRef<HTMLElement, any>(function Chapter2({ id, cust
 /* ─────────────────────────────────────────
    CH2.5 — 3D CAKE SCENE
 ───────────────────────────────────────── */
-const Chapter2_5 = React.forwardRef<HTMLElement, any>(function Chapter2_5({ id, onNext, recipientName }, ref) {
+const Chapter2_5 = React.forwardRef<HTMLElement, any>(function Chapter2_5({ id, customData, editMode, onFieldChange, onNext, recipientName, cakeStickUrl }, ref) {
   const [fade, setFade] = useState(false);
   const triggerNext = () => {
     setFade(true);
     setTimeout(() => { onNext(); setTimeout(() => setFade(false), 600); }, 900);
   };
+  
+  const sticks = ['61d180843a856e0004c63347.png', 'barbie-stick.png', 'naruto-stick.png'];
+  
   return (
     <section id={id} data-chapter="3" ref={ref as any} className="bs-snap" style={{ background: "#0F172A", position:"relative", overflow:"hidden" }}>
       <Suspense fallback={<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff"}}>Loading...</div>}>
-        <ThreeDScene onCut={triggerNext} recipientName={recipientName} />
+        <ThreeDScene onCut={triggerNext} recipientName={recipientName} cakeStickUrl={cakeStickUrl} />
       </Suspense>
+      
+      {editMode && (
+        <>
+          {/* Editable Name over the cake */}
+          <div style={{ position: "absolute", bottom: 120, left: "50%", transform: "translateX(-50%)", zIndex: 50, textAlign: "center", pointerEvents: "auto" }}>
+            <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, marginBottom: 4 }}>Edit Name on Cake</div>
+            <div style={{ background: "rgba(0,0,0,0.5)", padding: "4px 12px", borderRadius: 8 }}>
+              <ET fid="bs_cake_name" data={customData} onChange={onFieldChange} editMode={editMode} def={recipientName} />
+            </div>
+          </div>
+          
+          {/* Stick selector widget */}
+          <div style={{ position: "absolute", top: 80, right: 20, zIndex: 50, background: "rgba(0,0,0,0.7)", padding: "12px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", pointerEvents: "auto", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+            <div style={{ color: "white", fontSize: 12, fontWeight: 600 }}>Select Topper</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {sticks.map(f => (
+                <div 
+                  key={f}
+                  onClick={() => onFieldChange?.("bs_cake_stick", f)}
+                  style={{ 
+                    width: 48, height: 48, 
+                    borderRadius: 8, 
+                    cursor: "pointer", 
+                    background: "rgba(255,255,255,0.1)",
+                    border: cakeStickUrl === f ? "2px solid #E91E8C" : "2px solid transparent",
+                    padding: 4,
+                    display: "flex", alignItems: "center", justifyContent: "center"
+                  }}
+                >
+                  <img src={`/templates/birthday-serenade/sticks/${f}`} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} alt="Stick" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
       <AnimatePresence>
         {fade && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} style={{ position: "fixed", inset: 0, zIndex: 600, background: "black", pointerEvents: "none" }} />}
       </AnimatePresence>

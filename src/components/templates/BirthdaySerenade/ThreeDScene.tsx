@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Stars, Text, Float, Sparkles } from "@react-three/drei";
+import { OrbitControls, Stars, Text, Float, Sparkles, Image } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,7 +55,7 @@ function PearlRing({ tierRadius, y, count, color, scale = 1 }: { tierRadius: num
   );
 }
 
-function Cake({ onClick, recipientName }: { onClick: () => void, recipientName?: string }) {
+function Cake({ onClick, recipientName, cakeStickUrl }: { onClick: () => void, recipientName?: string, cakeStickUrl?: string }) {
   return (
     <group onClick={onClick}>
       {/* Elegant Gold Plate - Made wider */}
@@ -117,16 +117,28 @@ function Cake({ onClick, recipientName }: { onClick: () => void, recipientName?:
         })}
       </group>
 
-      {/* Candles */}
+      {/* Candles on 2nd Tier */}
       {[
-        { p: [0.35, 2.55, 0.35] as [number, number, number], c: "#FFFFFF" },
-        { p: [-0.35, 2.55, 0.35] as [number, number, number], c: "#FFFFFF" },
-        { p: [0.35, 2.55, -0.35] as [number, number, number], c: "#FFFFFF" },
-        { p: [-0.35, 2.55, -0.35] as [number, number, number], c: "#FFFFFF" },
-        { p: [0, 2.55, 0] as [number, number, number], c: "#FBBF24" }, // Center gold candle
+        { p: [0.9, 1.85, 0.9] as [number, number, number], c: "#FFFFFF" },
+        { p: [-0.9, 1.85, 0.9] as [number, number, number], c: "#FFFFFF" },
+        { p: [0.9, 1.85, -0.9] as [number, number, number], c: "#FFFFFF" },
+        { p: [-0.9, 1.85, -0.9] as [number, number, number], c: "#FFFFFF" },
+        { p: [0, 1.85, 1.1] as [number, number, number], c: "#FBBF24" }, 
       ].map((c, i) => (
         <Candle key={i} position={c.p} color={c.c} idx={i} />
       ))}
+
+      {/* Stick Topper on Top Tier */}
+      {cakeStickUrl && (
+        <Float speed={1.5} rotationIntensity={0} floatIntensity={0.2}>
+          <Image
+            url={`/templates/birthday-serenade/sticks/${cakeStickUrl}`}
+            position={[0, 3.2, 0]}
+            scale={[1.5, 1.5]}
+            transparent
+          />
+        </Float>
+      )}
 
         {/* Elegant 3D Happy Birthday Plaque */}
       <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
@@ -346,7 +358,7 @@ function FloatingHBD({ visible }: { visible: boolean }) {
   );
 }
 
-export default function ThreeDScene({ onCut, recipientName }: { onCut: () => void, recipientName?: string }) {
+export default function ThreeDScene({ onCut, recipientName, cakeStickUrl }: { onCut: () => void, recipientName?: string, cakeStickUrl?: string }) {
   const [cutting, setCutting] = useState(false);
   const [sliced, setSliced] = useState(false);
   const [confetti, setConfetti] = useState(false);
@@ -396,7 +408,7 @@ export default function ThreeDScene({ onCut, recipientName }: { onCut: () => voi
         <Stars radius={80} depth={40} count={4000} factor={5} saturation={0.5} fade speed={1.5} />
         <Sparkles count={100} scale={14} size={4} speed={0.4} opacity={0.6} color="#F9A8D4" />
 
-        <Cake onClick={handleCut} recipientName={recipientName} />
+        <Cake onClick={handleCut} recipientName={recipientName} cakeStickUrl={cakeStickUrl} />
         <Knife cutting={cutting} />
         <Slice visible={sliced} />
         <Confetti visible={confetti} />

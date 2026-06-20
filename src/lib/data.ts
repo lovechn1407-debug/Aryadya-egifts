@@ -1195,7 +1195,10 @@ export const PRODUCT_REGISTRY: Product[] = [
         slideNumber: 3,
         title: "3D Cake Cutting",
         description: "Interactive 3D cake you can rotate and cut",
-        fields: [],
+        fields: [
+          { id: "bs_cake_name", label: "Name on Cake", type: "text" as const, defaultValue: "Beautiful" },
+          { id: "bs_cake_stick", label: "Cake Stick Topper", type: "text" as const, defaultValue: "61d180843a856e0004c63347.png" },
+        ],
       },
       {
         slideNumber: 4,
