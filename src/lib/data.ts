@@ -1166,18 +1166,25 @@ export const PRODUCT_REGISTRY: Product[] = [
     slides: [
       {
         slideNumber: 0,
-        title: "Envelope & Letter",
-        description: "Animated envelope with sliding letter — recipient name, sender name, letter message & background music",
+        title: "Background Music",
+        description: "Choose a beautiful background song for your gift.",
         fields: [
-          { id: "bs_recipient", label: "Recipient Name", type: "text" as const, defaultValue: "Priya" },
-          { id: "bs_sender", label: "Sender Name", type: "text" as const, defaultValue: "Rohan" },
-          { id: "bs_letter_msg", label: "Letter Message", type: "textarea" as const, defaultValue: "Every single day I spend knowing you exist in this world feels like a gift I never deserved. You walk into a room and everything gets a little warmer. Happy Birthday, my love." },
           { id: "bs_bg_song_name", label: "Background Song Name", type: "text" as const, defaultValue: "" },
           { id: "bs_bg_song_url", label: "Background Song URL", type: "text" as const, defaultValue: "" },
         ],
       },
       {
         slideNumber: 1,
+        title: "Envelope & Letter",
+        description: "Animated envelope with sliding letter — recipient name, sender name & letter message",
+        fields: [
+          { id: "bs_recipient", label: "Recipient Name", type: "text" as const, defaultValue: "Priya" },
+          { id: "bs_sender", label: "Sender Name", type: "text" as const, defaultValue: "Rohan" },
+          { id: "bs_letter_msg", label: "Letter Message", type: "textarea" as const, defaultValue: "Every single day I spend knowing you exist in this world feels like a gift I never deserved. You walk into a room and everything gets a little warmer. Happy Birthday, my love." },
+        ],
+      },
+      {
+        slideNumber: 2,
         title: "Cake Box Opening",
         description: "Animated gift box with lid opening + video overlay transition",
         fields: [
@@ -1185,13 +1192,13 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 2,
+        slideNumber: 3,
         title: "3D Cake Cutting",
         description: "Interactive 3D cake you can rotate and cut",
         fields: [],
       },
       {
-        slideNumber: 3,
+        slideNumber: 4,
         title: "Fireworks & Wishes",
         description: "Canvas fireworks with 3 custom birthday wish messages",
         fields: [
@@ -1201,7 +1208,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 4,
+        slideNumber: 5,
         title: "Photo Album",
         description: "3 polaroid photos with custom captions in a beautiful masonry grid layout",
         fields: [
@@ -1214,7 +1221,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 5,
+        slideNumber: 6,
         title: "Scratch Card Gift",
         description: "Scratch to reveal a Myntra/brand gift code",
         fields: [
@@ -1225,7 +1232,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 6,
+        slideNumber: 7,
         title: "Birthday Letter + Seal",
         description: "A heartfelt letter with animated wax seal stamp",
         fields: [
@@ -1236,7 +1243,7 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 7,
+        slideNumber: 8,
         title: "Grand Outro",
         description: "Cinematic final screen with confetti, frosted glass card & final message",
         fields: [

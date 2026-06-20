@@ -191,7 +191,7 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
       {bgSongUrl && !editMode && <audio src={bgSongUrl} autoPlay loop style={{display:"none"}} />}
 
       {/* Chapter Progress */}
-      <ChapterNav total={8} active={activeChapter} onSelect={scrollTo} />
+      <ChapterNav total={9} active={activeChapter} onSelect={scrollTo} />
 
       {/* Song Library */}
       {showSongLibrary && (
@@ -205,62 +205,99 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
         />
       )}
 
-      {/* CHAPTER 1 — ENVELOPE */}
-      <Chapter1
+      {/* CHAPTER 0 — BG MUSIC */}
+      <Chapter0
         id="bs-chapter-0" ref={setRef(0)} data={0}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
         onNext={() => scrollTo(1)} onSongLibrary={openSongLibrary}
       />
 
+      {/* CHAPTER 1 — ENVELOPE */}
+      <Chapter1
+        id="bs-chapter-1" ref={setRef(1)} data={1}
+        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+        onNext={() => scrollTo(2)} onSongLibrary={openSongLibrary}
+      />
+
       {/* CHAPTER 2 — CAKE BOX */}
       <Chapter2
-        id="bs-chapter-1" ref={setRef(1)} data={1}
+        id="bs-chapter-2" ref={setRef(2)} data={2}
         customData={customData} editMode={editMode}
-        onNext={() => scrollTo(2)}
+        onNext={() => scrollTo(3)}
       />
 
       {/* CHAPTER 2.5 — THREE D SCENE */}
       <Chapter2_5
-        id="bs-chapter-2" ref={setRef(2)} data={2}
-        onNext={() => scrollTo(3)}
+        id="bs-chapter-3" ref={setRef(3)} data={3}
+        onNext={() => scrollTo(4)}
       />
 
       {/* CHAPTER 3 — FIREWORKS */}
       <Chapter3
-        id="bs-chapter-3" ref={setRef(3)} data={3}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(4)}
-      />
-
-      {/* CHAPTER 4 — ALBUM */}
-      <Chapter4
         id="bs-chapter-4" ref={setRef(4)} data={4}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
         onNext={() => scrollTo(5)}
       />
 
-      {/* CHAPTER 5 — SCRATCH CARD */}
-      <Chapter5
+      {/* CHAPTER 4 — ALBUM */}
+      <Chapter4
         id="bs-chapter-5" ref={setRef(5)} data={5}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
         onNext={() => scrollTo(6)}
       />
 
-      {/* CHAPTER 6 — LETTER / SEAL */}
-      <Chapter6
+      {/* CHAPTER 5 — SCRATCH CARD */}
+      <Chapter5
         id="bs-chapter-6" ref={setRef(6)} data={6}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
         onNext={() => scrollTo(7)}
       />
 
+      {/* CHAPTER 6 — LETTER / SEAL */}
+      <Chapter6
+        id="bs-chapter-7" ref={setRef(7)} data={7}
+        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+        onNext={() => scrollTo(8)}
+      />
+
       {/* CHAPTER 7 — OUTRO */}
       <Chapter7
-        id="bs-chapter-7" ref={setRef(7)} data={7}
+        id="bs-chapter-8" ref={setRef(8)} data={8}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
       />
     </div>
   );
 }
+
+/* ─────────────────────────────────────────
+   CH0 — BG MUSIC
+───────────────────────────────────────── */
+const Chapter0 = React.forwardRef<HTMLElement, any>(function Chapter0({ id, customData, editMode, onNext, onSongLibrary }, ref) {
+  const songName = d(customData, "bs_bg_song_name");
+  return (
+    <section id={id} data-chapter="8" ref={ref as any} className="bs-snap"
+      style={{ background:"#1A1A2E", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", padding:"40px 20px" }}>
+      <div style={{ textAlign: "center", color: "#fff", maxWidth: 400 }}>
+        <h2 className="bs-font-display" style={{ fontSize: 32, marginBottom: 16 }}>Set the Mood 🎵</h2>
+        <p className="bs-font-body" style={{ color: "rgba(255,255,255,0.7)", marginBottom: 32 }}>Choose a beautiful background song for your gift.</p>
+        
+        {editMode ? (
+          <button onClick={() => onSongLibrary("bs_bg_song")} style={{ padding: "12px 24px", borderRadius: 30, background: "linear-gradient(135deg, #E91E8C, #F59E0B)", border: "none", color: "#fff", fontWeight: "bold", cursor: "pointer", fontSize: 16 }}>
+            {songName ? `Selected: ${songName}` : "Choose Background Music"}
+          </button>
+        ) : (
+          <div style={{ padding: "12px 24px", borderRadius: 30, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}>
+            Playing: {songName || "Default Music"}
+          </div>
+        )}
+
+        <div style={{ marginTop: 40 }}>
+          <button className="bs-cta-btn" onClick={onNext}>Continue to Gift →</button>
+        </div>
+      </div>
+    </section>
+  );
+});
 
 /* ─────────────────────────────────────────
    CH1 — ENVELOPE & LETTER
@@ -276,7 +313,7 @@ const Chapter1 = React.forwardRef<HTMLElement, any>(function Chapter1({ id, cust
   const [showBgModal, setShowBgModal] = useState(false);
 
   const handleOpen = () => {
-    if (opened || editMode) return;
+    if (opened) return;
     setOpened(true);
     // Seal crack
     if (sealRef.current) {
@@ -312,14 +349,7 @@ const Chapter1 = React.forwardRef<HTMLElement, any>(function Chapter1({ id, cust
     <section id={id} data-chapter="0" ref={ref as any} className="bs-snap"
       style={{ background:"radial-gradient(ellipse at 20% 10%, #FFE0EC 0%, transparent 50%), radial-gradient(ellipse at 80% 90%, #FFF3C4 0%, transparent 55%), linear-gradient(180deg, #FFFBF5 0%, #FCE4EC 100%)", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", padding:"40px 20px", position:"relative" }}>
       
-      {/* Edit: BG music picker */}
-      {editMode && (
-        <div style={{ position:"absolute", top:16, left:16, zIndex:50 }}>
-          <button onClick={() => onSongLibrary("bs_bg_song")} style={{ padding:"6px 14px", borderRadius:8, background:"rgba(233,30,140,0.15)", border:"1px solid rgba(233,30,140,0.4)", color:"#E91E8C", fontSize:12, fontWeight:700, cursor:"pointer" }}>
-            🎵 Background Music {d(customData, "bs_bg_song_name") ? `(${d(customData, "bs_bg_song_name")})` : ""}
-          </button>
-        </div>
-      )}
+      
 
       {/* Decorative background confetti */}
       <div aria-hidden style={{ position:"absolute", inset:0, overflow:"hidden", pointerEvents:"none" }}>
@@ -339,7 +369,7 @@ const Chapter1 = React.forwardRef<HTMLElement, any>(function Chapter1({ id, cust
       {/* Envelope + Letter */}
       <div style={{ position:"relative", width:"min(320px, 85vw)" }}>
         {/* Letter (pops up from envelope) */}
-        <div ref={letterRef} style={{ position:"absolute", left:"50%", top:0, width:"min(440px, 92vw)", zIndex:5, opacity:0, transform:"translate(-50%, 0)" }}>
+        <div ref={letterRef} style={{ position:"absolute", left:"50%", top:0, width:"min(440px, 92vw)", zIndex:5, opacity:0, transform:"translate(-50%, 0)", pointerEvents: opened || editMode ? "auto" : "none" }}>
           <div className="bs-lined-paper bs-font-script"
             style={{ borderLeft:"3px solid #E91E8C", borderRadius:12, padding:28, boxShadow:"0 24px 64px rgba(0,0,0,0.18)" }}>
             <h3 style={{ fontSize:28, color:"#C2185B", marginBottom:12 }}>

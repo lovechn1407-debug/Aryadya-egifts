@@ -126,14 +126,15 @@ const CONFESS_SLIDES = [
 ];
 
 const SERENADE_SLIDES = [
-  { n: 0, label: "Envelope" },
-  { n: 1, label: "Cake Box" },
-  { n: 2, label: "3D Cake" },
-  { n: 3, label: "Fireworks" },
-  { n: 4, label: "Album" },
-  { n: 5, label: "Scratch Card" },
-  { n: 6, label: "Letter" },
-  { n: 7, label: "Outro" },
+  { n: 0, label: "BG Music" },
+  { n: 1, label: "Envelope" },
+  { n: 2, label: "Cake Box" },
+  { n: 3, label: "3D Cake" },
+  { n: 4, label: "Fireworks" },
+  { n: 5, label: "Album" },
+  { n: 6, label: "Scratch Card" },
+  { n: 7, label: "Letter" },
+  { n: 8, label: "Outro" },
 ];
 
 function getSlideList(productId: string) {
