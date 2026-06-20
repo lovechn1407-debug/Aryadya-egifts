@@ -128,14 +128,14 @@ function Cake({ onClick, recipientName }: { onClick: () => void, recipientName?:
         <Candle key={i} position={c.p} color={c.c} idx={i} />
       ))}
 
-      {/* Elegant 3D Happy Birthday Plaque */}
+        {/* Elegant 3D Happy Birthday Plaque */}
       <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
         <mesh position={[0, 1.3, 1.53]} rotation={[-0.05, 0, 0]}>
-          <boxGeometry args={[2.0, recipientName ? 0.8 : 0.5, 0.05]} />
+          <boxGeometry args={[2.0, 0.5, 0.05]} />
           <meshStandardMaterial color="#FFFFFF" metalness={0.1} roughness={0.2} />
         </mesh>
         <Text
-          position={[0, recipientName ? 1.45 : 1.3, 1.58]}
+          position={[0, 1.3, 1.58]}
           rotation={[-0.05, 0, 0]}
           fontSize={0.24}
           color="#D81B60"
@@ -145,20 +145,22 @@ function Cake({ onClick, recipientName }: { onClick: () => void, recipientName?:
         >
           Happy Birthday
         </Text>
-        {recipientName && (
-          <Text
-            position={[0, 1.15, 1.58]}
-            rotation={[-0.05, 0, 0]}
-            fontSize={0.3}
-            color="#E91E8C"
-            anchorX="center"
-            anchorY="middle"
-            maxWidth={1.8}
-          >
-            {recipientName}
-          </Text>
-        )}
       </Float>
+
+      {/* Recipient name written on the cream base of the first floor */}
+      {recipientName && (
+        <Text
+          position={[0, 0.45, 2.51]}
+          fontSize={0.4}
+          color="#FFFFFF"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.015}
+          outlineColor="#D81B60"
+        >
+          {recipientName}
+        </Text>
+      )}
     </group>
   );
 }
@@ -404,13 +406,24 @@ export default function ThreeDScene({ onCut, recipientName }: { onCut: () => voi
       <AnimatePresence>
         {!hintsHidden && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute top-12 left-1/2 -translate-x-1/2 text-white font-body text-sm bg-black/40 backdrop-blur px-5 py-3 rounded-full border border-white/10 shadow-xl pointer-events-none flex flex-col items-center gap-1"
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm pointer-events-none"
           >
-            <span className="font-semibold text-rose-200">🖐️ Drag to rotate the cake</span>
-            <span className="text-xs opacity-75">Pinch to zoom in or zoom out</span>
+            <div className="flex flex-col items-center gap-4 text-center px-6">
+              <div className="text-white font-body text-2xl font-bold flex items-center gap-3">
+                <span>↺</span>
+                <span>Drag to rotate</span>
+                <span>↻</span>
+              </div>
+              <div className="text-rose-200 font-body text-lg">
+                Pinch to zoom in or zoom out
+              </div>
+              <div className="mt-8 text-white/50 text-sm animate-pulse">
+                Tap anywhere to continue
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
