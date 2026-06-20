@@ -12,6 +12,7 @@ import RoyalWedding2 from "@/components/templates/RoyalWedding/RoyalWedding2";
 import DuduBirthday from "@/components/templates/DuduBirthday/DuduBirthday";
 import Propose3 from "@/components/templates/Propose3/Propose3";
 import Confess from "@/components/templates/Confess/Confess";
+import BirthdaySerenade from "@/components/templates/BirthdaySerenade/BirthdaySerenade";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { trackEvent } from "@/lib/analytics";
@@ -38,6 +39,8 @@ function renderTemplate(productId: string, customData: Record<string, string>, a
       return <Propose3 customData={customData} autoPlay={autoPlay} />;
     case "confess":
       return <Confess customData={customData} autoPlay={autoPlay} />;
+    case "birthday-serenade":
+      return <BirthdaySerenade customData={customData} autoPlay={autoPlay} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#fff" }}>

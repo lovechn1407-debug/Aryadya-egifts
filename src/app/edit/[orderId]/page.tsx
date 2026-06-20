@@ -13,6 +13,7 @@ import RoyalWedding2 from "@/components/templates/RoyalWedding/RoyalWedding2";
 import DuduBirthday from "@/components/templates/DuduBirthday/DuduBirthday";
 import Propose3 from "@/components/templates/Propose3/Propose3";
 import Confess from "@/components/templates/Confess/Confess";
+import BirthdaySerenade from "@/components/templates/BirthdaySerenade/BirthdaySerenade";
 import QRSharePopup from "@/components/QRSharePopup";
 import AdSequenceModal from "@/components/AdSequenceModal";
 import Link from "next/link";
@@ -124,6 +125,16 @@ const CONFESS_SLIDES = [
   { n: 7, label: "Promise" }
 ];
 
+const SERENADE_SLIDES = [
+  { n: 0, label: "Envelope" },
+  { n: 1, label: "Cake Box" },
+  { n: 2, label: "Fireworks" },
+  { n: 3, label: "Album" },
+  { n: 4, label: "Scratch Card" },
+  { n: 5, label: "Letter" },
+  { n: 6, label: "Outro" },
+];
+
 function getSlideList(productId: string) {
   if (productId === "lovers-enchanted-journey") return LOVERS_SLIDES;
   if (productId === "birthday-magic-box") return BIRTHDAY_SLIDES;
@@ -135,6 +146,7 @@ function getSlideList(productId: string) {
   if (productId === "pastel-dudu-birthday") return DUDU_BIRTHDAY_SLIDES;
   if (productId === "propose3") return PROPOSE3_SLIDES;
   if (productId === "confess") return CONFESS_SLIDES;
+  if (productId === "birthday-serenade") return SERENADE_SLIDES;
   return [];
 }
 
@@ -237,6 +249,16 @@ function renderEditorTemplate(
   if (productId === "confess") {
     return (
       <Confess
+        customData={customData}
+        editMode={true}
+        onFieldChange={onFieldChange}
+        forcedSlide={forcedSlide}
+      />
+    );
+  }
+  if (productId === "birthday-serenade") {
+    return (
+      <BirthdaySerenade
         customData={customData}
         editMode={true}
         onFieldChange={onFieldChange}
