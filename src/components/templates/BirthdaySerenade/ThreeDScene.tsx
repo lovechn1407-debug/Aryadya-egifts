@@ -117,13 +117,13 @@ function Cake({ onClick, recipientName, cakeStickUrl }: { onClick: () => void, r
         })}
       </group>
 
-      {/* Candles on 2nd Tier */}
+      {/* Candles on 1st Tier */}
       {[
-        { p: [0.9, 1.85, 0.9] as [number, number, number], c: "#FFFFFF" },
-        { p: [-0.9, 1.85, 0.9] as [number, number, number], c: "#FFFFFF" },
-        { p: [0.9, 1.85, -0.9] as [number, number, number], c: "#FFFFFF" },
-        { p: [-0.9, 1.85, -0.9] as [number, number, number], c: "#FFFFFF" },
-        { p: [0, 1.85, 1.1] as [number, number, number], c: "#FBBF24" }, 
+        { p: [1.5, 0.85, 1.5] as [number, number, number], c: "#FFFFFF" },
+        { p: [-1.5, 0.85, 1.5] as [number, number, number], c: "#FFFFFF" },
+        { p: [1.5, 0.85, -1.5] as [number, number, number], c: "#FFFFFF" },
+        { p: [-1.5, 0.85, -1.5] as [number, number, number], c: "#FFFFFF" },
+        { p: [0, 0.85, 1.9] as [number, number, number], c: "#FBBF24" }, 
       ].map((c, i) => (
         <Candle key={i} position={c.p} color={c.c} idx={i} />
       ))}
