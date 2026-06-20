@@ -231,6 +231,7 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
       {/* CHAPTER 2.5 — THREE D SCENE */}
       <Chapter2_5
         id="bs-chapter-3" ref={setRef(3)} data={3}
+        recipientName={d(customData, "bs_recipient") || "Beautiful"}
         onNext={() => scrollTo(4)}
       />
 
@@ -478,7 +479,7 @@ const Chapter2 = React.forwardRef<HTMLElement, any>(function Chapter2({ id, cust
 /* ─────────────────────────────────────────
    CH2.5 — 3D CAKE SCENE
 ───────────────────────────────────────── */
-const Chapter2_5 = React.forwardRef<HTMLElement, any>(function Chapter2_5({ id, onNext }, ref) {
+const Chapter2_5 = React.forwardRef<HTMLElement, any>(function Chapter2_5({ id, onNext, recipientName }, ref) {
   const [fade, setFade] = useState(false);
   const triggerNext = () => {
     setFade(true);
@@ -487,7 +488,7 @@ const Chapter2_5 = React.forwardRef<HTMLElement, any>(function Chapter2_5({ id, 
   return (
     <section id={id} data-chapter="3" ref={ref as any} className="bs-snap" style={{ background: "#0F172A", position:"relative", overflow:"hidden" }}>
       <Suspense fallback={<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff"}}>Loading...</div>}>
-        <ThreeDScene onCut={triggerNext} />
+        <ThreeDScene onCut={triggerNext} recipientName={recipientName} />
       </Suspense>
       <AnimatePresence>
         {fade && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} style={{ position: "fixed", inset: 0, zIndex: 600, background: "black", pointerEvents: "none" }} />}

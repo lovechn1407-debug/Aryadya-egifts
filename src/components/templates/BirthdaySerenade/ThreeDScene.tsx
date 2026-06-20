@@ -55,31 +55,31 @@ function PearlRing({ tierRadius, y, count, color, scale = 1 }: { tierRadius: num
   );
 }
 
-function Cake({ onClick }: { onClick: () => void }) {
+function Cake({ onClick, recipientName }: { onClick: () => void, recipientName?: string }) {
   return (
     <group onClick={onClick}>
-      {/* Elegant Gold Plate */}
+      {/* Elegant Gold Plate - Made wider */}
       <mesh position={[0, -0.05, 0]}>
-        <cylinderGeometry args={[2.6, 2.8, 0.1, 64]} />
+        <cylinderGeometry args={[3.2, 3.4, 0.1, 64]} />
         <meshStandardMaterial color="#FBBF24" metalness={0.9} roughness={0.1} />
       </mesh>
       <mesh position={[0, -0.08, 0]}>
-        <cylinderGeometry args={[2.8, 2.9, 0.05, 64]} />
+        <cylinderGeometry args={[3.4, 3.5, 0.05, 64]} />
         <meshStandardMaterial color="#F59E0B" metalness={0.8} roughness={0.3} />
       </mesh>
 
-      {/* Bottom tier - Soft Pink */}
+      {/* Bottom tier - Soft Pink - Made wider */}
       <mesh position={[0, 0.425, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[2.1, 2.1, 0.85, 64]} />
+        <cylinderGeometry args={[2.5, 2.5, 0.85, 64]} />
         <meshStandardMaterial color="#FBCFE8" roughness={0.3} metalness={0.05} />
       </mesh>
       {/* White Icing Ring */}
       <mesh position={[0, 0.85, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.1, 0.12, 16, 64]} />
+        <torusGeometry args={[2.5, 0.12, 16, 64]} />
         <meshStandardMaterial color="#FFFFFF" roughness={0.2} />
       </mesh>
-      <PearlRing tierRadius={2.1} y={0.92} count={16} color="#FBBF24" scale={1.2} />
-      <PearlRing tierRadius={2.1} y={0.05} count={24} color="#FFFFFF" scale={0.8} />
+      <PearlRing tierRadius={2.5} y={0.92} count={20} color="#FBBF24" scale={1.2} />
+      <PearlRing tierRadius={2.5} y={0.05} count={32} color="#FFFFFF" scale={0.8} />
 
       {/* Middle tier - Vibrant Pink */}
       <mesh position={[0, 1.275, 0]} castShadow receiveShadow>
@@ -131,11 +131,11 @@ function Cake({ onClick }: { onClick: () => void }) {
       {/* Elegant 3D Happy Birthday Plaque */}
       <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
         <mesh position={[0, 1.3, 1.53]} rotation={[-0.05, 0, 0]}>
-          <boxGeometry args={[2.0, 0.5, 0.05]} />
+          <boxGeometry args={[2.0, recipientName ? 0.8 : 0.5, 0.05]} />
           <meshStandardMaterial color="#FFFFFF" metalness={0.1} roughness={0.2} />
         </mesh>
         <Text
-          position={[0, 1.3, 1.58]}
+          position={[0, recipientName ? 1.45 : 1.3, 1.58]}
           rotation={[-0.05, 0, 0]}
           fontSize={0.24}
           color="#D81B60"
@@ -145,6 +145,19 @@ function Cake({ onClick }: { onClick: () => void }) {
         >
           Happy Birthday
         </Text>
+        {recipientName && (
+          <Text
+            position={[0, 1.15, 1.58]}
+            rotation={[-0.05, 0, 0]}
+            fontSize={0.3}
+            color="#E91E8C"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={1.8}
+          >
+            {recipientName}
+          </Text>
+        )}
       </Float>
     </group>
   );
@@ -161,11 +174,11 @@ function Knife({ cutting }: { cutting: boolean }) {
   useEffect(() => {
     if (cutting && ref.current) {
       gsap.to(ref.current.position, { x: 0, y: 2.5, z: 0, duration: 0.8, ease: "power3.in" });
-      gsap.to(ref.current.position, { x: 2.2, y: 5.5, z: 0, duration: 0.5, delay: 0.85, ease: "power2.out" });
+      gsap.to(ref.current.position, { x: 2.5, y: 5.5, z: 0, duration: 0.5, delay: 0.85, ease: "power2.out" });
     }
   }, [cutting]);
   return (
-    <group ref={ref} position={[2.2, 5.5, 0]}>
+    <group ref={ref} position={[2.5, 5.5, 0]}>
       {/* Handle */}
       <mesh position={[0, 0.6, 0]}>
         <cylinderGeometry args={[0.08, 0.08, 0.8, 16]} />
@@ -191,7 +204,7 @@ function Slice({ visible }: { visible: boolean }) {
     if (visible && ref.current) {
       ref.current.position.set(0, 0, 0);
       ref.current.rotation.set(0, 0, 0);
-      gsap.to(ref.current.position, { x: 3, z: 1.5, duration: 0.8, ease: "power3.out" });
+      gsap.to(ref.current.position, { x: 3.5, z: 1.5, duration: 0.8, ease: "power3.out" });
       gsap.to(ref.current.rotation, { y: 0.4, duration: 0.8 });
     }
   }, [visible]);
@@ -202,7 +215,7 @@ function Slice({ visible }: { visible: boolean }) {
     <group ref={ref} position={[0, 0, 0]}>
       {/* Bottom tier slice */}
       <mesh position={[0, 0.425, 0]}>
-        <cylinderGeometry args={[2.1, 2.1, 0.85, 32, 1, false, 0, Math.PI / 4]} />
+        <cylinderGeometry args={[2.5, 2.5, 0.85, 32, 1, false, 0, Math.PI / 4]} />
         <meshStandardMaterial color="#FBCFE8" />
       </mesh>
       {/* Middle tier slice */}
@@ -218,7 +231,7 @@ function Slice({ visible }: { visible: boolean }) {
       
       {/* Inside sponge color for the slices */}
       <mesh position={[0, 0.425, 0]}>
-        <cylinderGeometry args={[2.08, 2.08, 0.86, 32, 1, false, 0, Math.PI / 4]} />
+        <cylinderGeometry args={[2.48, 2.48, 0.86, 32, 1, false, 0, Math.PI / 4]} />
         <meshStandardMaterial color="#FFF1F2" roughness={0.8} />
       </mesh>
       <mesh position={[0, 1.275, 0]}>
@@ -331,18 +344,13 @@ function FloatingHBD({ visible }: { visible: boolean }) {
   );
 }
 
-export default function ThreeDScene({ onCut }: { onCut: () => void }) {
+export default function ThreeDScene({ onCut, recipientName }: { onCut: () => void, recipientName?: string }) {
   const [cutting, setCutting] = useState(false);
   const [sliced, setSliced] = useState(false);
   const [confetti, setConfetti] = useState(false);
   const [hbd, setHbd] = useState(false);
   const [hintsHidden, setHintsHidden] = useState(false);
   const [hasCut, setHasCut] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setHintsHidden(true), 4000);
-    return () => clearTimeout(t);
-  }, []);
 
   const handleCut = () => {
     if (hasCut) return;
@@ -363,14 +371,17 @@ export default function ThreeDScene({ onCut }: { onCut: () => void }) {
   }
 
   return (
-    <>
+    <div 
+      style={{ width: "100%", height: "100vh", position: "relative" }}
+      onPointerDown={() => setHintsHidden(true)}
+      onTouchStart={() => setHintsHidden(true)}
+    >
       <Canvas
-        // Camera moved back slightly and fov increased to make it compatible with mobile screens
-        camera={{ position: [0, 4.5, 12], fov: 55 }}
-        style={{ width: "100%", height: "100vh" }}
+        camera={{ position: [0, 5, 15], fov: 60 }}
+        style={{ width: "100%", height: "100%" }}
         shadows
       >
-        <OrbitControls enablePan={false} minDistance={5} maxDistance={16} />
+        <OrbitControls enablePan={false} minDistance={5} maxDistance={20} />
         
         <ambientLight intensity={1.5} color="#FFFFFF" />
         <directionalLight position={[5, 10, 5]} intensity={2} color="#FFFFFF" castShadow />
@@ -378,12 +389,12 @@ export default function ThreeDScene({ onCut }: { onCut: () => void }) {
         <pointLight position={[-5, 4, 5]} intensity={1.8} color="#F472B6" />
         <pointLight position={[5, 2, -5]} intensity={1.2} color="#FBBF24" />
         
-        <fog attach="fog" args={["#1A1A2E", 12, 28]} />
+        <fog attach="fog" args={["#1A1A2E", 14, 30]} />
         
         <Stars radius={80} depth={40} count={4000} factor={5} saturation={0.5} fade speed={1.5} />
-        <Sparkles count={100} scale={12} size={4} speed={0.4} opacity={0.6} color="#F9A8D4" />
+        <Sparkles count={100} scale={14} size={4} speed={0.4} opacity={0.6} color="#F9A8D4" />
 
-        <Cake onClick={handleCut} />
+        <Cake onClick={handleCut} recipientName={recipientName} />
         <Knife cutting={cutting} />
         <Slice visible={sliced} />
         <Confetti visible={confetti} />
@@ -396,23 +407,25 @@ export default function ThreeDScene({ onCut }: { onCut: () => void }) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="absolute top-8 left-1/2 -translate-x-1/2 text-white font-body text-sm bg-white/10 backdrop-blur px-4 py-2 rounded-full border border-white/20 shadow-xl"
+            className="absolute top-12 left-1/2 -translate-x-1/2 text-white font-body text-sm bg-black/40 backdrop-blur px-5 py-3 rounded-full border border-white/10 shadow-xl pointer-events-none flex flex-col items-center gap-1"
           >
-            🖐️ Drag to rotate the cake
+            <span className="font-semibold text-rose-200">🖐️ Drag to rotate the cake</span>
+            <span className="text-xs opacity-75">Pinch to zoom in or zoom out</span>
           </motion.div>
         )}
       </AnimatePresence>
+      
       {!hasCut && (
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white font-body bg-rose-500/90 backdrop-blur px-6 py-3 rounded-full shadow-2xl font-bold border border-rose-400 cursor-pointer hover:bg-rose-600 transition-colors"
-          style={{ background: "linear-gradient(135deg, #E91E8C, #D81B60)" }}
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white font-body bg-rose-500/90 backdrop-blur px-6 py-3 rounded-full shadow-2xl font-bold border border-rose-400 cursor-pointer hover:bg-rose-600 transition-colors"
+          style={{ background: "linear-gradient(135deg, #E91E8C, #D81B60)", zIndex: 10 }}
           onClick={handleCut}
         >
           🔪 Tap the cake to cut it!
         </motion.div>
       )}
-    </>
+    </div>
   );
 }
