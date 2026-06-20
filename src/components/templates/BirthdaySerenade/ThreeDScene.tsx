@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Stars, Text } from "@react-three/drei";
+import { OrbitControls, Stars, Text, Float, Sparkles } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,89 +28,125 @@ function Candle({ position, color, idx }: { position: [number, number, number]; 
         <cylinderGeometry args={[0.06, 0.06, 0.6, 16]} />
         <meshStandardMaterial color={color} />
       </mesh>
-      <Flame position={[0, 0.7, 0]} idx={idx} />
-      <pointLight position={[0, 0.75, 0]} intensity={0.3} color="#FDE68A" distance={2} />
+      {/* Wick */}
+      <mesh position={[0, 0.62, 0]}>
+        <cylinderGeometry args={[0.01, 0.01, 0.05, 8]} />
+        <meshStandardMaterial color="#333" />
+      </mesh>
+      <Flame position={[0, 0.72, 0]} idx={idx} />
+      <pointLight position={[0, 0.8, 0]} intensity={0.4} color="#FDE68A" distance={3} />
     </group>
   );
 }
 
-function StrawberryRing({ tierRadius, y, count }: { tierRadius: number; y: number; count: number }) {
+function PearlRing({ tierRadius, y, count, color, scale = 1 }: { tierRadius: number; y: number; count: number; color: string; scale?: number }) {
   return (
-    <>
+    <group>
       {Array.from({ length: count }).map((_, i) => {
         const a = (i / count) * Math.PI * 2;
         return (
           <mesh key={i} position={[Math.cos(a) * tierRadius, y, Math.sin(a) * tierRadius]}>
-            <sphereGeometry args={[0.15, 16, 16]} />
-            <meshStandardMaterial color="#EF4444" roughness={0.5} />
+            <sphereGeometry args={[0.08 * scale, 16, 16]} />
+            <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
           </mesh>
         );
       })}
-    </>
+    </group>
   );
 }
 
 function Cake({ onClick }: { onClick: () => void }) {
   return (
     <group onClick={onClick}>
-      {/* Plate */}
-      <mesh position={[0, -0.04, 0]}>
-        <cylinderGeometry args={[2.4, 2.4, 0.08, 64]} />
-        <meshStandardMaterial color="#E2E8F0" metalness={0.8} roughness={0.2} />
+      {/* Elegant Gold Plate */}
+      <mesh position={[0, -0.05, 0]}>
+        <cylinderGeometry args={[2.6, 2.8, 0.1, 64]} />
+        <meshStandardMaterial color="#FBBF24" metalness={0.9} roughness={0.1} />
+      </mesh>
+      <mesh position={[0, -0.08, 0]}>
+        <cylinderGeometry args={[2.8, 2.9, 0.05, 64]} />
+        <meshStandardMaterial color="#F59E0B" metalness={0.8} roughness={0.3} />
       </mesh>
 
-      {/* Bottom tier */}
-      <mesh position={[0, 0.425, 0]} castShadow>
-        <cylinderGeometry args={[2, 2, 0.85, 64]} />
-        <meshStandardMaterial color="#FFFBF5" roughness={0.4} metalness={0.1} />
+      {/* Bottom tier - Soft Pink */}
+      <mesh position={[0, 0.425, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[2.1, 2.1, 0.85, 64]} />
+        <meshStandardMaterial color="#FBCFE8" roughness={0.3} metalness={0.05} />
       </mesh>
+      {/* White Icing Ring */}
       <mesh position={[0, 0.85, 0]}>
-        <torusGeometry args={[2, 0.12, 16, 64]} />
-        <meshStandardMaterial color="#E91E8C" />
+        <torusGeometry args={[2.1, 0.12, 16, 64]} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.2} />
       </mesh>
-      <StrawberryRing tierRadius={2} y={0.95} count={8} />
+      <PearlRing tierRadius={2.1} y={0.92} count={16} color="#FBBF24" scale={1.2} />
+      <PearlRing tierRadius={2.1} y={0.05} count={24} color="#FFFFFF" scale={0.8} />
 
-      {/* Middle tier */}
-      <mesh position={[0, 1.275, 0]}>
-        <cylinderGeometry args={[1.4, 1.4, 0.75, 64]} />
-        <meshStandardMaterial color="#FFFBF5" roughness={0.4} />
+      {/* Middle tier - Vibrant Pink */}
+      <mesh position={[0, 1.275, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[1.5, 1.5, 0.75, 64]} />
+        <meshStandardMaterial color="#F9A8D4" roughness={0.3} />
       </mesh>
-      <mesh position={[0, 1.66, 0]}>
-        <torusGeometry args={[1.4, 0.1, 16, 64]} />
-        <meshStandardMaterial color="#E91E8C" />
+      {/* White Icing Ring */}
+      <mesh position={[0, 1.65, 0]}>
+        <torusGeometry args={[1.5, 0.1, 16, 64]} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.2} />
       </mesh>
+      <PearlRing tierRadius={1.5} y={1.72} count={12} color="#FBBF24" scale={1.2} />
 
-      {/* Top tier */}
-      <mesh position={[0, 2.3, 0]}>
-        <cylinderGeometry args={[0.9, 0.9, 0.65, 64]} />
-        <meshStandardMaterial color="#FFFBF5" roughness={0.4} />
+      {/* Top tier - Deep Pink */}
+      <mesh position={[0, 2.1, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.9, 0.9, 0.8, 64]} />
+        <meshStandardMaterial color="#F472B6" roughness={0.3} />
       </mesh>
-      <mesh position={[0, 2.63, 0]}>
+      {/* White Icing Ring */}
+      <mesh position={[0, 2.5, 0]}>
         <torusGeometry args={[0.9, 0.08, 16, 64]} />
-        <meshStandardMaterial color="#E91E8C" />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.2} />
       </mesh>
+
+      {/* Star decorations on middle tier */}
+      <group position={[0, 1.275, 0]}>
+        {Array.from({length: 8}).map((_, i) => {
+          const a = (i / 8) * Math.PI * 2;
+          return (
+            <mesh key={i} position={[Math.cos(a) * 1.52, 0, Math.sin(a) * 1.52]} rotation={[Math.PI/2, 0, a]}>
+              <octahedronGeometry args={[0.15, 0]} />
+              <meshStandardMaterial color="#FBBF24" metalness={0.9} roughness={0.1} />
+            </mesh>
+          )
+        })}
+      </group>
 
       {/* Candles */}
       {[
-        { p: [0.4, 2.95, 0.4] as [number, number, number], c: "#E91E8C" },
-        { p: [-0.4, 2.95, 0.4] as [number, number, number], c: "#F59E0B" },
-        { p: [0.4, 2.95, -0.4] as [number, number, number], c: "#8B5CF6" },
-        { p: [-0.4, 2.95, -0.4] as [number, number, number], c: "#06B6D4" },
+        { p: [0.35, 2.55, 0.35] as [number, number, number], c: "#FFFFFF" },
+        { p: [-0.35, 2.55, 0.35] as [number, number, number], c: "#FFFFFF" },
+        { p: [0.35, 2.55, -0.35] as [number, number, number], c: "#FFFFFF" },
+        { p: [-0.35, 2.55, -0.35] as [number, number, number], c: "#FFFFFF" },
+        { p: [0, 2.55, 0] as [number, number, number], c: "#FBBF24" }, // Center gold candle
       ].map((c, i) => (
         <Candle key={i} position={c.p} color={c.c} idx={i} />
       ))}
 
-      {/* Writing on cake */}
-      <Text
-        position={[0, 1.3, 1.5]}
-        fontSize={0.22}
-        color="#E91E8C"
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={2.5}
-      >
-        Happy Birthday! 🎂
-      </Text>
+      {/* Elegant 3D Happy Birthday Plaque */}
+      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
+        <mesh position={[0, 1.3, 1.6]} rotation={[-0.1, 0, 0]}>
+          <boxGeometry args={[2.2, 0.6, 0.05]} />
+          <meshStandardMaterial color="#FFFFFF" metalness={0.2} roughness={0.1} />
+        </mesh>
+        <Text
+          position={[0, 1.3, 1.63]}
+          rotation={[-0.1, 0, 0]}
+          fontSize={0.26}
+          color="#D81B60"
+          anchorX="center"
+          anchorY="middle"
+          maxWidth={2.5}
+          font="https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtM.woff"
+        >
+          Happy Birthday
+        </Text>
+      </Float>
     </group>
   );
 }
@@ -126,21 +162,24 @@ function Knife({ cutting }: { cutting: boolean }) {
   useEffect(() => {
     if (cutting && ref.current) {
       gsap.to(ref.current.position, { x: 0, y: 2.5, z: 0, duration: 0.8, ease: "power3.in" });
-      gsap.to(ref.current.position, { x: 1.8, y: 5.5, z: 0, duration: 0.5, delay: 0.85, ease: "power2.out" });
+      gsap.to(ref.current.position, { x: 2.2, y: 5.5, z: 0, duration: 0.5, delay: 0.85, ease: "power2.out" });
     }
   }, [cutting]);
   return (
-    <group ref={ref} position={[1.8, 5.5, 0]}>
+    <group ref={ref} position={[2.2, 5.5, 0]}>
+      {/* Handle */}
       <mesh position={[0, 0.6, 0]}>
         <cylinderGeometry args={[0.08, 0.08, 0.8, 16]} />
-        <meshStandardMaterial color="#5D4037" roughness={0.8} />
+        <meshStandardMaterial color="#F472B6" roughness={0.4} />
       </mesh>
+      {/* Handle Guard */}
       <mesh position={[0, 0.18, 0]}>
-        <cylinderGeometry args={[0.12, 0.12, 0.08, 16]} />
-        <meshStandardMaterial color="#9CA3AF" metalness={0.9} roughness={0.1} />
+        <cylinderGeometry args={[0.14, 0.14, 0.08, 16]} />
+        <meshStandardMaterial color="#FBBF24" metalness={0.9} roughness={0.1} />
       </mesh>
-      <mesh position={[0, -0.45, 0]} rotation={[0, 0, 0]}>
-        <boxGeometry args={[0.12, 1.0, 0.02]} />
+      {/* Blade */}
+      <mesh position={[0, -0.5, 0]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[0.1, 1.2, 0.02]} />
         <meshStandardMaterial color="#E2E8F0" metalness={1} roughness={0.05} />
       </mesh>
     </group>
@@ -148,21 +187,50 @@ function Knife({ cutting }: { cutting: boolean }) {
 }
 
 function Slice({ visible }: { visible: boolean }) {
-  const ref = useRef<THREE.Mesh>(null);
+  const ref = useRef<THREE.Group>(null);
   useEffect(() => {
     if (visible && ref.current) {
-      ref.current.position.set(0, 0.425, 0);
+      ref.current.position.set(0, 0, 0);
       ref.current.rotation.set(0, 0, 0);
       gsap.to(ref.current.position, { x: 3, z: 1.5, duration: 0.8, ease: "power3.out" });
       gsap.to(ref.current.rotation, { y: 0.4, duration: 0.8 });
     }
   }, [visible]);
+  
   if (!visible) return null;
+  
   return (
-    <mesh ref={ref} position={[0, 0.425, 0]}>
-      <cylinderGeometry args={[2, 2, 0.85, 32, 1, false, 0, Math.PI / 4]} />
-      <meshStandardMaterial color="#FFFBF5" />
-    </mesh>
+    <group ref={ref} position={[0, 0, 0]}>
+      {/* Bottom tier slice */}
+      <mesh position={[0, 0.425, 0]}>
+        <cylinderGeometry args={[2.1, 2.1, 0.85, 32, 1, false, 0, Math.PI / 4]} />
+        <meshStandardMaterial color="#FBCFE8" />
+      </mesh>
+      {/* Middle tier slice */}
+      <mesh position={[0, 1.275, 0]}>
+        <cylinderGeometry args={[1.5, 1.5, 0.75, 32, 1, false, 0, Math.PI / 4]} />
+        <meshStandardMaterial color="#F9A8D4" />
+      </mesh>
+      {/* Top tier slice */}
+      <mesh position={[0, 2.1, 0]}>
+        <cylinderGeometry args={[0.9, 0.9, 0.8, 32, 1, false, 0, Math.PI / 4]} />
+        <meshStandardMaterial color="#F472B6" />
+      </mesh>
+      
+      {/* Inside sponge color for the slices */}
+      <mesh position={[0, 0.425, 0]}>
+        <cylinderGeometry args={[2.08, 2.08, 0.86, 32, 1, false, 0, Math.PI / 4]} />
+        <meshStandardMaterial color="#FFF1F2" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 1.275, 0]}>
+        <cylinderGeometry args={[1.48, 1.48, 0.76, 32, 1, false, 0, Math.PI / 4]} />
+        <meshStandardMaterial color="#FFF1F2" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 2.1, 0]}>
+        <cylinderGeometry args={[0.88, 0.88, 0.81, 32, 1, false, 0, Math.PI / 4]} />
+        <meshStandardMaterial color="#FFF1F2" roughness={0.8} />
+      </mesh>
+    </group>
   );
 }
 
@@ -172,23 +240,23 @@ function Confetti({ visible }: { visible: boolean }) {
   const material = useRef<THREE.PointsMaterial>(null);
   useEffect(() => {
     if (visible && ref.current) {
-      const count = 200;
+      const count = 300;
       const pos = new Float32Array(count * 3);
       const vel = new Float32Array(count * 3);
       const colors = new Float32Array(count * 3);
       const palette = [
-        [0.91, 0.12, 0.55],
-        [0.96, 0.62, 0.04],
-        [0.99, 0.9, 0.44],
-        [0.55, 0.36, 0.96],
+        [0.96, 0.45, 0.71], // Pink
+        [0.98, 0.75, 0.14], // Gold
+        [1.00, 1.00, 1.00], // White
+        [0.85, 0.11, 0.38], // Deep Pink
       ];
       for (let i = 0; i < count; i++) {
-        pos[i * 3] = (Math.random() - 0.5) * 1;
-        pos[i * 3 + 1] = 2.5;
-        pos[i * 3 + 2] = (Math.random() - 0.5) * 1;
-        vel[i * 3] = (Math.random() - 0.5) * 3;
-        vel[i * 3 + 1] = Math.random() * 4 + 2;
-        vel[i * 3 + 2] = (Math.random() - 0.5) * 3;
+        pos[i * 3] = (Math.random() - 0.5) * 2;
+        pos[i * 3 + 1] = 4.5;
+        pos[i * 3 + 2] = (Math.random() - 0.5) * 2;
+        vel[i * 3] = (Math.random() - 0.5) * 4;
+        vel[i * 3 + 1] = Math.random() * 5 + 3;
+        vel[i * 3 + 2] = (Math.random() - 0.5) * 4;
         const c = palette[Math.floor(Math.random() * palette.length)];
         colors[i * 3] = c[0];
         colors[i * 3 + 1] = c[1];
@@ -210,11 +278,11 @@ function Confetti({ visible }: { visible: boolean }) {
       pos.array[i * 3] += v[i * 3] * delta;
       pos.array[i * 3 + 1] += v[i * 3 + 1] * delta;
       pos.array[i * 3 + 2] += v[i * 3 + 2] * delta;
-      v[i * 3 + 1] -= 6 * delta;
+      v[i * 3 + 1] -= 8 * delta; // Gravity
     }
     pos.needsUpdate = true;
     if (material.current && material.current.opacity > 0) {
-      material.current.opacity -= delta * 0.5;
+      material.current.opacity -= delta * 0.4;
     }
   });
   if (!visible) return null;
@@ -223,7 +291,7 @@ function Confetti({ visible }: { visible: boolean }) {
       <bufferGeometry />
       <pointsMaterial
         ref={material}
-        size={0.1}
+        size={0.15}
         vertexColors
         transparent
         opacity={1}
@@ -237,7 +305,7 @@ function FloatingHBD({ visible }: { visible: boolean }) {
   const ref = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
     if (visible && ref.current) {
-      ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, 6, 0.02);
+      ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, 6.5, 0.02);
       const s = 1 + Math.sin(clock.elapsedTime * 3) * 0.04;
       ref.current.scale.set(s, s, s);
     }
@@ -248,9 +316,19 @@ function FloatingHBD({ visible }: { visible: boolean }) {
   if (!visible) return null;
   return (
     <group ref={ref} position={[0, 3, 2]}>
-      <Text fontSize={0.4} color="#F59E0B" anchorX="center" anchorY="middle">
-        Happy Birthday! 🎉
-      </Text>
+      <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
+        <Text 
+          fontSize={0.6} 
+          color="#FBBF24" 
+          anchorX="center" 
+          anchorY="middle"
+          font="https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtM.woff"
+          outlineWidth={0.02}
+          outlineColor="#D81B60"
+        >
+          Happy Birthday! 🎉
+        </Text>
+      </Float>
     </group>
   );
 }
@@ -289,17 +367,24 @@ export default function ThreeDScene({ onCut }: { onCut: () => void }) {
   return (
     <>
       <Canvas
-        camera={{ position: [0, 3, 8], fov: 50 }}
+        // Camera moved back slightly and fov increased to make it compatible with mobile screens
+        camera={{ position: [0, 4.5, 12], fov: 55 }}
         style={{ width: "100%", height: "100vh" }}
         shadows
       >
-        <OrbitControls enablePan={false} minDistance={4} maxDistance={14} />
-        <ambientLight intensity={0.4} color="#FDE68A" />
-        <pointLight position={[0, 8, 0]} intensity={1.5} color="#FCE4EC" />
-        <pointLight position={[-5, 2, 5]} intensity={0.8} color="#E91E8C" />
-        <spotLight position={[5, 10, 5]} angle={0.3} penumbra={1} intensity={2} castShadow />
-        <fog attach="fog" args={["#0F172A", 15, 30]} />
-        <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
+        <OrbitControls enablePan={false} minDistance={5} maxDistance={16} />
+        
+        <ambientLight intensity={0.6} color="#FDF2F8" />
+        <pointLight position={[0, 10, 0]} intensity={1.5} color="#FFFFFF" />
+        <pointLight position={[-5, 4, 5]} intensity={1.2} color="#F472B6" />
+        <pointLight position={[5, 2, -5]} intensity={0.8} color="#FBBF24" />
+        <spotLight position={[6, 12, 6]} angle={0.4} penumbra={1} intensity={2.5} castShadow />
+        
+        <fog attach="fog" args={["#1A1A2E", 12, 28]} />
+        
+        <Stars radius={80} depth={40} count={4000} factor={5} saturation={0.5} fade speed={1.5} />
+        <Sparkles count={100} scale={12} size={4} speed={0.4} opacity={0.6} color="#F9A8D4" />
+
         <Cake onClick={handleCut} />
         <Knife cutting={cutting} />
         <Slice visible={sliced} />
@@ -313,7 +398,7 @@ export default function ThreeDScene({ onCut }: { onCut: () => void }) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="absolute top-8 left-1/2 -translate-x-1/2 text-white font-body text-sm bg-white/10 backdrop-blur px-4 py-2 rounded-full"
+            className="absolute top-8 left-1/2 -translate-x-1/2 text-white font-body text-sm bg-white/10 backdrop-blur px-4 py-2 rounded-full border border-white/20 shadow-xl"
           >
             🖐️ Drag to rotate the cake
           </motion.div>
@@ -323,8 +408,9 @@ export default function ThreeDScene({ onCut }: { onCut: () => void }) {
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white font-body bg-rose-600/80 backdrop-blur px-5 py-2.5 rounded-full"
-          style={{ background: "rgba(233,30,140,0.85)" }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white font-body bg-rose-500/90 backdrop-blur px-6 py-3 rounded-full shadow-2xl font-bold border border-rose-400 cursor-pointer hover:bg-rose-600 transition-colors"
+          style={{ background: "linear-gradient(135deg, #E91E8C, #D81B60)" }}
+          onClick={handleCut}
         >
           🔪 Tap the cake to cut it!
         </motion.div>

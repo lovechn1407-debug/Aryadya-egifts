@@ -191,7 +191,7 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
       {bgSongUrl && !editMode && <audio src={bgSongUrl} autoPlay loop style={{display:"none"}} />}
 
       {/* Chapter Progress */}
-      <ChapterNav total={9} active={activeChapter} onSelect={scrollTo} />
+      {editMode && <ChapterNav total={9} active={activeChapter} onSelect={scrollTo} />}
 
       {/* Song Library */}
       {showSongLibrary && (
@@ -206,11 +206,13 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
       )}
 
       {/* CHAPTER 0 — BG MUSIC */}
-      <Chapter0
-        id="bs-chapter-0" ref={setRef(0)} data={0}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(1)} onSongLibrary={openSongLibrary}
-      />
+      {editMode && (
+        <Chapter0
+          id="bs-chapter-0" ref={setRef(0)} data={0}
+          customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+          onNext={() => scrollTo(1)} onSongLibrary={openSongLibrary}
+        />
+      )}
 
       {/* CHAPTER 1 — ENVELOPE */}
       <Chapter1
