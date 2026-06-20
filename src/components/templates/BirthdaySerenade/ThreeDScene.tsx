@@ -142,7 +142,6 @@ function Cake({ onClick }: { onClick: () => void }) {
           anchorX="center"
           anchorY="middle"
           maxWidth={2.5}
-          font="https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtM.woff"
         >
           Happy Birthday
         </Text>
@@ -322,7 +321,6 @@ function FloatingHBD({ visible }: { visible: boolean }) {
           color="#FBBF24" 
           anchorX="center" 
           anchorY="middle"
-          font="https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtM.woff"
           outlineWidth={0.02}
           outlineColor="#D81B60"
         >
