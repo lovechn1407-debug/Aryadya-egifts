@@ -414,16 +414,18 @@ const Chapter1 = React.forwardRef<HTMLElement, any>(function Chapter1({ id, cust
           <div className="bs-lined-paper bs-font-script"
             style={{ borderLeft:"3px solid #E91E8C", borderRadius:12, padding:28, boxShadow:"0 24px 64px rgba(0,0,0,0.18)" }}>
             <h3 style={{ fontSize:28, color:"#C2185B", marginBottom:12 }}>
-              Dear <ET fid="bs_recipient" data={customData} onChange={onFieldChange} editMode={editMode} darkText={true} def="Priya" />, ✨
+              Dear <ET fid="bs_recipient" data={customData} onChange={onFieldChange} editMode={editMode} darkText={true} def="Priya" />,
             </h3>
             <p style={{ fontSize:18, lineHeight:1.8, color:"#4A4A68" }}>
               <ET fid="bs_letter_msg" data={customData} onChange={onFieldChange} editMode={editMode} darkText={true} multiline def="Every single day I spend knowing you exist in this world feels like a gift I never deserved. You walk into a room and everything gets a little warmer. Happy Birthday, my love." />
             </p>
             <p style={{ fontSize:22, color:"#E91E8C", marginTop:16 }}>
-              With all my love, <ET fid="bs_sender" data={customData} onChange={onFieldChange} editMode={editMode} darkText={true} def="Rohan" /> 💕
+              With all my love, <ET fid="bs_sender" data={customData} onChange={onFieldChange} editMode={editMode} darkText={true} def="Rohan" />
             </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/templates/birthday-magic-box/bear8.gif" alt="Bear" style={{ width: 60, height: 60, objectFit: "contain", margin: "12px auto 0", display: "block" }} />
             {(opened || editMode) && (
-              <button className="bs-cta-btn" style={{ marginTop:24 }} onClick={onNext}>Open Your Gift 🎁</button>
+              <button className="bs-cta-btn" style={{ marginTop:24 }} onClick={onNext}>Open Your Gift</button>
             )}
           </div>
         </div>
@@ -502,7 +504,7 @@ const Chapter2 = React.forwardRef<HTMLElement, any>(function Chapter2({ id, cust
           </div>
         </div>
       </div>
-      <p className="bs-font-body bs-shimmer" style={{ marginTop:40, fontSize:18, color:"#C2185B", fontWeight:700, textAlign:"center" }}>✨ Tap the box to reveal your surprise ✨</p>
+      <p className="bs-font-body bs-shimmer" style={{ marginTop:40, fontSize:18, color:"#C2185B", fontWeight:700, textAlign:"center" }}>Tap the box to reveal your surprise</p>
 
       {showVideo && (
         <div style={{ position:"fixed", inset:0, zIndex:500, background:"#000", opacity: fadeBlack ? 1 : undefined, transition: fadeBlack ? "opacity 0.8s" : undefined }}>
@@ -587,12 +589,12 @@ const Chapter3 = React.forwardRef<HTMLElement, any>(function Chapter3({ id, cust
 
   const recipientName = d(customData, "bs_recipient", "You");
   const messages = [
-    { text: d(customData, "bs_wish0", `🎂 Happy Birthday, ${recipientName}! 🎂`), ms:2500, big:true },
-    { text: d(customData, "bs_wish_intro", "This day belongs to you 🌟"), ms:2000, color:"#FDE68A" },
-    { text: d(customData, "bs_wish1", "May every dream you've whispered to the stars finally come true 🌟"), ms:2200, color:"#FCE4EC" },
-    { text: d(customData, "bs_wish2", "May joy follow you like a loyal friend wherever you go 💛"), ms:2200, color:"#FCE4EC" },
-    { text: d(customData, "bs_wish3", "May this chapter of your life be your most magical yet ✨"), ms:2200, color:"#FCE4EC" },
-    { text: d(customData, "bs_wish_outro", `You are so loved, ${recipientName}. Always. 💕`), ms:2500, big:true, italic:true },
+    { text: d(customData, "bs_wish0", `Happy Birthday, ${recipientName}!`), ms:2500, big:true },
+    { text: d(customData, "bs_wish_intro", "This day belongs to you"), ms:2000, color:"#FDE68A" },
+    { text: d(customData, "bs_wish1", "May every dream you've whispered to the stars finally come true"), ms:2200, color:"#FCE4EC" },
+    { text: d(customData, "bs_wish2", "May joy follow you like a loyal friend wherever you go"), ms:2200, color:"#FCE4EC" },
+    { text: d(customData, "bs_wish3", "May this chapter of your life be your most magical yet"), ms:2200, color:"#FCE4EC" },
+    { text: d(customData, "bs_wish_outro", `You are so loved, ${recipientName}. Always.`), ms:2500, big:true, italic:true },
   ];
 
   useEffect(() => {
@@ -754,7 +756,10 @@ const Chapter5 = React.forwardRef<HTMLElement, any>(function Chapter5({ id, cust
       </div>
 
       <div style={{ position:"relative", zIndex:10, textAlign:"center", maxWidth:440, width:"100%" }}>
-        <div className="bs-pulse-btn" style={{ fontSize:56 }}>🎁</div>
+        <div className="bs-pulse-btn" style={{ marginBottom: 12 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/templates/birthday-magic-box/bear9.gif" alt="Surprise Box" style={{ width: 100, height: 100, objectFit: "contain", margin: "0 auto" }} />
+        </div>
         <h2 className="bs-font-display" style={{ color:"#fff", fontWeight:700, fontSize:"clamp(24px,4vw,42px)", marginTop:12 }}>
           A Special Gift For You, {recipientName}!
         </h2>
@@ -779,7 +784,7 @@ const Chapter5 = React.forwardRef<HTMLElement, any>(function Chapter5({ id, cust
           <div style={{ position:"relative", borderRadius:16, overflow:"hidden", height:200, background:"linear-gradient(135deg, #FF3F6C 0%, #FF6B9D 100%)" }}>
             <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8, zIndex:1, color:"white", textAlign:"center" }}>
               <div style={{ fontWeight:800, fontSize:26, letterSpacing:2 }}>{giftBrand}</div>
-              <div style={{ fontSize:13, fontWeight:600 }}>🎀 Your Gift Code</div>
+              <div style={{ fontSize:13, fontWeight:600 }}>Your Gift Code</div>
               <div className={revealed ? "bs-glow-pulse" : ""} style={{ fontFamily:"'Courier New', monospace", fontSize:22, fontWeight:900, background:"rgba(255,255,255,0.2)", padding:"8px 20px", borderRadius:8, letterSpacing:4 }}>
                 {giftCode}
                 {giftPin && <div style={{ fontSize:14, letterSpacing:1, marginTop:4, opacity:0.9 }}>PIN: {giftPin}</div>}
@@ -793,10 +798,10 @@ const Chapter5 = React.forwardRef<HTMLElement, any>(function Chapter5({ id, cust
 
         {revealed && (
           <div style={{ marginTop:24, display:"flex", flexDirection:"column", alignItems:"center", gap:12 }}>
-            <button onClick={copy} className="bs-font-body" style={{ background:"linear-gradient(135deg, #FDE68A, #F59E0B)", color:"#1A1A2E", border:"none", borderRadius:999, padding:"12px 28px", fontWeight:700, fontSize:15, cursor:"pointer", boxShadow:"0 8px 24px rgba(245,158,11,0.5)" }}>📋 Copy Code</button>
-            <a href={`https://www.${giftBrand.toLowerCase()}.com`} target="_blank" rel="noopener noreferrer" style={{ color:"#FDE68A", fontSize:14, fontWeight:600, textDecoration:"underline" }}>🛍️ Open {giftBrand} App</a>
-            <p className="bs-font-body" style={{ fontSize:14, color:"#94A3B8", maxWidth:320 }}>💡 Real gift code, redeemable on {giftBrand}. Tap above to copy!</p>
-            <button className="bs-cta-btn" style={{ marginTop:8 }} onClick={onNext}>See the final surprise 💌</button>
+            <button onClick={copy} className="bs-font-body" style={{ background:"linear-gradient(135deg, #FDE68A, #F59E0B)", color:"#1A1A2E", border:"none", borderRadius:999, padding:"12px 28px", fontWeight:700, fontSize:15, cursor:"pointer", boxShadow:"0 8px 24px rgba(245,158,11,0.5)" }}>Copy Code</button>
+            <a href={`https://www.${giftBrand.toLowerCase()}.com`} target="_blank" rel="noopener noreferrer" style={{ color:"#FDE68A", fontSize:14, fontWeight:600, textDecoration:"underline" }}>Open {giftBrand} App</a>
+            <p className="bs-font-body" style={{ fontSize:14, color:"#94A3B8", maxWidth:320 }}>Real gift code, redeemable on {giftBrand}. Tap above to copy!</p>
+            <button className="bs-cta-btn" style={{ marginTop:8 }} onClick={onNext}>See the final surprise</button>
           </div>
         )}
       </div>
