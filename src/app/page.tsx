@@ -626,6 +626,16 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
   const [scale, setScale] = useState(0.35);
   const [isVisible, setIsVisible] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [stripIndex, setStripIndex] = useState(0);
+
+  // Cycle frame strip texts if there are multiple
+  useEffect(() => {
+    if (!product.frameStripEnabled || !product.frameStripTexts || product.frameStripTexts.length <= 1) return;
+    const interval = setInterval(() => {
+      setStripIndex(prev => (prev + 1) % product.frameStripTexts!.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [product.frameStripEnabled, product.frameStripTexts]);
 
   // IntersectionObserver: only load iframe/video when card is near viewport
   useEffect(() => {
@@ -778,6 +788,38 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
             </div>
           </div>
         )}
+
+        {/* Frame Strip overlay */}
+        {product.frameStripEnabled && product.frameStripTexts && product.frameStripTexts.length > 0 && (
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20,
+            background: "linear-gradient(90deg, #FACC15, #FDE047)",
+            padding: "8px 12px", textAlign: "center",
+            borderTop: "2px solid #EAB308",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 -4px 16px rgba(0,0,0,0.15)",
+            overflow: "hidden"
+          }}>
+            {/* We add a style tag for the fade animation if it's not present globally */}
+            <style>{`
+              @keyframes fs-fade-in {
+                0% { opacity: 0; transform: translateY(4px); }
+                100% { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+            <div 
+              key={stripIndex}
+              style={{
+                fontSize: 13, fontWeight: 900, color: "#422006", 
+                textTransform: "uppercase", letterSpacing: 1.5,
+                animation: "fs-fade-in 0.4s ease-out forwards",
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
+              }}
+            >
+              {product.frameStripTexts[stripIndex]}
+            </div>
+          </div>
+        )}
       </div>
       {/* Solid footer — always visible below iframe */}
       <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
@@ -827,7 +869,9 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
     prev.product.badge === next.product.badge &&
     (prev.product as any).rating === (next.product as any).rating &&
     (prev.product as any).stockLeft === (next.product as any).stockLeft &&
-    (prev.product as any).showStock === (next.product as any).showStock
+    (prev.product as any).showStock === (next.product as any).showStock &&
+    prev.product.frameStripEnabled === next.product.frameStripEnabled &&
+    JSON.stringify(prev.product.frameStripTexts) === JSON.stringify(next.product.frameStripTexts)
   );
 });
 

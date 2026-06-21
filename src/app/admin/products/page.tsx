@@ -38,6 +38,8 @@ export default function AdminProductsPage() {
   const [previewInput, setPreviewInput] = useState("");
   const [orderCounts, setOrderCounts] = useState<Record<string, number>>({});
   const [revenueCounts, setRevenueCounts] = useState<Record<string, number>>({});
+  const [editingFrameStrip, setEditingFrameStrip] = useState<string | null>(null);
+  const [frameStripTextsInput, setFrameStripTextsInput] = useState("");
 
   // Recording State variables
   const [recordingProduct, setRecordingProduct] = useState<Product | null>(null);
@@ -339,6 +341,13 @@ export default function AdminProductsPage() {
     reload();
   };
 
+  const saveFrameStrip = async (id: string) => {
+    const texts = frameStripTextsInput.split(",").map(t => t.trim()).filter(Boolean);
+    await updateProductOverrideDB(id, { frameStripTexts: texts });
+    setEditingFrameStrip(null);
+    reload();
+  };
+
   const cardStyle: React.CSSProperties = {
     background: "#FFFFFF", borderRadius: 12, border: "1px solid #E2E8F0",
     boxShadow: "0 1px 2px rgba(0,0,0,0.03)"
@@ -610,9 +619,50 @@ export default function AdminProductsPage() {
                 )}
               </div>
 
+              {/* Frame Strip Toggle */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, paddingLeft: 16, borderLeft: "1px solid #E2E8F0" }}>
+                <span style={{ fontSize: 13, color: "#64748B", fontWeight: 500 }}>Strip:</span>
+                <label className="toggle" style={{ margin: 0, display: "flex", alignItems: "center" }}>
+                  <input 
+                    type="checkbox" 
+                    checked={product.frameStripEnabled || false} 
+                    onChange={async (e) => {
+                      await updateProductOverrideDB(product.id, { frameStripEnabled: e.target.checked });
+                      reload();
+                    }} 
+                  />
+                  <span className="toggle-slider" style={{ background: product.frameStripEnabled ? "#10B981" : "#CBD5E1" }} />
+                </label>
+                {product.frameStripEnabled && (
+                  editingFrameStrip === product.id ? (
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <input 
+                        style={{ ...inputStyle, width: 160, padding: "6px" }} 
+                        placeholder="Comma separated texts" 
+                        value={frameStripTextsInput} 
+                        onChange={e => setFrameStripTextsInput(e.target.value)} 
+                        autoFocus 
+                      />
+                      <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#0F172A", color: "#FFFFFF", border: "none", cursor: "pointer" }} onClick={() => saveFrameStrip(product.id)}>Save</button>
+                      <button style={{ padding: "6px 10px", fontSize: 12, borderRadius: 6, background: "#F1F5F9", color: "#334155", border: "none", cursor: "pointer" }} onClick={() => setEditingFrameStrip(null)}>✕</button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 11, color: "#475569", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {product.frameStripTexts?.length ? product.frameStripTexts.join(", ") : "No texts"}
+                      </span>
+                      <button 
+                        onClick={() => { setEditingFrameStrip(product.id); setFrameStripTextsInput((product.frameStripTexts || []).join(", ")); }} 
+                        style={{ background: "transparent", border: "none", color: "#94A3B8", cursor: "pointer", fontSize: 14 }}
+                      >✏️</button>
+                    </div>
+                  )
+                )}
+              </div>
+
               {/* Visibility toggle */}
               <div style={{ display: "flex", alignItems: "center", gap: 10, paddingLeft: 16, borderLeft: "1px solid #E2E8F0" }}>
-                <label className="toggle">
+                <label className="toggle" style={{ margin: 0, display: "flex", alignItems: "center" }}>
                   <input type="checkbox" checked={product.visible} onChange={() => toggleVisibility(product.id, product.visible)} />
                   <span className="toggle-slider" style={{ background: product.visible ? "#10B981" : "#CBD5E1" }} />
                 </label>

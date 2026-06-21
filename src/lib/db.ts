@@ -129,6 +129,8 @@ export interface ProductOverride {
   previewVideoVersions?: Array<{ id: string; name: string; url: string; size?: number; createdAt: string }>;
   checkoutMethod?: "global" | "cash" | "ads" | "free";
   requiredAdsCount?: number;
+  frameStripEnabled?: boolean;
+  frameStripTexts?: string[];
 }
 
 export async function getProductsDB(): Promise<Product[]> {
