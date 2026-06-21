@@ -683,7 +683,10 @@ const Chapter4 = React.forwardRef<HTMLElement, any>(function Chapter4({ id, cust
     <section id={id} data-chapter="4" ref={ref as any} className="bs-snap"
       style={{ background:"linear-gradient(180deg, #FFFBF5 0%, rgba(253,230,138,0.13) 100%)", padding:"60px 20px" }}>
       <div style={{ textAlign:"center", maxWidth:700, margin:"0 auto" }}>
-        <div className="bs-spin-slow" style={{ display:"inline-block", fontSize:48 }}>📷</div>
+        <div style={{ display:"inline-block", marginBottom: 12 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/templates/birthday-magic-box/bear3.gif" alt="Decoration" style={{ width: 80, height: 80, objectFit: "contain" }} />
+        </div>
         <h2 className="bs-font-display" style={{ fontSize:"clamp(28px,5vw,48px)", fontWeight:700, color:"#1A1A2E", marginTop:12 }}>
           📸 Our Precious Moments
         </h2>
@@ -984,7 +987,10 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
 
         {/* Frosted glass card */}
         <div style={{ background:"rgba(255,255,255,0.08)", backdropFilter:"blur(20px)", border:"1px solid rgba(255,255,255,0.2)", borderRadius:24, padding:"36px 28px", boxShadow:"0 32px 80px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3)", marginTop:8, position:"relative" }}>
-          <div className="bs-spin-slow" style={{ display:"inline-block", fontSize:48 }}>🎂</div>
+          <div style={{ display:"inline-block", marginBottom: 12 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/templates/birthday-magic-box/bear2.gif" alt="Decoration" style={{ width: 80, height: 80, objectFit: "contain" }} />
+          </div>
           <h1 className="bs-font-display" style={{ fontWeight:900, fontStyle:"italic", fontSize:"clamp(26px,5vw,44px)", color:"#fff", textShadow:"0 0 30px rgba(233,30,140,0.5)", marginTop:12 }}>
             Happy Birthday, {recipientName}! 🌟
           </h1>
@@ -995,9 +1001,10 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
           <p className="bs-font-body" style={{ fontSize:16, lineHeight:1.8, color:"rgba(255,255,255,0.88)", maxWidth:380, margin:"0 auto" }}>
             <ET fid="bs_final_msg" data={customData} onChange={onFieldChange} editMode={editMode} multiline def="You make the world a more beautiful place just by being in it. Thank you for being you. Here's to you — the most incredible person I know. Happy Birthday, always and forever." />
           </p>
-          <div style={{ display:"flex", justifyContent:"center", gap:12, marginTop:20, flexWrap:"wrap" }}>
-            {["🎉","🎈","🎁","🎂","💕","✨","🌟","🥂"].map((e,i) => (
-              <span key={i} style={{ fontSize:28 }}>{e}</span>
+          <div style={{ display:"flex", justifyContent:"center", gap:16, marginTop:24, flexWrap:"wrap" }}>
+            {["bear4.gif","bear5.gif","bear6.gif","bear7.gif"].map((gif,i) => (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img key={i} src={`/templates/birthday-magic-box/${gif}`} alt="Decoration" style={{ width: 48, height: 48, objectFit: "contain" }} />
             ))}
           </div>
 
