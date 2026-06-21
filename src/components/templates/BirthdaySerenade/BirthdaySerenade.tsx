@@ -164,16 +164,9 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
   // AutoPlay logic for embed mode (slideshow effect)
   useEffect(() => {
     if (autoPlay) {
-      let current = 1;
+      setActiveChapter(1); // Start at chapter 1
       const interval = setInterval(() => {
-        current = current >= 7 ? 1 : current + 1;
-        const container = document.getElementById("bs-main-container");
-        const el = document.getElementById(`bs-chapter-${current}`);
-        if (container && el) {
-          container.scrollTo({ top: el.offsetTop, behavior: "smooth" });
-        } else {
-          el?.scrollIntoView({ behavior: "smooth" });
-        }
+        setActiveChapter(prev => prev >= 7 ? 1 : prev + 1);
       }, 3500);
       return () => clearInterval(interval);
     }
@@ -241,7 +234,10 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
         .bs-font-body { font-family: 'Nunito', sans-serif; }
         .bs-lined-paper { background: #FFFBF5 repeating-linear-gradient(transparent, transparent 27px, #E8D5C4 28px); }
         .bs-cta-btn { background: linear-gradient(135deg,#E91E8C,#F59E0B); color:#fff; border:none; border-radius:999px; padding:14px 36px; font-family:'Nunito',sans-serif; font-weight:700; font-size:16px; cursor:pointer; box-shadow:0 12px 32px rgba(233,30,140,0.45); transition:transform 0.2s; }
+        .bs-cta-btn { background: linear-gradient(135deg,#E91E8C,#F59E0B); color:#fff; border:none; border-radius:999px; padding:14px 36px; font-family:'Nunito',sans-serif; font-weight:700; font-size:16px; cursor:pointer; box-shadow:0 12px 32px rgba(233,30,140,0.45); transition:transform 0.2s; }
         .bs-cta-btn:hover { transform:scale(1.05); }
+        .bs-autoplay-fade { animation: bsAutoFade 0.8s ease-out forwards; }
+        @keyframes bsAutoFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
       `}</style>
 
       {/* Sound Toggle */}
@@ -272,54 +268,82 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
       )}
 
       {/* CHAPTER 1 — ENVELOPE */}
-      <Chapter1
-        id="bs-chapter-1" ref={setRef(1)} data={1}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(2)} onSongLibrary={openSongLibrary}
-      />
+      {(!autoPlay || activeChapter === 1) && (
+        <div className={autoPlay ? "bs-autoplay-fade" : ""}>
+          <Chapter1
+            id="bs-chapter-1" ref={setRef(1)} data={1}
+            customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+            onNext={() => scrollTo(2)} onSongLibrary={openSongLibrary}
+          />
+        </div>
+      )}
 
       {/* CHAPTER 2 — CAKE BOX */}
-      <Chapter2
-        id="bs-chapter-2" ref={setRef(2)} data={2}
-        customData={customData} editMode={editMode}
-        onNext={() => scrollTo(3)}
-      />
+      {(!autoPlay || activeChapter === 2) && (
+        <div className={autoPlay ? "bs-autoplay-fade" : ""}>
+          <Chapter2
+            id="bs-chapter-2" ref={setRef(2)} data={2}
+            customData={customData} editMode={editMode}
+            onNext={() => scrollTo(3)}
+          />
+        </div>
+      )}
 
       {/* CHAPTER 2.5 — THREE D SCENE */}
-      <Chapter2_5
-        id="bs-chapter-3" ref={setRef(3)} data={3}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        recipientName={d(customData, "bs_cake_name") || d(customData, "bs_recipient") || "Beautiful"}
-        cakeStickUrl={d(customData, "bs_cake_stick")}
-        onNext={() => scrollTo(4)}
-      />
+      {(!autoPlay || activeChapter === 3) && (
+        <div className={autoPlay ? "bs-autoplay-fade" : ""}>
+          <Chapter2_5
+            id="bs-chapter-3" ref={setRef(3)} data={3}
+            customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+            recipientName={d(customData, "bs_cake_name") || d(customData, "bs_recipient") || "Beautiful"}
+            cakeStickUrl={d(customData, "bs_cake_stick")}
+            onNext={() => scrollTo(4)}
+          />
+        </div>
+      )}
 
       {/* CHAPTER 3 — FIREWORKS */}
-      <Chapter3
-        id="bs-chapter-4" ref={setRef(4)} data={4}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(5)}
-      />
+      {(!autoPlay || activeChapter === 4) && (
+        <div className={autoPlay ? "bs-autoplay-fade" : ""}>
+          <Chapter3
+            id="bs-chapter-4" ref={setRef(4)} data={4}
+            customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+            onNext={() => scrollTo(5)}
+          />
+        </div>
+      )}
 
       {/* CHAPTER 4 — ALBUM */}
-      <Chapter4
-        id="bs-chapter-5" ref={setRef(5)} data={5}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(6)}
-      />
+      {(!autoPlay || activeChapter === 5) && (
+        <div className={autoPlay ? "bs-autoplay-fade" : ""}>
+          <Chapter4
+            id="bs-chapter-5" ref={setRef(5)} data={5}
+            customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+            onNext={() => scrollTo(6)}
+          />
+        </div>
+      )}
 
       {/* CHAPTER 5 — SCRATCH CARD */}
-      <Chapter5
-        id="bs-chapter-6" ref={setRef(6)} data={6}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(7)}
-      />
+      {(!autoPlay || activeChapter === 6) && (
+        <div className={autoPlay ? "bs-autoplay-fade" : ""}>
+          <Chapter5
+            id="bs-chapter-6" ref={setRef(6)} data={6}
+            customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+            onNext={() => scrollTo(7)}
+          />
+        </div>
+      )}
 
       {/* CHAPTER 7 — OUTRO */}
-      <Chapter7
-        id="bs-chapter-7" ref={setRef(7)} data={7}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-      />
+      {(!autoPlay || activeChapter === 7) && (
+        <div className={autoPlay ? "bs-autoplay-fade" : ""}>
+          <Chapter7
+            id="bs-chapter-7" ref={setRef(7)} data={7}
+            customData={customData} editMode={editMode} onFieldChange={onFieldChange}
+          />
+        </div>
+      )}
     </div>
   );
 }
