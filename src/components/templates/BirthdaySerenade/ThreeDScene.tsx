@@ -359,15 +359,16 @@ function FloatingHBD({ visible }: { visible: boolean }) {
   );
 }
 
-export default function ThreeDScene({ onCut, recipientName, cakeStickUrl }: { onCut: () => void, recipientName?: string, cakeStickUrl?: string }) {
+export default function ThreeDScene({ onCut, recipientName = "Beautiful", cakeStickUrl, editMode }: { onCut: () => void, recipientName?: string, cakeStickUrl?: string, editMode?: boolean }) {
+  const [hasCut, setHasCut] = useState(false);
   const [cutting, setCutting] = useState(false);
   const [sliced, setSliced] = useState(false);
   const [confetti, setConfetti] = useState(false);
   const [hbd, setHbd] = useState(false);
-  const [hintsHidden, setHintsHidden] = useState(false);
-  const [hasCut, setHasCut] = useState(false);
+  const [hintsHidden, setHintsHidden] = useState(!!editMode);
 
   const handleCut = () => {
+    if (editMode) return;
     if (hasCut) return;
     setHasCut(true);
     setCutting(true);
@@ -441,7 +442,7 @@ export default function ThreeDScene({ onCut, recipientName, cakeStickUrl }: { on
         )}
       </AnimatePresence>
       
-      {!hasCut && (
+      {!hasCut && !editMode && (
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}

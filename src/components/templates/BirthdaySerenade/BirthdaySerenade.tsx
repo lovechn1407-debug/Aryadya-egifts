@@ -230,7 +230,7 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
       {bgSongUrl && !editMode && <audio src={bgSongUrl} autoPlay loop style={{display:"none"}} />}
 
       {/* Chapter Progress */}
-      {editMode && <ChapterNav total={9} active={activeChapter} onSelect={scrollTo} />}
+      {editMode && <ChapterNav total={8} active={activeChapter} onSelect={scrollTo} />}
 
       {/* Song Library */}
       {showSongLibrary && (
@@ -297,16 +297,9 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
         onNext={() => scrollTo(7)}
       />
 
-      {/* CHAPTER 6 — LETTER / SEAL */}
-      <Chapter6
-        id="bs-chapter-7" ref={setRef(7)} data={7}
-        customData={customData} editMode={editMode} onFieldChange={onFieldChange}
-        onNext={() => scrollTo(8)}
-      />
-
       {/* CHAPTER 7 — OUTRO */}
       <Chapter7
-        id="bs-chapter-8" ref={setRef(8)} data={8}
+        id="bs-chapter-7" ref={setRef(7)} data={7}
         customData={customData} editMode={editMode} onFieldChange={onFieldChange}
       />
     </div>
@@ -388,6 +381,10 @@ const Chapter1 = React.forwardRef<HTMLElement, any>(function Chapter1({ id, cust
       }
     }, 600);
   };
+
+  useEffect(() => {
+    if (editMode) setTimeout(() => handleOpen(), 500);
+  }, [editMode]);
 
   return (
     <section id={id} data-chapter="0" ref={ref as any} className="bs-snap"
@@ -532,7 +529,7 @@ const Chapter2_5 = React.forwardRef<HTMLElement, any>(function Chapter2_5({ id, 
   return (
     <section id={id} data-chapter="3" ref={ref as any} className="bs-snap" style={{ background: "#0F172A", position:"relative", overflow:"hidden" }}>
       <Suspense fallback={<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff"}}>Loading...</div>}>
-        <ThreeDScene onCut={triggerNext} recipientName={recipientName} cakeStickUrl={cakeStickUrl} />
+        <ThreeDScene onCut={triggerNext} recipientName={recipientName} cakeStickUrl={cakeStickUrl} editMode={editMode} />
       </Suspense>
       
       {editMode && (
@@ -807,13 +804,15 @@ const Chapter5 = React.forwardRef<HTMLElement, any>(function Chapter5({ id, cust
 });
 
 /* ─────────────────────────────────────────
-   CH6 — BIRTHDAY LETTER + SEAL STAMP
+   CH7 — OUTRO
 ───────────────────────────────────────── */
-const Chapter6 = React.forwardRef<HTMLElement, any>(function Chapter6({ id, customData, editMode, onFieldChange, onNext }, ref) {
+const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, customData, editMode, onFieldChange }, ref) {
+  const recipientName = d(customData, "bs_recipient", "You");
+  const senderName = d(customData, "bs_sender", "Your Special Someone");
+
   const [sealed, setSealed] = useState(false);
   const [animDone, setAnimDone] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
-  const currentDate = new Date().toLocaleDateString("en-US", { day:"numeric", month:"short", year:"numeric" });
 
   const handleSeal = () => {
     if (sealed || editMode) return;
@@ -822,71 +821,6 @@ const Chapter6 = React.forwardRef<HTMLElement, any>(function Chapter6({ id, cust
     setTimeout(() => setShowFlash(false), 700);
     setTimeout(() => setAnimDone(true), 1000);
   };
-
-  return (
-    <section id={id} data-chapter="7" ref={ref as any} className="bs-snap"
-      style={{ background:"linear-gradient(180deg, #0F172A 0%, #1a0a2e 100%)", display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px", position:"relative", overflow:"hidden" }}>
-      <style>{`
-        @keyframes seal-slam { 0%{transform:scale(3.5) rotate(-45deg);opacity:0;filter:blur(6px)} 70%{transform:scale(0.9) rotate(5deg);opacity:1;filter:none} 85%{transform:scale(1.15) rotate(-3deg)} 100%{transform:scale(1) rotate(-5deg)} }
-        .seal-pressing { animation: seal-slam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes camera-flash { 0%{opacity:0} 15%{opacity:1} 100%{opacity:0} }
-        .camera-flash { position:fixed;inset:0;background:#fff;z-index:99999;pointer-events:none; animation:camera-flash 0.7s cubic-bezier(0.1,0.8,0.3,1) forwards; }
-      `}</style>
-
-      {showFlash && <div className="camera-flash" />}
-
-      <div style={{ background:"rgba(255,255,255,0.06)", backdropFilter:"blur(20px)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:24, padding:"40px 36px", maxWidth:480, width:"100%", position:"relative" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", color:"rgba(255,255,255,0.4)", fontSize:11, fontWeight:600, letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:32 }}>
-          <span>A Letter</span><span>{currentDate}</span>
-        </div>
-        <h1 className="bs-font-display" style={{ color:"#FCE4EC", fontSize:"clamp(28px,4vw,40px)", fontWeight:700, marginBottom:16, lineHeight:1.2 }}>
-          <ET fid="bs_l_greeting" data={customData} onChange={onFieldChange} editMode={editMode} darkText={false} def="Happy Birthday, my favorite person." />
-        </h1>
-        <div style={{ height:1, background:"rgba(233,30,140,0.2)", margin:"20px 0" }} />
-        <p className="bs-font-body" style={{ fontSize:17, lineHeight:1.8, color:"rgba(255,255,255,0.85)", marginBottom:16 }}>
-          <ET fid="bs_l_msg" data={customData} onChange={onFieldChange} editMode={editMode} multiline def="Thanks for coming into my life and making it better with your presence." />
-        </p>
-        <p className="bs-font-body" style={{ fontSize:17, lineHeight:1.8, color:"rgba(255,255,255,0.85)", marginBottom:24 }}>
-          <ET fid="bs_l_closing" data={customData} onChange={onFieldChange} editMode={editMode} multiline def="Here's to your laughter, your light, and every wish I'm quietly making for you tonight." />
-        </p>
-        <p className="bs-font-script" style={{ fontSize:26, color:"#E91E8C" }}>
-          <ET fid="bs_l_signoff" data={customData} onChange={onFieldChange} editMode={editMode} def="— with all my heart ❤" />
-        </p>
-
-        {/* Seal overlay */}
-        {sealed && (
-          <div style={{ position:"absolute", inset:0, background:"rgba(255,245,248,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
-            <div className={animDone ? "" : "seal-pressing"} style={{ transform:"rotate(-5deg)", filter:"drop-shadow(0 8px 24px rgba(183,28,28,0.4))" }}>
-              <svg width="180" height="180" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="90" fill="none" stroke="#C2185B" strokeWidth="6" strokeDasharray="8 6" />
-                <circle cx="100" cy="100" r="72" fill="rgba(233,30,140,0.95)" />
-                <text x="100" y="88" textAnchor="middle" fill="white" fontSize="32">💌</text>
-                <text x="100" y="115" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold" letterSpacing="1">SEALED WITH</text>
-                <text x="100" y="132" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold" letterSpacing="1">LOVE</text>
-              </svg>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div style={{ position:"absolute", bottom:32, left:"50%", transform:"translateX(-50%)", display:"flex", gap:12 }}>
-        {!sealed && !editMode && (
-          <button onClick={handleSeal} style={{ background:"linear-gradient(135deg, #C2185B, #E91E8C)", color:"white", border:"none", borderRadius:999, padding:"12px 28px", fontWeight:700, fontSize:15, cursor:"pointer", boxShadow:"0 8px 24px rgba(194,24,91,0.5)" }}>
-            💌 Seal with Love
-          </button>
-        )}
-        <button className="bs-cta-btn" onClick={onNext}>Continue 🎊</button>
-      </div>
-    </section>
-  );
-});
-
-/* ─────────────────────────────────────────
-   CH7 — OUTRO
-───────────────────────────────────────── */
-const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, customData, editMode, onFieldChange }, ref) {
-  const recipientName = d(customData, "bs_recipient", "You");
-  const senderName = d(customData, "bs_sender", "Your Special Someone");
 
   const confetti = useMemo(() => Array.from({length:50}).map(() => ({
     left:Math.random()*100, delay:Math.random()*8, duration:4+Math.random()*6,
@@ -897,6 +831,15 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
   return (
     <section id={id} data-chapter="7" ref={ref as any} className="bs-snap"
       style={{ background:"linear-gradient(135deg, #E91E8C, #7C3AED, #0F172A, #C2185B)", backgroundSize:"400% 400%", animation:"bs-gradient-shift 8s ease infinite", position:"relative", overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px" }}>
+
+      <style>{`
+        @keyframes seal-slam { 0%{transform:scale(3.5) rotate(-45deg);opacity:0;filter:blur(6px)} 70%{transform:scale(0.9) rotate(5deg);opacity:1;filter:none} 85%{transform:scale(1.15) rotate(-3deg)} 100%{transform:scale(1) rotate(-5deg)} }
+        .seal-pressing { animation: seal-slam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes camera-flash { 0%{opacity:0} 15%{opacity:1} 100%{opacity:0} }
+        .camera-flash { position:fixed;inset:0;background:#fff;z-index:99999;pointer-events:none; animation:camera-flash 0.7s cubic-bezier(0.1,0.8,0.3,1) forwards; }
+      `}</style>
+
+      {showFlash && <div className="camera-flash" />}
 
       {/* Confetti rain */}
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
@@ -917,7 +860,7 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
         </div>
 
         {/* Frosted glass card */}
-        <div style={{ background:"rgba(255,255,255,0.08)", backdropFilter:"blur(20px)", border:"1px solid rgba(255,255,255,0.2)", borderRadius:24, padding:"36px 28px", boxShadow:"0 32px 80px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3)", marginTop:8 }}>
+        <div style={{ background:"rgba(255,255,255,0.08)", backdropFilter:"blur(20px)", border:"1px solid rgba(255,255,255,0.2)", borderRadius:24, padding:"36px 28px", boxShadow:"0 32px 80px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3)", marginTop:8, position:"relative" }}>
           <div className="bs-spin-slow" style={{ display:"inline-block", fontSize:48 }}>🎂</div>
           <h1 className="bs-font-display" style={{ fontWeight:900, fontStyle:"italic", fontSize:"clamp(26px,5vw,44px)", color:"#fff", textShadow:"0 0 30px rgba(233,30,140,0.5)", marginTop:12 }}>
             Happy Birthday, {recipientName}! 🌟
@@ -934,6 +877,21 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
               <span key={i} style={{ fontSize:28 }}>{e}</span>
             ))}
           </div>
+
+          {/* Seal overlay */}
+          {sealed && (
+            <div style={{ position:"absolute", inset:0, background:"rgba(255,245,248,0.95)", borderRadius:24, display:"flex", alignItems:"center", justifyContent:"center", zIndex:20 }}>
+              <div className={animDone ? "" : "seal-pressing"} style={{ transform:"rotate(-5deg)", filter:"drop-shadow(0 8px 24px rgba(183,28,28,0.4))" }}>
+                <svg width="180" height="180" viewBox="0 0 200 200">
+                  <circle cx="100" cy="100" r="90" fill="none" stroke="#C2185B" strokeWidth="6" strokeDasharray="8 6" />
+                  <circle cx="100" cy="100" r="72" fill="rgba(233,30,140,0.95)" />
+                  <text x="100" y="88" textAnchor="middle" fill="white" fontSize="32">💌</text>
+                  <text x="100" y="115" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold" letterSpacing="1">SEALED WITH</text>
+                  <text x="100" y="132" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold" letterSpacing="1">LOVE</text>
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
 
         <div style={{ marginTop:24 }}>
@@ -941,9 +899,17 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
             Made with ❤️ just for {recipientName}
           </span>
         </div>
-        <button onClick={() => window.scrollTo({top:0, behavior:"smooth"})} style={{ marginTop:20, background:"transparent", border:"1px solid rgba(255,255,255,0.35)", color:"white", borderRadius:999, padding:"12px 28px", fontFamily:"'Nunito',sans-serif", fontWeight:600, cursor:"pointer", fontSize:14 }}>
-          🔁 Replay from the beginning
-        </button>
+
+        <div style={{ marginTop:20, display:"flex", flexDirection:"column", gap:12, alignItems:"center" }}>
+          {!sealed && !editMode && (
+            <button onClick={handleSeal} style={{ background:"linear-gradient(135deg, #C2185B, #E91E8C)", color:"white", border:"none", borderRadius:999, padding:"12px 28px", fontWeight:700, fontSize:15, cursor:"pointer", boxShadow:"0 8px 24px rgba(194,24,91,0.5)" }}>
+              💌 Seal with Love
+            </button>
+          )}
+          <button onClick={() => window.scrollTo({top:0, behavior:"smooth"})} style={{ background:"transparent", border:"1px solid rgba(255,255,255,0.35)", color:"white", borderRadius:999, padding:"12px 28px", fontFamily:"'Nunito',sans-serif", fontWeight:600, cursor:"pointer", fontSize:14 }}>
+            🔁 Replay from the beginning
+          </button>
+        </div>
       </div>
     </section>
   );

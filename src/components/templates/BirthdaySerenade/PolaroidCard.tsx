@@ -62,7 +62,7 @@ export default function PolaroidCard({
           style={{ objectFit: "cover" }}
         />
         {editMode && onFieldChange && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 transition-opacity">
             <ImageUploader 
               fid={imageId}
               data={{ [imageId]: src }}
