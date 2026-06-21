@@ -132,8 +132,23 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
   // Chapter refs for IntersectionObserver
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
 
+  const scrollTo = (idx: number) => {
+    setActiveChapter(idx);
+    const container = document.getElementById("bs-main-container");
+    const el = document.getElementById(`bs-chapter-${idx}`);
+    if (container && el) {
+      container.scrollTo({ top: el.offsetTop, behavior: "smooth" });
+    } else {
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   useEffect(() => {
-    if (editMode && forcedSlide != null) { setActiveChapter(Math.max(0, forcedSlide)); return; }
+    if (editMode && forcedSlide != null) { 
+      const idx = Math.max(0, forcedSlide);
+      setTimeout(() => scrollTo(idx), 50);
+      return; 
+    }
     const obs = new IntersectionObserver(entries => {
       entries.forEach(e => {
         if (e.isIntersecting) {
@@ -145,17 +160,6 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
     chapterRefs.current.forEach(el => el && obs.observe(el));
     return () => obs.disconnect();
   }, [editMode, forcedSlide]);
-
-  const scrollTo = (idx: number) => {
-    setActiveChapter(idx);
-    const container = document.getElementById("bs-main-container");
-    const el = document.getElementById(`bs-chapter-${idx}`);
-    if (container && el) {
-      container.scrollTo({ top: el.offsetTop, behavior: "smooth" });
-    } else {
-      el?.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   const openSongLibrary = (target: string) => { setSongLibraryTarget(target); setShowSongLibrary(true); };
 
@@ -586,12 +590,12 @@ const Chapter3 = React.forwardRef<HTMLElement, any>(function Chapter3({ id, cust
 
   const recipientName = d(customData, "bs_recipient", "You");
   const messages = [
-    { text:`🎂 Happy Birthday, ${recipientName}! 🎂`, ms:2500, big:true },
-    { text:"This day belongs to you 🌟", ms:2000, color:"#FDE68A" },
+    { text: d(customData, "bs_wish0", `🎂 Happy Birthday, ${recipientName}! 🎂`), ms:2500, big:true },
+    { text: d(customData, "bs_wish_intro", "This day belongs to you 🌟"), ms:2000, color:"#FDE68A" },
     { text: d(customData, "bs_wish1", "May every dream you've whispered to the stars finally come true 🌟"), ms:2200, color:"#FCE4EC" },
     { text: d(customData, "bs_wish2", "May joy follow you like a loyal friend wherever you go 💛"), ms:2200, color:"#FCE4EC" },
     { text: d(customData, "bs_wish3", "May this chapter of your life be your most magical yet ✨"), ms:2200, color:"#FCE4EC" },
-    { text:`You are so loved, ${recipientName}. Always. 💕`, ms:2500, big:true, italic:true },
+    { text: d(customData, "bs_wish_outro", `You are so loved, ${recipientName}. Always. 💕`), ms:2500, big:true, italic:true },
   ];
 
   useEffect(() => {
@@ -629,11 +633,18 @@ const Chapter3 = React.forwardRef<HTMLElement, any>(function Chapter3({ id, cust
       
       {/* Edit: wish fields */}
       {editMode && (
-        <div style={{ position:"absolute", top:20, left:20, zIndex:50, display:"flex", flexDirection:"column", gap:8, maxWidth:300 }}>
-          {["bs_wish1","bs_wish2","bs_wish3"].map((fid,i) => (
-            <div key={fid}>
-              <div style={{ color:"rgba(255,255,255,0.6)", fontSize:11, marginBottom:2 }}>Wish {i+1}</div>
-              <ET fid={fid} data={customData} onChange={onFieldChange} editMode={editMode} def={messages[2+i].text} />
+        <div style={{ position:"absolute", top:20, left:20, zIndex:50, display:"flex", flexDirection:"column", gap:8, maxWidth:300, maxHeight:"90%", overflowY:"auto", paddingRight:8 }}>
+          {[
+            { id: "bs_wish0", label: "Sentence 1", def: `🎂 Happy Birthday, ${recipientName}! 🎂` },
+            { id: "bs_wish_intro", label: "Sentence 2", def: "This day belongs to you 🌟" },
+            { id: "bs_wish1", label: "Sentence 3", def: "May every dream you've whispered to the stars finally come true 🌟" },
+            { id: "bs_wish2", label: "Sentence 4", def: "May joy follow you like a loyal friend wherever you go 💛" },
+            { id: "bs_wish3", label: "Sentence 5", def: "May this chapter of your life be your most magical yet ✨" },
+            { id: "bs_wish_outro", label: "Sentence 6", def: `You are so loved, ${recipientName}. Always. 💕` }
+          ].map((field, i) => (
+            <div key={field.id}>
+              <div style={{ color:"rgba(255,255,255,0.6)", fontSize:11, marginBottom:2 }}>{field.label}</div>
+              <ET fid={field.id} data={customData} onChange={onFieldChange} editMode={editMode} def={field.def} />
             </div>
           ))}
         </div>
