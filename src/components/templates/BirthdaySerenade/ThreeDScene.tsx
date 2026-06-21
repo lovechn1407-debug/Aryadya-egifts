@@ -327,17 +327,6 @@ function Confetti({ visible }: { visible: boolean }) {
   );
 }
 
-function DreamyBackground() {
-  return (
-    <>
-      <Environment preset="apartment" background blur={0.1} />
-      <ambientLight intensity={1.2} color="#FFFFFF" />
-      <directionalLight position={[5, 10, 5]} intensity={1.5} color="#FFFFFF" castShadow />
-      <pointLight position={[-5, 4, 5]} intensity={1.0} color="#F472B6" />
-      <Sparkles count={50} scale={10} size={3} speed={0.4} opacity={0.5} color="#F9A8D4" />
-    </>
-  );
-}
 
 function FloatingHBD({ visible }: { visible: boolean }) {
   const ref = useRef<THREE.Group>(null);
@@ -409,7 +398,16 @@ export default function ThreeDScene({ onCut, recipientName, cakeStickUrl }: { on
       >
         <OrbitControls enablePan={false} minDistance={5} maxDistance={20} />
         
-        <DreamyBackground />
+        <ambientLight intensity={1.5} color="#FFFFFF" />
+        <directionalLight position={[5, 10, 5]} intensity={2} color="#FFFFFF" castShadow />
+        <pointLight position={[0, 10, 0]} intensity={2.5} color="#FFFFFF" />
+        <pointLight position={[-5, 4, 5]} intensity={1.8} color="#F472B6" />
+        <pointLight position={[5, 2, -5]} intensity={1.2} color="#FBBF24" />
+        
+        <fog attach="fog" args={["#1A1A2E", 14, 30]} />
+        
+        <Stars radius={80} depth={40} count={4000} factor={5} saturation={0.5} fade speed={1.5} />
+        <Sparkles count={100} scale={14} size={4} speed={0.4} opacity={0.6} color="#F9A8D4" />
 
         <Cake onClick={handleCut} recipientName={recipientName} cakeStickUrl={cakeStickUrl} />
         <Knife cutting={cutting} />
