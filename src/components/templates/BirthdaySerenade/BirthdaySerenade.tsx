@@ -414,13 +414,13 @@ const Chapter1 = React.forwardRef<HTMLElement, any>(function Chapter1({ id, cust
           <div className="bs-lined-paper bs-font-script"
             style={{ borderLeft:"3px solid #E91E8C", borderRadius:12, padding:28, boxShadow:"0 24px 64px rgba(0,0,0,0.18)" }}>
             <h3 style={{ fontSize:28, color:"#C2185B", marginBottom:12 }}>
-              Dear <ET fid="bs_recipient" data={customData} onChange={onFieldChange} editMode={editMode} def="Priya" />, ✨
+              Dear <ET fid="bs_recipient" data={customData} onChange={onFieldChange} editMode={editMode} darkText={true} def="Priya" />, ✨
             </h3>
             <p style={{ fontSize:18, lineHeight:1.8, color:"#4A4A68" }}>
-              <ET fid="bs_letter_msg" data={customData} onChange={onFieldChange} editMode={editMode} multiline def="Every single day I spend knowing you exist in this world feels like a gift I never deserved. You walk into a room and everything gets a little warmer. Happy Birthday, my love." />
+              <ET fid="bs_letter_msg" data={customData} onChange={onFieldChange} editMode={editMode} darkText={true} multiline def="Every single day I spend knowing you exist in this world feels like a gift I never deserved. You walk into a room and everything gets a little warmer. Happy Birthday, my love." />
             </p>
             <p style={{ fontSize:22, color:"#E91E8C", marginTop:16 }}>
-              With all my love, <ET fid="bs_sender" data={customData} onChange={onFieldChange} editMode={editMode} def="Rohan" /> 💕
+              With all my love, <ET fid="bs_sender" data={customData} onChange={onFieldChange} editMode={editMode} darkText={true} def="Rohan" /> 💕
             </p>
             {(opened || editMode) && (
               <button className="bs-cta-btn" style={{ marginTop:24 }} onClick={onNext}>Open Your Gift 🎁</button>
