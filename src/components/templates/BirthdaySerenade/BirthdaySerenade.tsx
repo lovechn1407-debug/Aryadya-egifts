@@ -161,6 +161,24 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
     return () => obs.disconnect();
   }, [editMode, forcedSlide]);
 
+  // AutoPlay logic for embed mode (slideshow effect)
+  useEffect(() => {
+    if (autoPlay) {
+      let current = 1;
+      const interval = setInterval(() => {
+        current = current >= 7 ? 1 : current + 1;
+        const container = document.getElementById("bs-main-container");
+        const el = document.getElementById(`bs-chapter-${current}`);
+        if (container && el) {
+          container.scrollTo({ top: el.offsetTop, behavior: "smooth" });
+        } else {
+          el?.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 3500);
+      return () => clearInterval(interval);
+    }
+  }, [autoPlay]);
+
   const openSongLibrary = (target: string) => { setSongLibraryTarget(target); setShowSongLibrary(true); };
 
   // Background music
