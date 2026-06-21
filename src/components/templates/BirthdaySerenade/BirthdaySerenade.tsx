@@ -147,7 +147,14 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
   }, [editMode, forcedSlide]);
 
   const scrollTo = (idx: number) => {
-    document.getElementById(`bs-chapter-${idx}`)?.scrollIntoView({ behavior: "smooth" });
+    setActiveChapter(idx);
+    const container = document.getElementById("bs-main-container");
+    const el = document.getElementById(`bs-chapter-${idx}`);
+    if (container && el) {
+      container.scrollTo({ top: el.offsetTop, behavior: "smooth" });
+    } else {
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const openSongLibrary = (target: string) => { setSongLibraryTarget(target); setShowSongLibrary(true); };
@@ -158,7 +165,35 @@ export default function BirthdaySerenade({ customData = {}, editMode = false, on
   const setRef = (idx: number) => (el: HTMLElement | null) => { chapterRefs.current[idx] = el; };
 
   return (
-    <div style={{ position:"relative", fontFamily:"'Nunito', sans-serif" }}>
+    <div id="bs-main-container" style={{ position:"relative", fontFamily:"'Nunito', sans-serif", height: "100dvh", overflow: "hidden", width: "100%" }}>
+      {/* Global Back Button */}
+      {activeChapter > (editMode ? 0 : 1) && (
+        <button
+          onClick={() => scrollTo(activeChapter - 1)}
+          style={{
+            position: "fixed",
+            top: 20,
+            left: 20,
+            zIndex: 999,
+            background: "rgba(255,255,255,0.15)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(255,255,255,0.3)",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: 20,
+            fontFamily: "'Nunito', sans-serif",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
+          }}
+        >
+          <span style={{ fontSize: 18, lineHeight: 1 }}>←</span> Back
+        </button>
+      )}
       {/* Global CSS */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Nunito:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&display=swap');
