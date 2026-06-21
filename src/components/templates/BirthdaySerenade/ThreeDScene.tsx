@@ -329,44 +329,13 @@ function Confetti({ visible }: { visible: boolean }) {
 
 function DreamyBackground() {
   return (
-    <group>
-      <color attach="background" args={["#0a0616"]} />
-      <fog attach="fog" args={["#0a0616", 10, 40]} />
-      
-      {/* High-quality lighting environment */}
-      <Environment preset="city" />
-
-      {/* Glossy Reflective Floor */}
-      <mesh position={[0, -0.1, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#05030a" roughness={0.15} metalness={0.9} />
-      </mesh>
-
-      {/* Floating Magical Orbs (Bokeh Effect) */}
-      {Array.from({ length: 30 }).map((_, i) => {
-        const x = (Math.random() - 0.5) * 40;
-        const y = Math.random() * 20 - 2;
-        const z = (Math.random() - 0.5) * 40 - 10;
-        const s = Math.random() * 1.5 + 0.5;
-        const colors = ["#f472b6", "#c084fc", "#60a5fa", "#fde047", "#34d399"];
-        return (
-          <Float key={i} speed={1 + Math.random()} rotationIntensity={1} floatIntensity={2}>
-            <mesh position={[x, y, z]} scale={s}>
-              <sphereGeometry args={[1, 32, 32]} />
-              <meshBasicMaterial 
-                color={colors[i % colors.length]} 
-                transparent 
-                opacity={0.15} 
-                depthWrite={false} 
-              />
-            </mesh>
-          </Float>
-        );
-      })}
-
-      <Stars radius={80} depth={40} count={4000} factor={5} saturation={0.8} fade speed={1.5} />
-      <Sparkles count={150} scale={25} size={4} speed={0.4} opacity={0.5} color="#f9a8d4" />
-    </group>
+    <>
+      <Environment preset="apartment" background blur={0.1} />
+      <ambientLight intensity={1.2} color="#FFFFFF" />
+      <directionalLight position={[5, 10, 5]} intensity={1.5} color="#FFFFFF" castShadow />
+      <pointLight position={[-5, 4, 5]} intensity={1.0} color="#F472B6" />
+      <Sparkles count={50} scale={10} size={3} speed={0.4} opacity={0.5} color="#F9A8D4" />
+    </>
   );
 }
 
@@ -439,12 +408,6 @@ export default function ThreeDScene({ onCut, recipientName, cakeStickUrl }: { on
         shadows
       >
         <OrbitControls enablePan={false} minDistance={5} maxDistance={20} />
-        
-        <ambientLight intensity={0.8} color="#FFFFFF" />
-        <directionalLight position={[5, 10, 5]} intensity={1.5} color="#FFFFFF" castShadow />
-        <pointLight position={[0, 10, 0]} intensity={2.5} color="#FFFFFF" />
-        <pointLight position={[-5, 4, 5]} intensity={1.8} color="#F472B6" />
-        <pointLight position={[5, 2, -5]} intensity={1.2} color="#FBBF24" />
         
         <DreamyBackground />
 
