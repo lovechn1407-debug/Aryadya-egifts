@@ -725,6 +725,7 @@ const Chapter5 = React.forwardRef<HTMLElement, any>(function Chapter5({ id, cust
   const [toast, setToast] = useState(false);
 
   const giftCode = d(customData, "bs_gift_code", "BDAY2025LOVE");
+  const giftPin = d(customData, "bs_gift_pin", "1234");
   const giftBrand = d(customData, "bs_gift_brand", "Myntra");
   const giftWorth = d(customData, "bs_gift_worth", "500");
   const giftValid = d(customData, "bs_gift_valid", "31 Dec 2025");
@@ -761,7 +762,7 @@ const Chapter5 = React.forwardRef<HTMLElement, any>(function Chapter5({ id, cust
         {/* Gift card edit fields */}
         {editMode && (
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginTop:12, marginBottom:12 }}>
-            {[["bs_gift_brand","Brand","Myntra"],["bs_gift_code","Code","BDAY2025LOVE"],["bs_gift_worth","Worth (₹)","500"],["bs_gift_valid","Valid Till","31 Dec 2025"]].map(([fid,label,def]) => (
+            {[["bs_gift_brand","Brand","Myntra"],["bs_gift_code","Code","BDAY2025LOVE"],["bs_gift_pin","PIN","1234"],["bs_gift_worth","Worth (₹)","500"],["bs_gift_valid","Valid Till","31 Dec 2025"]].map(([fid,label,def]) => (
               <div key={fid} style={{ textAlign:"left" }}>
                 <div style={{ color:"rgba(255,255,255,0.5)", fontSize:11, marginBottom:2 }}>{label}</div>
                 <ET fid={fid} data={customData} onChange={onFieldChange} editMode={editMode} def={def} />
@@ -776,7 +777,10 @@ const Chapter5 = React.forwardRef<HTMLElement, any>(function Chapter5({ id, cust
             <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8, zIndex:1, color:"white", textAlign:"center" }}>
               <div style={{ fontWeight:800, fontSize:26, letterSpacing:2 }}>{giftBrand}</div>
               <div style={{ fontSize:13, fontWeight:600 }}>🎀 Your Gift Code</div>
-              <div className={revealed ? "bs-glow-pulse" : ""} style={{ fontFamily:"'Courier New', monospace", fontSize:22, fontWeight:900, background:"rgba(255,255,255,0.2)", padding:"8px 20px", borderRadius:8, letterSpacing:4 }}>{giftCode}</div>
+              <div className={revealed ? "bs-glow-pulse" : ""} style={{ fontFamily:"'Courier New', monospace", fontSize:22, fontWeight:900, background:"rgba(255,255,255,0.2)", padding:"8px 20px", borderRadius:8, letterSpacing:4 }}>
+                {giftCode}
+                {giftPin && <div style={{ fontSize:14, letterSpacing:1, marginTop:4, opacity:0.9 }}>PIN: {giftPin}</div>}
+              </div>
               <div style={{ color:"#FDE68A", fontWeight:800, fontSize:18 }}>Worth ₹{giftWorth}</div>
               <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>Valid till {giftValid}</div>
             </div>
@@ -813,13 +817,132 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
   const [sealed, setSealed] = useState(false);
   const [animDone, setAnimDone] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
+  
+  const [screenshotData, setScreenshotData] = useState<string | null>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSeal = () => {
     if (sealed || editMode) return;
     setSealed(true);
-    setShowFlash(true);
-    setTimeout(() => setShowFlash(false), 700);
-    setTimeout(() => setAnimDone(true), 1000);
+    setAnimDone(false);
+
+    setTimeout(() => {
+      setAnimDone(true);
+    }, 1000);
+
+    setTimeout(async () => {
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 700);
+
+      const element = document.getElementById("bs-card-to-capture");
+      if (!element) {
+        console.error("Capture element not found");
+        return;
+      }
+
+      try {
+        const { domToPng } = await import("modern-screenshot");
+        const dataUrl = await domToPng(element, {
+          scale: 2,
+          backgroundColor: "#fff",
+          filter: (el) => {
+            if (el.nodeType === 1) {
+              const htmlEl = el as HTMLElement;
+              return !htmlEl.classList.contains("no-screenshot") && htmlEl.tagName !== "BUTTON";
+            }
+            return true;
+          }
+        });
+        setScreenshotData(dataUrl);
+        setOpenModal(true);
+      } catch (err) {
+        console.error("Screenshot capture failed", err);
+      }
+    }, 1500);
+  };
+
+  const handleShare = async () => {
+    if (!screenshotData) return;
+    setUploading(true);
+    setError(null);
+
+    let isShared = false;
+
+    // 1. Try direct image file sharing if supported by browser/device
+    try {
+      if (screenshotData.includes(";base64,")) {
+        const base64Data = screenshotData.split(",")[1];
+        const byteString = atob(base64Data);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: "image/png" });
+        const file = new File([blob], `seen-proof-${Date.now()}.png`, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "Birthday Serenade Proof 🎊",
+            text: "My Birthday Serenade is sealed! 🎁"
+          });
+          isShared = true;
+        }
+      }
+    } catch (err) {
+      console.log("Direct raw file sharing not supported or cancelled, trying link upload...", err);
+    }
+
+    if (isShared) {
+      setUploading(false);
+      return;
+    }
+
+    // 2. Fallback to ImgBB upload and Native Share Sheet / Clipboard Copy
+    try {
+      let base64Data = "";
+      if (screenshotData.includes(";base64,")) {
+        base64Data = screenshotData.split(",")[1];
+      } else {
+        base64Data = btoa(unescape(encodeURIComponent(screenshotData.split(",")[1] || screenshotData)));
+      }
+
+      const fd = new FormData();
+      fd.append("image", base64Data);
+
+      const res = await fetch("https://api.imgbb.com/1/upload?key=83e3f88941efd1059a89f016ff302d9e", {
+        method: "POST",
+        body: fd
+      });
+      const json = await res.json();
+      if (json.success) {
+        const url = json.data.url;
+        setShareUrl(url);
+
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 5000);
+        } catch (clipErr) {
+          console.log("Clipboard write failed", clipErr);
+        }
+
+        const whatsappText = `My Birthday Serenade is sealed! Check out the proof here: 🎁\n${url}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+        window.open(whatsappUrl, '_blank');
+      } else {
+        setError("Failed to upload image. Please try again.");
+      }
+    } catch (err) {
+      setError("An error occurred during upload. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const confetti = useMemo(() => Array.from({length:50}).map(() => ({
@@ -848,7 +971,7 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
         ))}
       </div>
 
-      <div style={{ position:"relative", zIndex:10, textAlign:"center", maxWidth:520 }}>
+      <div id="bs-card-to-capture" style={{ position:"relative", zIndex:10, textAlign:"center", maxWidth:520 }}>
         {/* Pulsing heart */}
         <div style={{ position:"relative", width:160, height:160, margin:"0 auto" }}>
           <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", animation:"bs-pulse 1.8s ease-in-out infinite" }}>
@@ -900,7 +1023,7 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
           </span>
         </div>
 
-        <div style={{ marginTop:20, display:"flex", flexDirection:"column", gap:12, alignItems:"center" }}>
+        <div className="no-screenshot" style={{ marginTop:20, display:"flex", flexDirection:"column", gap:12, alignItems:"center" }}>
           {!sealed && !editMode && (
             <button onClick={handleSeal} style={{ background:"linear-gradient(135deg, #C2185B, #E91E8C)", color:"white", border:"none", borderRadius:999, padding:"12px 28px", fontWeight:700, fontSize:15, cursor:"pointer", boxShadow:"0 8px 24px rgba(194,24,91,0.5)" }}>
               💌 Seal with Love
@@ -911,6 +1034,117 @@ const Chapter7 = React.forwardRef<HTMLElement, any>(function Chapter7({ id, cust
           </button>
         </div>
       </div>
+
+      {/* Screenshot Framed Preview Modal */}
+      {openModal && screenshotData && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(15, 23, 42, 0.8)", backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20
+        }}>
+          <div style={{
+            background: "rgba(255, 255, 255, 0.95)",
+            border: "2px solid #E91E8C",
+            borderRadius: 24,
+            padding: "24px 20px",
+            width: "100%",
+            maxWidth: 440,
+            boxShadow: "0 24px 64px rgba(233, 30, 140, 0.3)",
+            textAlign: "center",
+            position: "relative",
+          }}>
+            <h3 style={{
+              fontFamily: "'Nunito', sans-serif", fontWeight: 900,
+              fontSize: 22, color: "#E91E8C", marginBottom: 6
+            }}>
+              💖 Birthday Proof Sealed! 💖
+            </h3>
+            <p style={{ fontSize: 13, color: "#4A4A68", marginBottom: 16 }}>
+              Your serenade is sealed and proof is captured!
+            </p>
+
+            <div style={{
+              background: "#fff",
+              padding: "12px 12px 24px",
+              borderRadius: 12,
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+              border: "1px solid #FCE4EC",
+              marginBottom: 20,
+              transform: "rotate(-1deg)",
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={screenshotData} alt="Sealed Proof" style={{
+                width: "100%", borderRadius: 6, display: "block",
+                maxHeight: 280, objectFit: "contain",
+                border: "1px solid rgba(233, 30, 140, 0.1)"
+              }} />
+              <div style={{
+                fontFamily: "'Dancing Script', cursive",
+                fontSize: 18, color: "#E91E8C", marginTop: 12, textAlign: "center"
+              }}>
+                Sealed with Love ✨
+              </div>
+            </div>
+
+            {shareUrl && (
+              <div style={{
+                background: "rgba(76, 175, 138, 0.08)",
+                border: "1px solid rgba(76, 175, 138, 0.3)",
+                borderRadius: 12, padding: "10px 14px", marginBottom: 16,
+                fontSize: 12, color: "#2E7D32", fontWeight: 600,
+                lineHeight: 1.4
+              }}>
+                <span style={{ fontSize: 14 }}>🎉</span> Link Copied to Clipboard!
+                <div style={{
+                  marginTop: 4, fontStyle: "italic", fontWeight: 400,
+                  color: "#388E3C", wordBreak: "break-all", background: "#fff",
+                  padding: "4px 8px", borderRadius: 6, border: "1px solid #E8F5E9"
+                }}>{shareUrl}</div>
+              </div>
+            )}
+
+            {error && (
+              <div style={{
+                background: "rgba(211, 47, 47, 0.08)",
+                border: "1px solid rgba(211, 47, 47, 0.3)",
+                borderRadius: 12, padding: "10px 14px", marginBottom: 16,
+                fontSize: 12, color: "#C62828", fontWeight: 600
+              }}>
+                ❌ {error}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+              <button
+                onClick={handleShare}
+                disabled={uploading}
+                style={{
+                  background: "#25D366", color: "#fff",
+                  border: "none", borderRadius: 999,
+                  padding: "12px 24px", fontSize: 13, fontWeight: 800,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  boxShadow: "0 6px 16px rgba(37, 211, 102, 0.3)",
+                  opacity: uploading ? 0.7 : 1, transition: "all 0.2s",
+                  flex: 1
+                }}
+              >
+                {uploading ? "Uploading... ⏳" : "Share to WhatsApp"}
+              </button>
+              <button
+                onClick={() => setOpenModal(false)}
+                style={{
+                  background: "#E0E0E0", color: "#333",
+                  border: "none", borderRadius: 999,
+                  padding: "12px 24px", fontSize: 13, fontWeight: 800,
+                  cursor: "pointer", transition: "all 0.2s", flex: 0.5
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 });
