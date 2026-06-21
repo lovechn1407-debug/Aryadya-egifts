@@ -131,6 +131,8 @@ export interface ProductOverride {
   requiredAdsCount?: number;
   frameStripEnabled?: boolean;
   frameStripTexts?: string[];
+  frameStripBgColor?: string;
+  frameStripTextColor?: string;
 }
 
 export async function getProductsDB(): Promise<Product[]> {

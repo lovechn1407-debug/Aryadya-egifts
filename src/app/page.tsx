@@ -633,7 +633,7 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
     if (!product.frameStripEnabled || !product.frameStripTexts || product.frameStripTexts.length <= 1) return;
     const interval = setInterval(() => {
       setStripIndex(prev => (prev + 1) % product.frameStripTexts!.length);
-    }, 3000);
+    }, 4000);
     return () => clearInterval(interval);
   }, [product.frameStripEnabled, product.frameStripTexts]);
 
@@ -790,36 +790,63 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
         )}
 
         {/* Frame Strip overlay */}
-        {product.frameStripEnabled && product.frameStripTexts && product.frameStripTexts.length > 0 && (
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20,
-            background: "linear-gradient(90deg, #FACC15, #FDE047)",
-            padding: "8px 12px", textAlign: "center",
-            borderTop: "2px solid #EAB308",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 -4px 16px rgba(0,0,0,0.15)",
-            overflow: "hidden"
-          }}>
-            {/* We add a style tag for the fade animation if it's not present globally */}
-            <style>{`
-              @keyframes fs-fade-in {
-                0% { opacity: 0; transform: translateY(4px); }
-                100% { opacity: 1; transform: translateY(0); }
-              }
-            `}</style>
-            <div 
-              key={stripIndex}
-              style={{
-                fontSize: 13, fontWeight: 900, color: "#422006", 
-                textTransform: "uppercase", letterSpacing: 1.5,
-                animation: "fs-fade-in 0.4s ease-out forwards",
-                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
-              }}
-            >
-              {product.frameStripTexts[stripIndex]}
+        {product.frameStripEnabled && product.frameStripTexts && product.frameStripTexts.length > 0 && (() => {
+          const currentText = product.frameStripTexts[stripIndex];
+          const isLong = currentText.length > 24;
+          const scrollOffset = isLong ? (currentText.length - 24) * 4 : 0;
+          return (
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20,
+              background: product.frameStripBgColor || "#FACC15",
+              padding: "5px 8px", textAlign: "center",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 -4px 16px rgba(0,0,0,0.15)",
+              overflow: "hidden"
+            }}>
+              {/* Animations */}
+              <style>{`
+                @keyframes fs-fade-in {
+                  0% { opacity: 0; transform: translateY(4px); }
+                  100% { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes fs-light-sweep {
+                  0% { left: -100%; }
+                  100% { left: 200%; }
+                }
+                @keyframes fs-scroll-dynamic-${scrollOffset} {
+                  0%, 15% { transform: translateX(${scrollOffset}px); }
+                  85%, 100% { transform: translateX(-${scrollOffset}px); }
+                }
+              `}</style>
+
+              {/* Light sweep element */}
+              <div style={{
+                position: "absolute", top: 0, bottom: 0, width: "40%",
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)",
+                transform: "skewX(-20deg)",
+                animation: "fs-light-sweep 2.5s infinite",
+                pointerEvents: "none", zIndex: 1
+              }} />
+
+              <div 
+                key={stripIndex}
+                style={{
+                  animation: "fs-fade-in 0.4s ease-out forwards",
+                  zIndex: 2, position: "relative", width: "100%"
+                }}
+              >
+                <div style={{
+                  fontSize: 11, fontWeight: 900, color: product.frameStripTextColor || "#422006", 
+                  textTransform: "uppercase", letterSpacing: 1,
+                  whiteSpace: "nowrap",
+                  animation: isLong ? `fs-scroll-dynamic-${scrollOffset} 4s linear infinite alternate` : "none"
+                }}>
+                  {currentText}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
       {/* Solid footer — always visible below iframe */}
       <div style={{ background: "#fff", padding: "10px 12px 12px", borderTop: `2px solid ${color}15`, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 82, flexShrink: 0 }}>
@@ -871,6 +898,8 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
     (prev.product as any).stockLeft === (next.product as any).stockLeft &&
     (prev.product as any).showStock === (next.product as any).showStock &&
     prev.product.frameStripEnabled === next.product.frameStripEnabled &&
+    prev.product.frameStripBgColor === next.product.frameStripBgColor &&
+    prev.product.frameStripTextColor === next.product.frameStripTextColor &&
     JSON.stringify(prev.product.frameStripTexts) === JSON.stringify(next.product.frameStripTexts)
   );
 });

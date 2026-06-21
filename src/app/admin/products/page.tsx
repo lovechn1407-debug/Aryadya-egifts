@@ -634,6 +634,24 @@ export default function AdminProductsPage() {
                   <span className="toggle-slider" style={{ background: product.frameStripEnabled ? "#10B981" : "#CBD5E1" }} />
                 </label>
                 {product.frameStripEnabled && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 6 }}>
+                    <input 
+                      type="color" 
+                      value={product.frameStripBgColor || "#FACC15"} 
+                      onChange={e => { updateProductOverrideDB(product.id, { frameStripBgColor: e.target.value }).then(reload); }}
+                      style={{ width: 24, height: 24, padding: 0, border: "1px solid #E2E8F0", borderRadius: 4, cursor: "pointer" }}
+                      title="Background Color"
+                    />
+                    <input 
+                      type="color" 
+                      value={product.frameStripTextColor || "#422006"} 
+                      onChange={e => { updateProductOverrideDB(product.id, { frameStripTextColor: e.target.value }).then(reload); }}
+                      style={{ width: 24, height: 24, padding: 0, border: "1px solid #E2E8F0", borderRadius: 4, cursor: "pointer" }}
+                      title="Text Color"
+                    />
+                  </div>
+                )}
+                {product.frameStripEnabled && (
                   editingFrameStrip === product.id ? (
                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                       <input 

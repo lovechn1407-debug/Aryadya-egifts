@@ -36,6 +36,8 @@ export interface Product {
   requiredAdsCount?: number;
   frameStripEnabled?: boolean;
   frameStripTexts?: string[];
+  frameStripBgColor?: string;
+  frameStripTextColor?: string;
 }
 
 export interface Order {
