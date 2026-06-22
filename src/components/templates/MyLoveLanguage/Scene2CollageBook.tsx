@@ -13,10 +13,6 @@ const PARTICLE_STYLE = `
   90% { opacity: 0.7; }
   100% { transform: translateY(-5vh) translateX(80px) rotate(360deg); opacity: 0; }
 }
-@keyframes pageTurnShadow {
-  0%, 100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
-  50% { box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-}
 `;
 
 const particles = Array.from({ length: 15 }, (_, i) => ({
@@ -32,15 +28,15 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
   const { data, editMode } = useMllContext();
   const [currentPage, setCurrentPage] = useState(0);
   const [turningState, setTurningState] = useState<"none" | "next" | "prev">("none");
-  const [closing, setClosing] = useState(false);
+  const [bookStage, setBookStage] = useState<"closed" | "open" | "closing">(editMode ? "open" : "closed");
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (closing) {
+    if (bookStage === "closing") {
       const t = setTimeout(() => setDone(true), 1100);
       return () => clearTimeout(t);
     }
-  }, [closing]);
+  }, [bookStage]);
 
   const turnNext = () => {
     if (turningState !== "none") return;
@@ -65,7 +61,7 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
 
   const startClose = () => {
     playSound(paperRustle);
-    setClosing(true);
+    setBookStage("closing");
   };
 
   return (
@@ -116,303 +112,230 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
         <div
           style={{
             position: "relative",
-            width: "min(640px, 92vw)",
-            height: "min(440px, 66vh)",
-            perspective: "1600px",
+            width: "min(340px, 92vw)",
+            height: "min(480px, 70vh)",
+            perspective: "1500px",
             zIndex: 10,
           }}
         >
-          {/* Depth effect: left/right margins behind the book simulating stack of pages */}
-          <div
-            style={{
-              position: "absolute",
-              inset: "8px -6px 8px -6px",
-              background: "#FFF3E6",
-              border: "1.5px solid #D4AF37",
-              borderRadius: "6px",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-              zIndex: 1,
-              opacity: 0.85,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: "4px -3px 4px -3px",
-              background: "#FFF6ED",
-              border: "1.5px solid #E5C158",
-              borderRadius: "5px",
-              zIndex: 2,
-              opacity: 0.9,
-            }}
-          />
-
-          {/* Book Wrapper */}
+          {/* Backing Red Leather Board (Cover Base) */}
           <div
             style={{
               position: "absolute",
               inset: 0,
-              display: "flex",
-              transformStyle: "preserve-3d",
-              zIndex: 3,
+              background: "radial-gradient(ellipse at 30% 30%, #8B0000 0%, #5A0000 60%, #3A0000 100%)",
+              border: "3px solid #8B0000",
+              borderRadius: "12px",
+              boxShadow: "0 15px 40px rgba(0,0,0,0.6), inset 0 0 24px rgba(0,0,0,0.4)",
+              zIndex: 1,
             }}
           >
-            {/* LEFT SIDE PANEL (Inside Left Page + Outside Front Cover) */}
-            <motion.div
-              animate={{ rotateY: closing ? 180 : 0 }}
-              transition={{ duration: 1.0, ease: "easeInOut" }}
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: "50%",
-                height: "100%",
-                transformOrigin: "right center",
-                transformStyle: "preserve-3d",
-                zIndex: closing ? 20 : 10,
-              }}
-            >
-              {/* Inside Left Page (visible when open) */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  backfaceVisibility: "hidden",
-                  zIndex: 2,
-                  background: "#FFF8F0",
-                  borderRadius: "4px 0 0 4px",
-                  boxShadow: "inset 10px 0 20px rgba(0,0,0,0.06)",
-                  border: "1.5px solid #D4AF37",
-                  borderRight: "none",
-                  overflow: "hidden",
-                }}
-              >
-                {/* Static Left page display */}
-                {turningState === "prev" ? (
-                  <LeftPageContent page={currentPage - 1} />
-                ) : (
-                  <LeftPageContent page={currentPage} />
-                )}
-              </div>
+            {/* Gold foil outline inside backing board */}
+            <div style={{ position: "absolute", inset: "8px", border: "1.5px solid #D4AF37", borderRadius: "8px", opacity: 0.35 }} />
+            {/* Gold metallic corners */}
+            <BookCorners />
+          </div>
 
-              {/* Outside Front Cover (backface - visible when closed) */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  backfaceVisibility: "hidden",
-                  transform: "rotateY(180deg)",
-                  zIndex: 1,
-                }}
-              >
-                <BookCover />
-              </div>
-            </motion.div>
+          {/* Pages stack container */}
+          <div
+            style={{
+              position: "absolute",
+              inset: "10px",
+              zIndex: 5,
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {/* Page Thickness stack (page depth effect) */}
+            <div style={{ position: "absolute", inset: "4px -4px 4px 4px", background: "#FFF3E6", border: "1px solid #D4AF37", borderRadius: "4px", zIndex: 1, opacity: 0.8 }} />
+            <div style={{ position: "absolute", inset: "2px -2px 2px 2px", background: "#FFF6ED", border: "1px solid #E5C158", borderRadius: "4px", zIndex: 2, opacity: 0.9 }} />
 
-            {/* RIGHT SIDE PANEL (Inside Right Page + Outside Back Cover) */}
-            <div
-              style={{
-                position: "absolute",
-                right: 0,
-                top: 0,
-                width: "50%",
-                height: "100%",
-                transformStyle: "preserve-3d",
-                zIndex: 9,
-              }}
-            >
-              {/* Inside Right Page (visible when open) */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "#FFF8F0",
-                  borderRadius: "0 4px 4px 0",
-                  boxShadow: "inset -10px 0 20px rgba(0,0,0,0.06)",
-                  border: "1.5px solid #D4AF37",
-                  borderLeft: "none",
-                  overflow: "hidden",
-                }}
-              >
-                {/* Static Right page display */}
-                {turningState === "next" ? (
-                  <RightPageContent page={currentPage + 1} />
-                ) : (
-                  <RightPageContent page={currentPage} />
-                )}
+            {/* Closed Cover View */}
+            {bookStage === "closed" && (
+              <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
+                <BookCover onOpen={() => {
+                  playSound(paperRustle);
+                  setBookStage("open");
+                }} />
               </div>
-            </div>
-
-            {/* FLIPPING PAGE SHEET (Runs transition on turn) */}
-            {turningState === "next" && (
-              <motion.div
-                initial={{ rotateY: 0 }}
-                animate={{ rotateY: -180 }}
-                transition={{ duration: 0.7, ease: "easeInOut" }}
-                style={{
-                  position: "absolute",
-                  right: 0,
-                  top: 0,
-                  width: "50%",
-                  height: "100%",
-                  transformOrigin: "left center",
-                  transformStyle: "preserve-3d",
-                  zIndex: 15,
-                  animation: "pageTurnShadow 0.7s ease-in-out",
-                }}
-              >
-                {/* Front of flipping sheet (page we are leaving) */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    backfaceVisibility: "hidden",
-                    background: "#FFF8F0",
-                    border: "1.5px solid #D4AF37",
-                    borderLeft: "none",
-                    borderRadius: "0 4px 4px 0",
-                    zIndex: 2,
-                  }}
-                >
-                  <RightPageContent page={currentPage} />
-                </div>
-                {/* Back of flipping sheet (page we are entering) */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    backfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
-                    background: "#FFF8F0",
-                    border: "1.5px solid #D4AF37",
-                    borderRight: "none",
-                    borderRadius: "4px 0 0 4px",
-                    zIndex: 1,
-                  }}
-                >
-                  <LeftPageContent page={currentPage + 1} />
-                </div>
-              </motion.div>
             )}
 
-            {turningState === "prev" && (
+            {/* Opened Pages View */}
+            {bookStage === "open" && (
+              <div style={{ position: "absolute", inset: 0, zIndex: 10, transformStyle: "preserve-3d" }}>
+                {/* Static Underneath Page */}
+                {turningState === "next" ? (
+                  <SinglePageContent page={currentPage + 1} />
+                ) : turningState === "prev" ? (
+                  <SinglePageContent page={currentPage - 1} />
+                ) : (
+                  <SinglePageContent page={currentPage} />
+                )}
+
+                {/* Flipping Page (Next) */}
+                {turningState === "next" && (
+                  <motion.div
+                    initial={{ rotateY: 0 }}
+                    animate={{ rotateY: -180 }}
+                    transition={{ duration: 0.7, ease: "easeInOut" }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      transformOrigin: "left center",
+                      transformStyle: "preserve-3d",
+                      zIndex: 15,
+                    }}
+                  >
+                    {/* Front face (Current page text/images) */}
+                    <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", zIndex: 2 }}>
+                      <SinglePageContent page={currentPage} />
+                    </div>
+                    {/* Back face (Flipped blank parchment texture) */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        backfaceVisibility: "hidden",
+                        transform: "rotateY(180deg)",
+                        background: "#FFF8F0",
+                        border: "1.5px solid #D4AF37",
+                        borderRadius: "4px",
+                        zIndex: 1,
+                      }}
+                    />
+                  </motion.div>
+                )}
+
+                {/* Flipping Page (Prev) */}
+                {turningState === "prev" && (
+                  <motion.div
+                    initial={{ rotateY: -180 }}
+                    animate={{ rotateY: 0 }}
+                    transition={{ duration: 0.7, ease: "easeInOut" }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      transformOrigin: "left center",
+                      transformStyle: "preserve-3d",
+                      zIndex: 15,
+                    }}
+                  >
+                    {/* Front face (Previous page content) */}
+                    <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", zIndex: 2 }}>
+                      <SinglePageContent page={currentPage - 1} />
+                    </div>
+                    {/* Back face */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        backfaceVisibility: "hidden",
+                        transform: "rotateY(180deg)",
+                        background: "#FFF8F0",
+                        border: "1.5px solid #D4AF37",
+                        borderRadius: "4px",
+                        zIndex: 1,
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </div>
+            )}
+
+            {/* Closing Cover Panel (3D overlay) */}
+            {bookStage === "closing" && (
               <motion.div
                 initial={{ rotateY: -180 }}
                 animate={{ rotateY: 0 }}
-                transition={{ duration: 0.7, ease: "easeInOut" }}
+                transition={{ duration: 1.0, ease: "easeInOut" }}
                 style={{
                   position: "absolute",
-                  right: 0,
-                  top: 0,
-                  width: "50%",
-                  height: "100%",
+                  inset: 0,
                   transformOrigin: "left center",
                   transformStyle: "preserve-3d",
-                  zIndex: 15,
-                  animation: "pageTurnShadow 0.7s ease-in-out",
+                  zIndex: 30,
                 }}
               >
-                {/* Front of flipping sheet (page we are entering) */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    backfaceVisibility: "hidden",
-                    background: "#FFF8F0",
-                    border: "1.5px solid #D4AF37",
-                    borderLeft: "none",
-                    borderRadius: "0 4px 4px 0",
-                    zIndex: 2,
-                  }}
-                >
-                  <RightPageContent page={currentPage - 1} />
-                </div>
-                {/* Back of flipping sheet (page we are leaving) */}
+                {/* Inside cover backing (rotated 180) */}
                 <div
                   style={{
                     position: "absolute",
                     inset: 0,
                     backfaceVisibility: "hidden",
                     transform: "rotateY(180deg)",
-                    background: "#FFF8F0",
-                    border: "1.5px solid #D4AF37",
-                    borderRight: "none",
-                    borderRadius: "4px 0 0 4px",
-                    zIndex: 1,
+                    background: "#5A0000",
+                    border: "3px solid #8B0000",
+                    borderRadius: "4px",
                   }}
-                >
-                  <LeftPageContent page={currentPage} />
+                />
+                {/* Outside front cover (visible face when closed) */}
+                <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden" }}>
+                  <BookCover onOpen={() => {}} />
                 </div>
               </motion.div>
             )}
-
-            {/* Spine shadow overlay */}
-            <div
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: 0,
-                bottom: 0,
-                width: "12px",
-                transform: "translateX(-50%)",
-                background: "linear-gradient(90deg, rgba(0,0,0,0.15), rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.15))",
-                zIndex: 30,
-                pointerEvents: "none",
-              }}
-            />
           </div>
+        </div>
+      )}
 
-          {/* Nav arrows */}
-          {!closing && turningState === "none" && (
-            <>
-              {currentPage > 0 && (
-                <button
-                  onClick={turnPrev}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    turnPrev();
-                  }}
-                  style={arrowStyle("left")}
-                >
-                  ‹
-                </button>
-              )}
-              {currentPage < TOTAL_PAGES - 1 && (
-                <button
-                  onClick={turnNext}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    turnNext();
-                  }}
-                  style={arrowStyle("right")}
-                >
-                  ›
-                </button>
-              )}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "-36px",
-                  left: 0,
-                  right: 0,
-                  textAlign: "center",
-                  fontFamily: "'Outfit', sans-serif",
-                  fontSize: "12px",
-                  color: "#D4AF37",
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  fontWeight: 600,
-                }}
-              >
-                Page {currentPage + 1} of {TOTAL_PAGES}
-              </div>
-            </>
+      {/* Floating Bottom Navigation Bar */}
+      {!done && bookStage === "open" && (
+        <div
+          style={{
+            marginTop: "24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "200px",
+            zIndex: 40,
+          }}
+        >
+          {currentPage > 0 ? (
+            <button
+              onClick={turnPrev}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                turnPrev();
+              }}
+              style={navButtonStyle()}
+            >
+              ‹
+            </button>
+          ) : (
+            <div style={{ width: "36px" }} />
+          )}
+
+          <span
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: "12px",
+              color: "#D4AF37",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+            }}
+          >
+            {currentPage + 1} / {TOTAL_PAGES}
+          </span>
+
+          {currentPage < TOTAL_PAGES - 1 ? (
+            <button
+              onClick={turnNext}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                turnNext();
+              }}
+              style={navButtonStyle()}
+            >
+              ›
+            </button>
+          ) : (
+            <div style={{ width: "36px" }} />
           )}
         </div>
       )}
 
-      {/* Close book button */}
-      {!closing && currentPage === TOTAL_PAGES - 1 && (
+      {/* Close the book overlay button */}
+      {bookStage !== "closing" && bookStage === "open" && currentPage === TOTAL_PAGES - 1 && (
         <motion.button
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -452,65 +375,85 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
   );
 }
 
-function arrowStyle(side: "left" | "right"): React.CSSProperties {
+function navButtonStyle(): React.CSSProperties {
   return {
-    position: "absolute",
-    top: "50%",
-    [side]: "-56px",
-    transform: "translateY(-50%)",
-    width: "44px",
-    height: "44px",
+    width: "36px",
+    height: "36px",
     borderRadius: "50%",
     background: "linear-gradient(135deg, #D4AF37, #F5D16A)",
     color: "#1A0A0A",
     border: "none",
-    fontSize: "26px",
+    fontSize: "22px",
     fontWeight: "bold",
     cursor: "pointer",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(212,175,55,0.3)",
-    zIndex: 35,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-  } as React.CSSProperties;
+    boxShadow: "0 4px 10px rgba(0,0,0,0.3), 0 0 8px rgba(212,175,55,0.2)",
+  };
 }
 
-function BookCover() {
+function BookCorners() {
+  const cornerStyle = (pos: "tl" | "tr" | "bl" | "br"): React.CSSProperties => {
+    const isTop = pos.startsWith("t");
+    const isLeft = pos.endsWith("l");
+    return {
+      position: "absolute",
+      width: "20px",
+      height: "20px",
+      borderTop: isTop ? "3.5px solid #D4AF37" : "none",
+      borderBottom: !isTop ? "3.5px solid #D4AF37" : "none",
+      borderLeft: isLeft ? "3.5px solid #D4AF37" : "none",
+      borderRight: !isLeft ? "3.5px solid #D4AF37" : "none",
+      [isTop ? "top" : "bottom"]: "6px",
+      [isLeft ? "left" : "right"]: "6px",
+      borderRadius: isTop
+        ? (isLeft ? "4px 0 0 0" : "0 4px 0 0")
+        : (isLeft ? "0 0 0 4px" : "0 0 4px 0"),
+      pointerEvents: "none",
+      boxShadow: "0 0 4px rgba(212,175,55,0.3)",
+    };
+  };
+
+  return (
+    <>
+      <div style={cornerStyle("tl")} />
+      <div style={cornerStyle("tr")} />
+      <div style={cornerStyle("bl")} />
+      <div style={cornerStyle("br")} />
+    </>
+  );
+}
+
+function BookCover({ onOpen }: { onOpen: () => void }) {
   const data = useMllData();
   return (
     <div
+      onClick={onOpen}
       style={{
         position: "absolute",
         inset: 0,
         background: "radial-gradient(ellipse at 30% 30%, #8B0000 0%, #5A0000 60%, #3A0000 100%)",
-        border: "3.5px solid #8B0000",
-        borderRadius: "4px 14px 14px 4px",
-        boxShadow: "8px 8px 30px rgba(0,0,0,0.6), inset 0 0 24px rgba(0,0,0,0.35)",
+        border: "3px solid #8B0000",
+        borderRadius: "4px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.35)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: "32px 20px",
+        boxSizing: "border-box",
+        cursor: "pointer",
         backfaceVisibility: "hidden",
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: "14px",
-          background: "linear-gradient(90deg, #D4AF37, #8B6914, #D4AF37)",
-          opacity: 0.45,
-        }}
-      />
-      <div style={{ position: "absolute", top: "24px", left: "30px", right: "20px", height: "1.5px", background: "#D4AF37", opacity: 0.35 }} />
-      
+      <div style={{ position: "absolute", top: "24px", left: "20px", right: "20px", height: "1.5px", background: "#D4AF37", opacity: 0.35 }} />
+      <BookCorners />
+
       <h1
         style={{
           fontFamily: "'Great Vibes', cursive",
-          fontSize: "38px",
+          fontSize: "36px",
           color: "#D4AF37",
           textAlign: "center",
           margin: 0,
@@ -525,7 +468,7 @@ function BookCover() {
         style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontStyle: "italic",
-          fontSize: "19px",
+          fontSize: "18px",
           color: "#E5C158",
           marginTop: "16px",
           opacity: 0.9,
@@ -544,12 +487,29 @@ function BookCover() {
           filter="drop-shadow(0 2px 6px rgba(0,0,0,0.3))"
         />
       </svg>
-      <div style={{ position: "absolute", bottom: "24px", left: "30px", right: "20px", height: "1.5px", background: "#D4AF37", opacity: 0.35 }} />
+
+      <motion.p
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2.0, repeat: Infinity }}
+        style={{
+          fontFamily: "'Outfit', sans-serif",
+          fontSize: "12px",
+          color: "#D4AF37",
+          marginTop: "32px",
+          letterSpacing: "0.15em",
+          textTransform: "uppercase",
+          fontWeight: 600,
+        }}
+      >
+        Click to Open ➔
+      </motion.p>
+
+      <div style={{ position: "absolute", bottom: "24px", left: "20px", right: "20px", height: "1.5px", background: "#D4AF37", opacity: 0.35 }} />
     </div>
   );
 }
 
-function LeftPageContent({ page }: { page: number }) {
+function SinglePageContent({ page }: { page: number }) {
   const data = useMllData();
   const imageSrc = data.img_pages?.[page] ?? `/templates/my-love-language/collage-${page + 1}.png`;
 
@@ -558,54 +518,60 @@ function LeftPageContent({ page }: { page: number }) {
       style={{
         position: "absolute",
         inset: 0,
-        padding: "24px 20px",
         background: "#FFF8F0",
-        boxShadow: "inset 6px 0 12px rgba(0,0,0,0.06)",
+        borderRadius: "4px",
+        border: "1.5px solid #D4AF37",
+        boxShadow: "inset 0 0 20px rgba(0,0,0,0.06)",
+        padding: "24px 16px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        boxSizing: "border-box",
+        overflow: "hidden",
       }}
     >
+      {/* Decorative gold inner frame */}
       <div
         style={{
           position: "absolute",
-          inset: "8px",
+          inset: "6px",
           border: "1px solid #D4AF37",
           opacity: 0.25,
-          borderRadius: "3px",
+          borderRadius: "2px",
           pointerEvents: "none",
         }}
       />
 
-      {/* Polaroid Frame */}
+      {/* Top Part: Polaroid Photo Frame */}
       <div
         style={{
           position: "relative",
           width: "82%",
-          maxWidth: "210px",
+          maxWidth: "200px",
           background: "#FFFFFF",
-          padding: "10px 10px 24px 10px",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)",
-          transform: "rotate(-3.5deg)",
+          padding: "8px 8px 20px 8px",
+          boxShadow: "0 6px 16px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)",
+          transform: "rotate(-2deg)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          marginBottom: "12px",
+          zIndex: 5,
         }}
       >
         {/* Washi Tape */}
         <div
           style={{
             position: "absolute",
-            top: "-14px",
+            top: "-12px",
             left: "50%",
-            transform: "translateX(-50%) rotate(-4deg)",
-            width: "66px",
-            height: "20px",
+            transform: "translateX(-50%) rotate(3deg)",
+            width: "60px",
+            height: "18px",
             background: "rgba(240, 235, 220, 0.7)",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-            borderLeft: "1px dashed rgba(0,0,0,0.15)",
-            borderRight: "1px dashed rgba(0,0,0,0.15)",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+            borderLeft: "1px dashed rgba(0,0,0,0.12)",
+            borderRight: "1px dashed rgba(0,0,0,0.12)",
             zIndex: 10,
           }}
         />
@@ -617,13 +583,12 @@ function LeftPageContent({ page }: { page: number }) {
             aspectRatio: "1/1",
             background: "#EBE6DE",
             overflow: "hidden",
-            border: "1px solid rgba(0,0,0,0.08)",
-            borderRadius: "1px",
+            border: "1px solid rgba(0,0,0,0.06)",
           }}
         >
           <img
             src={imageSrc}
-            alt="Collage Moment"
+            alt="Moments"
             style={{
               width: "100%",
               height: "100%",
@@ -636,10 +601,10 @@ function LeftPageContent({ page }: { page: number }) {
         <p
           style={{
             fontFamily: "'Great Vibes', cursive",
-            fontSize: "22px",
+            fontSize: "20px",
             color: "#4A3B32",
             margin: 0,
-            marginTop: "12px",
+            marginTop: "10px",
             lineHeight: 1.1,
             textAlign: "center",
             width: "100%",
@@ -649,110 +614,62 @@ function LeftPageContent({ page }: { page: number }) {
         </p>
       </div>
 
-      {/* Gold Heart Pressed Emblem */}
+      {/* Bottom Part: Text Content with notebook ruled lines */}
+      <div
+        style={{
+          width: "90%",
+          flex: 1,
+          background:
+            "repeating-linear-gradient(transparent 0, transparent 27px, #EADCC9 27px, #EADCC9 28px)",
+          position: "relative",
+          marginTop: "4px",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontStyle: "italic",
+            fontSize: "14px",
+            lineHeight: "28px",
+            color: "#302222",
+            margin: 0,
+            paddingTop: "6px",
+            paddingBottom: "10px",
+          }}
+        >
+          <ET fid={`mll_page${page + 1}`} multiline />
+        </p>
+      </div>
+
+      {/* Wax Seal at the bottom right */}
       <div
         style={{
           position: "absolute",
           bottom: "16px",
-          left: "20px",
-          fontSize: "18px",
-          opacity: 0.45,
-          color: "#D4AF37",
-        }}
-      >
-        ✦
-      </div>
-
-      <span
-        style={{
-          position: "absolute",
-          bottom: "12px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          fontFamily: "'Cormorant Garamond', serif",
-          fontStyle: "italic",
-          fontSize: "11px",
-          color: "#C19E37",
-          letterSpacing: "0.08em",
-        }}
-      >
-        Page {page + 1}
-      </span>
-    </div>
-  );
-}
-
-function RightPageContent({ page }: { page: number }) {
-  return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        padding: "36px 24px",
-        background:
-          "repeating-linear-gradient(transparent 0, transparent 29px, #EADCC9 29px, #EADCC9 30px), #FFF8F0",
-        boxShadow: "inset -6px 0 12px rgba(0,0,0,0.06)",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          inset: "8px",
-          border: "1px solid #D4AF37",
-          opacity: 0.25,
-          borderRadius: "3px",
+          right: "16px",
+          zIndex: 10,
           pointerEvents: "none",
         }}
-      />
-
-      {/* Wax Seal */}
-      <div style={{ position: "absolute", top: "16px", right: "16px", zIndex: 10 }}>
+      >
         <WaxSealMini />
       </div>
 
-      {/* Letter text */}
-      <p
-        style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontStyle: "italic",
-          fontSize: "15px",
-          lineHeight: "30px",
-          color: "#302222",
-          marginTop: "16px",
-          paddingRight: "16px",
-        }}
-      >
-        <ET fid={`mll_page${page + 1}`} multiline />
-      </p>
-
-      {/* Mini gold separator at bottom */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "32px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          color: "#D4AF37",
-          opacity: 0.35,
-          fontSize: "12px",
-        }}
-      >
-        ❦
-      </div>
-
+      {/* Page number */}
       <span
         style={{
           position: "absolute",
-          bottom: "12px",
-          right: "24px",
+          bottom: "10px",
+          left: "50%",
+          transform: "translateX(-50%)",
           fontFamily: "'Cormorant Garamond', serif",
           fontStyle: "italic",
           fontSize: "11px",
           color: "#C19E37",
         }}
       >
-        Pg. {page + 1}
+        Page {page + 1}
       </span>
     </div>
   );
