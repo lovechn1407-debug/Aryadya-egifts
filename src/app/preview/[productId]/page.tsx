@@ -13,6 +13,7 @@ import DuduBirthday from "@/components/templates/DuduBirthday/DuduBirthday";
 import Propose3 from "@/components/templates/Propose3/Propose3";
 import Confess from "@/components/templates/Confess/Confess";
 import BirthdaySerenade from "@/components/templates/BirthdaySerenade/BirthdaySerenade";
+import MyLoveLanguage from "@/components/templates/MyLoveLanguage/MyLoveLanguage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { trackEvent } from "@/lib/analytics";
@@ -41,6 +42,8 @@ function renderTemplate(productId: string, customData: Record<string, string>, a
       return <Confess customData={customData} autoPlay={autoPlay} />;
     case "birthday-serenade":
       return <BirthdaySerenade customData={customData} autoPlay={autoPlay} />;
+    case "my-love-language":
+      return <MyLoveLanguage customData={customData} autoPlay={autoPlay} editMode={false} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#fff" }}>

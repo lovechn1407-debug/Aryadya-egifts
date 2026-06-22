@@ -1259,6 +1259,92 @@ export const PRODUCT_REGISTRY: Product[] = [
       },
     ],
   },
+  {
+    id: "my-love-language",
+    name: "My Love Language 💍",
+    tagline: "A cinematic 8-scene romantic proposal experience: dark room reveal, collage flip book, TV memory room, beach bottle message, scratch card, fireworks, 3D ring box & final love letter",
+    category: "proposal" as const,
+    price: 19900,
+    visible: true,
+    badge: "new" as const,
+    thumbnail: "💍",
+    previewRoute: "/preview/my-love-language",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 1,
+        title: "Scene 1 — Dark Room",
+        description: "Opening hint text shown above the light switch",
+        fields: [
+          { id: "mll_scene1_hint", label: "Hint Text", type: "text" as const, defaultValue: "Something is waiting for you in the dark..." },
+          { id: "mll_video_room", label: "Room Video URL", type: "text" as const, defaultValue: "/videos/room-light-on.mp4" },
+        ],
+      },
+      {
+        slideNumber: 2,
+        title: "Scene 2 — Collage Book",
+        description: "The romantic flip book with 4 pages of messages",
+        fields: [
+          { id: "mll_book_author", label: "Book Author (e.g. by Your Name)", type: "text" as const, defaultValue: "by Your Name" },
+          { id: "mll_page1", label: "Page 1 Text", type: "textarea" as const, defaultValue: "The moment our eyes first met, the world around us softened. Time slowed, and somewhere deep within me, a quiet voice whispered: this one. This is the one." },
+          { id: "mll_page2", label: "Page 2 Text", type: "textarea" as const, defaultValue: "Every laugh we've shared has rewritten my idea of joy. You turn ordinary mornings into something I'd trade kingdoms for. You are my favorite season, my favorite weather, my favorite song." },
+          { id: "mll_page3", label: "Page 3 Text", type: "textarea" as const, defaultValue: "I've memorized the way your eyes catch the light, the small constellations of freckles, the way your laugh begins. Every detail of you feels like a love letter the universe wrote for me." },
+          { id: "mll_page4", label: "Page 4 Text", type: "textarea" as const, defaultValue: "And so here, on this page, I'm gathering all my courage and all my wonder to ask you the only question that has ever mattered to me. Turn the page, my love." },
+        ],
+      },
+      {
+        slideNumber: 3,
+        title: "Scene 3 — TV Room",
+        description: "Cozy room with a memory video playing on the TV",
+        fields: [
+          { id: "mll_video_story", label: "Story Video URL", type: "text" as const, defaultValue: "/videos/our-story.mp4" },
+          { id: "mll_tv_caption", label: "TV Caption", type: "text" as const, defaultValue: "A moment I never want to forget." },
+        ],
+      },
+      {
+        slideNumber: 4,
+        title: "Scene 4 — Beach Bottle",
+        description: "Shake the phone to open a secret bottle message",
+        fields: [
+          { id: "mll_shake_hint", label: "Shake Hint Text", type: "text" as const, defaultValue: "Shake your phone to open the bottle... 🍾" },
+          { id: "mll_bottle_message", label: "Bottle Message", type: "textarea" as const, defaultValue: "You are the message I've been writing my whole life." },
+        ],
+      },
+      {
+        slideNumber: 5,
+        title: "Scene 5 — Scratch Card",
+        description: "Scratch to reveal the hidden message",
+        fields: [
+          { id: "mll_scratch_message", label: "Scratch Reveal Message", type: "textarea" as const, defaultValue: "You are my greatest adventure. ❤" },
+        ],
+      },
+      {
+        slideNumber: 6,
+        title: "Scene 6 — Fireworks",
+        description: "Canvas fireworks with overlay text",
+        fields: [
+          { id: "mll_fireworks_text", label: "Fireworks Overlay Text", type: "text" as const, defaultValue: "Almost there... 🎇" },
+        ],
+      },
+      {
+        slideNumber: 7,
+        title: "Scene 7 — 3D Ring Box",
+        description: "Interactive 3D ring box with proposal question",
+        fields: [
+          { id: "mll_proposal_question", label: "Proposal Question", type: "text" as const, defaultValue: "Will you be mine? 💍" },
+          { id: "mll_no_button_text", label: "'No' Button Text", type: "text" as const, defaultValue: "Not yet..." },
+        ],
+      },
+      {
+        slideNumber: 8,
+        title: "Scene 8 — Final Love Letter",
+        description: "The final letter with wax seal and share button",
+        fields: [
+          { id: "mll_final_letter", label: "Final Letter Text", type: "textarea" as const, defaultValue: "From the very first moment I saw you, I knew. Through every quiet morning and every loud, beautiful chaos — you were it for me. You are my home, my favorite story, my forever. Forever yours, Your Name" },
+        ],
+      },
+    ],
+  },
 ];
 
 // ─── LOCALSTORAGE HELPERS ─────────────────────────────────────────────────────
