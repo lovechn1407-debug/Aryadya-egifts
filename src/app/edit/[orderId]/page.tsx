@@ -315,6 +315,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
   const searchParams = useSearchParams();
 
   // Post-pay state
+  const [paymentModeSetting, setPaymentModeSetting] = useState<"pre-pay" | "post-pay">("pre-pay");
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponMsg, setCouponMsg] = useState({ type: "", text: "" });
@@ -383,6 +384,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       }
       const { getSettingsDB } = await import("@/lib/db");
       const s = await getSettingsDB();
+      if (s?.paymentMode) setPaymentModeSetting(s.paymentMode);
       
       let cMethod = "cash";
       let cAds = 1;
@@ -884,7 +886,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                   className="btn-primary"
                   style={{ padding: "5px 12px", fontSize: 12, background: showFinalPanel ? "#00D9A0" : undefined }}
                 >
-                  {showFinalPanel ? "✕" : (order?.status === "pending" ? (checkoutMethod === "ads" ? "Unlock" : "Pay & Finalise") : "Finalise")}
+                  {showFinalPanel ? "✕" : ((paymentModeSetting === "post-pay" && order?.status === "pending") ? (checkoutMethod === "ads" ? "Unlock" : "Pay & Finalise") : "Finalise")}
                 </button>
               </>
             )}
@@ -939,7 +941,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
           background: "rgba(17,17,24,0.98)", border: "1px solid rgba(255,45,120,0.25)",
           borderRadius: 20, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
         }} className="fade-in-up">
-          {order?.status === "pending" ? (
+          {(paymentModeSetting === "post-pay" && order?.status === "pending") ? (
             <>
               <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: "#fff" }}>{checkoutMethod === "ads" ? "🔓 Unlock & Finalise" : checkoutMethod === "free" ? "✨ Finalise for Free" : "💳 Pay & Finalise"}</h3>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginBottom: 16 }}>

@@ -251,44 +251,41 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
             autoPlay
             loop
             playsInline
+            onClick={toggle}
             style={{
               width: "100%",
               height: "100%",
               objectFit: "cover",
+              cursor: "pointer",
             }}
           />
 
           {/* Media Select/Upload Overlay for Edit Mode */}
           {editMode && (
-            <div
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowVideoLibrary(true);
+              }}
               style={{
                 position: "absolute",
-                inset: 0,
-                background: "rgba(0, 0, 0, 0.65)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                top: "8px",
+                right: "8px",
+                padding: "6px 10px",
+                background: "linear-gradient(135deg, #FF69B4, #FF1493)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "12px",
+                fontFamily: "'Outfit', sans-serif",
+                fontWeight: 700,
+                fontSize: "10px",
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(255, 20, 147, 0.4)",
                 zIndex: 10,
               }}
             >
-              <button
-                onClick={() => setShowVideoLibrary(true)}
-                style={{
-                  padding: "8px 16px",
-                  background: "linear-gradient(135deg, #FF69B4, #FF1493)",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "20px",
-                  fontFamily: "'Outfit', sans-serif",
-                  fontWeight: 700,
-                  fontSize: "12px",
-                  cursor: "pointer",
-                  boxShadow: "0 0 12px rgba(255, 20, 147, 0.5)",
-                }}
-              >
-                📹 Select Video
-              </button>
-            </div>
+              📹 Change Video
+            </button>
           )}
 
           {/* Interactive feedback tip */}
