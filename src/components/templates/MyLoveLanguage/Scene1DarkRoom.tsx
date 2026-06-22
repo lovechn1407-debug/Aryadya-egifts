@@ -181,12 +181,12 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
     );
   }
 
-  // Helper component for premium gold action buttons
+  // Helper component for premium gold action buttons positioned at the bottom area
   const PremiumActionButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
     <motion.button
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       onClick={onClick}
       onTouchEnd={(e) => {
@@ -195,6 +195,10 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
       }}
       className="continue-btn"
       style={{
+        position: "absolute",
+        bottom: `calc(50px + env(safe-area-inset-bottom))`,
+        left: "50%",
+        transform: "translateX(-50%)",
         padding: "16px 36px",
         borderRadius: "999px",
         background: "linear-gradient(135deg, #D4AF37 0%, #F5D16A 50%, #D4AF37 100%)",
@@ -303,8 +307,8 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
         </div>
       )}
 
-      {/* 2. LIGHT ON VIDEO STAGE */}
-      {stage === "light_on_video" && (
+      {/* 2. LIGHT ON VIDEO & BUTTON STAGES */}
+      {(stage === "light_on_video" || stage === "go_to_book_btn") && (
         <>
           <motion.video
             src={data.video_light_on}
@@ -322,46 +326,45 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              zIndex: 50,
+              zIndex: 40,
               background: "#000",
             }}
           />
-          {/* Skip Button */}
-          <button
-            onClick={() => skipVideo("go_to_book_btn")}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              skipVideo("go_to_book_btn");
-            }}
-            style={{
-              position: "absolute",
-              top: "20px",
-              right: "20px",
-              padding: "8px 16px",
-              borderRadius: "20px",
-              background: "rgba(0, 0, 0, 0.6)",
-              color: "#FFF",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              cursor: "pointer",
-              zIndex: 60,
-              fontFamily: "'Outfit', sans-serif",
-              fontSize: "14px",
-            }}
-          >
-            Skip ➔
-          </button>
+          {stage === "light_on_video" && (
+            <button
+              onClick={() => skipVideo("go_to_book_btn")}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                skipVideo("go_to_book_btn");
+              }}
+              style={{
+                position: "absolute",
+                top: "20px",
+                right: "20px",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "rgba(0, 0, 0, 0.6)",
+                color: "#FFF",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+                cursor: "pointer",
+                zIndex: 60,
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: "14px",
+              }}
+            >
+              Skip ➔
+            </button>
+          )}
+          {stage === "go_to_book_btn" && (
+            <AnimatePresence>
+              <PremiumActionButton label={data.btn_go_to_book} onClick={handleGoToBook} />
+            </AnimatePresence>
+          )}
         </>
       )}
 
-      {/* 3. GO TO BOOK BUTTON STAGE */}
-      {stage === "go_to_book_btn" && (
-        <AnimatePresence>
-          <PremiumActionButton label={data.btn_go_to_book} onClick={handleGoToBook} />
-        </AnimatePresence>
-      )}
-
-      {/* 4. BOOK SHOWING VIDEO STAGE */}
-      {stage === "book_showing_video" && (
+      {/* 3. BOOK SHOWING VIDEO & BUTTON STAGES */}
+      {(stage === "book_showing_video" || stage === "open_book_btn") && (
         <>
           <motion.video
             src={data.video_book_showing}
@@ -379,45 +382,44 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              zIndex: 50,
+              zIndex: 41,
               background: "#000",
             }}
           />
-          {/* Skip Button */}
-          <button
-            onClick={() => skipVideo("open_book_btn")}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              skipVideo("open_book_btn");
-            }}
-            style={{
-              position: "absolute",
-              top: "20px",
-              right: "20px",
-              padding: "8px 16px",
-              borderRadius: "20px",
-              background: "rgba(0, 0, 0, 0.6)",
-              color: "#FFF",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              cursor: "pointer",
-              zIndex: 60,
-              fontFamily: "'Outfit', sans-serif",
-              fontSize: "14px",
-            }}
-          >
-            Skip ➔
-          </button>
+          {stage === "book_showing_video" && (
+            <button
+              onClick={() => skipVideo("open_book_btn")}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                skipVideo("open_book_btn");
+              }}
+              style={{
+                position: "absolute",
+                top: "20px",
+                right: "20px",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "rgba(0, 0, 0, 0.6)",
+                color: "#FFF",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+                cursor: "pointer",
+                zIndex: 60,
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: "14px",
+              }}
+            >
+              Skip ➔
+            </button>
+          )}
+          {stage === "open_book_btn" && (
+            <AnimatePresence>
+              <PremiumActionButton label={data.btn_open_book} onClick={handleOpenBook} />
+            </AnimatePresence>
+          )}
         </>
       )}
 
-      {/* 5. OPEN BOOK BUTTON STAGE */}
-      {stage === "open_book_btn" && (
-        <AnimatePresence>
-          <PremiumActionButton label={data.btn_open_book} onClick={handleOpenBook} />
-        </AnimatePresence>
-      )}
-
-      {/* 6. BOOK OPENING VIDEO STAGE */}
+      {/* 4. BOOK OPENING VIDEO STAGE */}
       {stage === "book_opening_video" && (
         <>
           <motion.video
@@ -436,7 +438,7 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              zIndex: 50,
+              zIndex: 42,
               background: "#000",
             }}
           />
