@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMllContext, ET } from "./MllDataContext";
 import { clickSound, playSound } from "./audio";
@@ -20,10 +20,29 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
   const [video2Started, setVideo2Started] = useState(false);
   const [video3Started, setVideo3Started] = useState(false);
 
+  const [video1Hidden, setVideo1Hidden] = useState(false);
+  const [video2Hidden, setVideo2Hidden] = useState(false);
+
+  const video2Ref = useRef<HTMLVideoElement>(null);
+  const video3Ref = useRef<HTMLVideoElement>(null);
+
+  // Play controls based on stage transition
+  useEffect(() => {
+    if (stage === "book_showing_video") {
+      video2Ref.current?.play().catch(() => {});
+    }
+    if (stage === "book_opening_video") {
+      video3Ref.current?.play().catch(() => {});
+    }
+  }, [stage]);
+
+  // Reset helper when restarting or mounting
   useEffect(() => {
     if (stage === "switch" || stage === "light_on_video") {
       setVideo2Started(false);
       setVideo3Started(false);
+      setVideo1Hidden(false);
+      setVideo2Hidden(false);
     }
   }, [stage]);
 
@@ -51,6 +70,22 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
     } else {
       setStage(nextStage);
     }
+  };
+
+  const handleVideo2Started = () => {
+    setVideo2Started(true);
+    // Delay unmounting Video 1 to ensure Video 2's first frames are fully painted
+    setTimeout(() => {
+      setVideo1Hidden(true);
+    }, 500);
+  };
+
+  const handleVideo3Started = () => {
+    setVideo3Started(true);
+    // Delay unmounting Video 2 to ensure Video 3's first frames are fully painted
+    setTimeout(() => {
+      setVideo2Hidden(true);
+    }, 500);
   };
 
   // Editor mode view: displays all editable text components of Scene 1 in a beautiful static view
@@ -228,17 +263,19 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
     </motion.button>
   );
 
-  const showVideo1 =
-    stage === "light_on_video" ||
-    stage === "go_to_book_btn" ||
-    (stage === "book_showing_video" && !video2Started);
+  const renderVideo1 = stage !== "switch" && !video1Hidden;
 
-  const showVideo2 =
-    stage === "book_showing_video" ||
+  const renderVideo2 =
+    !video2Hidden &&
+    (stage === "go_to_book_btn" ||
+      stage === "book_showing_video" ||
+      stage === "open_book_btn" ||
+      stage === "book_opening_video");
+
+  const renderVideo3 =
     stage === "open_book_btn" ||
-    (stage === "book_opening_video" && !video3Started);
-
-  const showVideo3 = stage === "book_opening_video";
+    stage === "book_opening_video" ||
+    stage === "done";
 
   return (
     <div
@@ -330,17 +367,12 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
       )}
 
       {/* 2. VIDEO 1 (Light On) */}
-      {showVideo1 && (
-        <motion.video
+      {renderVideo1 && (
+        <video
           src={data.video_light_on}
           muted
           playsInline
           autoPlay
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onEnded={() => setStage("go_to_book_btn")}
-          onError={() => setTimeout(() => setStage("go_to_book_btn"), 1500)}
           style={{
             position: "fixed",
             inset: 0,
@@ -350,6 +382,8 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
             zIndex: 40,
             background: "#000",
           }}
+          onEnded={() => setStage("go_to_book_btn")}
+          onError={() => setTimeout(() => setStage("go_to_book_btn"), 1500)}
         />
       )}
 
@@ -387,26 +421,23 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
       )}
 
       {/* 3. VIDEO 2 (Book Showing) */}
-      {showVideo2 && (
-        <motion.video
+      {renderVideo2 && (
+        <video
+          ref={video2Ref}
           src={data.video_book_showing}
           muted
           playsInline
-          autoPlay
-          initial={{ opacity: 0 }}
-          animate={{ opacity: video2Started ? 1 : 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ opacity: { duration: 0.15 } }}
-          onPlaying={() => setVideo2Started(true)}
-          onPlay={() => setVideo2Started(true)}
+          preload="auto"
+          onPlaying={handleVideo2Started}
+          onPlay={handleVideo2Started}
           onTimeUpdate={(e) => {
             if (e.currentTarget.currentTime > 0) {
-              setVideo2Started(true);
+              handleVideo2Started();
             }
           }}
           onEnded={() => setStage("open_book_btn")}
           onError={() => {
-            setVideo2Started(true);
+            handleVideo2Started();
             setTimeout(() => setStage("open_book_btn"), 1500);
           }}
           style={{
@@ -416,6 +447,8 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
             height: "100%",
             objectFit: "cover",
             zIndex: 41,
+            opacity: video2Started ? 1 : 0,
+            transition: "opacity 0.2s ease-in-out",
           }}
         />
       )}
@@ -454,26 +487,23 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
       )}
 
       {/* 4. VIDEO 3 (Book Opening) */}
-      {showVideo3 && (
-        <motion.video
+      {renderVideo3 && (
+        <video
+          ref={video3Ref}
           src={data.video_book_open}
           muted
           playsInline
-          autoPlay
-          initial={{ opacity: 0 }}
-          animate={{ opacity: video3Started ? 1 : 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ opacity: { duration: 0.15 } }}
-          onPlaying={() => setVideo3Started(true)}
-          onPlay={() => setVideo3Started(true)}
+          preload="auto"
+          onPlaying={handleVideo3Started}
+          onPlay={handleVideo3Started}
           onTimeUpdate={(e) => {
             if (e.currentTarget.currentTime > 0) {
-              setVideo3Started(true);
+              handleVideo3Started();
             }
           }}
           onEnded={() => skipVideo("done")}
           onError={() => {
-            setVideo3Started(true);
+            handleVideo3Started();
             setTimeout(() => skipVideo("done"), 1500);
           }}
           style={{
@@ -483,6 +513,8 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
             height: "100%",
             objectFit: "cover",
             zIndex: 42,
+            opacity: video3Started ? 1 : 0,
+            transition: "opacity 0.2s ease-in-out",
           }}
         />
       )}
