@@ -108,6 +108,18 @@ export default function MyLoveLanguage({
     btn_go_to_book: customData.mll_btn_go_to_book ?? SITE_DATA.btn_go_to_book,
     btn_open_book: customData.mll_btn_open_book ?? SITE_DATA.btn_open_book,
     book_author: customData.mll_book_author ?? SITE_DATA.book_author,
+    img_pages: [
+      customData.mll_img1 ?? SITE_DATA.img_pages[0],
+      customData.mll_img2 ?? SITE_DATA.img_pages[1],
+      customData.mll_img3 ?? SITE_DATA.img_pages[2],
+      customData.mll_img4 ?? SITE_DATA.img_pages[3],
+    ],
+    caption_pages: [
+      customData.mll_caption1 ?? SITE_DATA.caption_pages[0],
+      customData.mll_caption2 ?? SITE_DATA.caption_pages[1],
+      customData.mll_caption3 ?? SITE_DATA.caption_pages[2],
+      customData.mll_caption4 ?? SITE_DATA.caption_pages[3],
+    ],
     page_text: [
       customData.mll_page1 ?? SITE_DATA.page_text[0],
       customData.mll_page2 ?? SITE_DATA.page_text[1],

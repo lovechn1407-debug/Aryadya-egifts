@@ -33,6 +33,10 @@ export function ET({ fid, style, multiline = false }: { fid: string; style?: Rea
   if (fid === "mll_btn_go_to_book") fallback = SITE_DATA.btn_go_to_book;
   if (fid === "mll_btn_open_book") fallback = SITE_DATA.btn_open_book;
   if (fid === "mll_book_author") fallback = SITE_DATA.book_author;
+  if (fid === "mll_caption1") fallback = SITE_DATA.caption_pages[0];
+  if (fid === "mll_caption2") fallback = SITE_DATA.caption_pages[1];
+  if (fid === "mll_caption3") fallback = SITE_DATA.caption_pages[2];
+  if (fid === "mll_caption4") fallback = SITE_DATA.caption_pages[3];
   if (fid === "mll_page1") fallback = SITE_DATA.page_text[0];
   if (fid === "mll_page2") fallback = SITE_DATA.page_text[1];
   if (fid === "mll_page3") fallback = SITE_DATA.page_text[2];

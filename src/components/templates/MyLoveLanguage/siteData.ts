@@ -7,6 +7,18 @@ export const SITE_DATA = {
   btn_open_book: "Open Book",
 
   book_author: "by Your Name",
+  img_pages: [
+    "/templates/my-love-language/collage-1.png",
+    "/templates/my-love-language/collage-2.png",
+    "/templates/my-love-language/collage-3.png",
+    "/templates/my-love-language/collage-4.png",
+  ],
+  caption_pages: [
+    "The First Meet",
+    "Laughing Together",
+    "Stargazing",
+    "Together Always",
+  ],
   page_text: [
     "The moment our eyes first met, the world around us softened. Time slowed, and somewhere deep within me, a quiet voice whispered: this one. This is the one.",
     "Every laugh we've shared has rewritten my idea of joy. You turn ordinary mornings into something I'd trade kingdoms for. You are my favorite season, my favorite weather, my favorite song.",
