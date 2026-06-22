@@ -28,7 +28,7 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
   const { data, editMode } = useMllContext();
   const [currentPage, setCurrentPage] = useState(0);
   const [turningState, setTurningState] = useState<"none" | "next" | "prev">("none");
-  const [bookStage, setBookStage] = useState<"closed" | "open" | "closing">(editMode ? "open" : "closed");
+  const [bookStage, setBookStage] = useState<"closed" | "opening" | "open" | "closing">(editMode ? "open" : "closed");
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -63,6 +63,9 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
     playSound(paperRustle);
     setBookStage("closing");
   };
+
+  const showInsidePages =
+    bookStage === "open" || bookStage === "opening" || bookStage === "closing";
 
   return (
     <div
@@ -149,18 +152,53 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
             <div style={{ position: "absolute", inset: "4px -4px 4px 4px", background: "#FFF3E6", border: "1px solid #D4AF37", borderRadius: "4px", zIndex: 1, opacity: 0.8 }} />
             <div style={{ position: "absolute", inset: "2px -2px 2px 2px", background: "#FFF6ED", border: "1px solid #E5C158", borderRadius: "4px", zIndex: 2, opacity: 0.9 }} />
 
-            {/* Closed Cover View */}
-            {bookStage === "closed" && (
-              <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
-                <BookCover onOpen={() => {
-                  playSound(paperRustle);
-                  setBookStage("open");
-                }} />
-              </div>
+            {/* Front Cover opening transition */}
+            {(bookStage === "closed" || bookStage === "opening") && (
+              <motion.div
+                initial={{ rotateY: 0 }}
+                animate={{ rotateY: bookStage === "opening" ? -180 : 0 }}
+                transition={{ duration: 1.0, ease: "easeInOut" }}
+                onAnimationComplete={() => {
+                  if (bookStage === "opening") {
+                    setBookStage("open");
+                  }
+                }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  transformOrigin: "left center",
+                  transformStyle: "preserve-3d",
+                  zIndex: 20,
+                }}
+              >
+                {/* Front face (Front Cover) */}
+                <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", zIndex: 2 }}>
+                  <BookCover onOpen={() => {
+                    playSound(paperRustle);
+                    setBookStage("opening");
+                  }} />
+                </div>
+                {/* Back face (Inside front cover - rotated 180) */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    backfaceVisibility: "hidden",
+                    transform: "rotateY(180deg)",
+                    background: "radial-gradient(ellipse at 30% 30%, #8B0000 0%, #5A0000 60%, #3A0000 100%)",
+                    border: "3px solid #8B0000",
+                    borderRadius: "4px",
+                    zIndex: 1,
+                  }}
+                >
+                  <div style={{ position: "absolute", inset: "8px", border: "1.5px solid #D4AF37", borderRadius: "8px", opacity: 0.35 }} />
+                  <BookCorners />
+                </div>
+              </motion.div>
             )}
 
             {/* Opened Pages View */}
-            {bookStage === "open" && (
+            {showInsidePages && (
               <div style={{ position: "absolute", inset: 0, zIndex: 10, transformStyle: "preserve-3d" }}>
                 {/* Static Underneath Page */}
                 {turningState === "next" ? (
@@ -174,9 +212,13 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
                 {/* Flipping Page (Next) */}
                 {turningState === "next" && (
                   <motion.div
-                    initial={{ rotateY: 0 }}
-                    animate={{ rotateY: -180 }}
-                    transition={{ duration: 0.7, ease: "easeInOut" }}
+                    initial={{ rotateY: 0, opacity: 1 }}
+                    animate={{ rotateY: -180, opacity: [1, 1, 0.4, 0] }}
+                    transition={{
+                      duration: 0.7,
+                      ease: "easeInOut",
+                      opacity: { times: [0, 0.5, 0.75, 1], duration: 0.7 }
+                    }}
                     style={{
                       position: "absolute",
                       inset: 0,
@@ -208,9 +250,13 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
                 {/* Flipping Page (Prev) */}
                 {turningState === "prev" && (
                   <motion.div
-                    initial={{ rotateY: -180 }}
-                    animate={{ rotateY: 0 }}
-                    transition={{ duration: 0.7, ease: "easeInOut" }}
+                    initial={{ rotateY: -180, opacity: 0 }}
+                    animate={{ rotateY: 0, opacity: [0, 0.4, 1, 1] }}
+                    transition={{
+                      duration: 0.7,
+                      ease: "easeInOut",
+                      opacity: { times: [0, 0.25, 0.5, 1], duration: 0.7 }
+                    }}
                     style={{
                       position: "absolute",
                       inset: 0,
