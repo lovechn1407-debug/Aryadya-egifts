@@ -30,6 +30,8 @@ export function ET({ fid, style, multiline = false }: { fid: string; style?: Rea
   // Resolve value: prefer rawCustomData[fid], otherwise fallback to SITE_DATA if mapped
   let fallback = "";
   if (fid === "mll_scene1_hint") fallback = SITE_DATA.scene1_hint;
+  if (fid === "mll_btn_go_to_book") fallback = SITE_DATA.btn_go_to_book;
+  if (fid === "mll_btn_open_book") fallback = SITE_DATA.btn_open_book;
   if (fid === "mll_book_author") fallback = SITE_DATA.book_author;
   if (fid === "mll_page1") fallback = SITE_DATA.page_text[0];
   if (fid === "mll_page2") fallback = SITE_DATA.page_text[1];

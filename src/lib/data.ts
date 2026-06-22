@@ -1277,7 +1277,11 @@ export const PRODUCT_REGISTRY: Product[] = [
         description: "Opening hint text shown above the light switch",
         fields: [
           { id: "mll_scene1_hint", label: "Hint Text", type: "text" as const, defaultValue: "Something is waiting for you in the dark..." },
-          { id: "mll_video_room", label: "Room Video URL", type: "text" as const, defaultValue: "/videos/room-light-on.mp4" },
+          { id: "mll_video_light_on", label: "Light On Video URL", type: "text" as const, defaultValue: "/videos/LIGHT_ON.mp4" },
+          { id: "mll_btn_go_to_book", label: "Go to Book Button Text", type: "text" as const, defaultValue: "Go to Book" },
+          { id: "mll_video_book_showing", label: "Book Showing Video URL", type: "text" as const, defaultValue: "/videos/BOOK_SHOWING.mp4" },
+          { id: "mll_btn_open_book", label: "Open Book Button Text", type: "text" as const, defaultValue: "Open Book" },
+          { id: "mll_video_book_open", label: "Book Open Video URL", type: "text" as const, defaultValue: "/videos/BOOK_OPENING.mp4" },
         ],
       },
       {

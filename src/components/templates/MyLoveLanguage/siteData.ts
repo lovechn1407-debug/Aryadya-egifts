@@ -1,6 +1,10 @@
 export const SITE_DATA = {
   scene1_hint: "Something is waiting for you in the dark...",
-  video_room: "/videos/room-light-on.mp4",
+  video_light_on: "/videos/LIGHT_ON.mp4",
+  video_book_showing: "/videos/BOOK_SHOWING.mp4",
+  video_book_open: "/videos/BOOK_OPENING.mp4",
+  btn_go_to_book: "Go to Book",
+  btn_open_book: "Open Book",
 
   book_author: "by Your Name",
   page_text: [

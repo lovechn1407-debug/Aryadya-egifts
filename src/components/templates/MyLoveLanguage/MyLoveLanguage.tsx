@@ -102,7 +102,11 @@ export default function MyLoveLanguage({
     ...SITE_DATA,
     rawCustomData: customData,
     scene1_hint: customData.mll_scene1_hint ?? SITE_DATA.scene1_hint,
-    video_room: customData.mll_video_room ?? SITE_DATA.video_room,
+    video_light_on: customData.mll_video_light_on ?? SITE_DATA.video_light_on,
+    video_book_showing: customData.mll_video_book_showing ?? SITE_DATA.video_book_showing,
+    video_book_open: customData.mll_video_book_open ?? SITE_DATA.video_book_open,
+    btn_go_to_book: customData.mll_btn_go_to_book ?? SITE_DATA.btn_go_to_book,
+    btn_open_book: customData.mll_btn_open_book ?? SITE_DATA.btn_open_book,
     book_author: customData.mll_book_author ?? SITE_DATA.book_author,
     page_text: [
       customData.mll_page1 ?? SITE_DATA.page_text[0],
