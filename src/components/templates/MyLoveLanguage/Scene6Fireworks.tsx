@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData } from "./MllDataContext";
+import { useMllData, ET } from "./MllDataContext";
 
 const COLORS = ["#D4AF37", "#FFB6C1", "#FFFFFF", "#FF4444", "#FF8C00", "#C084FC"];
 
@@ -168,7 +168,7 @@ export default function Scene6Fireworks({ onNext }: { onNext: () => void }) {
             margin: 0,
           }}
         >
-          {data.fireworks_text}
+          <ET fid="mll_fireworks_text" />
         </motion.h2>
       )}
       {showContinue && <ContinueButton onClick={onNext} />}

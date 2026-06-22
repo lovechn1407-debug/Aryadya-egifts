@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import ContinueButton from "./ContinueButton";
-import { useMllData } from "./MllDataContext";
+import { useMllData, ET } from "./MllDataContext";
 import { stampSlam, playSound } from "./audio";
 
 const W = 320;
@@ -156,7 +156,7 @@ export default function Scene5ScratchCard({ onNext }: { onNext: () => void }) {
               lineHeight: 1.3,
             }}
           >
-            {data.scratch_message}
+            <ET fid="mll_scratch_message" multiline />
           </p>
         </div>
         <canvas

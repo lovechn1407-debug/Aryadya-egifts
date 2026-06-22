@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData } from "./MllDataContext";
+import { useMllData, ET } from "./MllDataContext";
 import { corkPop, playSound } from "./audio";
 
 const stars = Array.from({ length: 30 }, (_, i) => ({
@@ -208,7 +208,7 @@ export default function Scene4BeachBottle({ onNext }: { onNext: () => void }) {
             lineHeight: 1.3,
           }}
         >
-          {data.shake_hint}
+          <ET fid="mll_shake_hint" />
           <br />
           <span style={{ fontSize: "14px", fontFamily: "'Outfit', sans-serif", fontStyle: "italic", opacity: 0.7 }}>
             (or tap the bottle)
@@ -247,7 +247,7 @@ export default function Scene4BeachBottle({ onNext }: { onNext: () => void }) {
                 margin: 0,
               }}
             >
-              {data.bottle_message}
+              <ET fid="mll_bottle_message" multiline />
             </p>
             <div style={{ marginTop: "12px", fontSize: "28px" }}>❤</div>
           </motion.div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData } from "./MllDataContext";
+import { useMllData, ET } from "./MllDataContext";
 
 export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
   const data = useMllData();
@@ -151,7 +151,7 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
           padding: "0 30px",
         }}
       >
-        {data.tv_caption}
+        <ET fid="mll_tv_caption" />
       </p>
 
       {/* Floor */}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData } from "./MllDataContext";
+import { useMllData, ET } from "./MllDataContext";
 import { clickSound, playSound } from "./audio";
 
 export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
@@ -45,7 +45,7 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
               lineHeight: 1.3,
             }}
           >
-            {data.scene1_hint}
+            <ET fid="mll_scene1_hint" multiline />
           </motion.p>
 
           <motion.button

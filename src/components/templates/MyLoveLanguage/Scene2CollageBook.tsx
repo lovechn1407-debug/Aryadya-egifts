@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData } from "./MllDataContext";
+import { useMllData, ET } from "./MllDataContext";
 import { paperRustle, playSound } from "./audio";
 
 const TOTAL_PAGES = 4;
@@ -286,7 +286,7 @@ function BookCover() {
           opacity: 0.85,
         }}
       >
-        {data.book_author}
+        <ET fid="mll_book_author" />
       </p>
       <svg width="40" height="40" viewBox="0 0 100 100" style={{ marginTop: "20px" }}>
         <path
@@ -404,7 +404,7 @@ function RightPageContent({ page }: { page: number }) {
           marginTop: "28px",
         }}
       >
-        {data.page_text[page]}
+        <ET fid={`mll_page${page + 1}`} multiline />
       </p>
       <span
         style={{

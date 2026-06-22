@@ -73,6 +73,7 @@ export default function MyLoveLanguage({
   customData = {},
   autoPlay = false,
   editMode = false,
+  onFieldChange,
   forcedSlide,
 }: Props) {
   const [scene, setScene] = useState(1);
@@ -99,6 +100,7 @@ export default function MyLoveLanguage({
   // Build merged data: SITE_DATA defaults overridden by customData field values
   const mergedData = {
     ...SITE_DATA,
+    rawCustomData: customData,
     scene1_hint: customData.mll_scene1_hint ?? SITE_DATA.scene1_hint,
     video_room: customData.mll_video_room ?? SITE_DATA.video_room,
     book_author: customData.mll_book_author ?? SITE_DATA.book_author,
@@ -146,7 +148,7 @@ export default function MyLoveLanguage({
   };
 
   return (
-    <MllDataContext.Provider value={mergedData}>
+    <MllDataContext.Provider value={{ data: mergedData, editMode, onFieldChange }}>
       {/* Inject product CSS without touching global styles */}
       <style dangerouslySetInnerHTML={{ __html: PRODUCT_CSS }} />
       <link

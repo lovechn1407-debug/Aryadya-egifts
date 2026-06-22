@@ -3,7 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
-import { useMllData } from "./MllDataContext";
+import { useMllData, ET } from "./MllDataContext";
 
 function RingBox({ open }: { open: boolean }) {
   const lidRef = useRef<THREE.Group>(null);
@@ -175,7 +175,7 @@ export default function Scene7RingBox({ onNext }: { onNext: () => void }) {
                 margin: "0 0 24px",
               }}
             >
-              {data.proposal_question}
+              <ET fid="mll_proposal_question" />
             </h2>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
               <motion.button
@@ -215,7 +215,7 @@ export default function Scene7RingBox({ onNext }: { onNext: () => void }) {
                   cursor: "pointer",
                 }}
               >
-                {data.no_button_text}
+                <ET fid="mll_no_button_text" />
               </motion.button>
             </div>
           </motion.div>
