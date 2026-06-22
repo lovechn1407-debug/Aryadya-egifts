@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMllContext, ET } from "./MllDataContext";
 import { clickSound, playSound } from "./audio";
@@ -16,6 +16,16 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
   const { data, editMode } = useMllContext();
   const [stage, setStage] = useState<Stage>("switch");
   const [flipped, setFlipped] = useState(false);
+
+  const [video2Started, setVideo2Started] = useState(false);
+  const [video3Started, setVideo3Started] = useState(false);
+
+  useEffect(() => {
+    if (stage === "switch" || stage === "light_on_video") {
+      setVideo2Started(false);
+      setVideo3Started(false);
+    }
+  }, [stage]);
 
   const handleSwitch = () => {
     if (flipped) return;
@@ -218,6 +228,18 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
     </motion.button>
   );
 
+  const showVideo1 =
+    stage === "light_on_video" ||
+    stage === "go_to_book_btn" ||
+    (stage === "book_showing_video" && !video2Started);
+
+  const showVideo2 =
+    stage === "book_showing_video" ||
+    stage === "open_book_btn" ||
+    (stage === "book_opening_video" && !video3Started);
+
+  const showVideo3 = stage === "book_opening_video";
+
   return (
     <div
       style={{
@@ -307,166 +329,189 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
         </div>
       )}
 
-      {/* 2. LIGHT ON VIDEO & BUTTON STAGES */}
-      {(stage === "light_on_video" || stage === "go_to_book_btn") && (
-        <>
-          <motion.video
-            src={data.video_light_on}
-            muted
-            playsInline
-            autoPlay
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onEnded={() => setStage("go_to_book_btn")}
-            onError={() => setTimeout(() => setStage("go_to_book_btn"), 1500)}
-            style={{
-              position: "fixed",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              zIndex: 40,
-              background: "#000",
-            }}
-          />
-          {stage === "light_on_video" && (
-            <button
-              onClick={() => skipVideo("go_to_book_btn")}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                skipVideo("go_to_book_btn");
-              }}
-              style={{
-                position: "absolute",
-                top: "20px",
-                right: "20px",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                background: "rgba(0, 0, 0, 0.6)",
-                color: "#FFF",
-                border: "1px solid rgba(255, 255, 255, 0.3)",
-                cursor: "pointer",
-                zIndex: 60,
-                fontFamily: "'Outfit', sans-serif",
-                fontSize: "14px",
-              }}
-            >
-              Skip ➔
-            </button>
-          )}
-          {stage === "go_to_book_btn" && (
-            <AnimatePresence>
-              <PremiumActionButton label={data.btn_go_to_book} onClick={handleGoToBook} />
-            </AnimatePresence>
-          )}
-        </>
+      {/* 2. VIDEO 1 (Light On) */}
+      {showVideo1 && (
+        <motion.video
+          src={data.video_light_on}
+          muted
+          playsInline
+          autoPlay
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onEnded={() => setStage("go_to_book_btn")}
+          onError={() => setTimeout(() => setStage("go_to_book_btn"), 1500)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            zIndex: 40,
+            background: "#000",
+          }}
+        />
       )}
 
-      {/* 3. BOOK SHOWING VIDEO & BUTTON STAGES */}
-      {(stage === "book_showing_video" || stage === "open_book_btn") && (
-        <>
-          <motion.video
-            src={data.video_book_showing}
-            muted
-            playsInline
-            autoPlay
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onEnded={() => setStage("open_book_btn")}
-            onError={() => setTimeout(() => setStage("open_book_btn"), 1500)}
-            style={{
-              position: "fixed",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              zIndex: 41,
-              background: "#000",
-            }}
-          />
-          {stage === "book_showing_video" && (
-            <button
-              onClick={() => skipVideo("open_book_btn")}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                skipVideo("open_book_btn");
-              }}
-              style={{
-                position: "absolute",
-                top: "20px",
-                right: "20px",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                background: "rgba(0, 0, 0, 0.6)",
-                color: "#FFF",
-                border: "1px solid rgba(255, 255, 255, 0.3)",
-                cursor: "pointer",
-                zIndex: 60,
-                fontFamily: "'Outfit', sans-serif",
-                fontSize: "14px",
-              }}
-            >
-              Skip ➔
-            </button>
-          )}
-          {stage === "open_book_btn" && (
-            <AnimatePresence>
-              <PremiumActionButton label={data.btn_open_book} onClick={handleOpenBook} />
-            </AnimatePresence>
-          )}
-        </>
+      {/* Video 1 Skip & Button Overlays */}
+      {stage === "light_on_video" && (
+        <button
+          onClick={() => skipVideo("go_to_book_btn")}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            skipVideo("go_to_book_btn");
+          }}
+          style={{
+            position: "absolute",
+            top: "20px",
+            right: "20px",
+            padding: "8px 16px",
+            borderRadius: "20px",
+            background: "rgba(0, 0, 0, 0.6)",
+            color: "#FFF",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            cursor: "pointer",
+            zIndex: 60,
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: "14px",
+          }}
+        >
+          Skip ➔
+        </button>
       )}
 
-      {/* 4. BOOK OPENING VIDEO STAGE */}
+      {stage === "go_to_book_btn" && (
+        <AnimatePresence>
+          <PremiumActionButton label={data.btn_go_to_book} onClick={handleGoToBook} />
+        </AnimatePresence>
+      )}
+
+      {/* 3. VIDEO 2 (Book Showing) */}
+      {showVideo2 && (
+        <motion.video
+          src={data.video_book_showing}
+          muted
+          playsInline
+          autoPlay
+          initial={{ opacity: 0 }}
+          animate={{ opacity: video2Started ? 1 : 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ opacity: { duration: 0.15 } }}
+          onPlaying={() => setVideo2Started(true)}
+          onPlay={() => setVideo2Started(true)}
+          onTimeUpdate={(e) => {
+            if (e.currentTarget.currentTime > 0) {
+              setVideo2Started(true);
+            }
+          }}
+          onEnded={() => setStage("open_book_btn")}
+          onError={() => {
+            setVideo2Started(true);
+            setTimeout(() => setStage("open_book_btn"), 1500);
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            zIndex: 41,
+          }}
+        />
+      )}
+
+      {/* Video 2 Skip & Button Overlays */}
+      {stage === "book_showing_video" && (
+        <button
+          onClick={() => skipVideo("open_book_btn")}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            skipVideo("open_book_btn");
+          }}
+          style={{
+            position: "absolute",
+            top: "20px",
+            right: "20px",
+            padding: "8px 16px",
+            borderRadius: "20px",
+            background: "rgba(0, 0, 0, 0.6)",
+            color: "#FFF",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            cursor: "pointer",
+            zIndex: 60,
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: "14px",
+          }}
+        >
+          Skip ➔
+        </button>
+      )}
+
+      {stage === "open_book_btn" && (
+        <AnimatePresence>
+          <PremiumActionButton label={data.btn_open_book} onClick={handleOpenBook} />
+        </AnimatePresence>
+      )}
+
+      {/* 4. VIDEO 3 (Book Opening) */}
+      {showVideo3 && (
+        <motion.video
+          src={data.video_book_open}
+          muted
+          playsInline
+          autoPlay
+          initial={{ opacity: 0 }}
+          animate={{ opacity: video3Started ? 1 : 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ opacity: { duration: 0.15 } }}
+          onPlaying={() => setVideo3Started(true)}
+          onPlay={() => setVideo3Started(true)}
+          onTimeUpdate={(e) => {
+            if (e.currentTarget.currentTime > 0) {
+              setVideo3Started(true);
+            }
+          }}
+          onEnded={() => skipVideo("done")}
+          onError={() => {
+            setVideo3Started(true);
+            setTimeout(() => skipVideo("done"), 1500);
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            zIndex: 42,
+          }}
+        />
+      )}
+
+      {/* Video 3 Skip Overlay */}
       {stage === "book_opening_video" && (
-        <>
-          <motion.video
-            src={data.video_book_open}
-            muted
-            playsInline
-            autoPlay
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onEnded={() => skipVideo("done")}
-            onError={() => setTimeout(() => skipVideo("done"), 1500)}
-            style={{
-              position: "fixed",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              zIndex: 42,
-              background: "#000",
-            }}
-          />
-          {/* Skip Button */}
-          <button
-            onClick={() => skipVideo("done")}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              skipVideo("done");
-            }}
-            style={{
-              position: "absolute",
-              top: "20px",
-              right: "20px",
-              padding: "8px 16px",
-              borderRadius: "20px",
-              background: "rgba(0, 0, 0, 0.6)",
-              color: "#FFF",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              cursor: "pointer",
-              zIndex: 60,
-              fontFamily: "'Outfit', sans-serif",
-              fontSize: "14px",
-            }}
-          >
-            Skip ➔
-          </button>
-        </>
+        <button
+          onClick={() => skipVideo("done")}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            skipVideo("done");
+          }}
+          style={{
+            position: "absolute",
+            top: "20px",
+            right: "20px",
+            padding: "8px 16px",
+            borderRadius: "20px",
+            background: "rgba(0, 0, 0, 0.6)",
+            color: "#FFF",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            cursor: "pointer",
+            zIndex: 60,
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: "14px",
+          }}
+        >
+          Skip ➔
+        </button>
       )}
     </div>
   );
