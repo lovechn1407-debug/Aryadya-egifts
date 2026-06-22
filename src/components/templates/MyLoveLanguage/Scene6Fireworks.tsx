@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { SITE_DATA } from "./siteData";
+import { useMllData } from "./MllDataContext";
 
 const COLORS = ["#D4AF37", "#FFB6C1", "#FFFFFF", "#FF4444", "#FF8C00", "#C084FC"];
 
@@ -26,6 +26,7 @@ interface Firework {
 }
 
 export default function Scene6Fireworks({ onNext }: { onNext: () => void }) {
+  const data = useMllData();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showText, setShowText] = useState(false);
   const [showContinue, setShowContinue] = useState(false);
@@ -167,7 +168,7 @@ export default function Scene6Fireworks({ onNext }: { onNext: () => void }) {
             margin: 0,
           }}
         >
-          {SITE_DATA.fireworks_text}
+          {data.fireworks_text}
         </motion.h2>
       )}
       {showContinue && <ContinueButton onClick={onNext} />}

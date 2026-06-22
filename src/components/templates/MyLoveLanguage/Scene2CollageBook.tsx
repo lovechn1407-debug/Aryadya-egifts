@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { SITE_DATA } from "./siteData";
+import { useMllData } from "./MllDataContext";
 import { paperRustle, playSound } from "./audio";
 
 const TOTAL_PAGES = 4;
 
 export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
+  const data = useMllData();
   const [opened, setOpened] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [turning, setTurning] = useState(false);
@@ -230,6 +231,7 @@ function arrowStyle(side: "left" | "right"): React.CSSProperties {
 }
 
 function BookCover() {
+  const data = useMllData();
   return (
     <div
       style={{
@@ -284,7 +286,7 @@ function BookCover() {
           opacity: 0.85,
         }}
       >
-        {SITE_DATA.book_author}
+        {data.book_author}
       </p>
       <svg width="40" height="40" viewBox="0 0 100 100" style={{ marginTop: "20px" }}>
         <path
@@ -378,6 +380,7 @@ function LeftPageContent({ page }: { page: number }) {
 }
 
 function RightPageContent({ page }: { page: number }) {
+  const data = useMllData();
   return (
     <div
       style={{
@@ -401,7 +404,7 @@ function RightPageContent({ page }: { page: number }) {
           marginTop: "28px",
         }}
       >
-        {SITE_DATA.page_text[page]}
+        {data.page_text[page]}
       </p>
       <span
         style={{

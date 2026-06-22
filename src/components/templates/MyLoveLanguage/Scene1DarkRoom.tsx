@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { SITE_DATA } from "./siteData";
+import { useMllData } from "./MllDataContext";
 import { clickSound, playSound } from "./audio";
 
 export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
+  const data = useMllData();
   const [stage, setStage] = useState<"switch" | "video" | "done">("switch");
   const [flipped, setFlipped] = useState(false);
 
@@ -44,7 +45,7 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
               lineHeight: 1.3,
             }}
           >
-            {SITE_DATA.scene1_hint}
+            {data.scene1_hint}
           </motion.p>
 
           <motion.button
@@ -105,7 +106,7 @@ export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
 
       {stage === "video" && (
         <motion.video
-          src={SITE_DATA.video_room}
+          src={data.video_room}
           muted
           playsInline
           autoPlay

@@ -6,7 +6,7 @@ import confetti from "canvas-confetti";
 import * as THREE from "three";
 import Toast from "./Toast";
 import WaxSeal from "./WaxSeal";
-import { SITE_DATA } from "./siteData";
+import { useMllData } from "./MllDataContext";
 import { stampSlam, playSound } from "./audio";
 
 function FloatingRing() {
@@ -37,6 +37,7 @@ function FloatingRing() {
 }
 
 export default function Scene8FinalLetter() {
+  const data = useMllData();
   const [sealed, setSealed] = useState(false);
   const [flash, setFlash] = useState(false);
   const [toast, setToast] = useState(false);
@@ -153,7 +154,7 @@ export default function Scene8FinalLetter() {
                   lineHeight: 1.4,
                 }}
               >
-                {SITE_DATA.final_letter}
+                {data.final_letter}
               </p>
             </motion.div>
           </div>

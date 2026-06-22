@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import ContinueButton from "./ContinueButton";
-import { SITE_DATA } from "./siteData";
+import { useMllData } from "./MllDataContext";
 import { stampSlam, playSound } from "./audio";
 
 const W = 320;
 const H = 200;
 
 export default function Scene5ScratchCard({ onNext }: { onNext: () => void }) {
+  const data = useMllData();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
@@ -155,7 +156,7 @@ export default function Scene5ScratchCard({ onNext }: { onNext: () => void }) {
               lineHeight: 1.3,
             }}
           >
-            {SITE_DATA.scratch_message}
+            {data.scratch_message}
           </p>
         </div>
         <canvas

@@ -1,6 +1,8 @@
 "use client";
 import { lazy, Suspense, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { MllDataContext } from "./MllDataContext";
+import { SITE_DATA } from "./siteData";
 import Scene1DarkRoom from "./Scene1DarkRoom";
 import Scene2CollageBook from "./Scene2CollageBook";
 import Scene3TVRoom from "./Scene3TVRoom";
@@ -12,7 +14,7 @@ import Scene6Fireworks from "./Scene6Fireworks";
 const Scene7RingBox = lazy(() => import("./Scene7RingBox"));
 const Scene8FinalLetter = lazy(() => import("./Scene8FinalLetter"));
 
-// Product CSS — injected as a scoped style tag so it never pollutes global styles
+// Product CSS injected as a scoped style tag — never pollutes global styles
 const PRODUCT_CSS = `
 @keyframes goldPulse {
   0%, 100% { box-shadow: 0 0 24px rgba(212,175,55,0.5), 0 4px 16px rgba(0,0,0,0.3); }
@@ -68,6 +70,7 @@ interface Props {
 }
 
 export default function MyLoveLanguage({
+  customData = {},
   autoPlay = false,
   editMode = false,
   forcedSlide,
@@ -86,17 +89,39 @@ export default function MyLoveLanguage({
     }
   }, [autoPlay]);
 
-  // Editor forced slide sync
+  // Editor forced slide sync: MLL_SLIDES uses n=0..7 → scene 1..8
   useEffect(() => {
     if (editMode && forcedSlide !== undefined) {
-      setScene(Math.max(1, Math.min(8, forcedSlide + 1)));
+      setScene(forcedSlide + 1);
     }
   }, [forcedSlide, editMode]);
 
-  const renderScene = () => {
-    // In autoPlay mode, show a static snapshot of each scene (no interactivity)
-    const onNext = autoPlay ? () => {} : next;
+  // Build merged data: SITE_DATA defaults overridden by customData field values
+  const mergedData = {
+    ...SITE_DATA,
+    scene1_hint: customData.mll_scene1_hint ?? SITE_DATA.scene1_hint,
+    video_room: customData.mll_video_room ?? SITE_DATA.video_room,
+    book_author: customData.mll_book_author ?? SITE_DATA.book_author,
+    page_text: [
+      customData.mll_page1 ?? SITE_DATA.page_text[0],
+      customData.mll_page2 ?? SITE_DATA.page_text[1],
+      customData.mll_page3 ?? SITE_DATA.page_text[2],
+      customData.mll_page4 ?? SITE_DATA.page_text[3],
+    ],
+    video_story: customData.mll_video_story ?? SITE_DATA.video_story,
+    tv_caption: customData.mll_tv_caption ?? SITE_DATA.tv_caption,
+    shake_hint: customData.mll_shake_hint ?? SITE_DATA.shake_hint,
+    bottle_message: customData.mll_bottle_message ?? SITE_DATA.bottle_message,
+    scratch_message: customData.mll_scratch_message ?? SITE_DATA.scratch_message,
+    fireworks_text: customData.mll_fireworks_text ?? SITE_DATA.fireworks_text,
+    proposal_question: customData.mll_proposal_question ?? SITE_DATA.proposal_question,
+    no_button_text: customData.mll_no_button_text ?? SITE_DATA.no_button_text,
+    final_letter: customData.mll_final_letter ?? SITE_DATA.final_letter,
+  };
 
+  const onNext = autoPlay ? () => {} : next;
+
+  const renderScene = () => {
     switch (scene) {
       case 1: return <Scene1DarkRoom key="s1" onNext={onNext} />;
       case 2: return <Scene2CollageBook key="s2" onNext={onNext} />;
@@ -121,13 +146,9 @@ export default function MyLoveLanguage({
   };
 
   return (
-    <>
+    <MllDataContext.Provider value={mergedData}>
       {/* Inject product CSS without touching global styles */}
       <style dangerouslySetInnerHTML={{ __html: PRODUCT_CSS }} />
-      <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-      />
       <link
         href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;600;700&display=swap"
         rel="stylesheet"
@@ -153,6 +174,6 @@ export default function MyLoveLanguage({
           </motion.div>
         </AnimatePresence>
       </div>
-    </>
+    </MllDataContext.Provider>
   );
 }

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { SITE_DATA } from "./siteData";
+import { useMllData } from "./MllDataContext";
 
 export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
+  const data = useMllData();
   const [showContinue, setShowContinue] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [tip, setTip] = useState<string | null>(null);
@@ -78,7 +79,7 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
         >
           <video
             ref={videoRef}
-            src={SITE_DATA.video_story}
+            src={data.video_story}
             muted
             autoPlay
             loop
@@ -150,7 +151,7 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
           padding: "0 30px",
         }}
       >
-        {SITE_DATA.tv_caption}
+        {data.tv_caption}
       </p>
 
       {/* Floor */}
