@@ -6,7 +6,7 @@ import confetti from "canvas-confetti";
 import * as THREE from "three";
 import Toast from "./Toast";
 import WaxSeal from "./WaxSeal";
-import { useMllData, ET } from "./MllDataContext";
+import { useMllData, useMllContext, ET } from "./MllDataContext";
 import { stampSlam, playSound } from "./audio";
 
 function FloatingRing() {
@@ -37,7 +37,7 @@ function FloatingRing() {
 }
 
 export default function Scene8FinalLetter() {
-  const data = useMllData();
+  const { data, editMode } = useMllContext();
   const [sealed, setSealed] = useState(false);
   const [flash, setFlash] = useState(false);
   const [toast, setToast] = useState(false);
@@ -180,7 +180,7 @@ export default function Scene8FinalLetter() {
           </AnimatePresence>
         </div>
 
-        {!sealed && (
+        {!sealed && !editMode && (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

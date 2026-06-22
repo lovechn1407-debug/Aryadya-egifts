@@ -121,7 +121,7 @@ export default function MyLoveLanguage({
     final_letter: customData.mll_final_letter ?? SITE_DATA.final_letter,
   };
 
-  const onNext = autoPlay ? () => {} : next;
+  const onNext = (autoPlay || editMode) ? () => {} : next;
 
   const renderScene = () => {
     switch (scene) {

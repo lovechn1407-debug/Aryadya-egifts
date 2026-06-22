@@ -3,7 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
-import { useMllData, ET } from "./MllDataContext";
+import { useMllData, useMllContext, ET } from "./MllDataContext";
 
 function RingBox({ open }: { open: boolean }) {
   const lidRef = useRef<THREE.Group>(null);
@@ -91,8 +91,8 @@ function RingBox({ open }: { open: boolean }) {
 }
 
 export default function Scene7RingBox({ onNext }: { onNext: () => void }) {
-  const data = useMllData();
-  const [open, setOpen] = useState(false);
+  const { data, editMode } = useMllContext();
+  const [open, setOpen] = useState(editMode);
   const [noOffset, setNoOffset] = useState(0);
   const [yesScale, setYesScale] = useState(1);
 

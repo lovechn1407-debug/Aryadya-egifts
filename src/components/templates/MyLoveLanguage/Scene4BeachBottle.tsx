@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData, ET } from "./MllDataContext";
+import { useMllData, useMllContext, ET } from "./MllDataContext";
 import { corkPop, playSound } from "./audio";
 
 const stars = Array.from({ length: 30 }, (_, i) => ({
@@ -14,8 +14,8 @@ const stars = Array.from({ length: 30 }, (_, i) => ({
 }));
 
 export default function Scene4BeachBottle({ onNext }: { onNext: () => void }) {
-  const data = useMllData();
-  const [opened, setOpened] = useState(false);
+  const { data, editMode } = useMllContext();
+  const [opened, setOpened] = useState(editMode);
   const [permissionAsked, setPermissionAsked] = useState(false);
 
   useEffect(() => {

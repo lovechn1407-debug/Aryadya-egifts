@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData, ET } from "./MllDataContext";
+import { useMllData, useMllContext, ET } from "./MllDataContext";
 
 export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
   const data = useMllData();

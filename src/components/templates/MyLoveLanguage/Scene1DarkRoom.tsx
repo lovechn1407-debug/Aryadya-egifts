@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData, ET } from "./MllDataContext";
+import { useMllData, useMllContext, ET } from "./MllDataContext";
 import { clickSound, playSound } from "./audio";
 
 export default function Scene1DarkRoom({ onNext }: { onNext: () => void }) {
-  const data = useMllData();
-  const [stage, setStage] = useState<"switch" | "video" | "done">("switch");
+  const { data, editMode } = useMllContext();
+  const [stage, setStage] = useState<"switch" | "video" | "done">(editMode ? "switch" : "switch");
   const [flipped, setFlipped] = useState(false);
 
   const handleSwitch = () => {

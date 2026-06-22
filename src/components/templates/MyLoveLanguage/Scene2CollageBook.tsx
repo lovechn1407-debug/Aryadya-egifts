@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ContinueButton from "./ContinueButton";
-import { useMllData, ET } from "./MllDataContext";
+import { useMllData, useMllContext, ET } from "./MllDataContext";
 import { paperRustle, playSound } from "./audio";
 
 const TOTAL_PAGES = 4;
 
 export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
-  const data = useMllData();
-  const [opened, setOpened] = useState(false);
+  const { data, editMode } = useMllContext();
+  const [opened, setOpened] = useState(editMode);
   const [currentPage, setCurrentPage] = useState(0);
   const [turning, setTurning] = useState(false);
   const [closing, setClosing] = useState(false);

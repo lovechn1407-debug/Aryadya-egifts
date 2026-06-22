@@ -2,17 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import ContinueButton from "./ContinueButton";
-import { useMllData, ET } from "./MllDataContext";
+import { useMllData, useMllContext, ET } from "./MllDataContext";
 import { stampSlam, playSound } from "./audio";
 
 const W = 320;
 const H = 200;
 
 export default function Scene5ScratchCard({ onNext }: { onNext: () => void }) {
-  const data = useMllData();
+  const { data, editMode } = useMllContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(editMode);
   const [shake, setShake] = useState(false);
   const scratchingRef = useRef(false);
 
