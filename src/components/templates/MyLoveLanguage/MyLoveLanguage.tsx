@@ -1,5 +1,5 @@
 "use client";
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { MllDataContext } from "./MllDataContext";
 import { SITE_DATA } from "./siteData";
@@ -9,6 +9,9 @@ import Scene3TVRoom from "./Scene3TVRoom";
 import Scene4BeachBottle from "./Scene4BeachBottle";
 import Scene5ScratchCard from "./Scene5ScratchCard";
 import Scene6Fireworks from "./Scene6Fireworks";
+import YouTube from "react-youtube";
+import { Music, Volume2, VolumeX } from "lucide-react";
+import SongLibraryPopup from "@/components/SongLibraryPopup";
 
 // Lazy load Three.js heavy scenes
 const Scene7RingBox = lazy(() => import("./Scene7RingBox"));
@@ -61,6 +64,131 @@ function Fallback() {
   );
 }
 
+function Scene0Music({
+  d,
+  onNext,
+  em,
+  oc,
+  bgProps,
+}: {
+  d: any;
+  onNext: () => void;
+  em: boolean;
+  oc?: (id: string, v: string) => void;
+  bgProps: { isPicking: boolean; setIsPicking: (v: boolean) => void };
+}) {
+  return (
+    <section
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 20px",
+        background: "radial-gradient(ellipse at center, #1b0a1a 0%, #050106 100%)",
+        position: "relative",
+      }}
+    >
+      <div
+        style={{
+          background: "rgba(27, 10, 26, 0.95)",
+          borderRadius: 24,
+          padding: "40px 32px",
+          width: "100%",
+          maxWidth: 420,
+          border: "2px solid #D4AF37",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.15)",
+          textAlign: "center",
+          position: "relative",
+        }}
+      >
+        <h2
+          style={{
+            fontFamily: "'Great Vibes', cursive",
+            fontSize: "36px",
+            color: "#D4AF37",
+            marginBottom: 8,
+            textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+          }}
+        >
+          Background Music 🎵
+        </h2>
+        <p
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontStyle: "italic",
+            color: "#F2C4CE",
+            fontSize: 15,
+            marginBottom: 24,
+          }}
+        >
+          Plays continuously throughout the website
+        </p>
+
+        <div
+          style={{
+            width: 68,
+            height: 68,
+            borderRadius: "50%",
+            background: "rgba(212,175,55,0.1)",
+            border: "1.5px solid rgba(212,175,55,0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 20px",
+            color: "#D4AF37",
+          }}
+        >
+          <Music size={30} />
+        </div>
+
+        <div
+          style={{
+            fontFamily: "'Outfit', sans-serif",
+            fontWeight: 600,
+            textAlign: "center",
+            fontSize: 16,
+            color: "#FFF",
+            marginBottom: 28,
+            background: "rgba(255, 255, 255, 0.05)",
+            padding: "12px 18px",
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          {d.bg_song_name || "No song selected"}
+        </div>
+
+        {em && (
+          <div style={{ marginBottom: 24 }}>
+            <button
+              onClick={() => bgProps.setIsPicking(true)}
+              style={{
+                background: "linear-gradient(135deg, #FF69B4, #FF1493)",
+                color: "#FFF",
+                border: "none",
+                borderRadius: 999,
+                padding: "12px 28px",
+                fontFamily: "'Outfit', sans-serif",
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: "pointer",
+                boxShadow: "0 8px 24px rgba(255,20,147,0.3)",
+                transition: "transform 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              {d.bg_song_url ? "Change Song" : "Select Song"}
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 interface Props {
   customData?: Record<string, string>;
   editMode?: boolean;
@@ -79,6 +207,15 @@ export default function MyLoveLanguage({
   const [scene, setScene] = useState(1);
   const next = () => setScene((s) => Math.min(8, s + 1));
 
+  // Audio state management
+  const [isPickingBgSong, setIsPickingBgSong] = useState(false);
+  const [globalMuted, setGlobalMuted] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const [bgAudio, setBgAudio] = useState<HTMLAudioElement | null>(null);
+  const [ytPlayer, setYtPlayer] = useState<any>(null);
+  const ytPlayerRef = useRef<any>(null);
+  const fadeIntervalRef = useRef<any>(null);
+
   // AutoPlay cycling for homepage product frame preview
   useEffect(() => {
     if (autoPlay) {
@@ -90,7 +227,7 @@ export default function MyLoveLanguage({
     }
   }, [autoPlay]);
 
-  // Editor forced slide sync: MLL_SLIDES uses n=0..7 → scene 1..8
+  // Editor forced slide sync: MLL_SLIDES uses n=-1..7 → scene 0..8
   useEffect(() => {
     if (editMode && forcedSlide !== undefined) {
       setScene(forcedSlide + 1);
@@ -118,6 +255,12 @@ export default function MyLoveLanguage({
   const mergedData = {
     ...SITE_DATA,
     rawCustomData: customData,
+    bg_song_name: customData.mll_bg_song_name ?? "",
+    bg_song_url: customData.mll_bg_song_url ?? "",
+    bg_song_type: customData.mll_bg_song_type ?? "direct",
+    bg_song_youtube_id: customData.mll_bg_song_youtube_id ?? "",
+    bg_song_start: customData.mll_bg_song_start ?? "0",
+    bg_song_end: customData.mll_bg_song_end ?? "0",
     scene1_hint: customData.mll_scene1_hint ?? SITE_DATA.scene1_hint,
     video_light_on: customData.mll_video_light_on ?? SITE_DATA.video_light_on,
     video_book_showing: customData.mll_video_book_showing ?? SITE_DATA.video_book_showing,
@@ -139,10 +282,157 @@ export default function MyLoveLanguage({
     final_letter: customData.mll_final_letter ?? SITE_DATA.final_letter,
   };
 
-  const onNext = (autoPlay || editMode) ? () => {} : next;
+  const isYt = mergedData.bg_song_type === "youtube" && !!mergedData.bg_song_youtube_id;
+
+  useEffect(() => {
+    ytPlayerRef.current = ytPlayer;
+  }, [ytPlayer]);
+
+  // Handle interaction to start audio (bypass browser security)
+  useEffect(() => {
+    const onInteract = () => {
+      setHasInteracted(true);
+      if (isYt && ytPlayerRef.current?.playVideo) {
+        ytPlayerRef.current.playVideo();
+      }
+    };
+    window.addEventListener("click", onInteract);
+    window.addEventListener("touchstart", onInteract);
+    return () => {
+      window.removeEventListener("click", onInteract);
+      window.removeEventListener("touchstart", onInteract);
+    };
+  }, [isYt]);
+
+  // Set up audio source
+  useEffect(() => {
+    if (editMode) return;
+    const audio = new Audio();
+    audio.loop = true;
+    setBgAudio(audio);
+    return () => {
+      audio.pause();
+      audio.src = "";
+    };
+  }, [editMode]);
+
+  useEffect(() => {
+    if (!bgAudio || isYt || !mergedData.bg_song_url) return;
+    if (bgAudio.src !== mergedData.bg_song_url) {
+      bgAudio.src = mergedData.bg_song_url;
+    }
+  }, [bgAudio, mergedData.bg_song_url, isYt]);
+
+  // Continuous background audio pauses on Scene 3 (TV room)
+  const isAudible = !editMode && hasInteracted && !globalMuted && scene !== 3;
+
+  useEffect(() => {
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+
+    if (editMode) return;
+
+    if (isAudible) {
+      if (isYt) {
+        if (ytPlayer && typeof ytPlayer.playVideo === "function") {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(0);
+          ytPlayer.playVideo();
+          
+          let currentVol = 0;
+          fadeIntervalRef.current = setInterval(() => {
+            currentVol = Math.min(currentVol + 5, 100);
+            if (ytPlayer && typeof ytPlayer.setVolume === "function") {
+              ytPlayer.setVolume(currentVol);
+            }
+            if (currentVol >= 100) {
+              if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
+              }
+            }
+          }, 100);
+        }
+      } else {
+        if (bgAudio) {
+          bgAudio.muted = false;
+          bgAudio.volume = 0;
+          bgAudio.play().catch((e) => console.log("Bg audio play prevented", e));
+          
+          let currentVol = 0;
+          fadeIntervalRef.current = setInterval(() => {
+            currentVol = Math.min(currentVol + 0.05, 1.0);
+            bgAudio.volume = currentVol;
+            if (currentVol >= 1.0) {
+              if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
+              }
+            }
+          }, 100);
+        }
+      }
+    } else {
+      if (isYt) {
+        if (ytPlayer) {
+          if (globalMuted) {
+            ytPlayer.mute();
+          } else {
+            ytPlayer.pauseVideo?.();
+          }
+          ytPlayer.setVolume?.(0);
+        }
+      } else {
+        if (bgAudio) {
+          if (globalMuted) {
+            bgAudio.muted = true;
+          } else {
+            bgAudio.pause();
+          }
+          bgAudio.volume = 0;
+        }
+      }
+    }
+
+    return () => {
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
+    };
+  }, [isAudible, bgAudio, ytPlayer, isYt, globalMuted]);
+
+  useEffect(() => {
+    const forceAudio = () => {
+      if (isAudible && bgAudio && bgAudio.paused) {
+        bgAudio.play().catch(() => {});
+      }
+    };
+    window.addEventListener("click", forceAudio);
+    window.addEventListener("touchstart", forceAudio);
+    return () => {
+      window.removeEventListener("click", forceAudio);
+      window.removeEventListener("touchstart", forceAudio);
+    };
+  }, [isAudible, bgAudio]);
+
+  const onNext = autoPlay || editMode ? () => {} : next;
 
   const renderScene = () => {
     switch (scene) {
+      case 0:
+        return (
+          <Scene0Music
+            key="s0"
+            d={mergedData}
+            onNext={onNext}
+            em={editMode}
+            oc={(fid, val) => onFieldChange?.(fid, val)}
+            bgProps={{ isPicking: isPickingBgSong, setIsPicking: setIsPickingBgSong }}
+          />
+        );
       case 1: return <Scene1DarkRoom key="s1" onNext={onNext} />;
       case 2: return <Scene2CollageBook key="s2" onNext={onNext} />;
       case 3: return <Scene3TVRoom key="s3" onNext={onNext} />;
@@ -173,6 +463,14 @@ export default function MyLoveLanguage({
         href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;600;700&display=swap"
         rel="stylesheet"
       />
+      
+      {/* Preload TV Room video at the very start of the page */}
+      <video
+        src={mergedData.video_story}
+        preload="auto"
+        style={{ display: "none" }}
+      />
+
       <div
         style={{
           position: "fixed",
@@ -194,6 +492,79 @@ export default function MyLoveLanguage({
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* BG Audio mute/unmute button */}
+      {!editMode && mergedData.bg_song_url && (
+        <button
+          onClick={() => setGlobalMuted((m) => !m)}
+          title={globalMuted ? "Unmute background music" : "Mute background music"}
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 200,
+            width: 46,
+            height: 46,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.88)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(212,175,55,0.25)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: globalMuted ? "#888" : "#C0395A",
+            transition: "all 0.3s",
+          }}
+        >
+          {globalMuted ? <VolumeX size={20} strokeWidth={2.5} /> : <Volume2 size={20} strokeWidth={2.5} />}
+        </button>
+      )}
+
+      {/* YouTube headless player */}
+      {isYt && !editMode && (
+        <div style={{ position: "absolute", top: -9999, left: -9999, opacity: 0, pointerEvents: "none" }}>
+          <YouTube
+            videoId={mergedData.bg_song_youtube_id}
+            opts={{
+              height: "10",
+              width: "10",
+              playerVars: {
+                autoplay: 0,
+                loop: 1,
+                controls: 0,
+                start: parseInt(mergedData.bg_song_start || "0", 10) || undefined,
+                end: parseInt(mergedData.bg_song_end || "0", 10) || undefined,
+              },
+            }}
+            onReady={(e) => {
+              setYtPlayer(e.target);
+              if (globalMuted) e.target.mute();
+            }}
+            onStateChange={(e) => {
+              if (e.data === 0) e.target.playVideo();
+            }}
+          />
+        </div>
+      )}
+
+      {/* Song Library popup for background music editing */}
+      {isPickingBgSong && (
+        <SongLibraryPopup
+          onClose={() => setIsPickingBgSong(false)}
+          onSelect={(song) => {
+            onFieldChange?.("mll_bg_song_name", song.name);
+            onFieldChange?.("mll_bg_song_url", song.url || "");
+            onFieldChange?.("mll_bg_song_type", song.type || "direct");
+            onFieldChange?.("mll_bg_song_youtube_id", song.youtubeId || "");
+            onFieldChange?.("mll_bg_song_start", String(song.startTime || 0));
+            onFieldChange?.("mll_bg_song_end", String(song.endTime || 0));
+            setIsPickingBgSong(false);
+          }}
+        />
+      )}
     </MllDataContext.Provider>
   );
 }

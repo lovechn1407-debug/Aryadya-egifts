@@ -19,9 +19,24 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = false; // We want sound!
+    const promise = v.play();
+    if (promise !== undefined) {
+      promise.catch((error) => {
+        console.warn("Autoplay with audio blocked, playing muted:", error);
+        v.muted = true;
+        v.play().catch((err) => console.error("Muted play failed:", err));
+      });
+    }
+  }, []);
+
   const toggle = () => {
     const v = videoRef.current;
     if (!v) return;
+    v.muted = false; // Ensure unmuted when user toggles
     if (v.paused) {
       v.play().catch(() => {});
       setPlaying(true);
@@ -247,8 +262,6 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
           <video
             ref={videoRef}
             src={data.video_story}
-            muted
-            autoPlay
             loop
             playsInline
             onClick={toggle}

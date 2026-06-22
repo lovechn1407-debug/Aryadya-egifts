@@ -139,6 +139,7 @@ const SERENADE_SLIDES = [
 ];
 
 const MLL_SLIDES = [
+  { n: -1, label: "BG Music" },
   { n: 0, label: "Dark Room" },
   { n: 1, label: "Book" },
   { n: 2, label: "TV Room" },
