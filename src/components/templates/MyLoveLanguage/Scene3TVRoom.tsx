@@ -109,48 +109,26 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
       ))}
 
       {/* LEFT VELVET CURTAIN */}
-      <div
+      <motion.div
+        initial={{ width: "50%" }}
+        animate={{ width: "56px" }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
         style={{
           position: "absolute",
           left: 0,
           top: 0,
           bottom: 0,
-          width: "56px",
           background: "linear-gradient(90deg, #4A0000 0%, #8B0000 45%, #6A0000 85%, #2A0000 100%)",
           boxShadow: "4px 0 16px rgba(0,0,0,0.6)",
           zIndex: 15,
+          overflow: "hidden",
         }}
       >
         {/* Left tieback */}
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: "60%",
-            width: "56px",
-            height: "8px",
-            background: "linear-gradient(180deg, #D4AF37, #F5D16A, #D4AF37)",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-            borderRadius: "0 2px 2px 0",
-          }}
-        />
-      </div>
-
-      {/* RIGHT VELVET CURTAIN */}
-      <div
-        style={{
-          position: "absolute",
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: "56px",
-          background: "linear-gradient(-90deg, #4A0000 0%, #8B0000 45%, #6A0000 85%, #2A0000 100%)",
-          boxShadow: "-4px 0 16px rgba(0,0,0,0.6)",
-          zIndex: 15,
-        }}
-      >
-        {/* Right tieback */}
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4, duration: 0.4 }}
           style={{
             position: "absolute",
             right: 0,
@@ -162,7 +140,41 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
             borderRadius: "2px 0 0 2px",
           }}
         />
-      </div>
+      </motion.div>
+
+      {/* RIGHT VELVET CURTAIN */}
+      <motion.div
+        initial={{ width: "50%" }}
+        animate={{ width: "56px" }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+        style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          background: "linear-gradient(-90deg, #4A0000 0%, #8B0000 45%, #6A0000 85%, #2A0000 100%)",
+          boxShadow: "-4px 0 16px rgba(0,0,0,0.6)",
+          zIndex: 15,
+          overflow: "hidden",
+        }}
+      >
+        {/* Right tieback */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4, duration: 0.4 }}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: "60%",
+            width: "56px",
+            height: "8px",
+            background: "linear-gradient(180deg, #D4AF37, #F5D16A, #D4AF37)",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+            borderRadius: "0 2px 2px 0",
+          }}
+        />
+      </motion.div>
 
       {/* RETRO VALENTINE TV CABINET & SET */}
       <div
