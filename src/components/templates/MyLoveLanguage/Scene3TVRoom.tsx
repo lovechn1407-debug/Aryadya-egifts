@@ -2,13 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ContinueButton from "./ContinueButton";
 import { useMllData, useMllContext, ET } from "./MllDataContext";
+import { getLibraryVideosDB } from "@/lib/db";
+import type { LibraryVideo } from "@/lib/db";
 
 export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
   const data = useMllData();
-  const { editMode } = useMllContext();
+  const { editMode, onFieldChange } = useMllContext();
   const [showContinue, setShowContinue] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [tip, setTip] = useState<string | null>(null);
+  const [showVideoLibrary, setShowVideoLibrary] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -255,6 +258,39 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
             }}
           />
 
+          {/* Media Select/Upload Overlay for Edit Mode */}
+          {editMode && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0, 0, 0, 0.65)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 10,
+              }}
+            >
+              <button
+                onClick={() => setShowVideoLibrary(true)}
+                style={{
+                  padding: "8px 16px",
+                  background: "linear-gradient(135deg, #FF69B4, #FF1493)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "20px",
+                  fontFamily: "'Outfit', sans-serif",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  boxShadow: "0 0 12px rgba(255, 20, 147, 0.5)",
+                }}
+              >
+                📹 Select Video
+              </button>
+            </div>
+          )}
+
           {/* Interactive feedback tip */}
           <AnimatePresence>
             {tip && (
@@ -415,6 +451,192 @@ export default function Scene3TVRoom({ onNext }: { onNext: () => void }) {
       </motion.button>
 
       {showContinue && <ContinueButton onClick={onNext} />}
+
+      {/* Video Library Modal */}
+      <VideoLibraryModal
+        isOpen={showVideoLibrary}
+        onClose={() => setShowVideoLibrary(false)}
+        onSelect={(url) => {
+          onFieldChange?.("mll_video_story", url);
+          setShowVideoLibrary(false);
+        }}
+      />
+    </div>
+  );
+}
+
+function VideoLibraryModal({
+  isOpen,
+  onClose,
+  onSelect,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelect: (url: string) => void;
+}) {
+  const [videos, setVideos] = useState<LibraryVideo[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      setLoading(true);
+      getLibraryVideosDB()
+        .then((data) => {
+          setVideos(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error loading library videos:", err);
+          setLoading(false);
+        });
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(10, 5, 15, 0.85)",
+        backdropFilter: "blur(8px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "480px",
+          background: "linear-gradient(145deg, #2A1B2D 0%, #150D18 100%)",
+          border: "2px solid #FF69B4",
+          borderRadius: "20px",
+          boxShadow: "0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(255, 105, 180, 0.2)",
+          color: "#fff",
+          display: "flex",
+          flexDirection: "column",
+          maxHeight: "85vh",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            padding: "20px",
+            borderBottom: "1px dashed rgba(255, 105, 180, 0.3)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h3 style={{ margin: 0, fontFamily: "'Outfit', sans-serif", fontSize: "18px", fontWeight: 700, color: "#FFD4EF" }}>
+            📹 Video Library
+          </h3>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              color: "rgba(255, 255, 255, 0.6)",
+              fontSize: "20px",
+              cursor: "pointer",
+              padding: "4px",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: "20px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: "12px" }}>
+          {loading ? (
+            <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}>
+              <div
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  border: "3px solid rgba(255, 105, 180, 0.2)",
+                  borderTop: "3px solid #FF69B4",
+                  borderRadius: "50%",
+                  animation: "mllSpin 1s linear infinite",
+                }}
+              />
+              <style
+                dangerouslySetInnerHTML={{
+                  __html: `@keyframes mllSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`,
+                }}
+              />
+            </div>
+          ) : videos.length === 0 ? (
+            <p style={{ textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px", padding: "20px 0" }}>
+              No videos in library. Preloaded videos will show up here.
+            </p>
+          ) : (
+            videos.map((vid) => (
+              <div
+                key={vid.id}
+                style={{
+                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderRadius: "12px",
+                  padding: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  transition: "background 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)")}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: "14px", color: "#FFF", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {vid.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(255, 255, 255, 0.4)",
+                      fontFamily: "monospace",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {vid.url}
+                  </div>
+                </div>
+
+                {/* Small muted preview */}
+                <div style={{ width: "64px", height: "40px", borderRadius: "6px", overflow: "hidden", background: "#000", flexShrink: 0 }}>
+                  <video src={vid.url} muted playsInline autoPlay loop style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+
+                <button
+                  onClick={() => onSelect(vid.url)}
+                  style={{
+                    padding: "6px 12px",
+                    background: "#FF69B4",
+                    color: "#FFF",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                >
+                  Select
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

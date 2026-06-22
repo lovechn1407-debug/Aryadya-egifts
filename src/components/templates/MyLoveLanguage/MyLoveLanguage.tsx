@@ -97,6 +97,23 @@ export default function MyLoveLanguage({
     }
   }, [forcedSlide, editMode]);
 
+  const totalPagesVal = customData.mll_total_pages ?? "4";
+  const totalPages = parseInt(totalPagesVal, 10) || 4;
+
+  const dynamicImgPages = [];
+  const dynamicCaptionPages = [];
+  const dynamicPageTexts = [];
+
+  for (let i = 1; i <= totalPages; i++) {
+    const defaultImg = SITE_DATA.img_pages[i - 1] ?? "/templates/my-love-language/collage-1.png";
+    const defaultCaption = SITE_DATA.caption_pages[i - 1] ?? `Our Moment ${i}`;
+    const defaultText = SITE_DATA.page_text[i - 1] ?? "Write something beautiful here...";
+
+    dynamicImgPages.push(customData[`mll_img${i}`] ?? defaultImg);
+    dynamicCaptionPages.push(customData[`mll_caption${i}`] ?? defaultCaption);
+    dynamicPageTexts.push(customData[`mll_page${i}`] ?? defaultText);
+  }
+
   // Build merged data: SITE_DATA defaults overridden by customData field values
   const mergedData = {
     ...SITE_DATA,
@@ -108,24 +125,9 @@ export default function MyLoveLanguage({
     btn_go_to_book: customData.mll_btn_go_to_book ?? SITE_DATA.btn_go_to_book,
     btn_open_book: customData.mll_btn_open_book ?? SITE_DATA.btn_open_book,
     book_author: customData.mll_book_author ?? SITE_DATA.book_author,
-    img_pages: [
-      customData.mll_img1 ?? SITE_DATA.img_pages[0],
-      customData.mll_img2 ?? SITE_DATA.img_pages[1],
-      customData.mll_img3 ?? SITE_DATA.img_pages[2],
-      customData.mll_img4 ?? SITE_DATA.img_pages[3],
-    ],
-    caption_pages: [
-      customData.mll_caption1 ?? SITE_DATA.caption_pages[0],
-      customData.mll_caption2 ?? SITE_DATA.caption_pages[1],
-      customData.mll_caption3 ?? SITE_DATA.caption_pages[2],
-      customData.mll_caption4 ?? SITE_DATA.caption_pages[3],
-    ],
-    page_text: [
-      customData.mll_page1 ?? SITE_DATA.page_text[0],
-      customData.mll_page2 ?? SITE_DATA.page_text[1],
-      customData.mll_page3 ?? SITE_DATA.page_text[2],
-      customData.mll_page4 ?? SITE_DATA.page_text[3],
-    ],
+    img_pages: dynamicImgPages,
+    caption_pages: dynamicCaptionPages,
+    page_text: dynamicPageTexts,
     video_story: customData.mll_video_story ?? SITE_DATA.video_story,
     tv_caption: customData.mll_tv_caption ?? SITE_DATA.tv_caption,
     shake_hint: customData.mll_shake_hint ?? SITE_DATA.shake_hint,

@@ -455,3 +455,58 @@ export async function getAnalyticsEventsDB(): Promise<AnalyticsEvent[]> {
   return Object.values(snap.val() as Record<string, AnalyticsEvent>)
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
+
+// ── VIDEO LIBRARY DATABASE FUNCTIONS ─────────────────────────────────────────
+export interface LibraryVideo {
+  id: string;
+  name: string;
+  url: string;
+  createdAt: string;
+}
+
+export async function getLibraryVideosDB(): Promise<LibraryVideo[]> {
+  const snap = await get(ref(database, "libraryVideos"));
+  if (!snap.exists()) {
+    const defaults: LibraryVideo[] = [
+      {
+        id: "vid_500_days",
+        name: "500 Days Of Summer (AMV)",
+        url: "/videos/500_days_of_summer.mp4",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "vid_dandelions",
+        name: "Dandelions Spiderman (AMV)",
+        url: "/videos/dandelions_spiderman.mp4",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "vid_ishq",
+        name: "Ishq Spiderman (AMV)",
+        url: "/videos/ishq_spiderman.mp4",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "vid_oomahi",
+        name: "Oo Mahi Dr Strange (AMV)",
+        url: "/videos/oomahi_drstrange.mp4",
+        createdAt: new Date().toISOString()
+      }
+    ];
+    for (const v of defaults) {
+      await set(ref(database, `libraryVideos/${v.id}`), v);
+    }
+    return defaults;
+  }
+  return Object.values(snap.val() as Record<string, LibraryVideo>)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function saveLibraryVideoDB(video: LibraryVideo): Promise<void> {
+  await set(ref(database, `libraryVideos/${video.id}`), video);
+}
+
+export async function deleteLibraryVideoDB(id: string): Promise<void> {
+  await remove(ref(database, `libraryVideos/${id}`));
+}
+

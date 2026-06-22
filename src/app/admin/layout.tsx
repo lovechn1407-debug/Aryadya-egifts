@@ -12,6 +12,7 @@ const NAV = [
   { href: "/admin/coupons", icon: "🎟️", label: "Coupons" },
   { href: "/admin/sections", icon: "📂", label: "Sections" },
   { href: "/admin/songs", icon: "🎵", label: "Songs" },
+  { href: "/admin/video-library", icon: "📹", label: "Video Library" },
   { href: "/admin/faqs", icon: "❓", label: "FAQs" },
   { href: "/admin/reviews", icon: "⭐", label: "Reviews" },
   { href: "/admin/popups", icon: "💬", label: "Popups" },

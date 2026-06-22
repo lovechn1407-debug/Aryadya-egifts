@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ContinueButton from "./ContinueButton";
 import { useMllData, useMllContext, ET } from "./MllDataContext";
 import { paperRustle, playSound } from "./audio";
-
-const TOTAL_PAGES = 4;
+import ImageCropperUploader from "@/components/ImageCropperUploader";
 
 const PARTICLE_STYLE = `
 @keyframes mllFloat {
@@ -25,7 +24,9 @@ const particles = Array.from({ length: 15 }, (_, i) => ({
 }));
 
 export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
-  const { data, editMode } = useMllContext();
+  const { data, editMode, onFieldChange } = useMllContext();
+  const totalPages = data.img_pages?.length ?? 4;
+
   const [currentPage, setCurrentPage] = useState(0);
   const [turningState, setTurningState] = useState<"none" | "next" | "prev">("none");
   const [bookStage, setBookStage] = useState<"closed" | "opening" | "open" | "closing">(editMode ? "open" : "closed");
@@ -40,7 +41,7 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
 
   const turnNext = () => {
     if (turningState !== "none") return;
-    if (currentPage >= TOTAL_PAGES - 1) return;
+    if (currentPage >= totalPages - 1) return;
     playSound(paperRustle);
     setTurningState("next");
     setTimeout(() => {
@@ -62,6 +63,31 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
   const startClose = () => {
     playSound(paperRustle);
     setBookStage("closing");
+  };
+
+  const addPage = () => {
+    const newTotal = totalPages + 1;
+    onFieldChange?.("mll_total_pages", String(newTotal));
+    // Seed placeholder data for the new page
+    onFieldChange?.(`mll_img${newTotal}`, "/templates/my-love-language/collage-1.png");
+    onFieldChange?.(`mll_caption${newTotal}`, `Our Moment ${newTotal}`);
+    onFieldChange?.(`mll_page${newTotal}`, "Write something beautiful here...");
+    
+    // Auto turn to the newly added page
+    setTimeout(() => {
+      setCurrentPage(newTotal - 1);
+    }, 100);
+  };
+
+  const resetBook = () => {
+    if (!confirm("Are you sure you want to reset all pages back to defaults?")) return;
+    onFieldChange?.("mll_total_pages", "4");
+    for (let i = 1; i <= 20; i++) {
+      onFieldChange?.(`mll_img${i}`, "");
+      onFieldChange?.(`mll_caption${i}`, "");
+      onFieldChange?.(`mll_page${i}`, "");
+    }
+    setCurrentPage(0);
   };
 
   const showInsidePages =
@@ -360,10 +386,10 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
               fontWeight: 700,
             }}
           >
-            {currentPage + 1} / {TOTAL_PAGES}
+            {currentPage + 1} / {totalPages}
           </span>
 
-          {currentPage < TOTAL_PAGES - 1 ? (
+          {currentPage < totalPages - 1 ? (
             <button
               onClick={turnNext}
               onTouchEnd={(e) => {
@@ -380,8 +406,52 @@ export default function Scene2CollageBook({ onNext }: { onNext: () => void }) {
         </div>
       )}
 
+      {/* Web Editor Control Panel for Page Add/Reset */}
+      {editMode && bookStage === "open" && !done && (
+        <div
+          style={{
+            marginTop: "16px",
+            display: "flex",
+            gap: "12px",
+            zIndex: 40,
+          }}
+        >
+          <button
+            onClick={addPage}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "8px",
+              background: "linear-gradient(135deg, #FF69B4, #FF1493)",
+              color: "#fff",
+              border: "none",
+              fontSize: "13px",
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(255, 105, 180, 0.3)",
+            }}
+          >
+            ➕ Add Page
+          </button>
+          <button
+            onClick={resetBook}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "8px",
+              background: "rgba(255, 255, 255, 0.15)",
+              color: "#fff",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              fontSize: "13px",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            🔄 Reset Book
+          </button>
+        </div>
+      )}
+
       {/* Close the book overlay button */}
-      {bookStage !== "closing" && bookStage === "open" && currentPage === TOTAL_PAGES - 1 && (
+      {bookStage !== "closing" && bookStage === "open" && currentPage === totalPages - 1 && (
         <motion.button
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -557,7 +627,8 @@ function BookCover({ onOpen }: { onOpen: () => void }) {
 
 function SinglePageContent({ page }: { page: number }) {
   const data = useMllData();
-  const imageSrc = data.img_pages?.[page] ?? `/templates/my-love-language/collage-${page + 1}.png`;
+  const { editMode, onFieldChange } = useMllContext();
+  const imageSrc = data.img_pages?.[page] ?? `/templates/my-love-language/collage-${(page % 4) + 1}.png`;
 
   return (
     <div
@@ -622,9 +693,10 @@ function SinglePageContent({ page }: { page: number }) {
           }}
         />
 
-        {/* Polaroid Picture */}
+        {/* Polaroid Picture Container with Upload Overlay */}
         <div
           style={{
+            position: "relative",
             width: "100%",
             aspectRatio: "1/1",
             background: "#EBE6DE",
@@ -641,6 +713,27 @@ function SinglePageContent({ page }: { page: number }) {
               objectFit: "cover",
             }}
           />
+
+          {/* Inline Image Uploader for Edit Mode */}
+          {editMode && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "4px",
+                left: "4px",
+                right: "4px",
+                zIndex: 20,
+              }}
+            >
+              <ImageCropperUploader
+                fid={`mll_img${page + 1}`}
+                data={data.rawCustomData || {}}
+                onChange={onFieldChange}
+                defaultSrc={`/templates/my-love-language/collage-${(page % 4) + 1}.png`}
+                aspect={1}
+              />
+            </div>
+          )}
         </div>
 
         {/* Polaroid Caption */}
