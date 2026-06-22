@@ -154,7 +154,7 @@ function RingBox({ open }: { open: boolean }) {
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} scale={0.7}>
       {/* Luxury velvet floor platform */}
       <mesh position={[0, -0.8, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[4.5, 64]} />
