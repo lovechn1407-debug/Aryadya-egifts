@@ -236,7 +236,7 @@ function Navbar({ onMenuClick, settings, onLoginClick }: { onMenuClick: () => vo
 
       {/* Auth / Account Button */}
       {user ? (
-        <Link href="/account" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+        <Link href="/my-orders" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
           {userProfile?.photoURL || user.photoURL ? (
             <img src={userProfile?.photoURL || user.photoURL || ""} alt="User" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid #7C3AED" }} />
           ) : (

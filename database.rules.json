@@ -4,6 +4,11 @@
       ".read": false,
       ".write": false
     },
+    "orders": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["userId"]
+    },
     "$other": {
       ".read": true,
       ".write": true
