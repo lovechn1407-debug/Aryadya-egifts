@@ -205,54 +205,12 @@ function Navbar({ onMenuClick, settings, onLoginClick }: { onMenuClick: () => vo
       background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)",
       borderBottom: "1px solid rgba(0,0,0,0.06)",
       padding: "0 clamp(16px,4vw,48px)",
-      display: "flex", alignItems: "center", height: 60, gap: 14,
+      display: "flex", alignItems: "center", height: 60, gap: 12,
     }}>
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
         <img src={settings?.logoUrl || "/logo.png"} alt="Aradhya E-Giftings" style={{ height: 44, objectFit: "contain" }} />
       </Link>
       <div style={{ flex: 1 }} />
-      <Link href="/my-orders" style={{
-        fontSize: 13,
-        fontWeight: 800,
-        color: "#7C3AED",
-        cursor: "pointer",
-        padding: "0 16px",
-        height: 40,
-        borderRadius: 10,
-        background: "rgba(124, 58, 237, 0.08)",
-        textDecoration: "none",
-        whiteSpace: "nowrap",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transition: "all 0.2s"
-      }}
-      className="nav-my-orders-btn"
-      onMouseEnter={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.15)"}
-      onMouseLeave={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.08)"}
-      >
-        <span className="nav-my-orders-text">My Orders</span>
-      </Link>
-
-      {/* Auth / Account Button */}
-      {user ? (
-        <Link href="/my-orders" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-          {userProfile?.photoURL || user.photoURL ? (
-            <img src={userProfile?.photoURL || user.photoURL || ""} alt="User" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid #7C3AED" }} />
-          ) : (
-            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#7C3AED", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
-              {(userProfile?.name || user.displayName || "U")[0].toUpperCase()}
-            </div>
-          )}
-        </Link>
-      ) : (
-        <button onClick={onLoginClick} style={{
-          background: "#1E293B", color: "#fff", border: "none", borderRadius: 10, padding: "0 16px", height: 40,
-          fontSize: 13, fontWeight: 800, cursor: "pointer", transition: "0.2s", whiteSpace: "nowrap"
-        }}>
-          Login
-        </button>
-      )}
 
       {/* Hamburger Menu Icon */}
       <button 
@@ -281,15 +239,27 @@ function Navbar({ onMenuClick, settings, onLoginClick }: { onMenuClick: () => vo
         </svg>
       </button>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media (max-width: 480px) {
-          .nav-my-orders-btn {
-            padding: 0 10px !important;
-            font-size: 11px !important;
-            height: 36px !important;
-          }
-        }
-      `}} />
+      {/* Auth / Account Button */}
+      {user ? (
+        <Link href="/my-orders" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+          {userProfile?.photoURL || user.photoURL ? (
+            <img src={userProfile?.photoURL || user.photoURL || ""} alt="User" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid #7C3AED" }} />
+          ) : (
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
+              {(userProfile?.name || user.displayName || "U")[0].toUpperCase()}
+            </div>
+          )}
+        </Link>
+      ) : (
+        <button onClick={onLoginClick} style={{
+          background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", border: "none",
+          borderRadius: 10, padding: "0 16px", height: 40,
+          fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "0.2s",
+          whiteSpace: "nowrap", boxShadow: "0 2px 8px rgba(124,58,237,0.3)"
+        }}>
+          Login
+        </button>
+      )}
     </nav>
   );
 }
@@ -2906,7 +2876,7 @@ export default function HomePage() {
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
       <Navbar onMenuClick={() => setShowMenu(true)} settings={settings} onLoginClick={() => setShowLogin(true)} />
       <MenuDrawer isOpen={showMenu} onClose={() => setShowMenu(false)} sections={sections} settings={settings} />
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} googleEnabled={settings?.authGoogleEnabled ?? true} phoneEnabled={settings?.authPhoneEnabled ?? true} />}
       {selectedProduct && (
         <ProductModal 
           product={selectedProduct} 

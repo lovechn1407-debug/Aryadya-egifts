@@ -75,6 +75,9 @@ export interface Settings {
   rateLimitPublicWindowMs?: number;
   rateLimitAuthUserMax?: number;
   rateLimitAuthUserWindowMs?: number;
+  // Authentication Settings
+  authGoogleEnabled?: boolean;
+  authPhoneEnabled?: boolean;
 }
 
 export async function getSettingsDB(): Promise<Settings> {
