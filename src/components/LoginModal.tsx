@@ -13,8 +13,8 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     // Initialize reCAPTCHA
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    if (!(window as any).recaptchaVerifier) {
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
       });
     }
@@ -39,7 +39,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
     setLoading(true);
     setError("");
     try {
-      const appVerifier = window.recaptchaVerifier;
+      const appVerifier = (window as any).recaptchaVerifier;
       const formattedPhone = phone.startsWith("+") ? phone : `+91${phone}`; // default India if no country code
       const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setConfirmationResult(result);
