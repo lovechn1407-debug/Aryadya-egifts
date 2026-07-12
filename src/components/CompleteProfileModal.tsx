@@ -4,7 +4,7 @@ import { saveUserProfileDB } from "@/lib/db";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function CompleteProfileModal({ onClose }: { onClose: () => void }) {
-  const { user, userProfile, refreshProfile } = useAuth();
+  const { user, userProfile, refreshProfile, loading } = useAuth();
   
   const needsName = user ? (!userProfile?.name && !user.displayName) : false;
   const needsEmail = user ? (!userProfile?.email && !user.email) : false;
@@ -23,6 +23,7 @@ export default function CompleteProfileModal({ onClose }: { onClose: () => void 
     }
   }, [user, userProfile]);
 
+  if (loading) return null;
   if (!user) return null;
   
   // If we already have everything, don't show the modal
