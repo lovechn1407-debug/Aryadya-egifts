@@ -3,6 +3,7 @@ import "./globals.css";
 import { getSettingsDB } from "@/lib/db";
 import MaintenanceWrapper from "@/components/MaintenanceWrapper";
 import Script from "next/script";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aradhyagifts.in";
@@ -81,9 +82,11 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <MaintenanceWrapper>
-          {children}
-        </MaintenanceWrapper>
+        <AuthProvider>
+          <MaintenanceWrapper>
+            {children}
+          </MaintenanceWrapper>
+        </AuthProvider>
       </body>
     </html>
   );

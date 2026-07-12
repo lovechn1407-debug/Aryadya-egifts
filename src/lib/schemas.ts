@@ -19,9 +19,10 @@ export const BuyerLoginSchema = z.object({
 export const CreatePendingOrderSchema = z.object({
   productId: idSchema,
   customizations: z.record(z.string(), z.any()).optional().default({}),
-  buyerName: z.string().min(1, "Name is required").max(100),
-  buyerEmail: emailSchema,
-  buyerPhone: phoneSchema,
+  buyerName: z.string().min(1, "Name is required").max(100).optional(),
+  buyerEmail: emailSchema.optional(),
+  buyerPhone: phoneSchema.optional(),
+  userId: idSchema.optional(),
   price: z.number().min(0, "Price must be non-negative").max(1000000).optional(),
   previewUrl: z.string().url("Invalid URL format").max(1000).optional(),
 });
@@ -49,9 +50,10 @@ export const UpdatePreviewSchema = z.object({
 // Cashfree Routes
 export const CreateCashfreeOrderSchema = z.object({
   productId: idSchema,
-  buyerName: z.string().min(1, "Name is required").max(100),
-  buyerEmail: emailSchema,
-  buyerPhone: phoneSchema,
+  buyerName: z.string().min(1, "Name is required").max(100).optional(),
+  buyerEmail: emailSchema.optional(),
+  buyerPhone: phoneSchema.optional(),
+  userId: idSchema.optional(),
   couponCode: z.string().max(50).optional(),
 });
 

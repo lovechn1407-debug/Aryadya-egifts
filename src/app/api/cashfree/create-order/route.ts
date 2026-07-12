@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       buyerName,
       buyerEmail,
       buyerPhone,
+      userId,
       couponCode,
     } = validationResult.data;
 
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
         const meetsMin = c.minimumOrderValue <= product.price;
 
         if (notExpired && meetsMin) {
-          const pastOrders = await getOrdersByBuyerDB(buyerPhone, buyerEmail);
+          const pastOrders = await getOrdersByBuyerDB(buyerPhone || "", buyerEmail || "");
           const usedByPerson = pastOrders.filter(
             (o) => o.couponCode === c.id
           ).length;
@@ -115,6 +116,7 @@ export async function POST(req: NextRequest) {
       buyerName,
       buyerEmail,
       buyerPhone,
+      userId,
       amount: finalPrice,
       couponCode: validatedCoupon?.id,
       discountAmount,
@@ -143,7 +145,7 @@ export async function POST(req: NextRequest) {
       "https://aradhyagifts.in";
 
     // Sanitize phone: Cashfree needs exactly 10 digits
-    const phone10 = buyerPhone.replace(/\D/g, "").slice(-10);
+    const phone10 = (buyerPhone || "0000000000").replace(/\D/g, "").slice(-10);
     // customer_id must be alphanumeric, min 3 chars
     const customerId = `cust_${phone10}`;
 
@@ -153,8 +155,8 @@ export async function POST(req: NextRequest) {
       order_currency: "INR",
       customer_details: {
         customer_id: customerId,
-        customer_name: buyerName.slice(0, 50), // max 50 chars
-        customer_email: buyerEmail,
+        customer_name: (buyerName || "Unknown").slice(0, 50), // max 50 chars
+        customer_email: buyerEmail || "unknown@example.com",
         customer_phone: phone10,
       },
       order_meta: {

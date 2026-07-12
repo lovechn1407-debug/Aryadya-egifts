@@ -195,13 +195,41 @@ export async function deleteSectionDB(id: string): Promise<void> {
   await remove(ref(database, `sections/${id}`));
 }
 
+// ── USER PROFILES ────────────────────────────────────────────────────────────
+
+export interface UserProfile {
+  uid: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  photoURL?: string;
+  createdAt: number;
+}
+
+export async function getUserProfileDB(uid: string): Promise<UserProfile | null> {
+  const snap = await get(ref(database, `users/${uid}`));
+  return snap.exists() ? snap.val() : null;
+}
+
+export async function saveUserProfileDB(uid: string, data: Partial<UserProfile>): Promise<void> {
+  const current = await getUserProfileDB(uid);
+  const updated: UserProfile = {
+    uid,
+    createdAt: Date.now(),
+    ...current,
+    ...data,
+  };
+  await set(ref(database, `users/${uid}`), updated);
+}
+
 // ── ORDERS ────────────────────────────────────────────────────────────────────
 export async function createPendingOrderDB(data: {
   productId: string;
   productName: string;
-  buyerName: string;
-  buyerEmail: string;
-  buyerPhone: string;
+  buyerName?: string;
+  buyerEmail?: string;
+  buyerPhone?: string;
+  userId?: string;
   amount: number;
   couponCode?: string;
   discountAmount?: number;
@@ -211,9 +239,10 @@ export async function createPendingOrderDB(data: {
     id,
     productId: data.productId,
     productName: data.productName,
-    buyerName: data.buyerName,
-    buyerEmail: data.buyerEmail,
-    buyerPhone: data.buyerPhone,
+    buyerName: data.buyerName || "Unknown",
+    buyerEmail: data.buyerEmail || "Unknown",
+    buyerPhone: data.buyerPhone || "Unknown",
+    userId: data.userId || undefined,
     amount: data.amount,
     status: "pending",
     customizations: {},
@@ -226,6 +255,15 @@ export async function createPendingOrderDB(data: {
   };
   await set(ref(database, `orders/${id}`), order);
   return order;
+}
+
+export async function getOrdersByUserIdDB(userId: string): Promise<Order[]> {
+  const snap = await get(query(ref(database, "orders"), orderByChild("userId"), equalTo(userId)));
+  if (!snap.exists()) return [];
+  
+  const orders: Order[] = [];
+  snap.forEach(child => { orders.push(child.val()); });
+  return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export async function createOrderDB(data: {

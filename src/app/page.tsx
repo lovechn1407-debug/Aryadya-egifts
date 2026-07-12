@@ -10,6 +10,8 @@ import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB,
 import type { FAQItem, CustomerReview } from "@/lib/db";
 import HomepagePopups from "@/components/HomepagePopups";
 import AdsterraNativeAd from "@/components/AdsterraNativeAd";
+import { useAuth } from "@/contexts/AuthContext";
+import LoginModal from "@/components/LoginModal";
 
 /* ── Modern UI SVG Icons ── */
 function GiftSVG({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
@@ -194,7 +196,9 @@ function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> 
 }
 
 /* ── Navbar ── */
-function Navbar({ onMenuClick, settings }: { onMenuClick: () => void; settings: Settings | null }) {
+function Navbar({ onMenuClick, settings, onLoginClick }: { onMenuClick: () => void; settings: Settings | null; onLoginClick: () => void; }) {
+  const { user, userProfile } = useAuth();
+  
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 100,
@@ -229,6 +233,26 @@ function Navbar({ onMenuClick, settings }: { onMenuClick: () => void; settings: 
       >
         <span className="nav-my-orders-text">My Orders</span>
       </Link>
+
+      {/* Auth / Account Button */}
+      {user ? (
+        <Link href="/account" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+          {userProfile?.photoURL || user.photoURL ? (
+            <img src={userProfile?.photoURL || user.photoURL || ""} alt="User" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid #7C3AED" }} />
+          ) : (
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#7C3AED", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
+              {(userProfile?.name || user.displayName || "U")[0].toUpperCase()}
+            </div>
+          )}
+        </Link>
+      ) : (
+        <button onClick={onLoginClick} style={{
+          background: "#1E293B", color: "#fff", border: "none", borderRadius: 10, padding: "0 16px", height: 40,
+          fontSize: 13, fontWeight: 800, cursor: "pointer", transition: "0.2s", whiteSpace: "nowrap"
+        }}>
+          Login
+        </button>
+      )}
 
       {/* Hamburger Menu Icon */}
       <button 
@@ -905,235 +929,9 @@ const ProductCard = memo(function ProductCard({ product, accent, onCardClick }: 
 });
 
 
-/* ── Login Modal ── */
-function LoginModal({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (url: string) => void }) {
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [orders, setOrders] = useState<Order[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleLogin = async () => {
-    if (!phone.trim() || !email.trim()) { setError("Please enter both phone and email."); return; }
-    setLoading(true); setError("");
-    try {
-      const res = await fetch("/api/auth/buyer-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, email })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setOrders(data.orders);
-      } else {
-        setError(data.message || "No orders found matching these details.");
-      }
-    } catch { setError("Something went wrong. Please try again."); }
-    setLoading(false);
-  };
-
-  const inputStyle: React.CSSProperties = { 
-    width: "100%", 
-    padding: "13px 16px", 
-    borderRadius: 12, 
-    border: "1.5px solid #E2E8F0", 
-    fontSize: 14, 
-    color: "#1F2937", 
-    background: "#F8FAFC", 
-    outline: "none", 
-    boxSizing: "border-box",
-    transition: "all 0.2s"
-  };
-
-  const drafts = orders?.filter(o => o.status === "paid" || o.status === "editing") ?? [];
-  const finalized = orders?.filter(o => o.status === "finalized") ?? [];
-
-  return (
-    <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.4)", backdropFilter: "blur(8px)", zIndex: 1000 }} />
-      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 1001, width: "min(460px,92vw)", background: "#fff", borderRadius: 24, padding: "32px 28px", boxShadow: "0 32px 80px rgba(15,23,42,0.18)", maxHeight: "85vh", overflowY: "auto", fontFamily: "'Inter', sans-serif" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1F2937", fontFamily: "'Nunito',sans-serif", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-            </svg>
-            Track My Orders
-          </h2>
-          <button onClick={onClose} style={{ background: "#F1F5F9", border: "none", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 18, color: "#64748B" }}>×</button>
-        </div>
-
-        {orders === null ? (
-          <>
-            <p style={{ fontSize: 13, color: "#64748B", marginBottom: 24, marginTop: 0, lineHeight: 1.6 }}>Enter the phone number and email address you used when placing your purchase.</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 750, color: "#475569", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Phone Number</label>
-                <input 
-                  style={inputStyle} 
-                  placeholder="e.g. 9876543210" 
-                  value={phone} 
-                  onChange={e => setPhone(e.target.value)} 
-                  onFocus={e => { e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.background = "#FFF"; }}
-                  onBlur={e => { e.currentTarget.style.borderColor = "#E2E8F0"; e.currentTarget.style.background = "#F8FAFC"; }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 750, color: "#475569", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Email Address</label>
-                <input 
-                  style={inputStyle} 
-                  type="email" 
-                  placeholder="e.g. rahul@example.com" 
-                  value={email} 
-                  onChange={e => setEmail(e.target.value)} 
-                  onFocus={e => { e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.background = "#FFF"; }}
-                  onBlur={e => { e.currentTarget.style.borderColor = "#E2E8F0"; e.currentTarget.style.background = "#F8FAFC"; }}
-                />
-              </div>
-
-              {error && <p style={{ color: "#EF4444", fontSize: 12, fontWeight: 700, margin: "4px 0 0" }}>{error}</p>}
-              
-              <button 
-                onClick={handleLogin} 
-                disabled={loading} 
-                style={{ 
-                  padding: "14px", 
-                  borderRadius: 12, 
-                  border: "none", 
-                  background: "linear-gradient(135deg,#7C3AED,#EC4899)", 
-                  color: "#fff", 
-                  fontWeight: 900, 
-                  fontSize: 14, 
-                  cursor: "pointer", 
-                  opacity: loading ? 0.7 : 1,
-                  fontFamily: "'Nunito', sans-serif",
-                  boxShadow: "0 6px 20px rgba(124, 58, 237, 0.2)"
-                }}
-              >
-                {loading ? "Locating orders..." : "Locate Orders"}
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            {drafts.length > 0 && (
-              <div style={{ background: "#FFFBEB", borderRadius: 12, padding: "10px 14px", marginBottom: 16, border: "1px solid #FCD34D", display: "flex", gap: 8, alignItems: "center" }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="2.5">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                  <line x1="12" y1="9" x2="12" y2="13" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-                <p style={{ fontWeight: 800, color: "#B45309", fontSize: 12, margin: 0 }}>
-                  {drafts.length} order draft{drafts.length > 1 ? "s" : ""} awaiting personalization
-                </p>
-              </div>
-            )}
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {drafts.map(o => (
-                <div key={o.id} style={{ background: "#F8FAFC", borderRadius: 16, padding: 18, border: "1px solid #E2E8F0" }}>
-                  <p style={{ fontWeight: 850, color: "#1E293B", fontSize: 14, margin: 0, fontFamily: "'Nunito', sans-serif" }}>{o.productName}</p>
-                  <p style={{ fontSize: 11, color: "#64748B", marginTop: 4, margin: 0, fontWeight: 600 }}>{new Date(o.createdAt).toLocaleDateString("en-IN")}</p>
-                  <Link 
-                    href={`/edit/${o.id}`} 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onClose();
-                      onNavigate?.(`/edit/${o.id}`);
-                    }}
-                    style={{ 
-                      display: "inline-flex", 
-                      alignItems: "center",
-                      gap: 6,
-                      marginTop: 12, 
-                      background: "linear-gradient(135deg,#7C3AED,#EC4899)", 
-                      color: "#fff", 
-                      padding: "8px 16px", 
-                      borderRadius: 8, 
-                      textDecoration: "none", 
-                      fontSize: 12, 
-                      fontWeight: 800 
-                    }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 20h9" />
-                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                    </svg>
-                    Personalise Draft
-                  </Link>
-                </div>
-              ))}
-
-              {finalized.map(o => (
-                <div key={o.id} style={{ background: "#F0FDF4", borderRadius: 16, padding: 18, border: "1px solid #DCFCE7" }}>
-                  <p style={{ fontWeight: 850, color: "#1E293B", fontSize: 14, margin: 0, fontFamily: "'Nunito', sans-serif" }}>{o.productName}</p>
-                  <p style={{ fontSize: 11, color: "#15803D", marginTop: 4, margin: 0, fontWeight: 600 }}>For: {o.buyerName} · ₹{Math.floor(o.amount / 100)}</p>
-                  <Link 
-                    href={`/view/${o.id}`} 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onClose();
-                      onNavigate?.(`/view/${o.id}`);
-                    }}
-                    style={{ 
-                      display: "inline-flex", 
-                      alignItems: "center",
-                      gap: 6,
-                      marginTop: 12, 
-                      background: "#10B981", 
-                      color: "#fff", 
-                      padding: "8px 16px", 
-                      borderRadius: 8, 
-                      textDecoration: "none", 
-                      fontSize: 12, 
-                      fontWeight: 800 
-                    }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-                    </svg>
-                    View Surprise
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            {drafts.length === 0 && finalized.length === 0 && (
-              <div style={{ textAlign: "center", padding: "24px 0" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="12" x2="2" y2="12" />
-                  <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-                </svg>
-                <p style={{ fontSize: 13, fontWeight: 800, color: "#475569", marginTop: 12, margin: "12px 0 0 0" }}>No orders found matching details.</p>
-              </div>
-            )}
-
-            <button 
-              onClick={() => setOrders(null)} 
-              style={{ 
-                background: "none", 
-                border: "none", 
-                color: "#7C3AED", 
-                cursor: "pointer", 
-                fontSize: 12, 
-                fontWeight: 800,
-                display: "block",
-                margin: "20px auto 0 auto"
-              }}
-            >
-              ← Search with different details
-            </button>
-          </>
-        )}
-      </div>
-    </>
-  );
-}
 
 /* ── Product Quick-View Modal ── */
-function ProductModal({ product, accent, paymentMode, onClose, onNavigate }: { product: Product; accent: string; paymentMode?: string; onClose: () => void; onNavigate?: (url: string) => void }) {
+function ProductModal({ product, accent, paymentMode, user, onClose, onNavigate, onLoginClick }: { product: Product; accent: string; paymentMode?: string; user: any; onClose: () => void; onNavigate?: (url: string) => void; onLoginClick: () => void; }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
 
@@ -1204,8 +1002,13 @@ function ProductModal({ product, accent, paymentMode, onClose, onNavigate }: { p
               href={`/order/${product.id}`} 
               onClick={(e) => {
                 e.preventDefault();
-                onClose();
-                onNavigate?.(`/order/${product.id}`);
+                if (!user) {
+                  onClose();
+                  onLoginClick();
+                } else {
+                  onClose();
+                  onNavigate?.(`/order/${product.id}`);
+                }
               }}
               style={{ 
                 flex: 1,
@@ -3028,6 +2831,7 @@ function FAQShowcase({ faqs }: { faqs: FAQItem[] }) {
 /* ── Main Page ── */
 export default function HomePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isNavigating, setIsNavigating] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [sections, setSections] = useState<DisplaySection[]>([]);
@@ -3100,16 +2904,18 @@ export default function HomePage() {
       )}
 
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
-      <Navbar onMenuClick={() => setShowMenu(true)} settings={settings} />
+      <Navbar onMenuClick={() => setShowMenu(true)} settings={settings} onLoginClick={() => setShowLogin(true)} />
       <MenuDrawer isOpen={showMenu} onClose={() => setShowMenu(false)} sections={sections} settings={settings} />
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onNavigate={(url) => { setIsNavigating(true); router.push(url); }} />}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {selectedProduct && (
         <ProductModal 
           product={selectedProduct} 
           accent={selectedAccent} 
           paymentMode={settings?.paymentMode}
+          user={user}
           onClose={() => setSelectedProduct(null)} 
           onNavigate={(url) => { setIsNavigating(true); router.push(url); }} 
+          onLoginClick={() => { setSelectedProduct(null); setShowLogin(true); }}
         />
       )}
       <Hero />

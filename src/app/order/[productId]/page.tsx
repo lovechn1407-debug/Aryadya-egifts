@@ -55,16 +55,18 @@ function SpinnerSVG({ size = 22 }: { size?: number }) {
   );
 }
 
+import { useAuth } from "@/contexts/AuthContext";
+import LoginModal from "@/components/LoginModal";
+
 function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) {
   const { productId } = use(params);
   const initialProduct = getProduct(productId);
   const [product, setProduct] = useState(initialProduct);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, userProfile, loading: authLoading } = useAuth();
 
-  const [form, setForm] = useState({ name: "", email: "", phone: "" });
-  const [step, setStep] = useState<"details" | "payment" | "processing">("details");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [step, setStep] = useState<"payment" | "processing">("payment");
   const [paymentError, setPaymentError] = useState("");
   const [payLoading, setPayLoading] = useState(false);
   const [paymentMode, setPaymentMode] = useState<"pre-pay"|"post-pay">("pre-pay");
@@ -128,29 +130,32 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
     </div>
   );
 
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Full name is required";
-    if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = "Please provide a valid email address";
-    if (!form.phone.trim() || form.phone.replace(/\D/g, "").length < 10) e.phone = "Valid 10-digit phone number required";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+  // Enforce Login
+  if (authLoading) return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F6F5FB" }}>
+      <SpinnerSVG size={36} />
+    </div>
+  );
+  if (!user) return <LoginModal onClose={() => router.push("/")} />;
 
-  const handleDetailsSubmit = async () => { 
-    if (validate()) {
-      if (paymentMode === "post-pay") {
-        setIsPostPayProcessing(true);
-        setStep("processing");
-        try {
+  const buyerName = userProfile?.name || user.displayName || "Unknown";
+  const buyerEmail = userProfile?.email || user.email || "";
+  const buyerPhone = userProfile?.phone || user.phoneNumber || "";
+  const userId = user.uid;
+
+  const handlePostPaySubmit = async () => { 
+    setIsPostPayProcessing(true);
+    setStep("processing");
+    try {
           const res = await fetch("/api/order/create-pending", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               productId: product.id,
-              buyerName: form.name,
-              buyerEmail: form.email,
-              buyerPhone: form.phone
+              buyerName,
+              buyerEmail,
+              buyerPhone,
+              userId
             })
           });
           const data = await res.json();
@@ -159,18 +164,22 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
           } else {
             setPaymentError(data.message || "Could not create order. Please try again.");
             setIsPostPayProcessing(false);
-            setStep("details");
+            setStep("payment");
           }
         } catch(e) {
           setPaymentError("Network error. Please try again.");
           setIsPostPayProcessing(false);
-          setStep("details");
+          setStep("payment");
         }
-      } else {
-        setStep("payment"); 
-      }
-    }
   };
+
+  useEffect(() => {
+    // If it's a post-pay product, instantly submit and skip payment UI!
+    // We only trigger this if the product is fetched and we are logged in.
+    if (paymentMode === "post-pay" && product && user && step === "payment") {
+      handlePostPaySubmit();
+    }
+  }, [paymentMode, product, user, step]);
 
   const applyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -189,8 +198,8 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
       if (c.validFrom && now < new Date(c.validFrom)) { setCouponMsg({ type: "error", text: "Coupon is not valid yet." }); return; }
       if (c.validTo && now > new Date(c.validTo)) { setCouponMsg({ type: "error", text: "Coupon has expired." }); return; }
 
-      if (form.email && form.phone) {
-        const pastOrders = await getOrdersByBuyerDB(form.phone, form.email);
+      if (buyerEmail && buyerPhone) {
+        const pastOrders = await getOrdersByBuyerDB(buyerPhone, buyerEmail);
         const usedPast = pastOrders.filter(o => o.couponCode === c.id).length;
         if (usedPast >= c.perPersonLimit) {
           setCouponMsg({ type: "error", text: "You have reached the usage limit for this coupon." });
@@ -238,9 +247,10 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: product.id,
-          buyerName: form.name,
-          buyerEmail: form.email,
-          buyerPhone: form.phone,
+          buyerName,
+          buyerEmail,
+          buyerPhone,
+          userId,
           couponCode: appliedCoupon?.id,
         }),
       });
@@ -303,9 +313,10 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: product.id,
-          buyerName: form.name,
-          buyerEmail: form.email,
-          buyerPhone: form.phone
+          buyerName,
+          buyerEmail,
+          buyerPhone,
+          userId
         })
       });
 
@@ -397,55 +408,7 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
             </div>
           )}
 
-          {/* Step: Details */}
-          {step === "details" && (
-            <div style={{ background: "#fff", borderRadius: 24, padding: "28px 24px", boxShadow: "0 10px 30px rgba(124, 58, 237, 0.04)", border: "1px solid #F3E8FF" }}>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: "#1F2937", marginBottom: 6, fontFamily: "'Nunito', sans-serif", letterSpacing: -0.5 }}>
-                Your <span style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Details</span>
-              </h1>
-              <p style={{ color: "#64748B", fontSize: 13, marginBottom: 24, marginTop: 0 }}>We'll email the unique customization link directly to your inbox.</p>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                {[
-                  { key: "name", label: "Full Name", placeholder: "e.g. Priyanshu Chauhan", type: "text" },
-                  { key: "email", label: "Email Address", placeholder: "e.g. priyanshu@example.com", type: "email" },
-                  { key: "phone", label: "Phone Number", placeholder: "e.g. 9876543210", type: "tel" },
-                ].map(({ key, label, placeholder, type }) => (
-                  <div key={key}>
-                    <label style={{ fontSize: 13, fontWeight: 700, color: "#475569", display: "block", marginBottom: 6 }}>{label} *</label>
-                    <input
-                      type={type}
-                      placeholder={placeholder}
-                      value={form[key as keyof typeof form]}
-                      onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                      style={{
-                        width: "100%", padding: "13px 16px", borderRadius: 12, fontSize: 14,
-                        border: errors[key] ? "1.5px solid #EF4444" : "1.5px solid #E2E8F0",
-                        background: "#F8FAFC", color: "#1F2937", outline: "none",
-                        boxSizing: "border-box", fontFamily: "'Inter', sans-serif",
-                        transition: "all 0.2s"
-                      }}
-                      onFocus={e => { e.currentTarget.style.borderColor = "#7C3AED"; e.currentTarget.style.background = "#FFF"; }}
-                      onBlur={e => { e.currentTarget.style.borderColor = errors[key] ? "#EF4444" : "#E2E8F0"; e.currentTarget.style.background = "#F8FAFC"; }}
-                    />
-                    {errors[key] && <p style={{ color: "#EF4444", fontSize: 12, marginTop: 4, margin: 0 }}>{errors[key]}</p>}
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={handleDetailsSubmit}
-                style={{
-                  width: "100%", marginTop: 28, padding: "15px", borderRadius: 14, border: "none",
-                  background: "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff",
-                  fontWeight: 900, fontSize: 15, cursor: "pointer", fontFamily: "'Nunito', sans-serif",
-                  boxShadow: "0 8px 24px rgba(124, 58, 237, 0.25)",
-                }}
-              >
-                {paymentMode === "post-pay" ? "Start Customising ➜" : "Continue to Payment"}
-              </button>
-            </div>
-          )}
 
 
 
@@ -511,12 +474,10 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
 
               {/* Summary */}
               <div style={{ background: "#F8FAFC", borderRadius: 16, padding: "18px 20px", marginBottom: 20, border: "1px solid #F1F5F9" }}>
-                {[["Billing Name", form.name], ["Receipt Email", form.email], ["SMS Alert Phone", form.phone]].map(([label, val]) => (
-                  <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, fontSize: 13 }}>
-                    <span style={{ color: "#64748B" }}>{label}</span>
-                    <span style={{ fontWeight: 700, color: "#1E293B" }}>{val}</span>
-                  </div>
-                ))}
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, fontSize: 13 }}>
+                  <span style={{ color: "#64748B" }}>Account</span>
+                  <span style={{ fontWeight: 700, color: "#1E293B" }}>{buyerEmail || buyerPhone || buyerName}</span>
+                </div>
                 <div style={{ borderTop: "1px solid #E2E8F0", paddingTop: 14, marginTop: 4 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                     <span style={{ fontSize: 13, color: "#64748B" }}>Subtotal</span>
@@ -549,7 +510,6 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
               )}
 
               <div style={{ display: "flex", gap: 12 }}>
-                <button onClick={() => setStep("details")} style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1.5px solid #E2E8F0", background: "#fff", color: "#475569", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>← Back</button>
                 <button
                   onClick={checkoutMethod === "ads" ? () => setShowAdModal(true) : handlePayment}
                   disabled={payLoading}

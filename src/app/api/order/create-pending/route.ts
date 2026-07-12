@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Validation error: " + formatZodError(validationResult.error) }, { status: 400 });
     }
     
-    const { productId, buyerName, buyerEmail, buyerPhone } = validationResult.data;
+    const { productId, buyerName, buyerEmail, buyerPhone, userId } = validationResult.data;
 
     // Fetch product
     const product = await getProductDB(productId);
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
       buyerName,
       buyerEmail,
       buyerPhone,
+      userId,
       amount: product.price, // Initial full price
     });
 
