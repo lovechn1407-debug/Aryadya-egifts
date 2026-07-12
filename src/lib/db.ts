@@ -269,6 +269,12 @@ export async function getOrdersByUserIdDB(userId: string): Promise<Order[]> {
   return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
+export async function updateOrderLastOpenedDB(orderId: string): Promise<void> {
+  await update(ref(database, `orders/${orderId}`), {
+    lastOpenedAt: new Date().toISOString()
+  });
+}
+
 export async function createOrderDB(data: {
   productId: string;
   productName: string;

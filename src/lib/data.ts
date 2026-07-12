@@ -55,6 +55,7 @@ export interface Order {
   couponCode?: string; // Optional coupon code used
   discountAmount?: number; // Optional discount applied in paise
   createdAt: string;
+  lastOpenedAt?: string;
 }
 
 export interface Coupon {

@@ -1,7 +1,7 @@
 "use client";
 import { use, useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { getOrderDB, getProductDB } from "@/lib/db";
+import { getOrderDB, getProductDB, updateOrderLastOpenedDB } from "@/lib/db";
 import type { Order, Product } from "@/lib/data";
 import QRSharePopup from "@/components/QRSharePopup";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
@@ -121,6 +121,11 @@ function ViewPageInner({ params }: { params: Promise<{ orderId: string }> }) {
       const p = await getProductDB(o.productId);
       if (p) setProduct(p);
       setLoading(false);
+      
+      // Update lastOpenedAt asynchronously in the background
+      updateOrderLastOpenedDB(orderId).catch(err => {
+        console.error("Failed to update last opened:", err);
+      });
     })();
   }, [orderId]);
 

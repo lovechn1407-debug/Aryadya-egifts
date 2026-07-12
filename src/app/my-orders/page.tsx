@@ -178,12 +178,21 @@ export default function MyOrdersPage() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 800, color: "#64748B", background: "#F1F5F9", padding: "4px 8px", borderRadius: 6, textTransform: "uppercase" }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: order.status === "finalized" ? "#10B981" : "#64748B", background: order.status === "finalized" ? "#D1FAE5" : "#F1F5F9", padding: "4px 8px", borderRadius: 6, textTransform: "uppercase" }}>
                             {order.status}
                           </span>
-                          <span style={{ fontSize: 12, color: "#94A3B8" }}>{new Date(order.createdAt).toLocaleDateString()}</span>
                         </div>
-                        <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1E293B", margin: 0 }}>Order #{order.id.slice(-6).toUpperCase()}</h3>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, color: "#1E293B", margin: "0 0 4px 0" }}>{order.productName || "Interactive E-Gift"}</h3>
+                        <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 8px 0", fontFamily: "monospace", wordBreak: "break-all" }}>ID: {order.id}</p>
+                        
+                        <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "#64748B" }}>
+                          <div>
+                            <strong>Created:</strong> {new Date(order.createdAt).toLocaleString("en-IN")}
+                          </div>
+                          <div>
+                            <strong>Last Opened:</strong> {order.lastOpenedAt ? new Date(order.lastOpenedAt).toLocaleString("en-IN") : "Never opened"}
+                          </div>
+                        </div>
                       </div>
                       <div style={{ textAlign: "right" }}>
                         <div style={{ fontSize: 18, fontWeight: 800, color: "#1E293B" }}>₹{order.amount}</div>
@@ -193,24 +202,39 @@ export default function MyOrdersPage() {
                     <div style={{ height: 1, background: "#F1F5F9" }} />
                     
                     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                      {order.status === "paid" || order.status === "editing" || order.status === "finalized" ? (
+                      {order.status === "finalized" ? (
+                        <Link href={`/view/${order.id}`} style={{
+                          flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+                          background: "#10B981", color: "#fff", padding: "10px 16px", borderRadius: 10,
+                          textDecoration: "none", fontSize: 13, fontWeight: 600, transition: "all 0.2s"
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = "#059669"}
+                        onMouseLeave={e => e.currentTarget.style.background = "#10B981"}
+                        >
+                          <ClipboardSVG size={14} /> View Finalized Surprise
+                        </Link>
+                      ) : order.status === "paid" || order.status === "editing" ? (
                         <>
                           <Link href={`/edit/${order.id}`} style={{
                             flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
                             background: "#7C3AED", color: "#fff", padding: "10px 16px", borderRadius: 10,
-                            textDecoration: "none", fontSize: 13, fontWeight: 600
-                          }}>
-                            <PenSVG size={14} /> Customize Gift
+                            textDecoration: "none", fontSize: 13, fontWeight: 600, transition: "all 0.2s"
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = "#6D28D9"}
+                          onMouseLeave={e => e.currentTarget.style.background = "#7C3AED"}
+                          >
+                            <PenSVG size={14} /> Customize Gift (Draft)
                           </Link>
-                          {order.customizations && (
-                            <Link href={`/preview/${order.productId}?orderId=${order.id}`} style={{
-                              flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
-                              background: "#F8FAFC", color: "#475569", padding: "10px 16px", borderRadius: 10, border: "1px solid #E2E8F0",
-                              textDecoration: "none", fontSize: 13, fontWeight: 600
-                            }}>
-                              <ClipboardSVG size={14} /> View Final
-                            </Link>
-                          )}
+                          <Link href={`/preview/${order.productId}?orderId=${order.id}`} style={{
+                            flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+                            background: "#F8FAFC", color: "#475569", padding: "10px 16px", borderRadius: 10, border: "1px solid #E2E8F0",
+                            textDecoration: "none", fontSize: 13, fontWeight: 600, transition: "all 0.2s"
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = "#F1F5F9"}
+                          onMouseLeave={e => e.currentTarget.style.background = "#F8FAFC"}
+                          >
+                            <ClipboardSVG size={14} /> Preview Draft
+                          </Link>
                         </>
                       ) : (
                         <div style={{ fontSize: 13, color: "#B45309", display: "flex", alignItems: "center", gap: 6 }}>
