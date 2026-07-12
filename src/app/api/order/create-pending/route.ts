@@ -5,8 +5,12 @@
 // =============================================
 import { NextRequest, NextResponse } from "next/server";
 import { getProductDB, createPendingOrderDB } from "@/lib/db";
+import { checkRateLimit } from "@/lib/rate-limiter";
 
 export async function POST(req: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(req, "public");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await req.json();
     const { productId, buyerName, buyerEmail, buyerPhone } = body;

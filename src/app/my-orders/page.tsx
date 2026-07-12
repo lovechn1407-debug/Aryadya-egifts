@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { getOrdersByBuyerDB } from "@/lib/db";
+// Imported via API route
 import type { Order } from "@/lib/data";
 
 /* ── Vector SVG Components ── */
@@ -88,9 +88,21 @@ export default function MyOrdersPage() {
   const handleLookup = async () => {
     if (!phone.trim() || !email.trim()) { setError("Please fill both phone and email address"); return; }
     setLoading(true); setError("");
-    const found = await getOrdersByBuyerDB(phone, email);
-    if (found.length === 0) setError("No orders found matching these details");
-    else setOrders(found);
+    try {
+      const res = await fetch("/api/auth/buyer-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, email })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setOrders(data.orders);
+      } else {
+        setError(data.message || "No orders found matching these details");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    }
     setLoading(false);
   };
 

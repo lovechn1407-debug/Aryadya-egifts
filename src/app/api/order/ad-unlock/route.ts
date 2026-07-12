@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrderDB, updateOrderStatusDB, getSettingsDB } from "@/lib/db";
 import { sendOrderConfirmationEmailServer } from "@/lib/email-server";
+import { checkRateLimit } from "@/lib/rate-limiter";
 
 export async function POST(req: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(req, "public");
+  if (rateLimitResponse) return rateLimitResponse;
   try {
     const { orderId, finalize } = await req.json();
     if (!orderId) return NextResponse.json({ success: false, message: "Missing order ID" }, { status: 400 });

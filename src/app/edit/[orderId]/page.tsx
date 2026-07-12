@@ -1,7 +1,47 @@
 "use client";
 import React, { useState, useEffect, useRef, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getProductDB, getOrderDB, updateOrderCustomizationsDB, finalizeOrderDB, updateProductOverrideDB, getCouponDB } from "@/lib/db";
+import { getProductDB, getOrderDB, getCouponDB } from "@/lib/db";
+
+// API wrapper to perform customizations update server-side with rate limiting
+const updateOrderCustomizationsDB = async (orderId: string, customizations: Record<string, string>) => {
+  const res = await fetch("/api/order/update-customizations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId, customizations })
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.message || "Failed to update customizations due to rate limits.");
+  }
+};
+
+// API wrapper to perform order finalization server-side with rate limiting
+const finalizeOrderDB = async (orderId: string) => {
+  const res = await fetch("/api/order/finalize", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId })
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.message || "Failed to finalize order due to rate limits.");
+  }
+};
+
+// API wrapper to perform product preview overrides server-side with rate limiting
+const updateProductOverrideDB = async (targetId: string, overrides: { previewData: Record<string, string> }) => {
+  const res = await fetch("/api/admin/update-preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ targetId, customizations: overrides.previewData })
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.message || "Failed to update preview override due to rate limits.");
+  }
+};
+
 import type { Order, Product, Coupon } from "@/lib/data";
 import BirthdayMagicBox from "@/components/templates/BirthdayMagicBox";
 import SweetApologyBox from "@/components/templates/SweetApologyBox";

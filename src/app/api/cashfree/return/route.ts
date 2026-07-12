@@ -4,6 +4,7 @@
 // Verifies payment status server-side before sending user to editor.
 // =============================================
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limiter";
 import { getOrderDB, updateOrderStatusDB, saveCouponDB, getCouponDB, getSettingsDB } from "@/lib/db";
 import { sendOrderConfirmationEmailServer } from "@/lib/email-server";
 
@@ -15,6 +16,9 @@ const CASHFREE_BASE =
 const CF_VERSION = "2023-08-01";
 
 export async function GET(req: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(req, "public");
+  if (rateLimitResponse) return rateLimitResponse;
+
   const { searchParams, origin } = new URL(req.url);
   const orderId = searchParams.get("order_id");
   // Use the actual request origin so localhost:3000 works in dev

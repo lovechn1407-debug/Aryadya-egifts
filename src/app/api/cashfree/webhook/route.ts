@@ -4,6 +4,7 @@
 // Verifies signature → updates Firebase order status → sends confirmation email.
 // =============================================
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limiter";
 import { createHmac } from "crypto";
 import { getOrderDB, updateOrderStatusDB, saveCouponDB, getCouponDB, getSettingsDB } from "@/lib/db";
 import { sendOrderConfirmationEmailServer } from "@/lib/email-server";
@@ -29,6 +30,9 @@ function verifyWebhookSignature(
 }
 
 export async function POST(req: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(req, "public");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const rawBody = await req.text();
     const timestamp = req.headers.get("x-webhook-timestamp") || "";

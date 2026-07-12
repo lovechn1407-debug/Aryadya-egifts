@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limiter";
 
 const BOT_TOKEN = "8832668653:AAER53dyUKzFn6lXK3ex2dtEEgErTTNSjlw";
 
@@ -6,6 +7,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ fileId: string }> }
 ) {
+  const rateLimitResponse = await checkRateLimit(req, "public");
+  if (rateLimitResponse) return rateLimitResponse;
   const { fileId } = await params;
   
   if (!fileId) {

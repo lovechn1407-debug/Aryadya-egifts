@@ -917,9 +917,17 @@ function LoginModal({ onClose, onNavigate }: { onClose: () => void; onNavigate?:
     if (!phone.trim() || !email.trim()) { setError("Please enter both phone and email."); return; }
     setLoading(true); setError("");
     try {
-      const found = await getOrdersByBuyerDB(phone, email);
-      setOrders(found);
-      if (found.length === 0) setError("No orders found matching these details.");
+      const res = await fetch("/api/auth/buyer-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, email })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setOrders(data.orders);
+      } else {
+        setError(data.message || "No orders found matching these details.");
+      }
     } catch { setError("Something went wrong. Please try again."); }
     setLoading(false);
   };

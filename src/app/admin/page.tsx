@@ -15,11 +15,23 @@ export default function AdminLoginPage() {
     else setChecking(false);
   }, [router]);
 
-  const handleLogin = () => {
-    if (adminLogin(password)) {
-      router.push("/admin/dashboard");
-    } else {
-      setError("Incorrect password. Try again.");
+  const handleLogin = async () => {
+    setError("");
+    try {
+      const res = await fetch("/api/auth/admin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        localStorage.setItem("egift_admin_logged_in", "1");
+        router.push("/admin/dashboard");
+      } else {
+        setError(data.message || "Incorrect password. Try again.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
     }
   };
 

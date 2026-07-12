@@ -5,6 +5,7 @@
 // =============================================
 import { NextRequest, NextResponse } from "next/server";
 import { getProductDB, getOrderDB, getCouponDB, getOrdersByBuyerDB, saveCouponDB, updateOrderCouponDB } from "@/lib/db";
+import { checkRateLimit } from "@/lib/rate-limiter";
 
 const CASHFREE_BASE =
   process.env.CASHFREE_MODE === "production"
@@ -41,6 +42,9 @@ async function fetchCashfree(
 }
 
 export async function POST(req: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(req, "public");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await req.json();
     const { orderId, couponCode } = body;
