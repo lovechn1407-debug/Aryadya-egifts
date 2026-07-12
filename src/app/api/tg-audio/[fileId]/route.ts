@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limiter";
+import { FileIdSchema, formatZodError } from "@/lib/schemas";
 
 const BOT_TOKEN = "8832668653:AAER53dyUKzFn6lXK3ex2dtEEgErTTNSjlw";
 
@@ -9,11 +10,15 @@ export async function GET(
 ) {
   const rateLimitResponse = await checkRateLimit(req, "public");
   if (rateLimitResponse) return rateLimitResponse;
-  const { fileId } = await params;
   
-  if (!fileId) {
-    return new NextResponse("Missing fileId", { status: 400 });
+  const rawParams = await params;
+  const validationResult = FileIdSchema.safeParse(rawParams);
+  
+  if (!validationResult.success) {
+    return new NextResponse("Validation error: " + formatZodError(validationResult.error), { status: 400 });
   }
+  
+  const { fileId } = validationResult.data;
 
   try {
     // 1. Get the file path from Telegram

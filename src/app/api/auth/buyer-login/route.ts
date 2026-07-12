@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, recordAuthResult } from "@/lib/rate-limiter";
+import { BuyerLoginSchema, formatZodError } from "@/lib/schemas";
 import { getOrdersByBuyerDB } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
-  try {
-    const { phone, email } = await req.json();
+  const rateLimitResponse = await checkRateLimit(req, "auth");
+  if (rateLimitResponse) return rateLimitResponse;
 
-    if (!phone || !email) {
-      return NextResponse.json(
-        { success: false, message: "Phone and email are required." },
-        { status: 400 }
-      );
+  try {
+    const body = await req.json();
+    const validationResult = BuyerLoginSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json({ message: "Validation error: " + formatZodError(validationResult.error) }, { status: 400 });
     }
+    
+    const { phone, email } = validationResult.data;
 
     const sanitizedPhone = phone.trim().replace(/\D/g, "").slice(-10);
     const sanitizedEmail = email.toLowerCase().trim();
@@ -37,11 +41,7 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("[buyer-login] Error:", message);
-    return NextResponse.json(
-      { success: false, message: "Internal server error." },
-      { status: 500 }
-    );
+    console.error("[buyer-login] Error:", err);
+    return NextResponse.json({ success: false, message: "Internal server error." }, { status: 500 });
   }
 }

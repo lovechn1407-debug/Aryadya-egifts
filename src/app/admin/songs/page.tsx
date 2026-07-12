@@ -199,7 +199,8 @@ export default function AdminSongsPage() {
       resetForm();
       reload();
     } catch (err: any) {
-      alert("Error: " + err.message);
+      console.error(err);
+      alert("An unexpected error occurred while saving the song.");
     } finally {
       setSaving(false);
     }
@@ -277,7 +278,8 @@ export default function AdminSongsPage() {
         await saveSongDB(song);
         progress.push(`✅ ${e.name}`);
       } catch (err: any) {
-        progress.push(`❌ ${e.name}: ${err.message}`);
+        console.error(err);
+        progress.push(`❌ ${e.name}: Failed to save`);
       }
       setMassProgress([...progress]);
     }

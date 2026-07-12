@@ -99,7 +99,8 @@ export default function AdminVideoLibraryPage() {
       resetForm();
       reload();
     } catch (err: any) {
-      alert("Error: " + err.message);
+      console.error(err);
+      alert("An unexpected error occurred while saving the video.");
     } finally {
       setSaving(false);
     }
@@ -176,7 +177,8 @@ export default function AdminVideoLibraryPage() {
         await saveLibraryVideoDB(video);
         progress.push(`✅ ${e.name}`);
       } catch (err: any) {
-        progress.push(`❌ ${e.name}: ${err.message}`);
+        console.error(err);
+        progress.push(`❌ ${e.name}: Failed to save`);
       }
       setMassProgress([...progress]);
     }

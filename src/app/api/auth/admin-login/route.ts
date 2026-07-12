@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, recordAuthResult } from "@/lib/rate-limiter";
+import { AdminLoginSchema, formatZodError } from "@/lib/schemas";
 import { ADMIN_PASSWORD } from "@/lib/data";
 
 export async function POST(req: NextRequest) {
@@ -10,7 +11,14 @@ export async function POST(req: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const { password } = await req.json();
+    const body = await req.json();
+    const validationResult = AdminLoginSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json({ message: "Validation error: " + formatZodError(validationResult.error) }, { status: 400 });
+    }
+    
+    const { password } = validationResult.data;
 
     if (!password) {
       return NextResponse.json(
@@ -33,11 +41,7 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("[admin-login] Error:", message);
-    return NextResponse.json(
-      { success: false, message: "Internal server error." },
-      { status: 500 }
-    );
+    console.error("[admin-login] Error:", err);
+    return NextResponse.json({ success: false, message: "Internal server error." }, { status: 500 });
   }
 }

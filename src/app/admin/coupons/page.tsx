@@ -61,7 +61,8 @@ export default function AdminCouponsPage() {
       resetForm();
       reload();
     } catch (err: any) {
-      alert("Error: " + err.message);
+      console.error(err);
+      alert("An unexpected error occurred while saving the coupon.");
     } finally {
       setSaving(false);
     }

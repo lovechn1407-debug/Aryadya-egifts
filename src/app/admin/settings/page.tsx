@@ -55,6 +55,10 @@ export default function SettingsPage() {
     }));
   };
 
+  const handleGlobalChange = (field: keyof Settings, value: any) => {
+    setSettings(s => ({ ...s, [field]: value }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     await saveSettingsDB(settings);
@@ -200,25 +204,30 @@ export default function SettingsPage() {
         {/* Ad Mode */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Unlock via Ads Format</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Global Ad Formatting</h2>
             <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>
-              <strong>Direct Link:</strong> User clicks a button to open an ad in a new tab.<br/>
-              <strong>Banner Ad:</strong> Auto-running timer with a banner displayed on screen.
+              Enable or disable specific formats of Adsterra ads across the platform.
             </p>
           </div>
-          <div style={{ display: "flex", gap: 12, background: "#F1F5F9", padding: 4, borderRadius: 8 }}>
-            <button 
-              onClick={() => setSettings(s => ({ ...s, unlockAdType: "link" }))} 
-              style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.unlockAdType !== "banner" ? "#fff" : "transparent", color: settings.unlockAdType !== "banner" ? "#1E293B" : "#64748B", boxShadow: settings.unlockAdType !== "banner" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
-            >
-              Direct Link
-            </button>
-            <button 
-              onClick={() => setSettings(s => ({ ...s, unlockAdType: "banner" }))} 
-              style={{ padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, transition: "0.2s", background: settings.unlockAdType === "banner" ? "#fff" : "transparent", color: settings.unlockAdType === "banner" ? "#1E293B" : "#64748B", boxShadow: settings.unlockAdType === "banner" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
-            >
-              Banner Ad
-            </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "#475569" }}>Direct Link Ads</span>
+              <div style={{ position: "relative", display: "inline-block", width: 44, height: 24 }}>
+                <input type="checkbox" checked={settings.enableLinkAds ?? true} onChange={e => handleGlobalChange("enableLinkAds", e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
+                <span style={{ position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0, background: (settings.enableLinkAds ?? true) ? "#10B981" : "#CBD5E1", transition: "0.4s", borderRadius: 34 }}>
+                  <span style={{ position: "absolute", content: "''", height: 16, width: 16, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: (settings.enableLinkAds ?? true) ? "translateX(20px)" : "none" }}></span>
+                </span>
+              </div>
+            </label>
+            <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "#475569" }}>Banner Ads</span>
+              <div style={{ position: "relative", display: "inline-block", width: 44, height: 24 }}>
+                <input type="checkbox" checked={settings.enableBannerAds ?? false} onChange={e => handleGlobalChange("enableBannerAds", e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
+                <span style={{ position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0, background: (settings.enableBannerAds ?? false) ? "#10B981" : "#CBD5E1", transition: "0.4s", borderRadius: 34 }}>
+                  <span style={{ position: "absolute", content: "''", height: 16, width: 16, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: (settings.enableBannerAds ?? false) ? "translateX(20px)" : "none" }}></span>
+                </span>
+              </div>
+            </label>
           </div>
         </div>
 
@@ -503,6 +512,64 @@ export default function SettingsPage() {
                   <span style={{ position: "absolute", content: "''", height: 20, width: 20, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: (settings.emailServiceFinalize ?? true) ? "translateX(22px)" : "none" }}></span>
                 </span>
               </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: "#fff", padding: 32, borderRadius: 16, border: "1px solid #E2E8F0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginTop: 24 }}>
+        <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Rate Limiting Configuration</h2>
+          <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>Manage thresholds for DDOS and brute-force protection.</p>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          {/* Auth Rate Limits */}
+          <div style={{ background: "#F8FAFC", padding: 20, borderRadius: 12, border: "1px solid #E2E8F0" }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 16 }}>Authentication (Login/Admin)</h3>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 4, display: "block" }}>Max Failed Attempts (Per IP)</label>
+              <input type="number" value={settings.rateLimitAuthMaxIP ?? 5} onChange={e => handleGlobalChange("rateLimitAuthMaxIP", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", outline: "none" }} />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 4, display: "block" }}>Max Failed Attempts (Per Account)</label>
+              <input type="number" value={settings.rateLimitAuthMaxAccount ?? 5} onChange={e => handleGlobalChange("rateLimitAuthMaxAccount", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", outline: "none" }} />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 4, display: "block" }}>Window / Expiry (ms)</label>
+              <input type="number" value={settings.rateLimitAuthWindowMs ?? 900000} onChange={e => handleGlobalChange("rateLimitAuthWindowMs", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", outline: "none" }} />
+              <span style={{ fontSize: 11, color: "#94A3B8" }}>Default: 900000 ms (15 mins)</span>
+            </div>
+          </div>
+
+          {/* Public & Authenticated limits */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            <div style={{ background: "#F8FAFC", padding: 20, borderRadius: 12, border: "1px solid #E2E8F0" }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 16 }}>Public Actions (e.g., Save Order)</h3>
+              <div style={{ display: "flex", gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 4, display: "block" }}>Max Requests</label>
+                  <input type="number" value={settings.rateLimitPublicMax ?? 30} onChange={e => handleGlobalChange("rateLimitPublicMax", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", outline: "none" }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 4, display: "block" }}>Window (ms)</label>
+                  <input type="number" value={settings.rateLimitPublicWindowMs ?? 60000} onChange={e => handleGlobalChange("rateLimitPublicWindowMs", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", outline: "none" }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: "#F8FAFC", padding: 20, borderRadius: 12, border: "1px solid #E2E8F0" }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0F172A", marginBottom: 16 }}>Authenticated Actions (e.g., Save Customizations)</h3>
+              <div style={{ display: "flex", gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 4, display: "block" }}>Max Requests</label>
+                  <input type="number" value={settings.rateLimitAuthUserMax ?? 100} onChange={e => handleGlobalChange("rateLimitAuthUserMax", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", outline: "none" }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 4, display: "block" }}>Window (ms)</label>
+                  <input type="number" value={settings.rateLimitAuthUserWindowMs ?? 60000} onChange={e => handleGlobalChange("rateLimitAuthUserWindowMs", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #CBD5E1", outline: "none" }} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

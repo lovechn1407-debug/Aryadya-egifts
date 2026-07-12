@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ref, get, set, runTransaction } from "firebase/database";
 import { database } from "./firebase";
-import { RATE_LIMIT_CONFIG } from "./rate-limit-config";
+import { getSettingsDB } from "./db";
+import { RATE_LIMIT_CONFIG as DEFAULT_RATE_LIMIT_CONFIG } from "./rate-limit-config";
 import crypto from "crypto";
 
 // Helper to hash IPs and account identifiers for secure and valid Firebase keys
@@ -40,9 +41,29 @@ export async function checkRateLimit(
   const ipHash = hashKey(ip);
   const now = Date.now();
 
+  // Fetch dynamic settings from database
+  const settings = await getSettingsDB();
+  const configAuth = {
+    maxAttemptsPerIp: settings.rateLimitAuthMaxIP ?? DEFAULT_RATE_LIMIT_CONFIG.auth.maxAttemptsPerIp,
+    maxAttemptsPerAccount: settings.rateLimitAuthMaxAccount ?? DEFAULT_RATE_LIMIT_CONFIG.auth.maxAttemptsPerAccount,
+    windowMs: settings.rateLimitAuthWindowMs ?? DEFAULT_RATE_LIMIT_CONFIG.auth.windowMs,
+    baseBackoffMs: DEFAULT_RATE_LIMIT_CONFIG.auth.baseBackoffMs,
+    maxBackoffMs: DEFAULT_RATE_LIMIT_CONFIG.auth.maxBackoffMs
+  };
+
+  const configPublic = {
+    maxRequests: settings.rateLimitPublicMax ?? DEFAULT_RATE_LIMIT_CONFIG.public.maxRequests,
+    windowMs: settings.rateLimitPublicWindowMs ?? DEFAULT_RATE_LIMIT_CONFIG.public.windowMs
+  };
+
+  const configAuthenticated = {
+    maxRequests: settings.rateLimitAuthUserMax ?? DEFAULT_RATE_LIMIT_CONFIG.authenticated.maxRequests,
+    windowMs: settings.rateLimitAuthUserWindowMs ?? DEFAULT_RATE_LIMIT_CONFIG.authenticated.windowMs
+  };
+
   // ── AUTH CATEGORY (IP + ACCOUNT WITH EXPONENTIAL BACKOFF) ──────────────────
   if (category === "auth") {
-    const config = RATE_LIMIT_CONFIG.auth;
+    const config = configAuth;
     const checks: { path: string; name: string }[] = [
       { path: `rate_limits/auth_backoff/ip_${ipHash}`, name: "IP" }
     ];
@@ -88,7 +109,7 @@ export async function checkRateLimit(
   }
 
   // ── PUBLIC & AUTHENTICATED CATEGORIES (SLIDING WINDOW RATE LIMIT) ──────────
-  const config = category === "authenticated" ? RATE_LIMIT_CONFIG.authenticated : RATE_LIMIT_CONFIG.public;
+  const config = category === "authenticated" ? configAuthenticated : configPublic;
   const slidingWindowPath = `rate_limits/sliding_window/${category}/${ipHash}`;
   const dbRef = ref(database, slidingWindowPath);
 

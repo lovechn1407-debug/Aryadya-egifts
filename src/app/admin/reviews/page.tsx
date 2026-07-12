@@ -28,7 +28,8 @@ export default function AdminReviewsPage() {
       const data = await getReviewsDB();
       setReviews(data);
     } catch (err: any) {
-      setError("Failed to load reviews: " + err.message);
+      console.error(err);
+      setError("Failed to load reviews. An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -60,7 +61,8 @@ export default function AdminReviewsPage() {
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
-      setError("Error parsing image: " + err.message);
+      console.error(err);
+      setError("Error parsing image. An unexpected error occurred.");
       setUploading(false);
     }
   };
@@ -92,7 +94,8 @@ export default function AdminReviewsPage() {
       resetForm();
       await loadReviews();
     } catch (err: any) {
-      setError("Failed to save review: " + err.message);
+      console.error(err);
+      setError("Failed to save review. An unexpected error occurred.");
     }
   };
 
@@ -115,7 +118,8 @@ export default function AdminReviewsPage() {
       setSuccess("Review deleted successfully!");
       await loadReviews();
     } catch (err: any) {
-      setError("Failed to delete review: " + err.message);
+      console.error(err);
+      setError("Failed to delete review. An unexpected error occurred.");
     }
   };
 

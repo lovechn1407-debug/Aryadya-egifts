@@ -62,7 +62,19 @@ export interface Settings {
   showFacebook?: boolean;
   // Checkout Settings
   paymentMode?: "pre-pay" | "post-pay";
+  enableLinkAds?: boolean;
+  enableBannerAds?: boolean;
+  // (Legacy field, kept for backwards compatibility if needed)
   unlockAdType?: "link" | "banner";
+  
+  // Rate Limiting Settings
+  rateLimitAuthMaxIP?: number;
+  rateLimitAuthMaxAccount?: number;
+  rateLimitAuthWindowMs?: number;
+  rateLimitPublicMax?: number;
+  rateLimitPublicWindowMs?: number;
+  rateLimitAuthUserMax?: number;
+  rateLimitAuthUserWindowMs?: number;
 }
 
 export async function getSettingsDB(): Promise<Settings> {
@@ -79,7 +91,8 @@ export async function getSettingsDB(): Promise<Settings> {
     if (!val.businessName) val.businessName = "Aradhya E-Giftings";
     if (!val.businessEntity) val.businessEntity = "AS-Studios";
     if (!val.paymentMode) val.paymentMode = "pre-pay";
-    if (!val.unlockAdType) val.unlockAdType = "link";
+    if (val.enableLinkAds === undefined) val.enableLinkAds = true;
+    if (val.enableBannerAds === undefined) val.enableBannerAds = false;
     return val;
   }
   return {
@@ -102,7 +115,15 @@ export async function getSettingsDB(): Promise<Settings> {
     businessName: "Aradhya E-Giftings",
     businessEntity: "AS-Studios",
     paymentMode: "pre-pay",
-    unlockAdType: "link"
+    enableLinkAds: true,
+    enableBannerAds: false,
+    rateLimitAuthMaxIP: 5,
+    rateLimitAuthMaxAccount: 5,
+    rateLimitAuthWindowMs: 900000,
+    rateLimitPublicMax: 30,
+    rateLimitPublicWindowMs: 60000,
+    rateLimitAuthUserMax: 100,
+    rateLimitAuthUserWindowMs: 60000
   };
 }
 

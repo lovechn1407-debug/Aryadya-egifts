@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limiter";
 import { getOrderDB, updateOrderStatusDB, saveCouponDB, getCouponDB, getSettingsDB } from "@/lib/db";
 import { sendOrderConfirmationEmailServer } from "@/lib/email-server";
+import { CashfreeReturnSchema, formatZodError } from "@/lib/schemas";
 
 const CASHFREE_BASE =
   process.env.CASHFREE_MODE === "production"
@@ -20,9 +21,19 @@ export async function GET(req: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse;
 
   const { searchParams, origin } = new URL(req.url);
-  const orderId = searchParams.get("order_id");
-  // Use the actual request origin so localhost:3000 works in dev
+  
+  const validationResult = CashfreeReturnSchema.safeParse({
+    order_id: searchParams.get("order_id"),
+    finalize: searchParams.get("finalize") || undefined
+  });
+
   const siteUrl = origin;
+
+  if (!validationResult.success) {
+    return NextResponse.redirect(`${siteUrl}/?payment=error&reason=invalid_params`);
+  }
+
+  const { order_id: orderId, finalize } = validationResult.data;
 
   if (!orderId) {
     return NextResponse.redirect(`${siteUrl}/?payment=error`);
@@ -34,7 +45,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${siteUrl}/?payment=error`);
   }
 
-  const shouldFinalize = searchParams.get("finalize") === "true";
+  const shouldFinalize = finalize === "true";
 
   // ── If already paid (webhook processed first), just redirect ──────────────
   if (order.status === "finalized") {

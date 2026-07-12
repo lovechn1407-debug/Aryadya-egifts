@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProductDB, createPendingOrderDB } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limiter";
+import { CreatePendingOrderSchema, formatZodError } from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
   const rateLimitResponse = await checkRateLimit(req, "public");
@@ -13,15 +14,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { productId, buyerName, buyerEmail, buyerPhone } = body;
-
-    // Validate required fields
-    if (!productId || !buyerName || !buyerEmail || !buyerPhone) {
-      return NextResponse.json(
-        { success: false, message: "Missing required fields." },
-        { status: 400 }
-      );
+    const validationResult = CreatePendingOrderSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json({ message: "Validation error: " + formatZodError(validationResult.error) }, { status: 400 });
     }
+    
+    const { productId, buyerName, buyerEmail, buyerPhone } = validationResult.data;
 
     // Fetch product
     const product = await getProductDB(productId);
@@ -47,11 +46,7 @@ export async function POST(req: NextRequest) {
       order_id: order.id,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("[create-pending] Error:", message);
-    return NextResponse.json(
-      { success: false, message: "Internal server error." },
-      { status: 500 }
-    );
+    console.error("[create-pending] Error:", err);
+    return NextResponse.json({ success: false, message: "Internal server error." }, { status: 500 });
   }
 }

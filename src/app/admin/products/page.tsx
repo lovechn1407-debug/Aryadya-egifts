@@ -230,7 +230,7 @@ export default function AdminProductsPage() {
 
     } catch (err: any) {
       console.error(err);
-      setRecordingStatusText(`Error: ${err.message || "Failed to record"}`);
+      setRecordingStatusText("An unexpected error occurred while recording. Please try again.");
       setIsRecording(false);
     }
   };

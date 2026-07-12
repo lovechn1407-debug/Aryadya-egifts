@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { getOrderDB, updateOrderStatusDB, getSettingsDB } from "@/lib/db";
 import { sendOrderConfirmationEmailServer } from "@/lib/email-server";
 import { checkRateLimit } from "@/lib/rate-limiter";
+import { AdUnlockSchema, formatZodError } from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
   const rateLimitResponse = await checkRateLimit(req, "public");
   if (rateLimitResponse) return rateLimitResponse;
   try {
-    const { orderId, finalize } = await req.json();
-    if (!orderId) return NextResponse.json({ success: false, message: "Missing order ID" }, { status: 400 });
+    const body = await req.json();
+    const validationResult = AdUnlockSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json({ message: "Validation error: " + formatZodError(validationResult.error) }, { status: 400 });
+    }
+    
+    const { orderId, finalize } = validationResult.data;
 
     const order = await getOrderDB(orderId);
     if (!order) return NextResponse.json({ success: false, message: "Order not found" }, { status: 404 });
@@ -52,8 +59,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[ad-unlock]", err);
-    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Internal server error." }, { status: 500 });
   }
 }

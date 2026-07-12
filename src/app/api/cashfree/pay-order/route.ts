@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProductDB, getOrderDB, getCouponDB, getOrdersByBuyerDB, saveCouponDB, updateOrderCouponDB } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limiter";
+import { PayCashfreeOrderSchema, formatZodError } from "@/lib/schemas";
 
 const CASHFREE_BASE =
   process.env.CASHFREE_MODE === "production"
@@ -47,14 +48,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { orderId, couponCode } = body;
-
-    if (!orderId) {
-      return NextResponse.json(
-        { success: false, message: "Missing orderId." },
-        { status: 400 }
-      );
+    const validationResult = PayCashfreeOrderSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json({ message: "Validation error: " + formatZodError(validationResult.error) }, { status: 400 });
     }
+    
+    const { orderId, couponCode } = validationResult.data;
 
     const order = await getOrderDB(orderId);
     if (!order) {
@@ -221,11 +221,7 @@ export async function POST(req: NextRequest) {
       cashfree_mode: process.env.CASHFREE_MODE || "sandbox",
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("[pay-order] Error:", message);
-    return NextResponse.json(
-      { success: false, message: "Internal server error.", retryable: true },
-      { status: 500 }
-    );
+    console.error("[pay-order] Error:", err);
+    return NextResponse.json({ success: false, message: "Internal server error.", retryable: true }, { status: 500 });
   }
 }

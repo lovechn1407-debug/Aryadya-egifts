@@ -26,7 +26,8 @@ export default function AdminFAQsPage() {
       const data = await getFAQsDB();
       setFaqs(data);
     } catch (err: any) {
-      setError("Failed to load FAQs: " + err.message);
+      console.error(err);
+      setError("Failed to load FAQs. An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,8 @@ export default function AdminFAQsPage() {
       resetForm();
       await loadFAQs();
     } catch (err: any) {
-      setError("Failed to save FAQ: " + err.message);
+      console.error(err);
+      setError("Failed to save FAQ. An unexpected error occurred.");
     }
   };
 
@@ -80,7 +82,8 @@ export default function AdminFAQsPage() {
       setSuccess("FAQ deleted successfully!");
       await loadFAQs();
     } catch (err: any) {
-      setError("Failed to delete FAQ: " + err.message);
+      console.error(err);
+      setError("Failed to delete FAQ. An unexpected error occurred.");
     }
   };
 

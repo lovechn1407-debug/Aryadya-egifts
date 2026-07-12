@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getProductDB, createPendingOrderDB } from "@/lib/db";
 import { getCouponDB, getOrdersByBuyerDB, saveCouponDB } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limiter";
+import { CreateCashfreeOrderSchema, formatZodError } from "@/lib/schemas";
 
 const CASHFREE_BASE =
   process.env.CASHFREE_MODE === "production"
@@ -49,27 +50,19 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    const validationResult = CreateCashfreeOrderSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json({ message: "Validation error: " + formatZodError(validationResult.error) }, { status: 400 });
+    }
+    
     const {
       productId,
       buyerName,
       buyerEmail,
       buyerPhone,
       couponCode,
-    }: {
-      productId: string;
-      buyerName: string;
-      buyerEmail: string;
-      buyerPhone: string;
-      couponCode?: string;
-    } = body;
-
-    // ── Validate required fields ──────────────────────────────────────────────
-    if (!productId || !buyerName || !buyerEmail || !buyerPhone) {
-      return NextResponse.json(
-        { success: false, message: "Missing required fields." },
-        { status: 400 }
-      );
-    }
+    } = validationResult.data;
 
     // ── Fetch product price (server-side, can't be spoofed) ──────────────────
     const product = await getProductDB(productId);
@@ -234,11 +227,7 @@ export async function POST(req: NextRequest) {
       cashfree_mode: process.env.CASHFREE_MODE || "sandbox",
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("[create-order] Error:", message);
-    return NextResponse.json(
-      { success: false, message: "Internal server error.", retryable: true },
-      { status: 500 }
-    );
+    console.error("[create-order] Error:", err);
+    return NextResponse.json({ success: false, message: "Internal server error.", retryable: true }, { status: 500 });
   }
 }

@@ -33,7 +33,8 @@
     "react-easy-crop": "^5.5.7",
     "react-youtube": "^10.1.0",
     "three": "^0.184.0",
-    "youtube-ext": "^1.1.25"
+    "youtube-ext": "^1.1.25",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

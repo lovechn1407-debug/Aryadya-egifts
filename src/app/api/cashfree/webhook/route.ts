@@ -8,6 +8,7 @@ import { checkRateLimit } from "@/lib/rate-limiter";
 import { createHmac } from "crypto";
 import { getOrderDB, updateOrderStatusDB, saveCouponDB, getCouponDB, getSettingsDB } from "@/lib/db";
 import { sendOrderConfirmationEmailServer } from "@/lib/email-server";
+import { CashfreeWebhookSchema, formatZodError } from "@/lib/schemas";
 
 const CF_VERSION = "2023-08-01";
 const CASHFREE_BASE =
@@ -48,6 +49,11 @@ export async function POST(req: NextRequest) {
     }
 
     const event = JSON.parse(rawBody);
+    const validationResult = CashfreeWebhookSchema.safeParse(event);
+    if (!validationResult.success) {
+      return NextResponse.json({ status: "invalid_payload", message: formatZodError(validationResult.error) }, { status: 200 }); // return 200 so cashfree doesn't retry invalid payload
+    }
+
     const eventType: string = event?.type || "";
     const orderId: string = event?.data?.order?.order_id || "";
 
@@ -124,9 +130,8 @@ export async function POST(req: NextRequest) {
     // Unknown event — acknowledge to avoid retries
     return NextResponse.json({ status: "event_ignored" });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("[webhook] Error:", message);
+    console.error("[webhook] Error:", err);
     // Return 200 so Cashfree doesn't retry unnecessarily
-    return NextResponse.json({ status: "error", message }, { status: 200 });
+    return NextResponse.json({ status: "error", message: "Internal server error." }, { status: 200 });
   }
 }
