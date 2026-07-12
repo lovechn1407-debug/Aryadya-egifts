@@ -47,6 +47,7 @@ export interface Order {
   buyerName: string;
   buyerEmail: string;
   buyerPhone: string;
+  userId?: string;
   amount: number;
   status: "pending" | "paid" | "editing" | "finalized";
   customizations: Record<string, string>; // fieldId -> value
