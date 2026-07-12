@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const { targetId, customizations } = validationResult.data;
 
     // 2. Perform DB update
-    await updateProductOverrideDB(targetId, { previewData: customizations });
+    await updateProductOverrideDB(targetId, { previewData: customizations as Record<string, string> });
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("[update-preview] Error:", err);

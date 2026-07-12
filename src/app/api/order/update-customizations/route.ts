@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const { orderId, customizations } = validationResult.data;
 
     // 2. Perform DB update
-    await updateOrderCustomizationsDB(orderId, customizations);
+    await updateOrderCustomizationsDB(orderId, customizations as Record<string, string>);
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("[update-customizations] Error:", err);

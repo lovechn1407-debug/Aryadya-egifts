@@ -18,7 +18,7 @@ export const BuyerLoginSchema = z.object({
 // Order Routes
 export const CreatePendingOrderSchema = z.object({
   productId: idSchema,
-  customizations: z.record(z.any()).optional().default({}),
+  customizations: z.record(z.string(), z.any()).optional().default({}),
   buyerName: z.string().min(1, "Name is required").max(100),
   buyerEmail: emailSchema,
   buyerPhone: phoneSchema,
@@ -28,7 +28,7 @@ export const CreatePendingOrderSchema = z.object({
 
 export const UpdateCustomizationsSchema = z.object({
   orderId: idSchema,
-  customizations: z.record(z.any()),
+  customizations: z.record(z.string(), z.any()),
 });
 
 export const OrderIdSchema = z.object({
@@ -43,7 +43,7 @@ export const AdUnlockSchema = z.object({
 // Admin Preview Routes
 export const UpdatePreviewSchema = z.object({
   targetId: idSchema,
-  customizations: z.record(z.any()),
+  customizations: z.record(z.string(), z.any()),
 });
 
 // Cashfree Routes
