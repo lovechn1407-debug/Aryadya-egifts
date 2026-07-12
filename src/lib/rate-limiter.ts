@@ -37,6 +37,7 @@ export async function checkRateLimit(
   category: "public" | "authenticated" | "auth",
   accountId?: string
 ): Promise<NextResponse | null> {
+  try {
   const ip = getClientIp(req);
   const ipHash = hashKey(ip);
   const now = Date.now();
@@ -150,6 +151,11 @@ export async function checkRateLimit(
   }
 
   return null;
+  } catch (e) {
+    // Fail open: if rate limiter DB is unavailable, allow the request through
+    console.error("[rate-limiter] Firebase error, failing open:", e);
+    return null;
+  }
 }
 
 /**

@@ -78,7 +78,8 @@ export const CashfreeWebhookSchema = z.object({
 }).passthrough();
 
 export const FileIdSchema = z.object({
-  fileId: idSchema,
+  // Telegram file IDs can be very long (200+ chars)
+  fileId: z.string().min(1, "File ID cannot be empty").max(500),
 });
 
 // Utility function to format Zod errors
