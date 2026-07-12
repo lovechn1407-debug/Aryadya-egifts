@@ -1,7 +1,7 @@
 // =============================================
 // FIREBASE DATA LAYER
 // =============================================
-import { ref, get, set, update, remove } from "firebase/database";
+import { ref, get, set, update, remove, query, orderByChild, equalTo } from "firebase/database";
 import { database } from "./firebase";
 import { PRODUCT_REGISTRY } from "./data";
 import type { Product, DisplaySection, Order, Coupon } from "./data";
