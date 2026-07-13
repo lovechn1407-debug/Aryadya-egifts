@@ -13,5 +13,5 @@ jobs:
     steps:
       - name: Ping Render Backend
         run: |
-          curl -s -o /dev/null -w "%{http_code}" https://erp-whatsapp-bot.onrender.com/health
+          curl -s -o /dev/null -w "%{http_code}" https://whatsapp-otp-bot-v1vl.onrender.com/health
           echo "Render successfully pinged!"
