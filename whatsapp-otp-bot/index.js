@@ -25,10 +25,6 @@ const client = new Client({
   authStrategy: new LocalAuth({
     dataPath: './wa_session'
   }),
-  webVersionCache: {
-    type: 'remote',
-    remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
-  },
   puppeteer: {
     headless: true,
     args: [
@@ -37,17 +33,28 @@ const client = new Client({
       '--disable-dev-shm-usage',
       '--disable-accelerated-2d-canvas',
       '--no-first-run',
-      '--no-zygote',
-      '--single-process',
       '--disable-gpu',
-      '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
+      '--disable-extensions',
+      '--disable-background-networking',
+      '--disable-default-apps',
+      '--disable-sync',
+      '--disable-translate',
+      '--hide-scrollbars',
+      '--metrics-recording-only',
+      '--mute-audio',
+      '--safebrowsing-disable-auto-update',
     ],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
   }
+});
+
+client.on('loading_screen', (percent, message) => {
+  console.log(`[WA] Loading screen: ${percent}% — ${message}`);
 });
 
 client.on('qr', (qr) => {
   clientStatus = "qr_pending";
+  console.log('[WA] QR code generated, waiting for scan...');
   qrcode.toDataURL(qr, (err, url) => {
     if (!err) {
       qrCodeData = url;
@@ -55,27 +62,27 @@ client.on('qr', (qr) => {
   });
 });
 
+client.on('authenticated', () => {
+  console.log('[WA] ✅ Authenticated successfully!');
+});
+
 client.on('ready', () => {
   clientStatus = "connected";
   qrCodeData = "";
-  console.log('WhatsApp Web Client is ready!');
-});
-
-client.on('authenticated', () => {
-  console.log('WhatsApp Web Client authenticated successfully');
+  console.log('[WA] ✅ Client is READY! Connected to WhatsApp.');
 });
 
 client.on('auth_failure', (msg) => {
   clientStatus = "disconnected";
-  console.error('WhatsApp Web authentication failure:', msg);
+  console.error('[WA] ❌ Auth failure:', msg);
 });
 
 client.on('disconnected', (reason) => {
   clientStatus = "disconnected";
   qrCodeData = "";
-  console.log('WhatsApp Web Client was disconnected:', reason);
+  console.log('[WA] Disconnected:', reason);
   // Re-initialize client
-  client.initialize();
+  setTimeout(() => client.initialize(), 3000);
 });
 
 client.initialize().catch(err => {
