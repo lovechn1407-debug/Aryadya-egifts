@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSettingsDB } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limiter";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   // Check rate limits
   const rateLimitResponse = await checkRateLimit(req, "public");
@@ -34,6 +36,7 @@ export async function POST(req: NextRequest) {
         "x-bot-secret": botSecret,
       },
       body: JSON.stringify({ phone }),
+      cache: "no-store",
     });
 
     if (!response.ok) {

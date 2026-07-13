@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSettingsDB } from "@/lib/db";
 import { adminAuth } from "@/lib/firebase-admin";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const { phone, otp } = await req.json();
@@ -30,6 +32,7 @@ export async function POST(req: NextRequest) {
         "x-bot-secret": botSecret,
       },
       body: JSON.stringify({ phone, otp }),
+      cache: "no-store",
     });
 
     if (!response.ok) {
