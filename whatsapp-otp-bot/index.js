@@ -1,7 +1,9 @@
 const express = require('express');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { Boom } = require('@hapi/boom');
 const qrcode = require('qrcode');
 const NodeCache = require('node-cache');
+const pino = require('pino');
 
 const app = express();
 app.use(express.json());
@@ -18,78 +20,72 @@ if (!BOT_SECRET) {
 const otpCache = new NodeCache({ stdTTL: 300 });
 
 let qrCodeData = "";
-let clientStatus = "disconnected"; // disconnected, qr_pending, connected
+let clientStatus = "disconnected";
+let sock = null;
 
-// Initialize WhatsApp Web Client
-const client = new Client({
-  authStrategy: new LocalAuth({
-    dataPath: './wa_session'
-  }),
-  puppeteer: {
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--disable-gpu',
-      '--disable-extensions',
-      '--disable-background-networking',
-      '--disable-default-apps',
-      '--disable-sync',
-      '--disable-translate',
-      '--hide-scrollbars',
-      '--metrics-recording-only',
-      '--mute-audio',
-      '--safebrowsing-disable-auto-update',
-    ],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
-  }
-});
+const SESSION_DIR = process.env.SESSION_DIR || './wa_session';
 
-client.on('loading_screen', (percent, message) => {
-  console.log(`[WA] Loading screen: ${percent}% — ${message}`);
-});
+async function connectToWhatsApp() {
+  const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
 
-client.on('qr', (qr) => {
-  clientStatus = "qr_pending";
-  console.log('[WA] QR code generated, waiting for scan...');
-  qrcode.toDataURL(qr, (err, url) => {
-    if (!err) {
-      qrCodeData = url;
+  sock = makeWASocket({
+    auth: state,
+    logger: pino({ level: 'silent' }),
+    printQRInTerminal: true, // Also prints in Render logs for debugging
+    browser: ['Aradhya OTP Bot', 'Chrome', '3.0'],
+  });
+
+  // Handle QR code and connection state changes
+  sock.ev.on('connection.update', async (update) => {
+    const { connection, lastDisconnect, qr } = update;
+
+    if (qr) {
+      clientStatus = "qr_pending";
+      console.log('[WA] QR code generated. Scan it from the admin panel.');
+      try {
+        qrCodeData = await qrcode.toDataURL(qr);
+      } catch (err) {
+        console.error('[WA] Error generating QR code image:', err);
+      }
+    }
+
+    if (connection === 'close') {
+      const statusCode = (lastDisconnect?.error instanceof Boom)
+        ? lastDisconnect.error.output.statusCode
+        : null;
+
+      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+
+      clientStatus = "disconnected";
+      qrCodeData = "";
+
+      console.log(`[WA] Connection closed. Status: ${statusCode}. Will reconnect: ${shouldReconnect}`);
+
+      if (shouldReconnect) {
+        console.log('[WA] Reconnecting in 3 seconds...');
+        setTimeout(connectToWhatsApp, 3000);
+      } else {
+        console.log('[WA] Logged out. Will not reconnect automatically.');
+      }
+    }
+
+    if (connection === 'open') {
+      clientStatus = "connected";
+      qrCodeData = "";
+      console.log('[WA] ✅ Successfully connected to WhatsApp!');
     }
   });
+
+  // Save auth credentials whenever they update
+  sock.ev.on('creds.update', saveCreds);
+}
+
+// Start the WhatsApp connection
+connectToWhatsApp().catch(err => {
+  console.error('[WA] Fatal error starting WhatsApp client:', err);
 });
 
-client.on('authenticated', () => {
-  console.log('[WA] ✅ Authenticated successfully!');
-});
-
-client.on('ready', () => {
-  clientStatus = "connected";
-  qrCodeData = "";
-  console.log('[WA] ✅ Client is READY! Connected to WhatsApp.');
-});
-
-client.on('auth_failure', (msg) => {
-  clientStatus = "disconnected";
-  console.error('[WA] ❌ Auth failure:', msg);
-});
-
-client.on('disconnected', (reason) => {
-  clientStatus = "disconnected";
-  qrCodeData = "";
-  console.log('[WA] Disconnected:', reason);
-  // Re-initialize client
-  setTimeout(() => client.initialize(), 3000);
-});
-
-client.initialize().catch(err => {
-  console.error("Failed to initialize WhatsApp client:", err);
-});
-
-// Middleware for bot secret verification
+// ─── Middleware ───────────────────────────────────────────────────
 const verifySecret = (req, res, next) => {
   const secret = req.headers['x-bot-secret'];
   if (!secret || secret !== BOT_SECRET) {
@@ -98,7 +94,7 @@ const verifySecret = (req, res, next) => {
   next();
 };
 
-// Endpoints
+// ─── Routes ──────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ ok: true, clientStatus });
 });
@@ -112,7 +108,7 @@ app.get('/qr', verifySecret, (req, res) => {
     return res.json({ status: "connected", message: "Already connected" });
   }
   if (!qrCodeData) {
-    return res.json({ status: clientStatus, message: "QR Code not ready yet. Please wait..." });
+    return res.json({ status: clientStatus, message: "QR Code not ready yet. Please wait a moment..." });
   }
   res.json({ status: clientStatus, qrCode: qrCodeData });
 });
@@ -123,31 +119,27 @@ app.post('/send-otp', verifySecret, async (req, res) => {
     return res.status(400).json({ error: "Phone number is required" });
   }
 
-  if (clientStatus !== "connected") {
-    return res.status(503).json({ error: "WhatsApp Client is not connected" });
+  if (clientStatus !== "connected" || !sock) {
+    return res.status(503).json({ error: "WhatsApp is not connected. Please scan the QR code first." });
   }
 
-  // Format phone to WhatsApp JID format (e.g., 919876543210@c.us)
-  // Strip non-digits and add country code if missing
   let cleanPhone = phone.replace(/\D/g, '');
   if (cleanPhone.length === 10) {
-    cleanPhone = '91' + cleanPhone; // Default to India if 10 digits
+    cleanPhone = '91' + cleanPhone;
   }
-  
-  const jid = `${cleanPhone}@c.us`;
 
-  // Generate 6-digit OTP
+  const jid = `${cleanPhone}@s.whatsapp.net`;
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  
-  // Store OTP in cache
   otpCache.set(cleanPhone, otp);
 
   try {
-    const messageText = `Your Aradhya E-Gift verification code is: *${otp}*.\nIt is valid for 5 minutes. Do not share it with anyone.`;
-    await client.sendMessage(jid, messageText);
-    res.json({ success: true, message: "OTP sent successfully" });
+    await sock.sendMessage(jid, {
+      text: `🎁 *Aradhya E-Gift Verification*\n\nYour OTP is: *${otp}*\n\nValid for 5 minutes. Do not share this code with anyone.`
+    });
+    console.log(`[WA] OTP sent to ${cleanPhone}`);
+    res.json({ success: true, message: "OTP sent via WhatsApp." });
   } catch (error) {
-    console.error("Failed to send WhatsApp message:", error);
+    console.error("[WA] Failed to send OTP:", error);
     res.status(500).json({ error: "Failed to send WhatsApp OTP: " + error.message });
   }
 });
@@ -165,17 +157,17 @@ app.post('/verify-otp', verifySecret, (req, res) => {
 
   const cachedOtp = otpCache.get(cleanPhone);
   if (!cachedOtp) {
-    return res.status(400).json({ error: "OTP expired or invalid" });
+    return res.status(400).json({ error: "OTP expired or invalid. Please request a new one." });
   }
 
   if (cachedOtp === otp.toString().trim()) {
-    otpCache.del(cleanPhone); // Clear after successful verification
+    otpCache.del(cleanPhone);
     return res.json({ success: true });
   }
 
-  res.status(400).json({ error: "Invalid OTP code" });
+  res.status(400).json({ error: "Invalid OTP code." });
 });
 
 app.listen(PORT, () => {
-  console.log(`WhatsApp OTP Bot listening on port ${PORT}`);
+  console.log(`[BOT] WhatsApp OTP Bot running on port ${PORT}`);
 });
