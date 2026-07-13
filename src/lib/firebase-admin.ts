@@ -1,58 +1,51 @@
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getDatabase } from "firebase-admin/database";
-
-const apps = getApps();
-let app;
-
-if (!apps.length) {
+export async function getFirebaseAdmin() {
   try {
-    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    
-    if (serviceAccountJson) {
-      const serviceAccount = JSON.parse(serviceAccountJson);
-      app = initializeApp({
-        credential: cert(serviceAccount),
-        databaseURL: "https://aradhya-egifts-default-rtdb.firebaseio.com"
-      });
-    } else {
-      const projectId = process.env.FIREBASE_PROJECT_ID;
-      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    const { initializeApp, getApps, cert } = await import("firebase-admin/app");
+    const { getAuth } = await import("firebase-admin/auth");
+    const { getDatabase } = await import("firebase-admin/database");
 
-      if (projectId && clientEmail && privateKey) {
+    const apps = getApps();
+    let app;
+
+    if (!apps.length) {
+      const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+      
+      if (serviceAccountJson) {
+        const serviceAccount = JSON.parse(serviceAccountJson);
         app = initializeApp({
-          credential: cert({
-            projectId,
-            clientEmail,
-            privateKey: privateKey.replace(/\\n/g, "\n"),
-          }),
+          credential: cert(serviceAccount),
           databaseURL: "https://aradhya-egifts-default-rtdb.firebaseio.com"
         });
       } else {
-        // Fallback to application default credentials if available
-        app = initializeApp({
-          databaseURL: "https://aradhya-egifts-default-rtdb.firebaseio.com"
-        });
+        const projectId = process.env.FIREBASE_PROJECT_ID;
+        const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+        if (projectId && clientEmail && privateKey) {
+          app = initializeApp({
+            credential: cert({
+              projectId,
+              clientEmail,
+              privateKey: privateKey.replace(/\\n/g, "\n"),
+            }),
+            databaseURL: "https://aradhya-egifts-default-rtdb.firebaseio.com"
+          });
+        } else {
+          // If no credentials configured, log and return null
+          console.warn("No Firebase Service Account credentials found in environment variables.");
+          return null;
+        }
       }
+    } else {
+      app = apps[0];
     }
-  } catch (error) {
-    console.error("Firebase Admin SDK initialization error:", error);
-  }
-} else {
-  app = apps[0];
-}
 
-let adminAuth: ReturnType<typeof getAuth> | null = null;
-let adminDatabase: ReturnType<typeof getDatabase> | null = null;
-
-if (app) {
-  try {
-    adminAuth = getAuth(app);
-    adminDatabase = getDatabase(app);
+    return {
+      adminAuth: getAuth(app),
+      adminDatabase: getDatabase(app)
+    };
   } catch (error) {
-    console.error("Error obtaining Firebase Admin services:", error);
+    console.error("Failed to initialize Firebase Admin SDK:", error);
+    return null;
   }
 }
-
-export { adminAuth, adminDatabase };

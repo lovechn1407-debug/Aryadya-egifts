@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSettingsDB } from "@/lib/db";
-import { adminAuth } from "@/lib/firebase-admin";
+import { getFirebaseAdmin } from "@/lib/firebase-admin";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +50,10 @@ export async function POST(req: NextRequest) {
     }
 
     const uid = `phone_${cleanPhone}`;
+
+    // Get lazy-initialized Firebase Admin Auth
+    const admin = await getFirebaseAdmin();
+    const adminAuth = admin?.adminAuth;
 
     if (!adminAuth) {
       return NextResponse.json(
