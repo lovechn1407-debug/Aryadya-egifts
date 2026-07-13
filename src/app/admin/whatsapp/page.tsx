@@ -219,18 +219,12 @@ export default function WhatsAppSettingsPage() {
                   Allow users to request login verification codes on WhatsApp instead of SMS.
                 </p>
               </div>
-              <div>
-                <div style={{ position: "relative", display: "inline-block", width: 44, height: 24 }}>
-                  <input 
-                    type="checkbox" 
-                    checked={settings.whatsappOtpEnabled ?? false} 
-                    onChange={e => handleToggle(e.target.checked)} 
-                    style={{ opacity: 0, width: 0, height: 0 }} 
-                  />
-                  <span style={{ position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0, background: (settings.whatsappOtpEnabled ?? false) ? "#10B981" : "#CBD5E1", transition: "0.4s", borderRadius: 34 }}>
-                    <span style={{ position: "absolute", content: "''", height: 16, width: 16, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: (settings.whatsappOtpEnabled ?? false) ? "translateX(20px)" : "none" }}></span>
-                  </span>
-                </div>
+              <div
+                onClick={() => handleToggle(!(settings.whatsappOtpEnabled ?? false))}
+                style={{ position: "relative", display: "inline-block", width: 44, height: 24, cursor: "pointer", flexShrink: 0 }}
+              >
+                <span style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: (settings.whatsappOtpEnabled ?? false) ? "#10B981" : "#CBD5E1", transition: "background 0.3s", borderRadius: 34 }} />
+                <span style={{ position: "absolute", height: 16, width: 16, left: (settings.whatsappOtpEnabled ?? false) ? 24 : 4, bottom: 4, background: "white", transition: "left 0.3s", borderRadius: "50%", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
               </div>
             </div>
 
