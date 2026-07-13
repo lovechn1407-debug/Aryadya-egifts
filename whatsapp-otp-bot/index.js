@@ -75,6 +75,7 @@ app.post('/send-otp', verifySecret, async (req, res) => {
   const jid = `${cleanPhone}@s.whatsapp.net`;
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpCache.set(cleanPhone, otp);
+  console.log(`[WA] Generated OTP ${otp} for phone ${cleanPhone}. Cache keys:`, otpCache.keys());
 
   try {
     await sock.sendMessage(jid, {
@@ -90,6 +91,7 @@ app.post('/send-otp', verifySecret, async (req, res) => {
 
 app.post('/verify-otp', verifySecret, (req, res) => {
   const { phone, otp } = req.body;
+  console.log(`[WA] Received verify-otp request. Phone: ${phone}, OTP: ${otp}`);
   if (!phone || !otp) {
     return res.status(400).json({ error: "Phone number and OTP are required" });
   }
@@ -100,15 +102,20 @@ app.post('/verify-otp', verifySecret, (req, res) => {
   }
 
   const cachedOtp = otpCache.get(cleanPhone);
+  console.log(`[WA] Verifying. CleanPhone: ${cleanPhone}, CachedOTP: ${cachedOtp}, InputOTP: ${otp}`);
+
   if (!cachedOtp) {
+    console.log(`[WA] OTP verification failed: No cached OTP found for ${cleanPhone}. Cache keys:`, otpCache.keys());
     return res.status(400).json({ error: "OTP expired or invalid. Please request a new one." });
   }
 
   if (cachedOtp === otp.toString().trim()) {
     otpCache.del(cleanPhone);
+    console.log(`[WA] ✅ OTP verified successfully for ${cleanPhone}!`);
     return res.json({ success: true });
   }
 
+  console.log(`[WA] ❌ OTP verification failed. Mismatch: Cached=${cachedOtp}, Input=${otp}`);
   res.status(400).json({ error: "Invalid OTP code." });
 });
 
