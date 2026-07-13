@@ -1,6 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
-import { getOrdersByUserIdDB } from "@/lib/db";
-import { z } from "zod";
+import { getOrdersByUserIdDB, updateOrderStatusDB, getCouponDB, saveCouponDB } from "@/lib/db";
 
 const CASHFREE_BASE =
   process.env.CASHFREE_MODE === "production"
@@ -37,32 +38,31 @@ export async function GET(req: Request) {
                   "x-client-secret": process.env.CASHFREE_SECRET_KEY!,
                   "x-api-version": CF_VERSION,
                 },
-                next: { revalidate: 0 } // disable next fetch caching for this sync check
               }
             );
 
             if (cfRes.ok) {
-              const payments: Array<{ payment_status: string }> = await cfRes.json();
-              const successPayment = payments.find(
-                (p) => p.payment_status === "SUCCESS"
-              );
+              const payments = await cfRes.json();
+              if (Array.isArray(payments)) {
+                const successPayment = payments.find(
+                  (p: any) => p.payment_status === "SUCCESS"
+                );
 
-              if (successPayment) {
-                const { updateOrderStatusDB, saveCouponDB, getCouponDB } = await import("@/lib/db");
-                
-                // Update Firebase DB order status to paid
-                await updateOrderStatusDB(order.id, "paid");
-                
-                // Increment coupon usage if order had a coupon
-                if (order.couponCode) {
-                  const coupon = await getCouponDB(order.couponCode);
-                  if (coupon) {
-                    await saveCouponDB({ ...coupon, usedCount: coupon.usedCount + 1 });
+                if (successPayment) {
+                  // Update Firebase DB order status to paid
+                  await updateOrderStatusDB(order.id, "paid");
+                  
+                  // Increment coupon usage if order had a coupon
+                  if (order.couponCode) {
+                    const coupon = await getCouponDB(order.couponCode);
+                    if (coupon) {
+                      await saveCouponDB({ ...coupon, usedCount: coupon.usedCount + 1 });
+                    }
                   }
-                }
 
-                // Return the updated status to client immediately
-                return { ...order, status: "paid" as const };
+                  // Return the updated status to client immediately
+                  return { ...order, status: "paid" as const };
+                }
               }
             }
           } catch (err) {
