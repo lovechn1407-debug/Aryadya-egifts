@@ -1,9 +1,9 @@
 const express = require('express');
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
-const { Boom } = require('@hapi/boom');
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const qrcode = require('qrcode');
 const NodeCache = require('node-cache');
 const pino = require('pino');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
@@ -25,66 +25,6 @@ let sock = null;
 
 const SESSION_DIR = process.env.SESSION_DIR || './wa_session';
 
-async function connectToWhatsApp() {
-  const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
-
-  sock = makeWASocket({
-    auth: state,
-    logger: pino({ level: 'silent' }),
-    printQRInTerminal: true, // Also prints in Render logs for debugging
-    browser: ['Aradhya OTP Bot', 'Chrome', '3.0'],
-  });
-
-  // Handle QR code and connection state changes
-  sock.ev.on('connection.update', async (update) => {
-    const { connection, lastDisconnect, qr } = update;
-
-    if (qr) {
-      clientStatus = "qr_pending";
-      console.log('[WA] QR code generated. Scan it from the admin panel.');
-      try {
-        qrCodeData = await qrcode.toDataURL(qr);
-      } catch (err) {
-        console.error('[WA] Error generating QR code image:', err);
-      }
-    }
-
-    if (connection === 'close') {
-      const statusCode = (lastDisconnect?.error instanceof Boom)
-        ? lastDisconnect.error.output.statusCode
-        : null;
-
-      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-
-      clientStatus = "disconnected";
-      qrCodeData = "";
-
-      console.log(`[WA] Connection closed. Status: ${statusCode}. Will reconnect: ${shouldReconnect}`);
-
-      if (shouldReconnect) {
-        console.log('[WA] Reconnecting in 3 seconds...');
-        setTimeout(connectToWhatsApp, 3000);
-      } else {
-        console.log('[WA] Logged out. Will not reconnect automatically.');
-      }
-    }
-
-    if (connection === 'open') {
-      clientStatus = "connected";
-      qrCodeData = "";
-      console.log('[WA] ✅ Successfully connected to WhatsApp!');
-    }
-  });
-
-  // Save auth credentials whenever they update
-  sock.ev.on('creds.update', saveCreds);
-}
-
-// Start the WhatsApp connection
-connectToWhatsApp().catch(err => {
-  console.error('[WA] Fatal error starting WhatsApp client:', err);
-});
-
 // ─── Middleware ───────────────────────────────────────────────────
 const verifySecret = (req, res, next) => {
   const secret = req.headers['x-bot-secret'];
@@ -95,6 +35,10 @@ const verifySecret = (req, res, next) => {
 };
 
 // ─── Routes ──────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.send('WhatsApp OTP Bot is running! 🤖');
+});
+
 app.get('/health', (req, res) => {
   res.json({ ok: true, clientStatus });
 });
@@ -168,6 +112,71 @@ app.post('/verify-otp', verifySecret, (req, res) => {
   res.status(400).json({ error: "Invalid OTP code." });
 });
 
+// Start Express server FIRST so health checks work immediately
 app.listen(PORT, () => {
-  console.log(`[BOT] WhatsApp OTP Bot running on port ${PORT}`);
+  console.log(`[BOT] WhatsApp OTP Bot listening on port ${PORT}`);
+  // Start WhatsApp connection AFTER server is ready
+  startBot().catch(err => console.error('[WA] Startup error:', err));
 });
+
+// ─── WhatsApp Bot ─────────────────────────────────────────────────
+async function startBot() {
+  // Ensure session directory exists
+  if (!fs.existsSync(SESSION_DIR)) {
+    fs.mkdirSync(SESSION_DIR, { recursive: true });
+  }
+
+  console.log('[WA] Fetching latest WhatsApp Web version...');
+  const { version } = await fetchLatestBaileysVersion();
+  console.log(`[WA] Using WA v${version.join('.')}`);
+
+  const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
+
+  sock = makeWASocket({
+    version,
+    auth: state,
+    printQRInTerminal: true,
+    logger: pino({ level: 'silent' }),
+    browser: ['Aradhya OTP Bot', 'Chrome', '120.0.0'],
+  });
+
+  sock.ev.on('creds.update', saveCreds);
+
+  sock.ev.on('connection.update', async (update) => {
+    const { connection, lastDisconnect, qr } = update;
+
+    if (qr) {
+      clientStatus = "qr_pending";
+      console.log('[WA] QR code generated. Scan it from the admin panel.');
+      try {
+        qrCodeData = await qrcode.toDataURL(qr);
+        console.log('[WA] QR data URL generated successfully.');
+      } catch (err) {
+        console.error('[WA] Error generating QR data URL:', err);
+      }
+    }
+
+    if (connection === 'close') {
+      const statusCode = lastDisconnect?.error?.output?.statusCode;
+      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+
+      clientStatus = "disconnected";
+      qrCodeData = "";
+
+      console.log(`[WA] Connection closed. Status code: ${statusCode}. Will reconnect: ${shouldReconnect}`);
+
+      if (shouldReconnect) {
+        console.log('[WA] Reconnecting in 5 seconds...');
+        setTimeout(startBot, 5000);
+      } else {
+        console.log('[WA] Logged out. Restart the service to generate a new QR.');
+      }
+    }
+
+    if (connection === 'open') {
+      clientStatus = "connected";
+      qrCodeData = "";
+      console.log('[WA] ✅ Successfully connected to WhatsApp!');
+    }
+  });
+}
