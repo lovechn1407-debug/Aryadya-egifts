@@ -74,8 +74,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ status: "already_processed" });
       }
 
-      // Mark as paid
-      await updateOrderStatusDB(orderId, "paid");
+      // Mark as editing (paid)
+      await updateOrderStatusDB(orderId, "editing");
 
       // Increment coupon usage if applicable
       if (order.couponCode) {

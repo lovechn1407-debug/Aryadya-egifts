@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const order = await getOrderDB(orderId);
     if (!order) return NextResponse.json({ success: false, message: "Order not found" }, { status: 404 });
 
-    const newStatus = finalize ? "finalized" : "paid";
+    const newStatus = finalize ? "finalized" : "editing";
     const extraPayload = finalize ? { finalizedAt: new Date().toISOString() } : {};
 
     await updateOrderStatusDB(orderId, newStatus, extraPayload);

@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
     );
 
     if (successPayment) {
-      const newStatus = shouldFinalize ? "finalized" : "paid";
+      const newStatus = shouldFinalize ? "finalized" : "editing";
       const extraPayload = shouldFinalize ? { finalizedAt: new Date().toISOString() } : {};
 
       // Mark as paid or finalized

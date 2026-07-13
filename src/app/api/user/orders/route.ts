@@ -33,6 +33,7 @@ export async function GET(req: Request) {
             const cfRes = await fetch(
               `${CASHFREE_BASE}/pg/orders/${order.id}/payments`,
               {
+                cache: "no-store",
                 headers: {
                   "x-client-id": process.env.CASHFREE_APP_ID!,
                   "x-client-secret": process.env.CASHFREE_SECRET_KEY!,
@@ -50,7 +51,7 @@ export async function GET(req: Request) {
 
                 if (successPayment) {
                   const isPostPay = order.paymentMode === "post-pay";
-                  const newStatus = isPostPay ? "finalized" : "paid";
+                  const newStatus = isPostPay ? "finalized" : "editing";
                   const extraPayload = isPostPay ? { finalizedAt: new Date().toISOString() } : {};
 
                   // Update Firebase DB order status
