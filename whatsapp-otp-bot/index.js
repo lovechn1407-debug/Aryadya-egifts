@@ -25,6 +25,10 @@ const client = new Client({
   authStrategy: new LocalAuth({
     dataPath: './wa_session'
   }),
+  webVersionCache: {
+    type: 'remote',
+    remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+  },
   puppeteer: {
     headless: true,
     args: [
@@ -35,7 +39,8 @@ const client = new Client({
       '--no-first-run',
       '--no-zygote',
       '--single-process',
-      '--disable-gpu'
+      '--disable-gpu',
+      '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
     ],
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null
   }
