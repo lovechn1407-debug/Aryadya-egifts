@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ref, onValue, off } from "firebase/database";
 import { database } from "@/lib/firebase";
 import type { ChatMessage } from "@/lib/db";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function formatTime(ts: number) {
@@ -30,6 +31,8 @@ export default function ChatWidget({ onUnreadChange }: ChatWidgetProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const { user, userProfile } = useAuth();
+
   // Restore session from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("aradhya_chat_id");
@@ -38,6 +41,40 @@ export default function ChatWidget({ onUnreadChange }: ChatWidgetProps) {
       setStage("chat");
     }
   }, []);
+
+  // Pre-fill name and email from profile if logged in
+  useEffect(() => {
+    if (user) {
+      setName(userProfile?.name || user.displayName || "");
+      setEmail(userProfile?.email || user.email || "");
+    }
+  }, [user, userProfile]);
+
+  // Auto-start chat session if user is logged in and opens the support widget
+  useEffect(() => {
+    if (open && !chatId && stage === "form" && user) {
+      const autoName = userProfile?.name || user.displayName || "User";
+      const autoEmail = userProfile?.email || user.email || "";
+      if (autoName && autoEmail) {
+        setStarting(true);
+        fetch("/api/chat/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: autoName.trim(), email: autoEmail.trim() }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              localStorage.setItem("aradhya_chat_id", data.chatId);
+              setChatId(data.chatId);
+              setStage("chat");
+            }
+          })
+          .catch((err) => console.error("Error auto-starting chat session:", err))
+          .finally(() => setStarting(false));
+      }
+    }
+  }, [open, chatId, stage, user, userProfile]);
 
   // Listen for messages + session status in real-time
   useEffect(() => {
@@ -241,54 +278,72 @@ export default function ChatWidget({ onUnreadChange }: ChatWidgetProps) {
           {/* STAGE: Form */}
           {stage === "form" && (
             <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>👋</div>
-                <p style={{ color: "#fff", fontWeight: 700, fontSize: 16, margin: "0 0 4px" }}>Hi there!</p>
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, margin: 0 }}>Tell us who you are and we'll get you connected.</p>
-              </div>
-              <input
-                id="chat-name-input"
-                type="text"
-                placeholder="Your name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && document.getElementById("chat-email-input")?.focus()}
-                style={{
-                  background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: 10, padding: "12px 14px", color: "#fff", fontSize: 14,
-                  outline: "none", transition: "border-color 0.2s",
-                }}
-                className="chat-input"
-              />
-              <input
-                id="chat-email-input"
-                type="email"
-                placeholder="Your email address"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleStartChat()}
-                style={{
-                  background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: 10, padding: "12px 14px", color: "#fff", fontSize: 14,
-                  outline: "none", transition: "border-color 0.2s",
-                }}
-                className="chat-input"
-              />
-              <button
-                id="chat-start-btn"
-                onClick={handleStartChat}
-                disabled={!name.trim() || !email.trim() || starting}
-                style={{
-                  background: "linear-gradient(135deg,#7C3AED,#EC4899)",
-                  color: "#fff", border: "none", borderRadius: 10,
-                  padding: "13px 20px", fontSize: 14, fontWeight: 700,
-                  cursor: !name.trim() || !email.trim() || starting ? "not-allowed" : "pointer",
-                  opacity: !name.trim() || !email.trim() || starting ? 0.6 : 1,
-                  transition: "opacity 0.2s",
-                }}
-              >
-                {starting ? "Starting…" : "Start Chat 💬"}
-              </button>
+              {starting && user ? (
+                <div style={{ textAlign: "center", padding: "20px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    border: "3px solid rgba(155, 89, 252, 0.15)",
+                    borderTop: "3px solid #9B59FC",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite"
+                  }} />
+                  <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: 13.5, fontWeight: 600, margin: 0 }}>
+                    Connecting you to support...
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>👋</div>
+                    <p style={{ color: "#fff", fontWeight: 700, fontSize: 16, margin: "0 0 4px" }}>Hi there!</p>
+                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, margin: 0 }}>Tell us who you are and we'll get you connected.</p>
+                  </div>
+                  <input
+                    id="chat-name-input"
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && document.getElementById("chat-email-input")?.focus()}
+                    style={{
+                      background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: 10, padding: "12px 14px", color: "#fff", fontSize: 14,
+                      outline: "none", transition: "border-color 0.2s",
+                    }}
+                    className="chat-input"
+                  />
+                  <input
+                    id="chat-email-input"
+                    type="email"
+                    placeholder="Your email address"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleStartChat()}
+                    style={{
+                      background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: 10, padding: "12px 14px", color: "#fff", fontSize: 14,
+                      outline: "none", transition: "border-color 0.2s",
+                    }}
+                    className="chat-input"
+                  />
+                  <button
+                    id="chat-start-btn"
+                    onClick={handleStartChat}
+                    disabled={!name.trim() || !email.trim() || starting}
+                    style={{
+                      background: "linear-gradient(135deg,#7C3AED,#EC4899)",
+                      color: "#fff", border: "none", borderRadius: 10,
+                      padding: "13px 20px", fontSize: 14, fontWeight: 700,
+                      cursor: !name.trim() || !email.trim() || starting ? "not-allowed" : "pointer",
+                      opacity: !name.trim() || !email.trim() || starting ? 0.6 : 1,
+                      transition: "opacity 0.2s",
+                    }}
+                  >
+                    {starting ? "Starting…" : "Start Chat 💬"}
+                  </button>
+                </>
+              )}
             </div>
           )}
 
