@@ -62,6 +62,7 @@ export default function MyOrdersPage() {
     setLoadingOrders(true);
     try {
       const res = await fetch(`/api/user/orders`, {
+        cache: "no-store",
         headers: {
           // In a real app we'd pass an ID token, but since Next.js can't read client firebase state easily, 
           // we'll pass the UID for this simple setup.
