@@ -240,6 +240,9 @@ export async function createPendingOrderDB(data: {
   couponCode?: string;
   discountAmount?: number;
 }): Promise<Order> {
+  const settings = await getSettingsDB();
+  const paymentMode = settings.paymentMode || "pre-pay";
+
   const id = `order_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
   const order: Order = {
     id,
@@ -253,6 +256,7 @@ export async function createPendingOrderDB(data: {
     status: "pending",
     customizations: {},
     createdAt: new Date().toISOString(),
+    paymentMode,
     // Only include optional fields if they have actual values
     ...(data.couponCode ? { couponCode: data.couponCode } : {}),
     ...(data.discountAmount !== undefined && data.discountAmount > 0
@@ -286,12 +290,16 @@ export async function createOrderDB(data: {
   buyerPhone: string;
   amount: number;
 }): Promise<Order> {
+  const settings = await getSettingsDB();
+  const paymentMode = settings.paymentMode || "pre-pay";
+
   const id = `order_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
   const order: Order = {
     id, ...data,
     status: "paid",
     customizations: {},
     createdAt: new Date().toISOString(),
+    paymentMode,
   };
   await set(ref(database, `orders/${id}`), order);
   return order;

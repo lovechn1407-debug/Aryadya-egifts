@@ -56,6 +56,7 @@ export interface Order {
   discountAmount?: number; // Optional discount applied in paise
   createdAt: string;
   lastOpenedAt?: string;
+  paymentMode?: "pre-pay" | "post-pay";
 }
 
 export interface Coupon {
