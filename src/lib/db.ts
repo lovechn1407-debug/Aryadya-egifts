@@ -1,7 +1,7 @@
 // =============================================
 // FIREBASE DATA LAYER
 // =============================================
-import { ref, get, set, update, remove, query, orderByChild, equalTo } from "firebase/database";
+import { ref, get, set, update, remove, query, orderByChild, equalTo, push } from "firebase/database";
 import { database } from "./firebase";
 import { PRODUCT_REGISTRY } from "./data";
 import type { Product, DisplaySection, Order, Coupon } from "./data";
@@ -589,3 +589,104 @@ export async function deleteLibraryVideoDB(id: string): Promise<void> {
   await remove(ref(database, `libraryVideos/${id}`));
 }
 
+// ── CHAT SUPPORT ─────────────────────────────────────────────────────────────
+export interface ChatMeta {
+  id: string;
+  name: string;
+  email: string;
+  status: "open" | "closed";
+  createdAt: number;
+  lastMessageAt: number;
+  lastMessage: string;
+  unreadByAdmin: number;
+  unreadByUser: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  sender: "user" | "admin";
+  text: string;
+  timestamp: number;
+  replyToId?: string;
+  replyToText?: string;
+  replyToSender?: "user" | "admin";
+}
+
+export async function createChatSessionDB(name: string, email: string): Promise<string> {
+  const chatId = `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const now = Date.now();
+  const meta: Omit<ChatMeta, "id"> = {
+    name,
+    email,
+    status: "open",
+    createdAt: now,
+    lastMessageAt: now,
+    lastMessage: "",
+    unreadByAdmin: 0,
+    unreadByUser: 0,
+  };
+  await set(ref(database, `chats/${chatId}/meta`), meta);
+  return chatId;
+}
+
+export async function getChatSessionDB(chatId: string): Promise<ChatMeta | null> {
+  const snap = await get(ref(database, `chats/${chatId}/meta`));
+  if (!snap.exists()) return null;
+  return { id: chatId, ...snap.val() } as ChatMeta;
+}
+
+export async function getAllChatsDB(): Promise<ChatMeta[]> {
+  const snap = await get(ref(database, "chats"));
+  if (!snap.exists()) return [];
+  const raw = snap.val() as Record<string, { meta: Omit<ChatMeta, "id"> }>;
+  return Object.entries(raw)
+    .map(([id, val]) => ({ id, ...val.meta }))
+    .sort((a, b) => b.lastMessageAt - a.lastMessageAt);
+}
+
+export async function getChatMessagesDB(chatId: string): Promise<ChatMessage[]> {
+  const snap = await get(ref(database, `chats/${chatId}/messages`));
+  if (!snap.exists()) return [];
+  return Object.entries(snap.val() as Record<string, Omit<ChatMessage, "id">>)
+    .map(([id, val]) => ({ id, ...val }))
+    .sort((a, b) => a.timestamp - b.timestamp);
+}
+
+export async function sendChatMessageDB(
+  chatId: string,
+  sender: "user" | "admin",
+  text: string,
+  replyTo?: { id: string; text: string; sender: "user" | "admin" }
+): Promise<void> {
+  const now = Date.now();
+  const msgRef = push(ref(database, `chats/${chatId}/messages`));
+  const msg: Omit<ChatMessage, "id"> = {
+    sender,
+    text,
+    timestamp: now,
+    ...(replyTo ? { replyToId: replyTo.id, replyToText: replyTo.text, replyToSender: replyTo.sender } : {}),
+  };
+  await set(msgRef, msg);
+  // Update meta
+  const updates: Record<string, unknown> = {
+    [`chats/${chatId}/meta/lastMessageAt`]: now,
+    [`chats/${chatId}/meta/lastMessage`]: text.slice(0, 80),
+  };
+  if (sender === "user") {
+    const snap = await get(ref(database, `chats/${chatId}/meta/unreadByAdmin`));
+    updates[`chats/${chatId}/meta/unreadByAdmin`] = ((snap.val() as number) || 0) + 1;
+  } else {
+    const snap = await get(ref(database, `chats/${chatId}/meta/unreadByUser`));
+    updates[`chats/${chatId}/meta/unreadByUser`] = ((snap.val() as number) || 0) + 1;
+  }
+  await update(ref(database), updates);
+}
+
+export async function endChatSessionDB(chatId: string): Promise<void> {
+  await update(ref(database, `chats/${chatId}/meta`), { status: "closed" });
+}
+
+export async function markChatReadDB(chatId: string, by: "admin" | "user"): Promise<void> {
+  const field = by === "admin" ? "unreadByAdmin" : "unreadByUser";
+  await update(ref(database, `chats/${chatId}/meta`), { [field]: 0 });
+}

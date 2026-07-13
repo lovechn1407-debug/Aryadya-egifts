@@ -12,6 +12,8 @@ import HomepagePopups from "@/components/HomepagePopups";
 import AdsterraNativeAd from "@/components/AdsterraNativeAd";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginModal from "@/components/LoginModal";
+import ChatWidget from "@/components/ChatWidget";
+
 
 /* ── Modern UI SVG Icons ── */
 function GiftSVG({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
@@ -2875,7 +2877,9 @@ export default function HomePage() {
 
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
       <Navbar onMenuClick={() => setShowMenu(true)} settings={settings} onLoginClick={() => setShowLogin(true)} />
+      <ChatWidget />
       <MenuDrawer isOpen={showMenu} onClose={() => setShowMenu(false)} sections={sections} settings={settings} />
+
       {showLogin && (
         <LoginModal 
           onClose={() => setShowLogin(false)} 

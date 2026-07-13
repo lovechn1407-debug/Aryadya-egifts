@@ -9,6 +9,11 @@
       ".write": true,
       ".indexOn": ["userId"]
     },
+    "chats": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["lastMessageAt"]
+    },
     "$other": {
       ".read": true,
       ".write": true

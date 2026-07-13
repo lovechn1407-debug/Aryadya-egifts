@@ -3,19 +3,22 @@ import { ReactNode, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { isAdminLoggedIn, adminLogout } from "@/lib/data";
 import Link from "next/link";
+import { ref, onValue, off } from "firebase/database";
+import { database } from "@/lib/firebase";
 
 const NAV = [
   { href: "/admin/dashboard", icon: "📊", label: "Dashboard" },
   { href: "/admin/analytics", icon: "📈", label: "Analytics" },
   { href: "/admin/products", icon: "🎁", label: "Products" },
   { href: "/admin/orders", icon: "📦", label: "Orders" },
+  { href: "/admin/chats", icon: "💬", label: "Chats" },
   { href: "/admin/coupons", icon: "🎟️", label: "Coupons" },
   { href: "/admin/sections", icon: "📂", label: "Sections" },
   { href: "/admin/songs", icon: "🎵", label: "Songs" },
   { href: "/admin/video-library", icon: "📹", label: "Video Library" },
   { href: "/admin/faqs", icon: "❓", label: "FAQs" },
   { href: "/admin/reviews", icon: "⭐", label: "Reviews" },
-  { href: "/admin/popups", icon: "💬", label: "Popups" },
+  { href: "/admin/popups", icon: "🗂️", label: "Popups" },
   { href: "/admin/whatsapp", icon: "🟢", label: "WhatsApp Bot" },
   { href: "/admin/settings", icon: "⚙️", label: "Settings" },
 ];
@@ -24,6 +27,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [ready, setReady] = useState(false);
+  const [chatUnread, setChatUnread] = useState(0);
+
+  // Real-time chat unread badge
+  useEffect(() => {
+    const chatsRef = ref(database, "chats");
+    const handle = onValue(chatsRef, (snap) => {
+      if (!snap.exists()) { setChatUnread(0); return; }
+      const raw = snap.val() as Record<string, { meta?: { unreadByAdmin?: number } }>;
+      const total = Object.values(raw).reduce((sum, chat) => sum + (chat.meta?.unreadByAdmin || 0), 0);
+      setChatUnread(total);
+    });
+    return () => off(chatsRef, "value", handle);
+  }, []);
 
   useEffect(() => {
     if (!isAdminLoggedIn() && pathname !== "/admin") {
@@ -64,6 +80,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <div style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.8, padding: "12px 8px 8px" }}>Menu</div>
           {NAV.map(n => {
             const isActive = pathname === n.href;
+            const isChats = n.href === "/admin/chats";
+            const badge = isChats && chatUnread > 0 ? chatUnread : 0;
             return (
               <Link
                 key={n.href}
@@ -73,8 +91,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                   padding: "10px 12px", borderRadius: 8,
                   textDecoration: "none", fontSize: 14, fontWeight: 500,
                   transition: "all 0.15s",
-                  background: isActive ? "#F1F5F9" : "transparent",
-                  color: isActive ? "#0F172A" : "#64748B",
+                  background: isActive ? "#EDE9FE" : "transparent",
+                  color: isActive ? "#7C3AED" : "#64748B",
+                  position: "relative",
                 }}
                 onMouseEnter={e => {
                   if (!isActive) { e.currentTarget.style.background = "#F8FAFC"; e.currentTarget.style.color = "#334155"; }
@@ -84,7 +103,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 }}
               >
                 <span style={{ fontSize: 16, opacity: isActive ? 1 : 0.7 }}>{n.icon}</span>
-                {n.label}
+                <span style={{ flex: 1 }}>{n.label}</span>
+                {badge > 0 && (
+                  <span style={{
+                    background: "#EF4444", color: "#fff", borderRadius: 20,
+                    fontSize: 10, fontWeight: 700, padding: "2px 6px", minWidth: 18,
+                    textAlign: "center", lineHeight: "14px",
+                  }}>{badge > 99 ? "99+" : badge}</span>
+                )}
               </Link>
             );
           })}
