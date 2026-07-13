@@ -1,11 +1,11 @@
 import emailjs from "@emailjs/browser";
 
-const SERVICE_ID = "service_rjysbwg";
-const PUBLIC_KEY = "mJfuz0ZKGAq69Jzcw";
+const SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_rjysbwg";
+const PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "mJfuz0ZKGAq69Jzcw";
 
 // Template IDs
-const TEMPLATE_ORDER_CONFIRM = "template_yd1azyl";
-const TEMPLATE_FINALIZE = "template_15dylig";
+const TEMPLATE_ORDER_CONFIRM = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_BUY || "template_yd1azyl";
+const TEMPLATE_FINALIZE = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_FINALIZE || "template_15dylig";
 
 // Initialize EmailJS once
 let initialized = false;
