@@ -72,7 +72,7 @@ export const CashfreeWebhookSchema = z.object({
   data: z.object({
     order: z.object({
       order_id: idSchema,
-      order_status: z.string().min(1).max(50),
+      order_status: z.string().min(1).max(50).optional(),
     }),
   }).passthrough(),
 }).passthrough();
