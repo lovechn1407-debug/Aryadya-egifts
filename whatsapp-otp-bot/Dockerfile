@@ -2,6 +2,7 @@ FROM node:18-slim
 
 # Install Chromium dependencies and Chromium itself
 RUN apt-get update && apt-get install -y \
+    git \
     wget \
     gnupg \
     ca-certificates \
