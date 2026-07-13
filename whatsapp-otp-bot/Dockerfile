@@ -1,17 +1,20 @@
-FROM node:18-slim
+# Node 20 with build tools needed for Baileys native dependencies
+FROM node:20-slim
 
-# Install git only (no Chromium needed anymore - using Baileys)
+# Install build tools for native module compilation
 RUN apt-get update && apt-get install -y \
     git \
-    --no-install-recommends \
+    python3 \
+    make \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
-
-ENV NODE_ENV=production
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --omit=dev
+
+# Use --legacy-peer-deps to avoid peer dependency conflicts
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
