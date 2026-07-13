@@ -78,6 +78,9 @@ export interface Settings {
   // Authentication Settings
   authGoogleEnabled?: boolean;
   authPhoneEnabled?: boolean;
+  whatsappBotUrl?: string;
+  whatsappBotSecret?: string;
+  whatsappOtpEnabled?: boolean;
 }
 
 export async function getSettingsDB(): Promise<Settings> {

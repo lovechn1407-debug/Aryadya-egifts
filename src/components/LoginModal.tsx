@@ -1,22 +1,54 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { auth } from "@/lib/firebase";
-import { signInWithPopup, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  RecaptchaVerifier, 
+  signInWithPhoneNumber, 
+  ConfirmationResult,
+  signInWithCustomToken
+} from "firebase/auth";
 
 interface LoginModalProps {
   onClose: () => void;
   googleEnabled?: boolean;
   phoneEnabled?: boolean;
+  whatsappEnabled?: boolean;
 }
 
-export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled = true }: LoginModalProps) {
+export default function LoginModal({ 
+  onClose, 
+  googleEnabled, 
+  phoneEnabled,
+  whatsappEnabled
+}: LoginModalProps) {
   const [method, setMethod] = useState<"choose" | "phone">("choose");
+  const [phoneMethod, setPhoneMethod] = useState<"whatsapp" | "sms" | null>(null);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+
+  // Dynamic configuration overrides (if props are omitted)
+  const [googleActive, setGoogleActive] = useState(googleEnabled ?? true);
+  const [phoneActive, setPhoneActive] = useState(phoneEnabled ?? true);
+  const [whatsappActive, setWhatsappActive] = useState(whatsappEnabled ?? false);
+
+  useEffect(() => {
+    // If props are not passed, load dynamically from settings
+    if (googleEnabled === undefined || phoneEnabled === undefined || whatsappEnabled === undefined) {
+      import("@/lib/db").then(({ getSettingsDB }) => {
+        getSettingsDB().then(s => {
+          if (googleEnabled === undefined) setGoogleActive(s.authGoogleEnabled ?? true);
+          if (phoneEnabled === undefined) setPhoneActive(s.authPhoneEnabled ?? true);
+          if (whatsappEnabled === undefined) setWhatsappActive(s.whatsappOtpEnabled ?? false);
+        }).catch(err => console.error("Error loading auth settings:", err));
+      });
+    }
+  }, [googleEnabled, phoneEnabled, whatsappEnabled]);
 
   useEffect(() => {
     if (!(window as any).recaptchaVerifier) {
@@ -25,7 +57,7 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
   }, []);
 
   const handleGoogleLogin = async () => {
-    if (!googleEnabled) return;
+    if (!googleActive) return;
     setLoading(true);
     setError("");
     try {
@@ -40,15 +72,34 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phoneEnabled) return;
+    if (phone.length < 10) return;
     setLoading(true);
     setError("");
+
     try {
-      const appVerifier = (window as any).recaptchaVerifier;
-      const formatted = phone.startsWith("+") ? phone : `+91${phone}`;
-      const result = await signInWithPhoneNumber(auth, formatted, appVerifier);
-      setConfirmationResult(result);
-      setOtpSent(true);
+      if (phoneMethod === "whatsapp") {
+        // WhatsApp OTP flow
+        const response = await fetch("/api/wa/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone }),
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to send WhatsApp OTP. Please try again.");
+        }
+
+        setOtpSent(true);
+      } else {
+        // SMS flow
+        if (!phoneActive) return;
+        const appVerifier = (window as any).recaptchaVerifier;
+        const formatted = phone.startsWith("+") ? phone : `+91${phone}`;
+        const result = await signInWithPhoneNumber(auth, formatted, appVerifier);
+        setConfirmationResult(result);
+        setOtpSent(true);
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to send OTP. Please try again.");
@@ -59,22 +110,48 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!confirmationResult) return;
+    if (otp.length < 6) return;
     setLoading(true);
     setError("");
+
     try {
-      await confirmationResult.confirm(otp);
-      onClose();
+      if (phoneMethod === "whatsapp") {
+        // Verify via WhatsApp proxy route
+        const response = await fetch("/api/wa/verify-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, otp }),
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || "Invalid OTP code");
+        }
+
+        const data = await response.json();
+        if (data.customToken) {
+          // Sign in using custom token from Firebase Admin SDK
+          await signInWithCustomToken(auth, data.customToken);
+          onClose();
+        } else {
+          throw new Error("Failed to authenticate custom token.");
+        }
+      } else {
+        // Verify via Firebase Phone Auth confirmation
+        if (!confirmationResult) return;
+        await confirmationResult.confirm(otp);
+        onClose();
+      }
     } catch (err: any) {
       console.error(err);
-      setError("Invalid OTP. Please check and try again.");
+      setError(err.message || "Invalid OTP. Please check and try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const Toggle = ({ label, icon, onClick, disabled, unavailable }: {
-    label: string; icon: React.ReactNode; onClick: () => void; disabled?: boolean; unavailable?: boolean;
+  const Toggle = ({ label, subText, icon, onClick, disabled, unavailable }: {
+    label: string; subText?: string; icon: React.ReactNode; onClick: () => void; disabled?: boolean; unavailable?: boolean;
   }) => (
     <div style={{ position: "relative" }}>
       <button
@@ -83,7 +160,7 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
         style={{
           width: "100%", display: "flex", alignItems: "center", gap: 14,
           padding: "14px 18px", borderRadius: 14,
-          border: unavailable ? "1.5px solid #E2E8F0" : "1.5px solid #E2E8F0",
+          border: "1.5px solid #E2E8F0",
           background: unavailable ? "#F8FAFC" : "#fff",
           cursor: unavailable ? "not-allowed" : "pointer",
           transition: "all 0.2s", opacity: (disabled && !unavailable) ? 0.6 : 1,
@@ -98,6 +175,7 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: unavailable ? "#94A3B8" : "#1E293B" }}>{label}</div>
+          {subText && !unavailable && <div style={{ fontSize: 11, color: "#64748B", marginTop: 2 }}>{subText}</div>}
           {unavailable && (
             <div style={{ fontSize: 11, color: "#F59E0B", fontWeight: 600, marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -163,7 +241,7 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
                 icon={<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: 20 }} />}
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                unavailable={!googleEnabled}
+                unavailable={!googleActive}
               />
 
               <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 0" }}>
@@ -172,16 +250,37 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
                 <div style={{ flex: 1, height: 1, background: "#E2E8F0" }} />
               </div>
 
+              {whatsappActive && (
+                <Toggle
+                  label="Continue with WhatsApp"
+                  subText="Get quick 6-digit OTP on WhatsApp"
+                  icon={
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                  }
+                  onClick={() => {
+                    setPhoneMethod("whatsapp");
+                    setMethod("phone");
+                  }}
+                  disabled={loading}
+                />
+              )}
+
               <Toggle
-                label="Continue with Phone (OTP)"
+                label="Continue with Phone SMS"
+                subText="Receive classic text message OTP"
                 icon={
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.22 12 19.79 19.79 0 0 1 1.15 3.38 2 2 0 0 1 3.12 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 16z"/>
                   </svg>
                 }
-                onClick={() => setMethod("phone")}
+                onClick={() => {
+                  setPhoneMethod("sms");
+                  setMethod("phone");
+                }}
                 disabled={loading}
-                unavailable={!phoneEnabled}
+                unavailable={!phoneActive}
               />
 
               <p style={{ fontSize: 11, color: "#94A3B8", textAlign: "center", margin: "8px 0 0" }}>
@@ -196,7 +295,7 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
                 <>
                   <div>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                      Phone Number
+                      Phone Number ({phoneMethod === "whatsapp" ? "WhatsApp" : "SMS"})
                     </label>
                     <div style={{ display: "flex", border: "1.5px solid #E2E8F0", borderRadius: 12, overflow: "hidden", background: "#fff" }}>
                       <div style={{ padding: "0 14px", background: "#F8FAFC", display: "flex", alignItems: "center", borderRight: "1.5px solid #E2E8F0", fontSize: 14, fontWeight: 600, color: "#475569", whiteSpace: "nowrap" }}>
@@ -213,11 +312,11 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
                     </div>
                   </div>
                   <button type="submit" disabled={loading || phone.length < 10} style={{
-                    background: "linear-gradient(135deg, #7C3AED, #EC4899)",
+                    background: phoneMethod === "whatsapp" ? "linear-gradient(135deg, #10B981, #059669)" : "linear-gradient(135deg, #7C3AED, #EC4899)",
                     color: "#fff", border: "none", borderRadius: 12, padding: "14px",
                     fontSize: 15, fontWeight: 700, cursor: phone.length < 10 ? "not-allowed" : "pointer",
                     opacity: (loading || phone.length < 10) ? 0.7 : 1,
-                    boxShadow: "0 4px 15px rgba(124,58,237,0.3)"
+                    boxShadow: phoneMethod === "whatsapp" ? "0 4px 15px rgba(16,185,129,0.3)" : "0 4px 15px rgba(124,58,237,0.3)"
                   }}>
                     {loading ? "Sending…" : "Send OTP"}
                   </button>
@@ -225,8 +324,10 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
               ) : (
                 <>
                   <div style={{ textAlign: "center", padding: "8px 0" }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>📱</div>
-                    <p style={{ fontSize: 14, color: "#475569", margin: 0 }}>OTP sent to <strong>+91 {phone}</strong></p>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>{phoneMethod === "whatsapp" ? "💬" : "📱"}</div>
+                    <p style={{ fontSize: 14, color: "#475569", margin: 0 }}>
+                      OTP sent to <strong>+91 {phone}</strong> via {phoneMethod === "whatsapp" ? "WhatsApp" : "SMS"}
+                    </p>
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
@@ -244,16 +345,16 @@ export default function LoginModal({ onClose, googleEnabled = true, phoneEnabled
                         width: "100%", padding: "16px", borderRadius: 12,
                         border: "1.5px solid #E2E8F0", outline: "none", fontSize: 22,
                         textAlign: "center", letterSpacing: 10, fontWeight: 800,
-                        boxSizing: "border-box", color: "#7C3AED"
+                        boxSizing: "border-box", color: phoneMethod === "whatsapp" ? "#10B981" : "#7C3AED"
                       }}
                     />
                   </div>
                   <button type="submit" disabled={loading || otp.length < 6} style={{
-                    background: "linear-gradient(135deg, #7C3AED, #EC4899)",
+                    background: phoneMethod === "whatsapp" ? "linear-gradient(135deg, #10B981, #059669)" : "linear-gradient(135deg, #7C3AED, #EC4899)",
                     color: "#fff", border: "none", borderRadius: 12, padding: "14px",
                     fontSize: 15, fontWeight: 700, cursor: otp.length < 6 ? "not-allowed" : "pointer",
                     opacity: (loading || otp.length < 6) ? 0.7 : 1,
-                    boxShadow: "0 4px 15px rgba(124,58,237,0.3)"
+                    boxShadow: phoneMethod === "whatsapp" ? "0 4px 15px rgba(16,185,129,0.3)" : "0 4px 15px rgba(124,58,237,0.3)"
                   }}>
                     {loading ? "Verifying…" : "Verify & Login"}
                   </button>

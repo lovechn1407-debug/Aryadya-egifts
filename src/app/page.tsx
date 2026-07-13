@@ -2876,7 +2876,14 @@ export default function HomePage() {
       {sortedMarquees.length > 0 && <MarqueeBar marquees={sortedMarquees} />}
       <Navbar onMenuClick={() => setShowMenu(true)} settings={settings} onLoginClick={() => setShowLogin(true)} />
       <MenuDrawer isOpen={showMenu} onClose={() => setShowMenu(false)} sections={sections} settings={settings} />
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} googleEnabled={settings?.authGoogleEnabled ?? true} phoneEnabled={settings?.authPhoneEnabled ?? true} />}
+      {showLogin && (
+        <LoginModal 
+          onClose={() => setShowLogin(false)} 
+          googleEnabled={settings?.authGoogleEnabled ?? true} 
+          phoneEnabled={settings?.authPhoneEnabled ?? true} 
+          whatsappEnabled={settings?.whatsappOtpEnabled ?? false}
+        />
+      )}
       {selectedProduct && (
         <ProductModal 
           product={selectedProduct} 

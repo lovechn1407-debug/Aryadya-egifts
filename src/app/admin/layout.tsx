@@ -16,6 +16,7 @@ const NAV = [
   { href: "/admin/faqs", icon: "❓", label: "FAQs" },
   { href: "/admin/reviews", icon: "⭐", label: "Reviews" },
   { href: "/admin/popups", icon: "💬", label: "Popups" },
+  { href: "/admin/whatsapp", icon: "🟢", label: "WhatsApp Bot" },
   { href: "/admin/settings", icon: "⚙️", label: "Settings" },
 ];
 
