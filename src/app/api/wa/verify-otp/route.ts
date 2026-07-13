@@ -51,6 +51,13 @@ export async function POST(req: NextRequest) {
 
     const uid = `phone_${cleanPhone}`;
 
+    if (!adminAuth) {
+      return NextResponse.json(
+        { error: "Firebase Admin Auth is not configured on the server. Please set the FIREBASE_SERVICE_ACCOUNT_KEY environment variable on your hosting dashboard." },
+        { status: 500 }
+      );
+    }
+
     // Mint custom token using Firebase Admin SDK
     const customToken = await adminAuth.createCustomToken(uid, {
       phoneNumber: `+${cleanPhone}`

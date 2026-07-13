@@ -43,5 +43,16 @@ if (!apps.length) {
   app = apps[0];
 }
 
-export const adminAuth = getAuth(app);
-export const adminDatabase = getDatabase(app);
+let adminAuth: ReturnType<typeof getAuth> | null = null;
+let adminDatabase: ReturnType<typeof getDatabase> | null = null;
+
+if (app) {
+  try {
+    adminAuth = getAuth(app);
+    adminDatabase = getDatabase(app);
+  } catch (error) {
+    console.error("Error obtaining Firebase Admin services:", error);
+  }
+}
+
+export { adminAuth, adminDatabase };
