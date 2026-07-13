@@ -174,9 +174,32 @@ export default function MyOrdersPage() {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {orders.map(order => {
-                  const displayStatus = (order.paymentMode === "post-pay" && order.status === "pending") ? "editing" : order.status;
-                  const badgeColor = displayStatus === "finalized" ? "#10B981" : (displayStatus === "editing" || displayStatus === "paid") ? "#7C3AED" : "#64748B";
-                  const badgeBg = displayStatus === "finalized" ? "#D1FAE5" : (displayStatus === "editing" || displayStatus === "paid") ? "#F5F3FF" : "#F1F5F9";
+                  const displayStatus = 
+                    order.status === "finalized" 
+                      ? "finalized" 
+                      : (order.status === "paid" || order.status === "editing") 
+                        ? "editing" 
+                        : (order.paymentMode === "post-pay" && order.status === "pending") 
+                          ? "pending-editing" 
+                          : "pending";
+
+                  const badgeColor = 
+                    displayStatus === "finalized" 
+                      ? "#10B981" 
+                      : displayStatus === "editing" 
+                        ? "#7C3AED" 
+                        : displayStatus === "pending-editing"
+                          ? "#D97706"
+                          : "#64748B";
+
+                  const badgeBg = 
+                    displayStatus === "finalized" 
+                      ? "#D1FAE5" 
+                      : displayStatus === "editing" 
+                        ? "#F5F3FF" 
+                        : displayStatus === "pending-editing"
+                          ? "#FEF3C7"
+                          : "#F1F5F9";
 
                   return (
                     <div key={order.id} style={{ background: "#fff", borderRadius: 20, border: "1px solid #E2E8F0", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
@@ -207,14 +230,14 @@ export default function MyOrdersPage() {
                       <div style={{ height: 1, background: "#F1F5F9" }} />
                       
                       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                        {order.paymentMode === "post-pay" && order.status === "pending" && (
+                        {displayStatus === "pending-editing" && (
                           <div style={{ fontSize: 13, color: "#D97706", display: "flex", alignItems: "center", gap: 6, fontWeight: 600, background: "#FFFBEB", padding: "8px 12px", borderRadius: 8, border: "1px solid #FDE68A" }}>
-                            ⚠️ This product is not purchased yet.
+                            ⚠️ Payment is pending and you are editing this draft.
                           </div>
                         )}
                         
                         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                          {order.status === "finalized" ? (
+                          {displayStatus === "finalized" ? (
                             <Link href={`/view/${order.id}`} style={{
                               flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
                               background: "#10B981", color: "#fff", padding: "10px 16px", borderRadius: 10,
@@ -225,7 +248,7 @@ export default function MyOrdersPage() {
                             >
                               <ClipboardSVG size={14} /> View Finalized Surprise
                             </Link>
-                          ) : (order.status === "paid" || order.status === "editing" || (order.paymentMode === "post-pay" && order.status === "pending")) ? (
+                          ) : (displayStatus === "editing" || displayStatus === "pending-editing") ? (
                             <>
                               <Link href={`/edit/${order.id}`} style={{
                                 flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,

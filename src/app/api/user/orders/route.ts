@@ -49,8 +49,12 @@ export async function GET(req: Request) {
                 );
 
                 if (successPayment) {
-                  // Update Firebase DB order status to paid
-                  await updateOrderStatusDB(order.id, "paid");
+                  const isPostPay = order.paymentMode === "post-pay";
+                  const newStatus = isPostPay ? "finalized" : "paid";
+                  const extraPayload = isPostPay ? { finalizedAt: new Date().toISOString() } : {};
+
+                  // Update Firebase DB order status
+                  await updateOrderStatusDB(order.id, newStatus, extraPayload);
                   
                   // Increment coupon usage if order had a coupon
                   if (order.couponCode) {
@@ -61,7 +65,7 @@ export async function GET(req: Request) {
                   }
 
                   // Return the updated status to client immediately
-                  return { ...order, status: "paid" as const };
+                  return { ...order, status: newStatus, ...extraPayload };
                 }
               }
             }
