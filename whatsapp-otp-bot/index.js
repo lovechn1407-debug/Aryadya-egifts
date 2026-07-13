@@ -57,6 +57,15 @@ app.get('/qr', verifySecret, (req, res) => {
   res.json({ status: clientStatus, qrCode: qrCodeData });
 });
 
+app.get('/debug-cache', verifySecret, (req, res) => {
+  const keys = otpCache.keys();
+  const cacheData = {};
+  for (const key of keys) {
+    cacheData[key] = otpCache.get(key);
+  }
+  res.json({ keys, cacheData });
+});
+
 app.post('/send-otp', verifySecret, async (req, res) => {
   const { phone } = req.body;
   if (!phone) {
