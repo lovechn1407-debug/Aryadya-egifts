@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: whatsapp-otp-bot
+    env: docker
+    plan: free
+    rootDirectory: whatsapp-otp-bot
+    envVars:
+      - key: BOT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 3001
+    disk:
+      name: wa-session-data
+      mountPath: /app/wa_session
+      sizeGB: 1
