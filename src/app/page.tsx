@@ -9,7 +9,6 @@ import type { Order } from "@/lib/data";
 import { getProductsDB, getVisibleSectionsDB, getOrdersByBuyerDB, getSettingsDB, Settings, getFAQsDB, getReviewsDB } from "@/lib/db";
 import type { FAQItem, CustomerReview } from "@/lib/db";
 import HomepagePopups from "@/components/HomepagePopups";
-import AdsterraNativeAd from "@/components/AdsterraNativeAd";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginModal from "@/components/LoginModal";
 import ChatWidget from "@/components/ChatWidget";
@@ -1827,9 +1826,6 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
                 <ProductCard product={p} accent={theme.accent} onCardClick={p => onCardClick(p, theme.accent)} />
               </div>
             ))}
-            <div style={{ width: "100%" }}>
-              <AdsterraNativeAd adKey="7e37617b7730bee23bde81a412cda931" />
-            </div>
           </div>
         ) : (
           <div
@@ -1859,15 +1855,6 @@ function OccasionSection({ section, products, onCardClick }: { section: DisplayS
                 <ProductCard product={p} accent={theme.accent} onCardClick={p => onCardClick(p, theme.accent)} />
               </div>
             ))}
-            <div
-              style={{
-                flexShrink: 0,
-                width: "clamp(160px, calc(50vw - 26px), 260px)",
-                scrollSnapAlign: "start",
-              }}
-            >
-              <AdsterraNativeAd adKey="7e37617b7730bee23bde81a412cda931" />
-            </div>
           </div>
         )}
 
@@ -1912,9 +1899,6 @@ function AllGifts({ products, onCardClick }: { products: Product[]; onCardClick:
           {products.map(p => (
             <ProductCard key={p.id} product={p} onCardClick={onCardClick} />
           ))}
-          <div style={{ width: "100%" }}>
-            <AdsterraNativeAd adKey="7e37617b7730bee23bde81a412cda931" />
-          </div>
         </div>
       </div>
     </section>
@@ -2938,10 +2922,6 @@ export default function HomePage() {
       <HowItWorks />
       <ReviewsShowcase reviews={reviews} />
       <FAQShowcase faqs={faqs} />
-      
-      <div style={{ padding: "40px 20px", maxWidth: 1100, margin: "0 auto" }}>
-        <AdsterraNativeAd adKey="7e37617b7730bee23bde81a412cda931" />
-      </div>
 
       <Footer settings={settings} />
     </div>

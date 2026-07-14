@@ -56,7 +56,6 @@ import Confess from "@/components/templates/Confess/Confess";
 import BirthdaySerenade from "@/components/templates/BirthdaySerenade/BirthdaySerenade";
 import MyLoveLanguage from "@/components/templates/MyLoveLanguage/MyLoveLanguage";
 import QRSharePopup from "@/components/QRSharePopup";
-import AdSequenceModal from "@/components/AdSequenceModal";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
 import { isAdminLoggedIn } from "@/lib/data";
@@ -365,10 +364,9 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
   const [paymentError, setPaymentError] = useState("");
   const [postPayAgreed, setPostPayAgreed] = useState(false);
   
-  // Ad Unlock State
-  const [checkoutMethod, setCheckoutMethod] = useState<"cash"|"ads"|"free">("cash");
+  // Checkout Unlock State
+  const [checkoutMethod, setCheckoutMethod] = useState<"cash"|"free">("cash");
   const [requiredAdsCount, setRequiredAdsCount] = useState(1);
-  const [showAdModal, setShowAdModal] = useState(false);
 
   // Tutorial State
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -431,12 +429,11 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
       let cAds = 1;
 
       if (finalProduct?.price === 0) {
-        cMethod = finalProduct.checkoutMethod === "ads" ? "ads" : "free";
-        if (finalProduct.requiredAdsCount) cAds = finalProduct.requiredAdsCount;
+        cMethod = "free";
       }
 
-      setCheckoutMethod(cMethod as "cash" | "ads" | "free");
-      setRequiredAdsCount(cAds);
+      setCheckoutMethod(cMethod as "cash" | "free");
+      setRequiredAdsCount(1);
     })();
   }, [orderId, isPreviewEditor]);
 
@@ -626,36 +623,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
     }
   };
 
-  const handleAdUnlockComplete = async () => {
-    setShowAdModal(false);
-    setPayLoading(true);
-    setPaymentError("");
 
-    try {
-      // Save customisations first
-      await updateOrderCustomizationsDB(orderId, customizations);
-
-      const res = await fetch("/api/order/ad-unlock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, finalize: true })
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        setLocked(true);
-        setShowFinalPanel(false);
-        router.replace(`/view/${orderId}?success=1`);
-      } else {
-        setPaymentError(data.message || "Error finalizing unlock. Please try again.");
-        setPayLoading(false);
-      }
-    } catch (err) {
-      console.error(err);
-      setPaymentError("Error finalizing unlock. Please try again.");
-      setPayLoading(false);
-    }
-  };
 
   const renderTutorial = () => {
     if (tutorialStep === null) return null;
@@ -927,7 +895,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                   className="btn-primary"
                   style={{ padding: "5px 12px", fontSize: 12, background: showFinalPanel ? "#00D9A0" : undefined }}
                 >
-                  {showFinalPanel ? "✕" : ((paymentModeSetting === "post-pay" && order?.status === "pending") ? (checkoutMethod === "ads" ? "Unlock" : "Pay & Finalise") : "Finalise")}
+                  {showFinalPanel ? "✕" : ((paymentModeSetting === "post-pay" && order?.status === "pending") ? (checkoutMethod === "free" ? "Finalise" : "Pay & Finalise") : "Finalise")}
                 </button>
               </>
             )}
@@ -984,13 +952,13 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
         }} className="fade-in-up">
           {(paymentModeSetting === "post-pay" && order?.status === "pending") ? (
             <>
-              <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: "#fff" }}>{checkoutMethod === "ads" ? "🔓 Unlock & Finalise" : checkoutMethod === "free" ? "✨ Finalise for Free" : "💳 Pay & Finalise"}</h3>
+              <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: "#fff" }}>{checkoutMethod === "free" ? "✨ Finalise for Free" : "💳 Pay & Finalise"}</h3>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginBottom: 16 }}>
-                You are about to complete your order. Once {checkoutMethod === "ads" ? "unlocked" : checkoutMethod === "free" ? "finalised" : "paid"}, the page will be locked and your shareable link will be generated.
+                You are about to complete your order. Once {checkoutMethod === "free" ? "finalised" : "paid"}, the page will be locked and your shareable link will be generated.
               </p>
 
-              {/* Price Details - Hide if Ads mode or Free mode */}
-              {(checkoutMethod !== "ads" && checkoutMethod !== "free") && (
+              {/* Price Details - Hide if Free mode */}
+              {(checkoutMethod !== "free") && (
                 <>
                   <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
@@ -1063,7 +1031,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                   style={{ marginTop: 3, width: 17, height: 17, accentColor: "#FF2D78", flexShrink: 0 }}
                 />
                 <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
-                  I've reviewed all slides and I'm happy with my edits. Once {checkoutMethod === "ads" ? "unlocked" : checkoutMethod === "free" ? "finalised" : "paid"}, the design is <strong style={{ color: "#fff" }}>locked permanently</strong>.
+                  I've reviewed all slides and I'm happy with my edits. Once {checkoutMethod === "free" ? "finalised" : "paid"}, the design is <strong style={{ color: "#fff" }}>locked permanently</strong>.
                 </span>
               </label>
 
@@ -1071,9 +1039,9 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
                 className="btn-primary pulse-glow"
                 style={{ width: "100%", justifyContent: "center", cursor: (payLoading || !postPayAgreed) ? "not-allowed" : "pointer", opacity: postPayAgreed ? 1 : 0.4 }}
                 disabled={payLoading || !postPayAgreed}
-                onClick={checkoutMethod === "ads" ? () => setShowAdModal(true) : handlePayment}
+                onClick={handlePayment}
               >
-                {payLoading ? "Processing…" : (checkoutMethod === "ads" ? `Watch ${requiredAdsCount} Ad${requiredAdsCount > 1 ? "s" : ""} to Lock 🔒` : checkoutMethod === "free" ? "Finalise for FREE 🔒" : "Continue to Payment 🔒")}
+                {payLoading ? "Processing…" : (checkoutMethod === "free" ? "Finalise for FREE 🔒" : "Continue to Payment 🔒")}
               </button>
             </>
           ) : (
@@ -1135,14 +1103,7 @@ export default function EditorPage({ params }: { params: Promise<{ orderId: stri
         />
       )}
 
-      {/* ── AD SEQUENCE MODAL ── */}
-      {showAdModal && (
-        <AdSequenceModal
-          requiredAds={requiredAdsCount}
-          onComplete={handleAdUnlockComplete}
-          onCancel={() => setShowAdModal(false)}
-        />
-      )}
+
 
       {/* ── INTERACTIVE TUTORIAL OVERLAY ── */}
       {renderTutorial()}

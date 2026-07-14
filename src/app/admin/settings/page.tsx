@@ -201,35 +201,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Ad Mode */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B" }}>Global Ad Formatting</h2>
-            <p style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>
-              Enable or disable specific formats of Adsterra ads across the platform.
-            </p>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#475569" }}>Direct Link Ads</span>
-              <div style={{ position: "relative", display: "inline-block", width: 44, height: 24 }}>
-                <input type="checkbox" checked={settings.enableLinkAds ?? true} onChange={e => handleGlobalChange("enableLinkAds", e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                <span style={{ position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0, background: (settings.enableLinkAds ?? true) ? "#10B981" : "#CBD5E1", transition: "0.4s", borderRadius: 34 }}>
-                  <span style={{ position: "absolute", content: "''", height: 16, width: 16, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: (settings.enableLinkAds ?? true) ? "translateX(20px)" : "none" }}></span>
-                </span>
-              </div>
-            </label>
-            <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#475569" }}>Banner Ads</span>
-              <div style={{ position: "relative", display: "inline-block", width: 44, height: 24 }}>
-                <input type="checkbox" checked={settings.enableBannerAds ?? false} onChange={e => handleGlobalChange("enableBannerAds", e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                <span style={{ position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0, background: (settings.enableBannerAds ?? false) ? "#10B981" : "#CBD5E1", transition: "0.4s", borderRadius: 34 }}>
-                  <span style={{ position: "absolute", content: "''", height: 16, width: 16, left: 4, bottom: 4, background: "white", transition: "0.4s", borderRadius: "50%", transform: (settings.enableBannerAds ?? false) ? "translateX(20px)" : "none" }}></span>
-                </span>
-              </div>
-            </label>
-          </div>
-        </div>
+
 
         {/* Authentication Settings */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 24, borderBottom: "1px solid #F1F5F9" }}>
