@@ -5,7 +5,7 @@
 // =============================================
 import { NextRequest, NextResponse } from "next/server";
 import { getProductDB, createPendingOrderDB } from "@/lib/db";
-import { getCouponDB, getOrdersByBuyerDB, saveCouponDB } from "@/lib/db";
+import { getCouponDB, getOrdersByBuyerDB, saveCouponDB, parseDateLocalOrUTC } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limiter";
 import { CreateCashfreeOrderSchema, formatZodError } from "@/lib/schemas";
 
@@ -100,13 +100,15 @@ export async function POST(req: NextRequest) {
         console.warn(`[create-order] Coupon "${couponCode}" stock exhausted: ${c.usedCount}/${c.totalStocks}`);
       } else {
         const now = new Date();
-        const validFromOk = !c.validFrom || now >= new Date(c.validFrom);
-        const validToOk = !c.validTo || now <= new Date(c.validTo);
+        const parsedFrom = parseDateLocalOrUTC(c.validFrom);
+        const parsedTo = parseDateLocalOrUTC(c.validTo);
+        const validFromOk = !parsedFrom || now >= parsedFrom;
+        const validToOk = !parsedTo || now <= parsedTo;
         const notExpired = validFromOk && validToOk;
         const meetsMin = c.minimumOrderValue <= product.price;
 
         if (!notExpired) {
-          console.warn(`[create-order] Coupon "${couponCode}" time window mismatch. validFrom: ${c.validFrom}, validTo: ${c.validTo}, now: ${now.toISOString()}`);
+          console.warn(`[create-order] Coupon "${couponCode}" time window mismatch. validFrom: ${c.validFrom} (parsed: ${parsedFrom?.toISOString()}), validTo: ${c.validTo} (parsed: ${parsedTo?.toISOString()}), now: ${now.toISOString()}`);
         } else if (!meetsMin) {
           console.warn(`[create-order] Coupon "${couponCode}" min order not met: ${c.minimumOrderValue} > ${product.price}`);
         } else {

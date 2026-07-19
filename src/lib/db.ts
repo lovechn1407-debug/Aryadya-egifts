@@ -365,6 +365,16 @@ export async function getOrdersByBuyerDB(phone: string, email: string): Promise<
   });
 }
 
+export function parseDateLocalOrUTC(dateStr: string | undefined): Date | null {
+  if (!dateStr) return null;
+  const clean = dateStr.trim();
+  if (!clean) return null;
+  if (!clean.endsWith("Z") && !/[+-]\d{2}:?\d{2}$/.test(clean)) {
+    return new Date(`${clean}+05:30`);
+  }
+  return new Date(clean);
+}
+
 // ── COUPONS ───────────────────────────────────────────────────────────────────
 export async function getCouponsDB(): Promise<Coupon[]> {
   const snap = await get(ref(database, "coupons"));

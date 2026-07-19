@@ -4,7 +4,7 @@
 // Used in the Post-Pay flow from the editor.
 // =============================================
 import { NextRequest, NextResponse } from "next/server";
-import { getProductDB, getOrderDB, getCouponDB, getOrdersByBuyerDB, saveCouponDB, updateOrderCouponDB } from "@/lib/db";
+import { getProductDB, getOrderDB, getCouponDB, getOrdersByBuyerDB, saveCouponDB, updateOrderCouponDB, parseDateLocalOrUTC } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limiter";
 import { PayCashfreeOrderSchema, formatZodError } from "@/lib/schemas";
 
@@ -87,9 +87,11 @@ export async function POST(req: NextRequest) {
       const c = await getCouponDB(couponCode);
       if (c && c.active && c.usedCount < c.totalStocks) {
         const now = new Date();
-        const notExpired =
-          (!c.validFrom || now >= new Date(c.validFrom)) &&
-          (!c.validTo || now <= new Date(c.validTo));
+        const parsedFrom = parseDateLocalOrUTC(c.validFrom);
+        const parsedTo = parseDateLocalOrUTC(c.validTo);
+        const validFromOk = !parsedFrom || now >= parsedFrom;
+        const validToOk = !parsedTo || now <= parsedTo;
+        const notExpired = validFromOk && validToOk;
         const meetsMin = c.minimumOrderValue <= product.price;
 
         if (notExpired && meetsMin) {

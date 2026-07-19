@@ -2,7 +2,7 @@
 import { use, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getProduct } from "@/lib/data";
-import { getCouponDB, getOrdersByBuyerDB, getSettingsDB } from "@/lib/db";
+import { getCouponDB, getOrdersByBuyerDB, getSettingsDB, parseDateLocalOrUTC } from "@/lib/db";
 import type { Coupon } from "@/lib/data";
 import Link from "next/link";
 
@@ -191,8 +191,10 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
         return;
       }
       const now = new Date();
-      if (c.validFrom && now < new Date(c.validFrom)) { setCouponMsg({ type: "error", text: "Coupon is not valid yet." }); return; }
-      if (c.validTo && now > new Date(c.validTo)) { setCouponMsg({ type: "error", text: "Coupon has expired." }); return; }
+      const parsedFrom = parseDateLocalOrUTC(c.validFrom);
+      const parsedTo = parseDateLocalOrUTC(c.validTo);
+      if (parsedFrom && now < parsedFrom) { setCouponMsg({ type: "error", text: "Coupon is not valid yet." }); return; }
+      if (parsedTo && now > parsedTo) { setCouponMsg({ type: "error", text: "Coupon has expired." }); return; }
 
       if (buyerEmail && buyerPhone) {
         const pastOrders = await getOrdersByBuyerDB(buyerPhone, buyerEmail);
