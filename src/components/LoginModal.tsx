@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "@/lib/firebase";
 import { 
-  signInWithPopup, 
+  signInWithRedirect, 
   GoogleAuthProvider, 
   RecaptchaVerifier, 
   signInWithPhoneNumber, 
@@ -61,11 +61,10 @@ export default function LoginModal({
     setLoading(true);
     setError("");
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-      onClose();
+      await signInWithRedirect(auth, new GoogleAuthProvider());
     } catch (err: any) {
       console.error(err);
-      setError("Failed to sign in with Google. Please try again.");
+      setError(err?.message || "Failed to sign in with Google. Please try again.");
       setLoading(false);
     }
   };
