@@ -418,9 +418,31 @@ export default function CreatorDashboard() {
   const [activeTab, setActiveTab] = useState<"overview" | "coupons" | "orders" | "payouts" | "settings">("overview");
 
   // Local state for editing settings
-  const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", instagram: "", youtube: "", other: "" });
+  const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", instagram: "", youtube: "", other: "", upiId: "", upiName: "" });
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState("");
+
+  // Notice dismissal state
+  const [hideNotice, setHideNotice] = useState(false);
+  const [showDismissModal, setShowDismissModal] = useState(false);
+  const [dontShowAgainCheck, setDontShowAgainCheck] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const dismissed = localStorage.getItem("hide_creator_notice");
+      if (dismissed === "true") {
+        setHideNotice(true);
+      }
+    }
+  }, []);
+
+  const confirmDismissNotice = () => {
+    if (dontShowAgainCheck && typeof window !== "undefined") {
+      localStorage.setItem("hide_creator_notice", "true");
+    }
+    setHideNotice(true);
+    setShowDismissModal(false);
+  };
 
   // Claimed Rewards state persistence
   const [claimedRewards, setClaimedRewards] = useState<string[]>([]);
@@ -455,7 +477,9 @@ export default function CreatorDashboard() {
           phone: json.creator.phone || "",
           instagram: json.creator.instagramHandle || "",
           youtube: json.creator.youtubeHandle || "",
-          other: json.creator.otherHandle || ""
+          other: json.creator.otherHandle || "",
+          upiId: json.creator.upiId || "",
+          upiName: json.creator.upiName || "",
         });
       } else {
         router.replace("/creator");
@@ -515,7 +539,9 @@ export default function CreatorDashboard() {
           phone: settingsForm.phone,
           instagramHandle: settingsForm.instagram,
           youtubeHandle: settingsForm.youtube,
-          otherHandle: settingsForm.other
+          otherHandle: settingsForm.other,
+          upiId: settingsForm.upiId,
+          upiName: settingsForm.upiName,
         })
       });
       const resData = await res.json();
@@ -550,6 +576,10 @@ export default function CreatorDashboard() {
   const paidOrders = orders.filter(o => o.status === "paid" || o.status === "editing" || o.status === "finalized");
   const thisMonth = new Date().toISOString().slice(0, 7);
   const thisMonthEarnings = monthlyEarnings[thisMonth] || 0;
+
+  const missingUpi = !creator.upiId || !creator.upiName;
+  const missingPhone = !creator.phone;
+  const missingSocial = !creator.instagramHandle && !creator.youtubeHandle && !creator.otherHandle;
 
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: <BarChartIcon /> },
@@ -746,6 +776,93 @@ export default function CreatorDashboard() {
               {activeTab === "settings" && "Update your creator public details, handles, and account information."}
             </p>
           </div>
+
+          {/* ── Top Notice Bar for Critical Issues ── */}
+          {!hideNotice && (missingUpi || missingPhone || missingSocial) && (
+            <div style={{
+              background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 16,
+              padding: "16px 20px", marginBottom: 24, display: "flex", alignItems: "center",
+              justifyContent: "space-between", gap: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+            }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <span style={{ fontSize: 20, lineHeight: 1 }}>⚠️</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#92400E", marginBottom: 4 }}>
+                    Action Required: Complete your creator profile
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#B45309", display: "flex", flexDirection: "column", gap: 3 }}>
+                    {missingUpi && <li>Add your <strong>UPI ID & Registered Name</strong> under Settings to receive instant payouts.</li>}
+                    {missingPhone && <li>Add your <strong>Phone Number</strong> under Settings to receive payout notifications.</li>}
+                    {missingSocial && <li>Add at least one <strong>Social Handle (Instagram/YouTube)</strong> under Settings.</li>}
+                  </ul>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDismissModal(true)}
+                style={{
+                  background: "#FEF3C7", border: "1px solid #FDE68A", color: "#92400E", cursor: "pointer",
+                  borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 14, fontWeight: 700, flexShrink: 0
+                }}
+                title="Close notice"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Dismissal Confirmation Modal */}
+          {showDismissModal && (
+            <div style={{
+              position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+              background: "rgba(15,23,42,0.6)", zIndex: 9999, display: "flex",
+              alignItems: "center", justifyContent: "center", padding: 20,
+              backdropFilter: "blur(4px)"
+            }}>
+              <div style={{
+                background: "#FFFFFF", borderRadius: 20, padding: 24, maxWidth: 420,
+                width: "100%", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
+                animation: "fadeUp 0.2s ease-out"
+              }}>
+                <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: "#0F172A" }}>Dismiss Important Notice?</h3>
+                <p style={{ margin: "0 0 20px", fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
+                  Missing payment details like your UPI ID will prevent the admin from transferring your earned commissions automatically.
+                </p>
+                
+                <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 24, cursor: "pointer", userSelect: "none" }}>
+                  <input
+                    type="checkbox"
+                    checked={dontShowAgainCheck}
+                    onChange={e => setDontShowAgainCheck(e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: "#6366F1", cursor: "pointer" }}
+                  />
+                  Don't show this notice again
+                </label>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                  <button
+                    onClick={() => setShowDismissModal(false)}
+                    style={{
+                      padding: "9px 16px", borderRadius: 10, border: "1px solid #CBD5E1",
+                      background: "#FFFFFF", color: "#475569", fontSize: 13, fontWeight: 700, cursor: "pointer"
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDismissNotice}
+                    style={{
+                      padding: "9px 18px", borderRadius: 10, border: "none",
+                      background: "#6366F1", color: "#FFFFFF", fontSize: 13, fontWeight: 700, cursor: "pointer",
+                      boxShadow: "0 4px 12px rgba(99,102,241,0.25)"
+                    }}
+                  >
+                    Dismiss Notice
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Stats Summary row */}
           {activeTab !== "settings" && (
@@ -1050,6 +1167,48 @@ export default function CreatorDashboard() {
                       borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
                     }}
                   />
+                </div>
+
+                <div style={{ borderTop: "1px solid #F1F5F9", paddingTop: 20, marginTop: 10 }}>
+                  <h3 style={{ fontSize: 13, fontWeight: 800, color: "#0F172A", margin: "0 0 16px", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    💳 Payout Payment Details
+                  </h3>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                        UPI ID (VPA)
+                      </label>
+                      <input
+                        type="text"
+                        value={settingsForm.upiId}
+                        onChange={e => setSettingsForm(prev => ({ ...prev, upiId: e.target.value.trim() }))}
+                        placeholder="e.g. username@upi or mobile@paytm"
+                        style={{
+                          width: "100%", padding: "11px 14px", boxSizing: "border-box",
+                          background: "#FFFFFF", border: "1px solid #CBD5E1",
+                          borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                        Account Registered Name
+                      </label>
+                      <input
+                        type="text"
+                        value={settingsForm.upiName}
+                        onChange={e => setSettingsForm(prev => ({ ...prev, upiName: e.target.value }))}
+                        placeholder="Full name as registered in bank"
+                        style={{
+                          width: "100%", padding: "11px 14px", boxSizing: "border-box",
+                          background: "#FFFFFF", border: "1px solid #CBD5E1",
+                          borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {settingsMessage && (

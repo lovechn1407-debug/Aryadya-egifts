@@ -9,7 +9,7 @@ import type { Creator } from "@/lib/db";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { uid, name, email, phone, photoURL, googleId, instagramHandle, youtubeHandle, otherHandle } = body;
+    const { uid, name, email, phone, photoURL, googleId, instagramHandle, youtubeHandle, otherHandle, upiId, upiName } = body;
 
     if (!uid || !email) {
       return NextResponse.json({ success: false, message: "uid and email are required." }, { status: 400 });
@@ -23,9 +23,11 @@ export async function POST(req: NextRequest) {
         name: name || existing.name,
         photoURL: photoURL || existing.photoURL,
         phone: phone || existing.phone,
-        instagramHandle: instagramHandle || existing.instagramHandle,
-        youtubeHandle: youtubeHandle || existing.youtubeHandle,
-        otherHandle: otherHandle || existing.otherHandle,
+        instagramHandle: instagramHandle !== undefined ? instagramHandle : (existing.instagramHandle || ""),
+        youtubeHandle: youtubeHandle !== undefined ? youtubeHandle : (existing.youtubeHandle || ""),
+        otherHandle: otherHandle !== undefined ? otherHandle : (existing.otherHandle || ""),
+        upiId: upiId !== undefined ? upiId : (existing.upiId || ""),
+        upiName: upiName !== undefined ? upiName : (existing.upiName || ""),
       });
       return NextResponse.json({ success: true, creator: { ...existing, name, photoURL } });
     }
@@ -41,6 +43,8 @@ export async function POST(req: NextRequest) {
       instagramHandle: instagramHandle || "",
       youtubeHandle: youtubeHandle || "",
       otherHandle: otherHandle || "",
+      upiId: upiId || "",
+      upiName: upiName || "",
       totalReferrals: 0,
       totalEarningsPaise: 0,
       totalPaidPaise: 0,

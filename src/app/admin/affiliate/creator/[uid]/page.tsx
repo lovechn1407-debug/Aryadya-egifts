@@ -134,6 +134,28 @@ export default function AdminCreatorDetailPage({ params }: { params: Promise<{ u
     await fetchData();
   };
 
+  const payViaCashfree = async (payoutId: string) => {
+    if (!confirm("Are you sure you want to process this payout instantly via Cashfree? This will send real money to the creator's UPI ID.")) {
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin/affiliate/payouts/cashfree", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payoutId, creatorId: uid }),
+      });
+      const resJson = await res.json();
+      if (resJson.success) {
+        alert(`✅ Payout Successful!\nReference ID: ${resJson.referenceId}`);
+        await fetchData();
+      } else {
+        alert(`❌ Payout Failed: ${resJson.message}`);
+      }
+    } catch (e: any) {
+      alert(`❌ Error processing Cashfree payout: ${e?.message || e}`);
+    }
+  };
+
   if (loading || !data) {
     return <div style={{ padding: "40px 0", textAlign: "center", color: "#64748B" }}>Loading creator profile...</div>;
   }
@@ -160,6 +182,7 @@ export default function AdminCreatorDetailPage({ params }: { params: Promise<{ u
           <p style={{ color: "#64748B", fontSize: 13, margin: "0 0 10px" }}>{creator.email} · Joined {new Date(creator.registeredAt).toLocaleDateString("en-IN")}</p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 12 }}>
             {creator.phone && <span style={{ color: "#64748B" }}>📱 {creator.phone}</span>}
+            {creator.upiId && <span style={{ color: "#0F172A", background: "#F1F5F9", padding: "3px 8px", borderRadius: 6 }}>💳 UPI: <strong>{creator.upiId}</strong> ({creator.upiName})</span>}
             {creator.instagramHandle && <span style={{ color: "#64748B" }}>📸 {creator.instagramHandle}</span>}
             {creator.youtubeHandle && <span style={{ color: "#64748B" }}>▶️ {creator.youtubeHandle}</span>}
             {creator.otherHandle && <span style={{ color: "#64748B" }}>🔗 {creator.otherHandle}</span>}
@@ -336,9 +359,27 @@ export default function AdminCreatorDetailPage({ params }: { params: Promise<{ u
                     </td>
                     <td style={{ padding: "12px 14px" }}>
                       {p.status === "pending" && (
-                        <button onClick={() => markPayoutPaid(p.id)} style={{ padding: "5px 12px", borderRadius: 6, background: "#ECFDF5", color: "#059669", border: "none", fontWeight: 700, fontSize: 11, cursor: "pointer" }}>
-                          Mark Paid
-                        </button>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <button onClick={() => markPayoutPaid(p.id)} style={{ padding: "5px 12px", borderRadius: 6, background: "#F1F5F9", color: "#475569", border: "1px solid #CBD5E1", fontWeight: 700, fontSize: 11, cursor: "pointer" }}>
+                            Mark Paid
+                          </button>
+                          <button
+                            onClick={() => payViaCashfree(p.id)}
+                            disabled={!creator.upiId}
+                            style={{
+                              padding: "5px 12px", borderRadius: 6,
+                              background: creator.upiId ? "#ECFDF5" : "#F8FAFC",
+                              color: creator.upiId ? "#059669" : "#94A3B8",
+                              border: creator.upiId ? "1px solid #A7F3D0" : "1px solid #E2E8F0",
+                              fontWeight: 700, fontSize: 11,
+                              cursor: creator.upiId ? "pointer" : "not-allowed",
+                              display: "inline-flex", alignItems: "center", gap: 4
+                            }}
+                            title={!creator.upiId ? "Creator has not set a UPI ID" : "Instant Pay via Cashfree Payouts API"}
+                          >
+                            ⚡ Instant Pay (Cashfree)
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>

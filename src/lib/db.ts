@@ -718,6 +718,8 @@ export interface Creator {
   totalEarningsPaise: number; // total commission earned (in paise)
   totalPaidPaise: number; // total payouts made (in paise)
   registeredAt: string;
+  upiId?: string; // UPI ID for payments
+  upiName?: string; // Bank account name registered with UPI
 }
 
 export async function getCreatorDB(uid: string): Promise<Creator | null> {
