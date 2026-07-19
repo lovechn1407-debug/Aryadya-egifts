@@ -223,7 +223,7 @@ export default function MyOrdersPage() {
                           </div>
                         </div>
                         <div style={{ textAlign: "right" }}>
-                          <div style={{ fontSize: 18, fontWeight: 800, color: "#1E293B" }}>₹{order.amount}</div>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: "#1E293B" }}>₹{Math.floor(order.amount / 100)}</div>
                         </div>
                       </div>
                       
