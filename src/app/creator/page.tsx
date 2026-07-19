@@ -106,41 +106,36 @@ export default function CreatorLoginPage() {
 
   if (checkingAuth) {
     return (
-      <div style={{ minHeight: "100vh", background: "#0A0A0F", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: 40, height: 40, border: "3px solid #7C3AED", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      <div style={{ minHeight: "100vh", background: "#F8FAFC", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 40, height: 40, border: "3px solid #6366F1", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
         <style>{`@keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }`}</style>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0A0A0F", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif", padding: "20px" }}>
+    <div style={{ minHeight: "100vh", background: "#F8FAFC", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif", padding: "20px" }}>
       <style>{`
         @keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)} }
-        @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(124,58,237,0.3)} 50%{box-shadow:0 0 40px rgba(124,58,237,0.6),0 0 80px rgba(236,72,153,0.2)} }
-        .google-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(124,58,237,0.35) !important; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+        .google-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15) !important; background: #4F46E5 !important; }
         .google-btn:active { transform: translateY(0); }
-        .input-field:focus { border-color: #7C3AED !important; box-shadow: 0 0 0 3px rgba(124,58,237,0.15) !important; outline: none; }
+        .cancel-btn:hover { background: #E2E8F0 !important; }
+        .input-field:focus { border-color: #6366F1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important; outline: none; }
       `}</style>
 
-      {/* Background orbs */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
-        <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)", top: -200, right: -100, animation: "float 8s ease-in-out infinite" }} />
-        <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(236,72,153,0.08) 0%, transparent 70%)", bottom: -100, left: -100, animation: "float 10s ease-in-out infinite reverse" }} />
-      </div>
-
-      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 440, animation: "fadeUp 0.5s ease forwards" }}>
+      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 440, animation: "fadeUp 0.4s ease forwards" }}>
         {/* Logo & Brand */}
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{
-            width: 72, height: 72, borderRadius: 20, margin: "0 auto 20px",
-            background: "linear-gradient(135deg, #7C3AED, #EC4899)",
+            width: 64, height: 64, borderRadius: 16, margin: "0 auto 16px",
+            background: "#6366F1",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 32, animation: "glow 3s ease-in-out infinite",
+            fontSize: 28, color: "#FFFFFF",
+            boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)"
           }}>🤝</div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: "#F1F5F9", margin: 0, letterSpacing: -0.5 }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: -0.5 }}>
             Creator Portal
           </h1>
           <p style={{ color: "#64748B", fontSize: 14, marginTop: 8, lineHeight: 1.5 }}>
@@ -151,35 +146,36 @@ export default function CreatorLoginPage() {
           </p>
         </div>
 
-        {/* Card */}
+        {/* Main Card */}
         <div style={{
-          background: "rgba(15,15,25,0.8)", backdropFilter: "blur(24px)",
-          border: "1px solid rgba(124,58,237,0.2)", borderRadius: 24,
+          background: "#FFFFFF",
+          border: "1px solid #E2E8F0",
+          borderRadius: 20,
           padding: "36px 32px",
-          boxShadow: "0 32px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)"
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)"
         }}>
           {step === "login" && (
             <>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: "#E2E8F0", margin: "0 0 8px" }}>Welcome back</h2>
-              <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 28px" }}>Sign in with Google to access your affiliate dashboard.</p>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", margin: "0 0 6px" }}>Welcome</h2>
+              <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 24px" }}>Sign in with Google to access your affiliate dashboard.</p>
 
               {/* Feature highlights */}
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                 {[
-                  { icon: "💰", text: "Earn commission on every referred sale" },
-                  { icon: "📊", text: "Track your earnings & milestones in real-time" },
-                  { icon: "🎁", text: "Unlock reward bonuses as you refer more" },
+                  { icon: "💵", text: "Earn commission on every referred sale" },
+                  { icon: "📈", text: "Track your earnings & milestones in real-time" },
+                  { icon: "🏆", text: "Unlock reward bonuses as you refer more" },
                 ].map(item => (
-                  <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "rgba(124,58,237,0.06)", borderRadius: 10, border: "1px solid rgba(124,58,237,0.1)" }}>
-                    <span style={{ fontSize: 18 }}>{item.icon}</span>
-                    <span style={{ fontSize: 13, color: "#94A3B8", fontWeight: 500 }}>{item.text}</span>
+                  <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "#F8FAFC", borderRadius: 10, border: "1px solid #E2E8F0" }}>
+                    <span style={{ fontSize: 16 }}>{item.icon}</span>
+                    <span style={{ fontSize: 13, color: "#475569", fontWeight: 500 }}>{item.text}</span>
                   </div>
                 ))}
               </div>
 
               {error && (
-                <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "12px 16px", marginBottom: 20 }}>
-                  <p style={{ color: "#F87171", fontSize: 13, margin: 0, fontWeight: 600 }}>⚠️ {error}</p>
+                <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 10, padding: "12px 16px", marginBottom: 20 }}>
+                  <p style={{ color: "#EF4444", fontSize: 13, margin: 0, fontWeight: 600 }}>⚠️ {error}</p>
                 </div>
               )}
 
@@ -189,12 +185,12 @@ export default function CreatorLoginPage() {
                 className="google-btn"
                 style={{
                   width: "100%", padding: "14px 20px",
-                  background: loading ? "rgba(124,58,237,0.3)" : "linear-gradient(135deg, #7C3AED, #6D28D9)",
-                  border: "1px solid rgba(124,58,237,0.4)", borderRadius: 14,
-                  color: "#fff", fontWeight: 700, fontSize: 15, cursor: loading ? "not-allowed" : "pointer",
+                  background: loading ? "#A5B4FC" : "#6366F1",
+                  border: "none", borderRadius: 12,
+                  color: "#FFFFFF", fontWeight: 700, fontSize: 15, cursor: loading ? "not-allowed" : "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                  transition: "all 0.25s ease",
-                  boxShadow: "0 8px 24px rgba(124,58,237,0.25)"
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)"
                 }}
               >
                 {loading ? (
@@ -215,25 +211,29 @@ export default function CreatorLoginPage() {
                 )}
               </button>
 
-              <p style={{ textAlign: "center", fontSize: 11, color: "#475569", marginTop: 20, lineHeight: 1.6 }}>
-                By signing in, you agree to our affiliate program terms. Your Google profile data is used only for account creation.
+              <p style={{ textAlign: "center", fontSize: 11, color: "#94A3B8", marginTop: 20, lineHeight: 1.6 }}>
+                By signing in, you agree to our affiliate program terms. Your Google profile data is used only for account registration.
               </p>
             </>
           )}
 
           {step === "register" && pendingUser && (
             <>
-              {/* User avatar preview */}
-              <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px", background: "rgba(124,58,237,0.08)", borderRadius: 14, border: "1px solid rgba(124,58,237,0.15)", marginBottom: 24 }}>
-                {pendingUser.photoURL && <img src={pendingUser.photoURL} alt={pendingUser.name} style={{ width: 48, height: 48, borderRadius: "50%", border: "2px solid rgba(124,58,237,0.4)" }} />}
+              {/* User Identity Preview */}
+              <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px", background: "#F8FAFC", borderRadius: 12, border: "1px solid #E2E8F0", marginBottom: 24 }}>
+                {pendingUser.photoURL ? (
+                  <img src={pendingUser.photoURL} alt={pendingUser.name} style={{ width: 44, height: 44, borderRadius: "50%", border: "2px solid #E2E8F0", objectFit: "cover" }} />
+                ) : (
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#EEF2F6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>👤</div>
+                )}
                 <div>
-                  <p style={{ margin: 0, fontWeight: 700, color: "#E2E8F0", fontSize: 15 }}>{pendingUser.name}</p>
+                  <p style={{ margin: 0, fontWeight: 700, color: "#0F172A", fontSize: 14 }}>{pendingUser.name}</p>
                   <p style={{ margin: 0, color: "#64748B", fontSize: 12 }}>{pendingUser.email}</p>
                 </div>
               </div>
 
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: "#E2E8F0", margin: "0 0 4px" }}>Complete Your Profile</h2>
-              <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 24px" }}>We need a few more details to set up your affiliate account.</p>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", margin: "0 0 4px" }}>Complete Your Profile</h2>
+              <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 20px" }}>We need a few details to set up your affiliate account.</p>
 
               {[
                 { key: "phone", label: "Phone Number *", placeholder: "10-digit mobile number", type: "tel" },
@@ -242,7 +242,7 @@ export default function CreatorLoginPage() {
                 { key: "other", label: "Other Platform", placeholder: "Website or other link", type: "text" },
               ].map(field => (
                 <div key={field.key} style={{ marginBottom: 16 }}>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#94A3B8", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
                     {field.label}
                   </label>
                   <input
@@ -252,27 +252,28 @@ export default function CreatorLoginPage() {
                     onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
                     placeholder={field.placeholder}
                     style={{
-                      width: "100%", padding: "12px 16px", boxSizing: "border-box",
-                      background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: 10, color: "#E2E8F0", fontSize: 14, transition: "all 0.2s",
+                      width: "100%", padding: "12px 14px", boxSizing: "border-box",
+                      background: "#FFFFFF", border: "1px solid #CBD5E1",
+                      borderRadius: 10, color: "#0F172A", fontSize: 14, transition: "all 0.2s",
                     }}
                   />
                 </div>
               ))}
 
               {error && (
-                <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "10px 14px", marginBottom: 16 }}>
-                  <p style={{ color: "#F87171", fontSize: 12, margin: 0, fontWeight: 600 }}>⚠️ {error}</p>
+                <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 10, padding: "10px 14px", marginBottom: 16 }}>
+                  <p style={{ color: "#EF4444", fontSize: 12, margin: 0, fontWeight: 600 }}>⚠️ {error}</p>
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
                 <button
                   onClick={handleCancel}
+                  className="cancel-btn"
                   style={{
-                    flex: 1, padding: "12px", borderRadius: 12,
-                    background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
-                    color: "#94A3B8", fontWeight: 700, fontSize: 14, cursor: "pointer", transition: "all 0.2s"
+                    flex: 1, padding: "12px", borderRadius: 10,
+                    background: "#F1F5F9", border: "none",
+                    color: "#475569", fontWeight: 700, fontSize: 14, cursor: "pointer", transition: "all 0.2s"
                   }}
                 >
                   Cancel
@@ -281,17 +282,17 @@ export default function CreatorLoginPage() {
                   onClick={handleRegister}
                   disabled={saving}
                   style={{
-                    flex: 2, padding: "12px", borderRadius: 12,
-                    background: saving ? "rgba(124,58,237,0.4)" : "linear-gradient(135deg, #7C3AED, #EC4899)",
-                    border: "none", color: "#fff", fontWeight: 700, fontSize: 14,
+                    flex: 2, padding: "12px", borderRadius: 10,
+                    background: saving ? "#A5B4FC" : "#6366F1",
+                    border: "none", color: "#FFFFFF", fontWeight: 700, fontSize: 14,
                     cursor: saving ? "not-allowed" : "pointer", transition: "all 0.2s",
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                    boxShadow: saving ? "none" : "0 8px 24px rgba(124,58,237,0.3)"
+                    boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)"
                   }}
                 >
                   {saving ? (
                     <><div style={{ width: 18, height: 18, border: "2.5px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /> Saving...</>
-                  ) : "Join Affiliate Program 🚀"}
+                  ) : "Join Program 🚀"}
                 </button>
               </div>
             </>
@@ -299,7 +300,7 @@ export default function CreatorLoginPage() {
         </div>
 
         {/* Footer */}
-        <p style={{ textAlign: "center", fontSize: 12, color: "#334155", marginTop: 24 }}>
+        <p style={{ textAlign: "center", fontSize: 12, color: "#64748B", marginTop: 28 }}>
           Aradhya E-Giftings · Affiliate Program
         </p>
       </div>
