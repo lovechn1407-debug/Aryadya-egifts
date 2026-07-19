@@ -25,8 +25,105 @@ interface DashboardData {
 
 function fmt(paise: number) { return `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`; }
 
-// Modernized stat cards with custom borders and clear layout
-function StatCard({ icon, label, value, sub, color }: { icon: string; label: string; value: string; sub?: string; color: string }) {
+/* ── Inline SVG Icon Components ── */
+function BarChartIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+
+function CouponIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+      <line x1="13" y1="5" x2="13" y2="19" />
+    </svg>
+  );
+}
+
+function BriefcaseIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </svg>
+  );
+}
+
+function DollarIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  );
+}
+
+function SettingsIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
+
+function CalendarIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+}
+
+function ShieldIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  );
+}
+
+function TrophyIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+      <path d="M4 22h16" />
+      <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
+      <path d="M12 2a6 6 0 0 1 6 6v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6z" />
+    </svg>
+  );
+}
+
+function TargetIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
+
+function UserIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+// Custom Stat Card
+function StatCard({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: string; sub?: string; color: string }) {
   return (
     <div style={{
       background: "#FFFFFF",
@@ -37,14 +134,13 @@ function StatCard({ icon, label, value, sub, color }: { icon: string; label: str
       alignItems: "center",
       gap: 16,
       boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-      flex: 1,
-      minWidth: 200,
+      flex: "1 1 200px",
     }}>
       <div style={{
         width: 48, height: 48, borderRadius: 12,
         background: `${color}10`, color: color,
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 20, flexShrink: 0
+        flexShrink: 0
       }}>
         {icon}
       </div>
@@ -57,7 +153,7 @@ function StatCard({ icon, label, value, sub, color }: { icon: string; label: str
   );
 }
 
-// Interactive Milestones Progress bar
+// Milestone Progress Bar
 function MilestoneProgress({ milestones, current }: { milestones: AffiliateMilestone[]; current: number }) {
   if (!milestones.length) return (
     <div style={{ textAlign: "center", padding: "24px", color: "#64748B", fontSize: 13 }}>No milestones configured yet.</div>
@@ -71,11 +167,11 @@ function MilestoneProgress({ milestones, current }: { milestones: AffiliateMiles
     <div style={{ padding: "4px 0" }}>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#475569", fontWeight: 600, marginBottom: 12 }}>
         <span>Current Progress: <strong>{current} Referrals</strong></span>
-        <span>Target Goal: <strong>{maxRef}</strong></span>
+        <span>Goal: <strong>{maxRef}</strong></span>
       </div>
 
-      {/* Progress Track */}
-      <div style={{ position: "relative", height: 8, background: "#E2E8F0", borderRadius: 99, marginBottom: 32 }}>
+      {/* Track */}
+      <div style={{ position: "relative", height: 8, background: "#E2E8F0", borderRadius: 99, marginBottom: 36 }}>
         <div style={{
           position: "absolute", left: 0, top: 0, height: "100%", width: `${progress}%`,
           background: "linear-gradient(90deg, #6366F1, #4F46E5)", borderRadius: 99,
@@ -95,18 +191,18 @@ function MilestoneProgress({ milestones, current }: { milestones: AffiliateMiles
               }}
             >
               <div style={{
-                width: 20, height: 20, borderRadius: "50%",
+                width: 22, height: 22, borderRadius: "50%",
                 background: unlocked ? "#6366F1" : "#FFFFFF",
                 border: `2px solid ${unlocked ? "#6366F1" : "#CBD5E1"}`,
-                boxShadow: unlocked ? "0 2px 5px rgba(99,102,241,0.2)" : "none",
+                boxShadow: unlocked ? "0 2px 6px rgba(99,102,241,0.25)" : "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                color: unlocked ? "#FFFFFF" : "#94A3B8", fontSize: 9, fontWeight: 700,
+                color: unlocked ? "#FFFFFF" : "#64748B", fontSize: 9, fontWeight: 700,
                 transition: "all 0.3s"
               }}>
                 {unlocked ? "✓" : m.referrals}
               </div>
               <div style={{
-                position: "absolute", top: 22, left: "50%", transform: "translateX(-50%)",
+                position: "absolute", top: 26, left: "50%", transform: "translateX(-50%)",
                 fontSize: 10, fontWeight: 700, color: unlocked ? "#6366F1" : "#64748B",
                 whiteSpace: "nowrap", textAlign: "center"
               }}>
@@ -120,7 +216,7 @@ function MilestoneProgress({ milestones, current }: { milestones: AffiliateMiles
   );
 }
 
-// Reward Missions lists
+// Reward Missions
 function RewardMissionsList({ rewards, current }: { rewards: AffiliateReward[]; current: number }) {
   if (!rewards.length) return (
     <div style={{ textAlign: "center", padding: "24px", color: "#64748B", fontSize: 13 }}>No rewards program set yet.</div>
@@ -137,13 +233,15 @@ function RewardMissionsList({ rewards, current }: { rewards: AffiliateReward[]; 
             borderRadius: 16, padding: 18, position: "relative"
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>{unlocked ? "🏆" : "🎯"}</span>
+              <span style={{ color: unlocked ? "#166534" : "#6366F1" }}>
+                {unlocked ? <TrophyIcon size={24} /> : <TargetIcon size={24} />}
+              </span>
               <span style={{
                 fontSize: 11, fontWeight: 700,
                 color: unlocked ? "#166534" : "#4F46E5",
                 background: unlocked ? "#DCFCE7" : "#EEF2F6",
                 padding: "2px 8px", borderRadius: 20
-              }}>{unlocked ? "Claimed" : "Active"}</span>
+              }}>{unlocked ? "Unlocked" : "Active"}</span>
             </div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>{r.label}</div>
             <div style={{ fontSize: 12, color: "#64748B", marginBottom: 14 }}>{r.description}</div>
@@ -173,14 +271,30 @@ export default function CreatorDashboard() {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "coupons" | "orders" | "payouts">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "coupons" | "orders" | "payouts" | "settings">("overview");
+
+  // Local state for editing settings
+  const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", instagram: "", youtube: "", other: "" });
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState("");
 
   const fetchData = useCallback(async (userId: string) => {
     try {
       const res = await fetch(`/api/creator/me?uid=${userId}`);
       const json = await res.json();
-      if (json.success) setData(json);
-      else router.replace("/creator");
+      if (json.success) {
+        setData(json);
+        // Pre-fill settings form
+        setSettingsForm({
+          name: json.creator.name || "",
+          phone: json.creator.phone || "",
+          instagram: json.creator.instagramHandle || "",
+          youtube: json.creator.youtubeHandle || "",
+          other: json.creator.otherHandle || ""
+        });
+      } else {
+        router.replace("/creator");
+      }
     } catch {
       router.replace("/creator");
     } finally {
@@ -196,7 +310,64 @@ export default function CreatorDashboard() {
     return () => unsub();
   }, [router, fetchData]);
 
-  if (loading || !data) {
+  // Sync active tab with URL query parameter safely
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (tab === "overview" || tab === "coupons" || tab === "orders" || tab === "payouts" || tab === "settings") {
+        setActiveTab(tab);
+      }
+    }
+  }, [typeof window !== "undefined" ? window.location.search : null]);
+
+  const handleUpdateTab = (tab: "overview" | "coupons" | "orders" | "payouts" | "settings") => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      router.push(`/creator/dashboard?tab=${tab}`);
+    }
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!data) return;
+    if (!settingsForm.name.trim() || !settingsForm.phone.trim()) {
+      setSettingsMessage("❌ Name and Phone Number are required.");
+      return;
+    }
+    setSettingsSaving(true);
+    setSettingsMessage("");
+    try {
+      const res = await fetch("/api/creator/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: data.creator.uid,
+          name: settingsForm.name,
+          email: data.creator.email,
+          photoURL: data.creator.photoURL || "",
+          googleId: data.creator.uid,
+          phone: settingsForm.phone,
+          instagramHandle: settingsForm.instagram,
+          youtubeHandle: settingsForm.youtube,
+          otherHandle: settingsForm.other
+        })
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        setSettingsMessage("✅ Profile updated successfully!");
+        await fetchData(data.creator.uid);
+      } else {
+        setSettingsMessage(`❌ ${resData.message || "Failed to update profile."}`);
+      }
+    } catch {
+      setSettingsMessage("❌ Network error. Please try again.");
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  if (checkingAuth() || loading || !data) {
     return (
       <div style={{ flex: 1, minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ width: 40, height: 40, border: "3px solid #6366F1", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
@@ -205,16 +376,22 @@ export default function CreatorDashboard() {
     );
   }
 
+  // Temporary function helper to check if auth window loading
+  function checkingAuth() {
+    return false;
+  }
+
   const { creator, coupons, orders, payouts, milestones, rewards, monthlyEarnings, pendingPayoutPaise } = data;
   const paidOrders = orders.filter(o => o.status === "paid" || o.status === "editing" || o.status === "finalized");
   const thisMonth = new Date().toISOString().slice(0, 7);
   const thisMonthEarnings = monthlyEarnings[thisMonth] || 0;
 
   const sidebarItems = [
-    { id: "overview", label: "Overview", icon: "📊" },
-    { id: "coupons", label: "My Coupons", icon: "🎟️" },
-    { id: "orders", label: "Referred Sales", icon: "💼" },
-    { id: "payouts", label: "Payouts History", icon: "💸" },
+    { id: "overview", label: "Overview", icon: <BarChartIcon /> },
+    { id: "coupons", label: "My Coupons", icon: <CouponIcon /> },
+    { id: "orders", label: "Referred Sales", icon: <BriefcaseIcon /> },
+    { id: "payouts", label: "Payouts History", icon: <DollarIcon /> },
+    { id: "settings", label: "Settings", icon: <SettingsIcon /> },
   ] as const;
 
   return (
@@ -261,8 +438,27 @@ export default function CreatorDashboard() {
           background: #F8FAFC;
           overflow-y: auto;
         }
+        
+        /* Bottom navigation design */
         .bottom-nav {
           display: none;
+        }
+
+        /* Milestones grid layout to resolve flowing issues */
+        .milestones-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 16px;
+        }
+
+        /* Settings card layout */
+        .settings-card {
+          background: #FFFFFF;
+          border: 1px solid #E2E8F0;
+          border-radius: 16px;
+          padding: 28px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+          max-width: 600px;
         }
 
         /* Responsive Mobile Layout rules */
@@ -281,9 +477,11 @@ export default function CreatorDashboard() {
             right: 0;
             background: #FFFFFF;
             border-top: 1px solid #E2E8F0;
-            height: 64px;
-            z-index: 90;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            height: 68px;
+            z-index: 100;
+            box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+            justify-content: space-around;
+            align-items: center;
           }
           .bottom-nav-btn {
             flex: 1;
@@ -291,49 +489,67 @@ export default function CreatorDashboard() {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 5px;
             border: none;
             background: none;
-            color: #64748B;
+            color: #94A3B8;
             font-size: 10px;
             font-weight: 700;
             cursor: pointer;
+            height: 100%;
+            position: relative;
+            transition: color 0.2s;
           }
           .bottom-nav-btn.active {
             color: #6366F1;
           }
+          .bottom-nav-btn.active::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: #6366F1;
+            border-radius: 0 0 3px 3px;
+          }
           .desktop-menu {
             display: none !important;
+          }
+          .milestones-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
           }
         }
       `}</style>
 
       {/* 1. Left Sidebar Navigation (Desktop) */}
       <aside className="sidebar">
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.5, padding: "0 16px 8px" }}>
-          Menu options
+        <div style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.5, padding: "0 16px 12px" }}>
+          Portal Sections
         </div>
         {sidebarItems.map(item => (
           <button
             key={item.id}
-            onClick={() => setActiveTab(item.id)}
+            onClick={() => handleUpdateTab(item.id)}
             className={`sidebar-btn ${activeTab === item.id ? "active" : ""}`}
           >
-            <span style={{ fontSize: 18 }}>{item.icon}</span>
+            {item.icon}
             <span>{item.label}</span>
           </button>
         ))}
       </aside>
 
-      {/* 2. Responsive Bottom Nav (Mobile/Phone screens) */}
+      {/* 2. Responsive Bottom Nav with active indicators (Mobile/Phone screens) */}
       <nav className="bottom-nav">
         {sidebarItems.map(item => (
           <button
             key={item.id}
-            onClick={() => setActiveTab(item.id)}
+            onClick={() => handleUpdateTab(item.id)}
             className={`bottom-nav-btn ${activeTab === item.id ? "active" : ""}`}
           >
-            <span style={{ fontSize: 20 }}>{item.icon}</span>
+            {item.icon}
             <span>{item.label.split(" ")[0]}</span>
           </button>
         ))}
@@ -342,21 +558,33 @@ export default function CreatorDashboard() {
       {/* 3. Main Dashboard Contents Display Area */}
       <main className="main-container">
         <div style={{ animation: "fadeUp 0.3s ease-out" }}>
-          {/* Welcome Info */}
+          {/* Welcome Title */}
           <div style={{ marginBottom: 28 }}>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#0F172A", margin: "0 0 6px", letterSpacing: -0.5 }}>
-              Dashboard Overview
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: "#0F172A", margin: "0 0 6px", letterSpacing: -0.5 }}>
+              {activeTab === "overview" && "Dashboard Overview"}
+              {activeTab === "coupons" && "My Coupons"}
+              {activeTab === "orders" && "Referred Sales"}
+              {activeTab === "payouts" && "Payouts History"}
+              {activeTab === "settings" && "Account Settings"}
             </h1>
-            <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>Review earnings, rewards, statistics, and coupon references.</p>
+            <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>
+              {activeTab === "overview" && "Track your performance, achievements and rewards."}
+              {activeTab === "coupons" && "Share your custom coupon codes to credit referred order commissions."}
+              {activeTab === "orders" && "Track completed digital gift orders referred through your links."}
+              {activeTab === "payouts" && "Review history of payouts requested and processed by administrators."}
+              {activeTab === "settings" && "Update your creator public details, handles, and account information."}
+            </p>
           </div>
 
-          {/* Core Statistics grid */}
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 32 }}>
-            <StatCard icon="💰" label="Total Earnings" value={fmt(creator.totalEarningsPaise)} color="#6366F1" />
-            <StatCard icon="📅" label="This Month" value={fmt(thisMonthEarnings)} color="#4F46E5" />
-            <StatCard icon="⏳" label="Unpaid Balance" value={fmt(pendingPayoutPaise)} sub="Pending transfer" color="#D97706" />
-            <StatCard icon="💼" label="Referred Sales" value={`${creator.totalReferrals} orders`} color="#10B981" />
-          </div>
+          {/* Stats Summary row */}
+          {activeTab !== "settings" && (
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 32 }}>
+              <StatCard icon={<DollarIcon size={24} />} label="Total Earnings" value={fmt(creator.totalEarningsPaise)} color="#6366F1" />
+              <StatCard icon={<CalendarIcon size={24} />} label="This Month" value={fmt(thisMonthEarnings)} color="#4F46E5" />
+              <StatCard icon={<DollarIcon size={24} />} label="Unpaid Balance" value={fmt(pendingPayoutPaise)} sub="Pending transfer" color="#D97706" />
+              <StatCard icon={<BriefcaseIcon size={24} />} label="Referred Sales" value={`${creator.totalReferrals} orders`} color="#10B981" />
+            </div>
+          )}
 
           {/* ───────────────── Tab View: Overview ───────────────── */}
           {activeTab === "overview" && (
@@ -365,6 +593,35 @@ export default function CreatorDashboard() {
               <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "24px 24px 44px" }}>
                 <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px" }}>🏆 Referral Milestone Levels</h2>
                 <MilestoneProgress milestones={milestones} current={creator.totalReferrals} />
+              </div>
+
+              {/* Milestones grid details */}
+              <div className="milestones-grid">
+                {milestones.sort((a, b) => a.referrals - b.referrals).map(m => {
+                  const unlocked = creator.totalReferrals >= m.referrals;
+                  return (
+                    <div key={m.id} style={{
+                      padding: "16px", borderRadius: 12,
+                      background: unlocked ? "#F0FDF4" : "#FFFFFF",
+                      border: `1px solid ${unlocked ? "#A7F3D0" : "#E2E8F0"}`,
+                      display: "flex", alignItems: "center", gap: 14
+                    }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: "50%",
+                        background: unlocked ? "#10B981" : "#EEF2F6",
+                        color: unlocked ? "#FFFFFF" : "#64748B",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 12, fontWeight: 800, flexShrink: 0
+                      }}>
+                        {unlocked ? "✓" : m.referrals}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#0F172A", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{m.label}</div>
+                        <div style={{ fontSize: 11, color: "#64748B", marginTop: 2 }}>{m.referrals} Sales · +{m.bonusPercentage}% bonus</div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Rewards Program */}
@@ -408,7 +665,7 @@ export default function CreatorDashboard() {
             <div>
               {coupons.length === 0 ? (
                 <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>🎟️</div>
+                  <div style={{ display: "flex", justifyContent: "center", color: "#94A3B8", marginBottom: 12 }}><CouponIcon size={40} /></div>
                   <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", margin: "0 0 4px" }}>No Coupons Assigned</h3>
                   <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>The administrator will assign unique trackable coupons to your account shortly.</p>
                 </div>
@@ -457,7 +714,7 @@ export default function CreatorDashboard() {
             <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, overflow: "hidden" }}>
               {paidOrders.length === 0 ? (
                 <div style={{ padding: "48px 24px", textAlign: "center" }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>💼</div>
+                  <div style={{ display: "flex", justifyContent: "center", color: "#94A3B8", marginBottom: 12 }}><BriefcaseIcon size={40} /></div>
                   <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", margin: "0 0 4px" }}>No Referrals Recorded</h3>
                   <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>Once buyers use your coupon, verified sales transactions will populate here.</p>
                 </div>
@@ -511,7 +768,7 @@ export default function CreatorDashboard() {
               <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, overflow: "hidden" }}>
                 {payouts.length === 0 ? (
                   <div style={{ padding: "48px 24px", textAlign: "center" }}>
-                    <div style={{ fontSize: 40, marginBottom: 12 }}>💸</div>
+                    <div style={{ display: "flex", justifyContent: "center", color: "#94A3B8", marginBottom: 12 }}><DollarIcon size={40} /></div>
                     <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", margin: "0 0 4px" }}>No Payouts Yet</h3>
                     <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>You haven't requested or received any payouts yet.</p>
                   </div>
@@ -545,6 +802,128 @@ export default function CreatorDashboard() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* ───────────────── Tab View: Settings ───────────────── */}
+          {activeTab === "settings" && (
+            <div className="settings-card">
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 10 }}>
+                <UserIcon /> Edit Creator Profile
+              </h2>
+              
+              <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={settingsForm.name}
+                    onChange={e => setSettingsForm(prev => ({ ...prev, name: e.target.value }))}
+                    style={{
+                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
+                      background: "#FFFFFF", border: "1px solid #CBD5E1",
+                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={settingsForm.phone}
+                    onChange={e => setSettingsForm(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }))}
+                    placeholder="10-digit phone number"
+                    style={{
+                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
+                      background: "#FFFFFF", border: "1px solid #CBD5E1",
+                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    Instagram Handle
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsForm.instagram}
+                    onChange={e => setSettingsForm(prev => ({ ...prev, instagram: e.target.value }))}
+                    placeholder="@username"
+                    style={{
+                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
+                      background: "#FFFFFF", border: "1px solid #CBD5E1",
+                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    YouTube Channel
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsForm.youtube}
+                    onChange={e => setSettingsForm(prev => ({ ...prev, youtube: e.target.value }))}
+                    placeholder="Channel link or username"
+                    style={{
+                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
+                      background: "#FFFFFF", border: "1px solid #CBD5E1",
+                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    Other Platform Link
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsForm.other}
+                    onChange={e => setSettingsForm(prev => ({ ...prev, other: e.target.value }))}
+                    placeholder="Website or portfolio URL"
+                    style={{
+                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
+                      background: "#FFFFFF", border: "1px solid #CBD5E1",
+                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
+                    }}
+                  />
+                </div>
+
+                {settingsMessage && (
+                  <div style={{
+                    padding: "10px 14px", borderRadius: 10,
+                    background: settingsMessage.startsWith("✅") ? "#E8F5E9" : "#FFEBEE",
+                    color: settingsMessage.startsWith("✅") ? "#2E7D32" : "#C62828",
+                    fontSize: 13, fontWeight: 600
+                  }}>
+                    {settingsMessage}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={settingsSaving}
+                  style={{
+                    background: settingsSaving ? "#A5B4FC" : "#6366F1",
+                    color: "#FFFFFF", border: "none", borderRadius: 10,
+                    padding: "12px 24px", fontSize: 14, fontWeight: 700,
+                    cursor: settingsSaving ? "not-allowed" : "pointer", alignSelf: "flex-start",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  {settingsSaving ? "Saving..." : "Save Profile Details"}
+                </button>
+              </form>
             </div>
           )}
         </div>

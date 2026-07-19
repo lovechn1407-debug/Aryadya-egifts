@@ -5,6 +5,70 @@ import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from
 import { auth } from "@/lib/firebase";
 import { getCreatorDB } from "@/lib/db";
 
+/* ── Inline SVG Icon Components ── */
+function HandshakeIcon({ size = 28, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+
+function DollarIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  );
+}
+
+function BarChartIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+
+function TrophyIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+      <path d="M4 22h16" />
+      <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
+      <path d="M12 2a6 6 0 0 1 6 6v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6z" />
+    </svg>
+  );
+}
+
+function WarningIcon({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+
+function RocketIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+      <path d="M4.5 16.5c-1.5 1.25-2.5 3.5-2.5 3.5s2.25-1 3.5-2.5" />
+      <path d="M12 2C6.5 2 2 6.5 2 12c0 2.5 1 4.5 2.5 6l6-6" />
+      <path d="M12 2c5.5 0 10 4.5 10 10 0 2.5-1 4.5-2.5 6l-6-6" />
+      <path d="M9 15l3-3 3 3-3 3-3-3z" />
+    </svg>
+  );
+}
+
 export default function CreatorLoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -132,9 +196,11 @@ export default function CreatorLoginPage() {
             width: 64, height: 64, borderRadius: 16, margin: "0 auto 16px",
             background: "#6366F1",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 28, color: "#FFFFFF",
+            color: "#FFFFFF",
             boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)"
-          }}>🤝</div>
+          }}>
+            <HandshakeIcon size={28} />
+          </div>
           <h1 style={{ fontSize: 26, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: -0.5 }}>
             Creator Portal
           </h1>
@@ -162,12 +228,12 @@ export default function CreatorLoginPage() {
               {/* Feature highlights */}
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                 {[
-                  { icon: "💵", text: "Earn commission on every referred sale" },
-                  { icon: "📈", text: "Track your earnings & milestones in real-time" },
-                  { icon: "🏆", text: "Unlock reward bonuses as you refer more" },
-                ].map(item => (
-                  <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "#F8FAFC", borderRadius: 10, border: "1px solid #E2E8F0" }}>
-                    <span style={{ fontSize: 16 }}>{item.icon}</span>
+                  { icon: <DollarIcon size={18} />, text: "Earn commission on every referred sale" },
+                  { icon: <BarChartIcon size={18} />, text: "Track your earnings & milestones in real-time" },
+                  { icon: <TrophyIcon size={18} />, text: "Unlock reward bonuses as you refer more" },
+                ].map((item, idx) => (
+                  <div key={idx} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "#F8FAFC", borderRadius: 10, border: "1px solid #E2E8F0" }}>
+                    <span style={{ color: "#6366F1", display: "flex" }}>{item.icon}</span>
                     <span style={{ fontSize: 13, color: "#475569", fontWeight: 500 }}>{item.text}</span>
                   </div>
                 ))}
@@ -175,7 +241,9 @@ export default function CreatorLoginPage() {
 
               {error && (
                 <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 10, padding: "12px 16px", marginBottom: 20 }}>
-                  <p style={{ color: "#EF4444", fontSize: 13, margin: 0, fontWeight: 600 }}>⚠️ {error}</p>
+                  <p style={{ color: "#EF4444", fontSize: 13, margin: 0, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                    <WarningIcon color="#EF4444" /> {error}
+                  </p>
                 </div>
               )}
 
@@ -224,7 +292,7 @@ export default function CreatorLoginPage() {
                 {pendingUser.photoURL ? (
                   <img src={pendingUser.photoURL} alt={pendingUser.name} style={{ width: 44, height: 44, borderRadius: "50%", border: "2px solid #E2E8F0", objectFit: "cover" }} />
                 ) : (
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#EEF2F6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>👤</div>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#EEF2F6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: "#94A3B8" }}>👤</div>
                 )}
                 <div>
                   <p style={{ margin: 0, fontWeight: 700, color: "#0F172A", fontSize: 14 }}>{pendingUser.name}</p>
@@ -262,7 +330,9 @@ export default function CreatorLoginPage() {
 
               {error && (
                 <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 10, padding: "10px 14px", marginBottom: 16 }}>
-                  <p style={{ color: "#EF4444", fontSize: 12, margin: 0, fontWeight: 600 }}>⚠️ {error}</p>
+                  <p style={{ color: "#EF4444", fontSize: 12, margin: 0, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                    <WarningIcon color="#EF4444" /> {error}
+                  </p>
                 </div>
               )}
 
@@ -292,7 +362,11 @@ export default function CreatorLoginPage() {
                 >
                   {saving ? (
                     <><div style={{ width: 18, height: 18, border: "2.5px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /> Saving...</>
-                  ) : "Join Program 🚀"}
+                  ) : (
+                    <>
+                      <RocketIcon size={16} /> Join Program
+                    </>
+                  )}
                 </button>
               </div>
             </>
@@ -301,7 +375,7 @@ export default function CreatorLoginPage() {
 
         {/* Footer */}
         <p style={{ textAlign: "center", fontSize: 12, color: "#64748B", marginTop: 28 }}>
-          Aradhya E-Giftings · Affiliate Program
+          Aradhya E-Giftings · Creator Affiliate Portal
         </p>
       </div>
     </div>
