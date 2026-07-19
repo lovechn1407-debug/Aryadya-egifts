@@ -859,3 +859,93 @@ export async function saveRewardDB(reward: AffiliateReward): Promise<void> {
 export async function deleteRewardDB(id: string): Promise<void> {
   await remove(ref(database, `affiliateProgram/rewards/${id}`));
 }
+
+export async function syncCreatorStatsDB(uid: string) {
+  const creator = await getCreatorDB(uid);
+  if (!creator) throw new Error("Creator not found");
+
+  const allCoupons = await getCouponsDB();
+  const myCoupons = allCoupons.filter(c => c.creatorId === uid);
+  const myCodes = new Set(myCoupons.map(c => c.id));
+
+  const allOrders = await getAllOrdersDB();
+  const myOrders = allOrders.filter(o =>
+    o.affiliateCouponCreatorId === uid ||
+    (o.couponCode && myCodes.has(o.couponCode))
+  );
+
+  // Sync / Self-heal orders
+  const paidReferredOrders = myOrders.filter(o =>
+    o.status === "paid" || o.status === "editing" || o.status === "finalized"
+  );
+
+  let recalculatedEarnings = 0;
+  let recalculatedReferrals = 0;
+
+  for (const order of paidReferredOrders) {
+    const coupon = myCoupons.find(c => c.id === order.couponCode);
+    if (coupon) {
+      let orderComm = order.commissionAmount || 0;
+      if ((!order.commissionAmount || order.commissionAmount === 0) && coupon.commissionPercentage) {
+        orderComm = Math.floor(order.amount * (coupon.commissionPercentage / 100));
+        await update(ref(database, `orders/${order.id}`), {
+          commissionAmount: orderComm,
+          affiliateCouponCreatorId: uid,
+        });
+        order.commissionAmount = orderComm;
+      }
+      recalculatedEarnings += orderComm;
+      recalculatedReferrals += 1;
+    }
+  }
+
+  // Update creator totals if mismatched
+  if ((creator.totalEarningsPaise || 0) !== recalculatedEarnings || (creator.totalReferrals || 0) !== recalculatedReferrals) {
+    creator.totalEarningsPaise = recalculatedEarnings;
+    creator.totalReferrals = recalculatedReferrals;
+    await updateCreatorDB(uid, {
+      totalEarningsPaise: recalculatedEarnings,
+      totalReferrals: recalculatedReferrals
+    });
+  }
+
+  // Sync / Self-heal payouts
+  let payouts = await getPayoutsByCreatorDB(uid);
+  const totalPaid = payouts
+    .filter(p => p.status === "paid")
+    .reduce((s, p) => s + p.amountPaise, 0);
+
+  const calculatedPending = recalculatedEarnings - totalPaid;
+  const actualPendingPayouts = payouts.filter(p => p.status === "pending");
+  const actualPendingTotal = actualPendingPayouts.reduce((s, p) => s + p.amountPaise, 0);
+
+  if (actualPendingTotal !== calculatedPending) {
+    // Clean old pendings
+    for (const p of actualPendingPayouts) {
+      await remove(ref(database, `payouts/${p.id}`));
+    }
+    // Recreate correct pending if any
+    if (calculatedPending > 0) {
+      const newPayoutId = `payout_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const currentMonthName = new Date().toLocaleString("en-IN", { month: "long", year: "numeric" });
+      const newPayout: Payout = {
+        id: newPayoutId,
+        creatorId: uid,
+        creatorName: creator.name,
+        amountPaise: calculatedPending,
+        status: "pending",
+        note: `Auto-compiled pending payout for ${currentMonthName}`,
+        createdAt: new Date().toISOString(),
+      };
+      await set(ref(database, `payouts/${newPayoutId}`), newPayout);
+      
+      // Update local array for return value
+      payouts = payouts.filter(p => p.status !== "pending");
+      payouts.unshift(newPayout);
+    } else {
+      payouts = payouts.filter(p => p.status !== "pending");
+    }
+  }
+
+  return { creator, coupons: myCoupons, orders: myOrders, payouts };
+}
