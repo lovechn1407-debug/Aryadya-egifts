@@ -69,7 +69,7 @@ export default function CreatorLoginPage() {
       })
       .catch((err) => {
         console.error("Google Redirect Error:", err);
-        setError("Sign-in failed. Please try again.");
+        setError(err?.message || "Sign-in failed. Please try again.");
       });
 
     return () => unsub();
@@ -82,9 +82,9 @@ export default function CreatorLoginPage() {
       const provider = new GoogleAuthProvider();
       // Using Redirect instead of Popup to bypass COOP headers issues
       await signInWithRedirect(auth, provider);
-    } catch (err: unknown) {
-      console.error(err);
-      setError("Sign-in failed. Please try again.");
+    } catch (err: any) {
+      console.error("Sign-in Error:", err);
+      setError(err?.message || "Sign-in failed. Please try again.");
       setLoading(false);
     }
   };
