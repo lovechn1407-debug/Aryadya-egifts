@@ -54,6 +54,8 @@ export interface Order {
   finalizedAt?: string;
   couponCode?: string; // Optional coupon code used
   discountAmount?: number; // Optional discount applied in paise
+  affiliateCouponCreatorId?: string; // Creator UID if coupon was affiliate
+  commissionAmount?: number; // Commission to credit to creator (in paise)
   createdAt: string;
   lastOpenedAt?: string;
   paymentMode?: "pre-pay" | "post-pay";
@@ -72,6 +74,9 @@ export interface Coupon {
   minimumOrderValue: number; // Minimum order in paise
   description: string;
   createdAt: string;
+  // Affiliate extension fields (optional — only set for creator coupons)
+  creatorId?: string; // UID of the affiliated creator
+  commissionPercentage?: number; // e.g. 10 means 10% commission to creator
 }
 
 export interface SongPart {

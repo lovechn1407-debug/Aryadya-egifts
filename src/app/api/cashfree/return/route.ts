@@ -5,7 +5,7 @@
 // =============================================
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limiter";
-import { getOrderDB, updateOrderStatusDB, saveCouponDB, getCouponDB, getSettingsDB } from "@/lib/db";
+import { getOrderDB, updateOrderStatusDB, saveCouponDB, getCouponDB, getSettingsDB, creditCreatorCommissionDB } from "@/lib/db";
 import { sendOrderConfirmationEmailServer } from "@/lib/email-server";
 import { CashfreeReturnSchema, formatZodError } from "@/lib/schemas";
 
@@ -112,6 +112,16 @@ export async function GET(req: NextRequest) {
         const coupon = await getCouponDB(order.couponCode);
         if (coupon) {
           await saveCouponDB({ ...coupon, usedCount: coupon.usedCount + 1 });
+        }
+      }
+
+      // Credit affiliate creator commission if applicable
+      if (order.affiliateCouponCreatorId && order.commissionAmount && order.commissionAmount > 0) {
+        try {
+          await creditCreatorCommissionDB(order.affiliateCouponCreatorId, order.commissionAmount);
+        } catch (commErr) {
+          console.error("[return] Creator commission credit failed:", commErr);
+          // Non-fatal
         }
       }
 

@@ -248,6 +248,10 @@ function OrderPageInner({ params }: { params: Promise<{ productId: string }> }) 
           buyerPhone,
           userId,
           couponCode: appliedCoupon?.id,
+          affiliateCouponCreatorId: appliedCoupon?.creatorId || undefined,
+          commissionAmount: appliedCoupon?.creatorId && appliedCoupon?.commissionPercentage
+            ? Math.floor(finalPrice * (appliedCoupon.commissionPercentage / 100))
+            : undefined,
         }),
       });
 

@@ -239,6 +239,8 @@ export async function createPendingOrderDB(data: {
   amount: number;
   couponCode?: string;
   discountAmount?: number;
+  affiliateCouponCreatorId?: string;
+  commissionAmount?: number;
 }): Promise<Order> {
   const settings = await getSettingsDB();
   const paymentMode = settings.paymentMode || "pre-pay";
@@ -689,4 +691,161 @@ export async function endChatSessionDB(chatId: string): Promise<void> {
 export async function markChatReadDB(chatId: string, by: "admin" | "user"): Promise<void> {
   const field = by === "admin" ? "unreadByAdmin" : "unreadByUser";
   await update(ref(database, `chats/${chatId}/meta`), { [field]: 0 });
+}
+
+// ── AFFILIATE PROGRAM — CREATORS ─────────────────────────────────────────────
+export interface Creator {
+  uid: string;
+  name: string;
+  email: string;
+  phone?: string;
+  photoURL?: string;
+  googleId: string;
+  instagramHandle?: string;
+  youtubeHandle?: string;
+  otherHandle?: string;
+  totalReferrals: number; // count of paid orders through their coupons
+  totalEarningsPaise: number; // total commission earned (in paise)
+  totalPaidPaise: number; // total payouts made (in paise)
+  registeredAt: string;
+}
+
+export async function getCreatorDB(uid: string): Promise<Creator | null> {
+  const snap = await get(ref(database, `creators/${uid}`));
+  return snap.exists() ? (snap.val() as Creator) : null;
+}
+
+export async function saveCreatorDB(creator: Creator): Promise<void> {
+  await set(ref(database, `creators/${creator.uid}`), creator);
+}
+
+export async function updateCreatorDB(uid: string, changes: Partial<Creator>): Promise<void> {
+  await update(ref(database, `creators/${uid}`), changes);
+}
+
+export async function getAllCreatorsDB(): Promise<Creator[]> {
+  const snap = await get(ref(database, "creators"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, Creator>)
+    .sort((a, b) => b.totalReferrals - a.totalReferrals);
+}
+
+/**
+ * Atomically increments a creator's totalEarnings and totalReferrals.
+ * Called after a successful payment on an affiliate coupon order.
+ */
+export async function creditCreatorCommissionDB(
+  uid: string,
+  commissionAmountPaise: number
+): Promise<void> {
+  const creator = await getCreatorDB(uid);
+  if (!creator) return;
+  await update(ref(database, `creators/${uid}`), {
+    totalEarningsPaise: (creator.totalEarningsPaise || 0) + commissionAmountPaise,
+    totalReferrals: (creator.totalReferrals || 0) + 1,
+  });
+}
+
+// ── AFFILIATE PROGRAM — PAYOUTS ───────────────────────────────────────────────
+export interface Payout {
+  id: string;
+  creatorId: string;
+  creatorName: string;
+  amountPaise: number;
+  status: "pending" | "paid";
+  method?: string; // e.g. "UPI", "Bank Transfer"
+  reference?: string; // UPI transaction ID, etc.
+  note?: string;
+  createdAt: string;
+  paidAt?: string;
+}
+
+export async function createPayoutDB(data: Omit<Payout, "id">): Promise<Payout> {
+  const id = `payout_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const payout: Payout = { ...data, id };
+  await set(ref(database, `payouts/${id}`), payout);
+  return payout;
+}
+
+export async function getPayoutsByCreatorDB(creatorId: string): Promise<Payout[]> {
+  const snap = await get(ref(database, "payouts"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, Payout>)
+    .filter(p => p.creatorId === creatorId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function getAllPayoutsDB(): Promise<Payout[]> {
+  const snap = await get(ref(database, "payouts"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, Payout>)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function markPayoutPaidDB(payoutId: string, reference?: string): Promise<void> {
+  await update(ref(database, `payouts/${payoutId}`), {
+    status: "paid",
+    paidAt: new Date().toISOString(),
+    ...(reference ? { reference } : {}),
+  });
+  // Also update creator's totalPaid
+  const payout = await get(ref(database, `payouts/${payoutId}`));
+  if (payout.exists()) {
+    const p = payout.val() as Payout;
+    const creator = await getCreatorDB(p.creatorId);
+    if (creator) {
+      await update(ref(database, `creators/${p.creatorId}`), {
+        totalPaidPaise: (creator.totalPaidPaise || 0) + p.amountPaise,
+      });
+    }
+  }
+}
+
+// ── AFFILIATE PROGRAM — MILESTONES ────────────────────────────────────────────
+export interface AffiliateMilestone {
+  id: string;
+  referrals: number; // threshold to unlock
+  bonusPercentage: number; // informational bonus % shown to creator
+  label: string;
+  order: number;
+}
+
+export async function getMilestonesDB(): Promise<AffiliateMilestone[]> {
+  const snap = await get(ref(database, "affiliateProgram/milestones"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, AffiliateMilestone>)
+    .sort((a, b) => a.referrals - b.referrals);
+}
+
+export async function saveMilestoneDB(milestone: AffiliateMilestone): Promise<void> {
+  await set(ref(database, `affiliateProgram/milestones/${milestone.id}`), milestone);
+}
+
+export async function deleteMilestoneDB(id: string): Promise<void> {
+  await remove(ref(database, `affiliateProgram/milestones/${id}`));
+}
+
+// ── AFFILIATE PROGRAM — REWARD MISSIONS ──────────────────────────────────────
+export interface AffiliateReward {
+  id: string;
+  referrals: number; // threshold to unlock
+  rewardAmountPaise: number; // bonus payout in paise
+  label: string;
+  description: string;
+  order: number;
+}
+
+export async function getRewardsDB(): Promise<AffiliateReward[]> {
+  const snap = await get(ref(database, "affiliateProgram/rewards"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, AffiliateReward>)
+    .sort((a, b) => a.referrals - b.referrals);
+}
+
+export async function saveRewardDB(reward: AffiliateReward): Promise<void> {
+  await set(ref(database, `affiliateProgram/rewards/${reward.id}`), reward);
+}
+
+export async function deleteRewardDB(id: string): Promise<void> {
+  await remove(ref(database, `affiliateProgram/rewards/${id}`));
 }

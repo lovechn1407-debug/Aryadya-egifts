@@ -63,7 +63,18 @@ export async function POST(req: NextRequest) {
       buyerPhone,
       userId,
       couponCode,
-    } = validationResult.data;
+      affiliateCouponCreatorId,
+      commissionAmount: clientCommissionAmount,
+    } = validationResult.data as {
+      productId: string;
+      buyerName?: string;
+      buyerEmail?: string;
+      buyerPhone?: string;
+      userId?: string;
+      couponCode?: string;
+      affiliateCouponCreatorId?: string;
+      commissionAmount?: number;
+    };
 
     // ── Fetch product price (server-side, can't be spoofed) ──────────────────
     const product = await getProductDB(productId);
@@ -110,6 +121,11 @@ export async function POST(req: NextRequest) {
     const finalPrice = Math.max(0, product.price - discountAmount);
 
     // ── Create a PENDING order in Firebase ───────────────────────────────────
+    // Calculate server-side commission for security
+    const serverCommission = validatedCoupon?.creatorId && validatedCoupon?.commissionPercentage
+      ? Math.floor(finalPrice * (validatedCoupon.commissionPercentage / 100))
+      : (clientCommissionAmount && validatedCoupon?.creatorId ? clientCommissionAmount : undefined);
+
     const order = await createPendingOrderDB({
       productId: product.id,
       productName: product.name,
@@ -120,6 +136,8 @@ export async function POST(req: NextRequest) {
       amount: finalPrice,
       couponCode: validatedCoupon?.id,
       discountAmount,
+      affiliateCouponCreatorId: validatedCoupon?.creatorId || affiliateCouponCreatorId || undefined,
+      commissionAmount: serverCommission,
     });
 
     // ── If free (after coupon), skip Cashfree ────────────────────────────────
