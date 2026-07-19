@@ -201,11 +201,14 @@ function MilestoneProgress({ milestones, current }: { milestones: AffiliateMiles
               }}>
                 {unlocked ? "✓" : m.referrals}
               </div>
-              <div style={{
-                position: "absolute", top: 26, left: "50%", transform: "translateX(-50%)",
-                fontSize: 10, fontWeight: 700, color: unlocked ? "#6366F1" : "#64748B",
-                whiteSpace: "nowrap", textAlign: "center"
-              }}>
+              <div 
+                className="milestone-bubble-label"
+                style={{
+                  position: "absolute", top: 26, left: "50%", transform: "translateX(-50%)",
+                  fontSize: 10, fontWeight: 700, color: unlocked ? "#6366F1" : "#64748B",
+                  whiteSpace: "nowrap", textAlign: "center"
+                }}
+              >
                 {m.label} ({m.bonusPercentage}%)
               </div>
             </div>
@@ -521,6 +524,12 @@ export default function CreatorDashboard() {
             flex-direction: column;
             gap: 12px;
           }
+          .milestone-bubble-label {
+            display: none !important;
+          }
+        }
+        .milestone-bubble-label {
+          display: block;
         }
       `}</style>
 
@@ -591,7 +600,9 @@ export default function CreatorDashboard() {
             <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
               {/* Progress Milestones */}
               <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "24px 24px 44px" }}>
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px" }}>🏆 Referral Milestone Levels</h2>
+                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 8 }}>
+                  <TrophyIcon size={20} color="#6366F1" /> Referral Milestone Levels
+                </h2>
                 <MilestoneProgress milestones={milestones} current={creator.totalReferrals} />
               </div>
 
@@ -626,13 +637,17 @@ export default function CreatorDashboard() {
 
               {/* Rewards Program */}
               <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 24 }}>
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px" }}>🎯 Extra Reward Missions</h2>
+                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 8 }}>
+                  <TargetIcon size={20} color="#6366F1" /> Extra Reward Missions
+                </h2>
                 <RewardMissionsList rewards={rewards} current={creator.totalReferrals} />
               </div>
 
               {/* Monthly stats chart bar */}
               <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 24 }}>
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 24px" }}>📈 Earnings Performance Chart</h2>
+                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 24px", display: "flex", alignItems: "center", gap: 8 }}>
+                  <BarChartIcon size={20} color="#6366F1" /> Earnings Performance Chart
+                </h2>
                 {Object.keys(monthlyEarnings).length === 0 ? (
                   <div style={{ textAlign: "center", padding: "24px 0", color: "#64748B", fontSize: 13 }}>No earnings data yet. Keep pushing coupon usage!</div>
                 ) : (
