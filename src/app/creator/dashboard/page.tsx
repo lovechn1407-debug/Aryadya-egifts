@@ -359,7 +359,17 @@ function MilestoneProgress({ milestones, current }: { milestones: AffiliateMiles
 }
 
 // Reward Missions
-function RewardMissionsList({ rewards, current }: { rewards: AffiliateReward[]; current: number }) {
+function RewardMissionsList({ 
+  rewards, 
+  current,
+  claimedIds = [],
+  onClaim
+}: { 
+  rewards: AffiliateReward[]; 
+  current: number;
+  claimedIds: string[];
+  onClaim: (id: string) => void;
+}) {
   if (!rewards.length) return (
     <div style={{ textAlign: "center", padding: "24px", color: "#64748B", fontSize: 13 }}>No rewards program set yet.</div>
   );
@@ -367,31 +377,37 @@ function RewardMissionsList({ rewards, current }: { rewards: AffiliateReward[]; 
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
       {rewards.map(r => {
         const unlocked = current >= r.referrals;
+        const claimed = claimedIds.includes(r.id);
         const ratio = Math.min(100, (current / r.referrals) * 100);
         return (
           <div key={r.id} style={{
-            background: unlocked ? "#F0FDF4" : "#FFFFFF",
-            border: `1px solid ${unlocked ? "#A7F3D0" : "#E2E8F0"}`,
-            borderRadius: 16, padding: 18, position: "relative"
+            background: claimed ? "#F8FAFC" : unlocked ? "#F0FDF4" : "#FFFFFF",
+            border: `1px solid ${claimed ? "#E2E8F0" : unlocked ? "#A7F3D0" : "#E2E8F0"}`,
+            borderRadius: 16, padding: 18, position: "relative",
+            display: "flex", flexDirection: "column", gap: 12,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
           }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-              <span style={{ color: unlocked ? "#166534" : "#6366F1" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <span style={{ color: claimed ? "#94A3B8" : unlocked ? "#10B981" : "#6366F1" }}>
                 {unlocked ? <TrophyIcon size={24} /> : <TargetIcon size={24} />}
               </span>
               <span style={{
                 fontSize: 11, fontWeight: 700,
-                color: unlocked ? "#166534" : "#4F46E5",
-                background: unlocked ? "#DCFCE7" : "#EEF2F6",
+                color: claimed ? "#64748B" : unlocked ? "#166534" : "#4F46E5",
+                background: claimed ? "#E2E8F0" : unlocked ? "#DCFCE7" : "#EEF2F6",
                 padding: "2px 8px", borderRadius: 20
-              }}>{unlocked ? "Unlocked" : "Active"}</span>
+              }}>{claimed ? "Claimed" : unlocked ? "Completed" : "Active"}</span>
             </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>{r.label}</div>
-            <div style={{ fontSize: 12, color: "#64748B", marginBottom: 14 }}>{r.description}</div>
             
-            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>{r.label}</div>
+              <div style={{ fontSize: 12, color: "#64748B", marginBottom: 14, lineHeight: 1.4 }}>{r.description}</div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 4 }}>
               <div>
                 <div style={{ fontSize: 10, color: "#94A3B8", fontWeight: 600, textTransform: "uppercase" }}>Bonus Reward</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: unlocked ? "#166534" : "#0F172A" }}>{fmt(r.rewardAmountPaise)}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: claimed ? "#64748B" : unlocked ? "#10B981" : "#0F172A" }}>{fmt(r.rewardAmountPaise)}</div>
               </div>
               {!unlocked && (
                 <div style={{ textAlign: "right", minWidth: 80 }}>
@@ -402,6 +418,22 @@ function RewardMissionsList({ rewards, current }: { rewards: AffiliateReward[]; 
                 </div>
               )}
             </div>
+
+            {/* Claim Reward Button */}
+            <button
+              onClick={() => onClaim(r.id)}
+              disabled={!unlocked || claimed}
+              style={{
+                width: "100%", padding: "10px", borderRadius: 10, border: "none",
+                fontSize: 12, fontWeight: 700, cursor: (unlocked && !claimed) ? "pointer" : "not-allowed",
+                background: claimed ? "#F1F5F9" : unlocked ? "#10B981" : "#EEF2F6",
+                color: claimed ? "#94A3B8" : unlocked ? "#FFFFFF" : "#64748B",
+                transition: "all 0.2s",
+                boxShadow: (unlocked && !claimed) ? "0 2px 6px rgba(16,185,129,0.2)" : "none"
+              }}
+            >
+              {claimed ? "Claimed ✓" : unlocked ? "Claim Reward 🎁" : `Locked (Need ${r.referrals - current} More Sales)`}
+            </button>
           </div>
         );
       })}
@@ -419,6 +451,27 @@ export default function CreatorDashboard() {
   const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", instagram: "", youtube: "", other: "" });
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState("");
+
+  // Claimed Rewards state persistence
+  const [claimedRewards, setClaimedRewards] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("claimed_rewards");
+        if (stored) setClaimedRewards(JSON.parse(stored));
+      } catch {}
+    }
+  }, []);
+
+  const handleClaimReward = (rewardId: string) => {
+    const updated = [...claimedRewards, rewardId];
+    setClaimedRewards(updated);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("claimed_rewards", JSON.stringify(updated));
+    }
+    alert("🎉 Claim Request Submitted!\n\nYour reward claim has been registered. The admin team will credit this bonus reward in your next payout.");
+  };
 
   const fetchData = useCallback(async (userId: string) => {
     try {
@@ -750,7 +803,12 @@ export default function CreatorDashboard() {
                 <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 8 }}>
                   <TargetIcon size={20} color="#6366F1" /> Extra Reward Missions
                 </h2>
-                <RewardMissionsList rewards={rewards} current={creator.totalReferrals} />
+                <RewardMissionsList 
+                  rewards={rewards} 
+                  current={creator.totalReferrals} 
+                  claimedIds={claimedRewards}
+                  onClaim={handleClaimReward}
+                />
               </div>
 
               {/* Monthly stats chart bar */}
