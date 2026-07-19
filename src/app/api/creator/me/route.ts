@@ -13,7 +13,10 @@ import {
   getPayoutsByCreatorDB,
   getMilestonesDB,
   getRewardsDB,
+  updateCreatorDB,
 } from "@/lib/db";
+import { ref, update } from "firebase/database";
+import { database } from "@/lib/firebase";
 
 export async function GET(req: NextRequest) {
   try {
@@ -40,6 +43,41 @@ export async function GET(req: NextRequest) {
       o.affiliateCouponCreatorId === uid ||
       (o.couponCode && myCouponCodes.has(o.couponCode))
     );
+
+    // Sync / Self-heal orders and creator totals
+    const paidReferredOrders = myOrders.filter(o =>
+      o.status === "paid" || o.status === "editing" || o.status === "finalized"
+    );
+
+    let recalculatedEarnings = 0;
+    let recalculatedReferrals = 0;
+
+    for (const order of paidReferredOrders) {
+      const coupon = myCoupons.find(c => c.id === order.couponCode);
+      if (coupon) {
+        let orderComm = order.commissionAmount || 0;
+        // If commissionAmount is missing/0, calculate it based on coupon percentage
+        if ((!order.commissionAmount || order.commissionAmount === 0) && coupon.commissionPercentage) {
+          orderComm = Math.floor(order.amount * (coupon.commissionPercentage / 100));
+          await update(ref(database, `orders/${order.id}`), {
+            commissionAmount: orderComm,
+            affiliateCouponCreatorId: uid,
+          });
+          order.commissionAmount = orderComm;
+        }
+        recalculatedEarnings += orderComm;
+        recalculatedReferrals += 1;
+      }
+    }
+
+    if ((creator.totalEarningsPaise || 0) !== recalculatedEarnings || (creator.totalReferrals || 0) !== recalculatedReferrals) {
+      creator.totalEarningsPaise = recalculatedEarnings;
+      creator.totalReferrals = recalculatedReferrals;
+      await updateCreatorDB(uid, {
+        totalEarningsPaise: recalculatedEarnings,
+        totalReferrals: recalculatedReferrals
+      });
+    }
 
     // Get payouts for this creator
     const payouts = await getPayoutsByCreatorDB(uid);
