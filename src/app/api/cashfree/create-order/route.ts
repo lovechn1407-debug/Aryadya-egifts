@@ -90,35 +90,51 @@ export async function POST(req: NextRequest) {
     let validatedCoupon = null;
 
     if (couponCode) {
+      console.log(`[create-order] Validating coupon: "${couponCode}" for product price: ${product.price}`);
       const c = await getCouponDB(couponCode);
-      if (c && c.active && c.usedCount < c.totalStocks) {
+      if (!c) {
+        console.warn(`[create-order] Coupon "${couponCode}" not found in DB.`);
+      } else if (!c.active) {
+        console.warn(`[create-order] Coupon "${couponCode}" is inactive.`);
+      } else if (c.usedCount >= c.totalStocks) {
+        console.warn(`[create-order] Coupon "${couponCode}" stock exhausted: ${c.usedCount}/${c.totalStocks}`);
+      } else {
         const now = new Date();
-        const notExpired =
-          (!c.validFrom || now >= new Date(c.validFrom)) &&
-          (!c.validTo || now <= new Date(c.validTo));
+        const validFromOk = !c.validFrom || now >= new Date(c.validFrom);
+        const validToOk = !c.validTo || now <= new Date(c.validTo);
+        const notExpired = validFromOk && validToOk;
         const meetsMin = c.minimumOrderValue <= product.price;
 
-        if (notExpired && meetsMin) {
-          const pastOrders = await getOrdersByBuyerDB(buyerPhone || "", buyerEmail || "");
-          const usedByPerson = pastOrders.filter(
-            (o) => o.couponCode === c.id
-          ).length;
+        if (!notExpired) {
+          console.warn(`[create-order] Coupon "${couponCode}" time window mismatch. validFrom: ${c.validFrom}, validTo: ${c.validTo}, now: ${now.toISOString()}`);
+        } else if (!meetsMin) {
+          console.warn(`[create-order] Coupon "${couponCode}" min order not met: ${c.minimumOrderValue} > ${product.price}`);
+        } else {
+          // Check per-person limit only if we have buyer info
+          let usedByPerson = 0;
+          if ((buyerPhone || buyerEmail)) {
+            const pastOrders = await getOrdersByBuyerDB(buyerPhone || "", buyerEmail || "");
+            usedByPerson = pastOrders.filter(o => o.couponCode === c.id).length;
+          }
 
-          if (usedByPerson < c.perPersonLimit) {
+          if (usedByPerson >= c.perPersonLimit) {
+            console.warn(`[create-order] Coupon "${couponCode}" per-person limit reached: ${usedByPerson}/${c.perPersonLimit}`);
+          } else {
             if (c.discountType === "percentage") {
-              discountAmount = Math.floor(
-                product.price * (c.discountAmount / 100)
-              );
+              discountAmount = Math.floor(product.price * (c.discountAmount / 100));
             } else {
               discountAmount = c.discountAmount * 100;
             }
             validatedCoupon = c;
+            console.log(`[create-order] Coupon "${couponCode}" applied. Discount: ${discountAmount} paise. Product: ${product.price} → Final: ${product.price - discountAmount}`);
           }
         }
       }
     }
 
     const finalPrice = Math.max(0, product.price - discountAmount);
+    console.log(`[create-order] Final price to Cashfree: ${finalPrice} paise (₹${(finalPrice / 100).toFixed(2)})`);
+
 
     // ── Create a PENDING order in Firebase ───────────────────────────────────
     // Calculate server-side commission for security

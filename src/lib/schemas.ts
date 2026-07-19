@@ -55,6 +55,8 @@ export const CreateCashfreeOrderSchema = z.object({
   buyerPhone: phoneSchema.optional(),
   userId: idSchema.optional(),
   couponCode: z.string().max(50).optional(),
+  affiliateCouponCreatorId: z.string().max(128).optional(),
+  commissionAmount: z.number().nonnegative().optional(),
 });
 
 export const PayCashfreeOrderSchema = z.object({
