@@ -122,6 +122,33 @@ function UserIcon({ size = 20, color = "currentColor" }: { size?: number; color?
   );
 }
 
+function CheckCircleIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+  );
+}
+
+function LockIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function TrendingUpIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
+  );
+}
+
 // Custom Stat Card
 function StatCard({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: string; sub?: string; color: string }) {
   return (
@@ -153,68 +180,180 @@ function StatCard({ icon, label, value, sub, color }: { icon: React.ReactNode; l
   );
 }
 
-// Milestone Progress Bar
+// Milestone Progress Card-based Redesign
 function MilestoneProgress({ milestones, current }: { milestones: AffiliateMilestone[]; current: number }) {
   if (!milestones.length) return (
     <div style={{ textAlign: "center", padding: "24px", color: "#64748B", fontSize: 13 }}>No milestones configured yet.</div>
   );
 
   const sortedMilestones = [...milestones].sort((a, b) => a.referrals - b.referrals);
-  const maxRef = Math.max(...sortedMilestones.map(m => m.referrals), 1);
-  const progress = Math.min(100, (current / maxRef) * 100);
+  
+  // Find current active milestone level
+  const activeMilestone = [...sortedMilestones].reverse().find(m => current >= m.referrals);
+  // Find next milestone level
+  const nextMilestone = sortedMilestones.find(m => current < m.referrals);
 
   return (
-    <div style={{ padding: "4px 0" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#475569", fontWeight: 600, marginBottom: 12 }}>
-        <span>Current Progress: <strong>{current} Referrals</strong></span>
-        <span>Goal: <strong>{maxRef}</strong></span>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      {/* Active Tier Overview Status Card */}
+      <div style={{
+        background: "#F8FAFC",
+        border: "1px solid #E2E8F0",
+        borderRadius: 12,
+        padding: "20px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{
+            width: 8, height: 8, borderRadius: "50%", background: "#10B981",
+            display: "inline-block", animation: "pulse 1.5s infinite"
+          }} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#334155", textTransform: "uppercase", letterSpacing: 0.5 }}>
+            Active Level: <span style={{ color: "#6366F1" }}>{activeMilestone ? activeMilestone.label : "Base Partner"}</span>
+          </span>
+        </div>
+
+        <p style={{ fontSize: 14, color: "#475569", margin: 0, lineHeight: 1.5 }}>
+          {nextMilestone ? (
+            <>
+              You have completed <strong>{current}</strong> successful referrals. You only need <strong>{nextMilestone.referrals - current}</strong> more sales to unlock the <strong style={{ color: "#6366F1" }}>{nextMilestone.label}</strong> tier!
+            </>
+          ) : (
+            <>
+              Amazing job! You have reached the maximum level of <strong>{activeMilestone?.label}</strong> with <strong>{current}</strong> total referred sales!
+            </>
+          )}
+        </p>
+
+        {nextMilestone && (
+          <div style={{ width: "100%" }}>
+            {/* Compute current step progress bar */}
+            {(() => {
+              const previousTarget = activeMilestone ? activeMilestone.referrals : 0;
+              const nextTarget = nextMilestone.referrals;
+              const range = nextTarget - previousTarget;
+              const completedInRange = current - previousTarget;
+              const percent = Math.min(100, Math.max(0, (completedInRange / range) * 100));
+              return (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748B", marginBottom: 6 }}>
+                    <span>Progress to next tier</span>
+                    <span>{current} / {nextTarget} referrals</span>
+                  </div>
+                  <div style={{ height: 6, background: "#E2E8F0", borderRadius: 99, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${percent}%`, background: "#6366F1", borderRadius: 99 }} />
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
       </div>
 
-      {/* Track */}
-      <div style={{ position: "relative", height: 8, background: "#E2E8F0", borderRadius: 99, marginBottom: 36 }}>
-        <div style={{
-          position: "absolute", left: 0, top: 0, height: "100%", width: `${progress}%`,
-          background: "linear-gradient(90deg, #6366F1, #4F46E5)", borderRadius: 99,
-          transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)"
-        }} />
-
-        {/* Checkpoint bubbles */}
-        {sortedMilestones.map(m => {
-          const percentage = (m.referrals / maxRef) * 100;
+      {/* Grid of Milestone Tier Cards */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+        gap: 16
+      }}>
+        {sortedMilestones.map((m) => {
           const unlocked = current >= m.referrals;
+          // Determine if this is the active level they are currently on
+          const isCurrentActive = activeMilestone?.id === m.id;
+          // Determine if this level is currently in progress
+          const isInProgress = nextMilestone?.id === m.id;
+          
           return (
-            <div 
-              key={m.id} 
-              style={{
-                position: "absolute", left: `${percentage}%`, top: "50%",
-                transform: "translate(-50%, -50%)", zIndex: 10
-              }}
-            >
+            <div key={m.id} style={{
+              background: "#FFFFFF",
+              border: isCurrentActive ? "2px solid #10B981" : isInProgress ? "2px solid #6366F1" : "1px solid #E2E8F0",
+              borderRadius: 16,
+              padding: "20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 14,
+              boxShadow: (isCurrentActive || isInProgress) ? "0 4px 12px rgba(0,0,0,0.03)" : "none",
+              position: "relative",
+              opacity: unlocked ? 1 : 0.75
+            }}>
+              {/* Top Row: Title & Badge */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: 0 }}>{m.label}</h3>
+                  <span style={{ fontSize: 12, color: "#64748B", fontWeight: 600, display: "block", marginTop: 2 }}>
+                    Goal: {m.referrals} referrals
+                  </span>
+                </div>
+                
+                {/* Status Badge */}
+                <div>
+                  {unlocked ? (
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, padding: "4px 8px", borderRadius: 20,
+                      background: "#E8F5E9", color: "#2E7D32", display: "flex", alignItems: "center", gap: 4
+                    }}>
+                      <CheckCircleIcon size={12} /> Unlocked
+                    </span>
+                  ) : isInProgress ? (
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, padding: "4px 8px", borderRadius: 20,
+                      background: "#EEF2F6", color: "#6366F1", display: "flex", alignItems: "center", gap: 4
+                    }}>
+                      <TrendingUpIcon size={12} /> Active Goal
+                    </span>
+                  ) : (
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, padding: "4px 8px", borderRadius: 20,
+                      background: "#F1F5F9", color: "#94A3B8", display: "flex", alignItems: "center", gap: 4
+                    }}>
+                      <LockIcon size={12} /> Locked
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Commission Tier Info */}
               <div style={{
-                width: 22, height: 22, borderRadius: "50%",
-                background: unlocked ? "#6366F1" : "#FFFFFF",
-                border: `2px solid ${unlocked ? "#6366F1" : "#CBD5E1"}`,
-                boxShadow: unlocked ? "0 2px 6px rgba(99,102,241,0.25)" : "none",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: unlocked ? "#FFFFFF" : "#64748B", fontSize: 9, fontWeight: 700,
-                transition: "all 0.3s"
+                background: unlocked ? "#F0FDF4" : isInProgress ? "#EEF2F6" : "#F8FAFC",
+                borderRadius: 10,
+                padding: "10px 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                color: unlocked ? "#15803D" : isInProgress ? "#4F46E5" : "#64748B",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between"
               }}>
-                {unlocked ? "✓" : m.referrals}
+                <span>Commission Rate:</span>
+                <span>+{m.bonusPercentage}% Bonus</span>
               </div>
-              <div 
-                className="milestone-bubble-label"
-                style={{
-                  position: "absolute", top: 26, left: "50%", transform: "translateX(-50%)",
-                  fontSize: 10, fontWeight: 700, color: unlocked ? "#6366F1" : "#64748B",
-                  whiteSpace: "nowrap", textAlign: "center"
-                }}
-              >
-                {m.label} ({m.bonusPercentage}%)
-              </div>
+
+              {/* In Progress details */}
+              {isInProgress && (
+                <div style={{ marginTop: "auto" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748B", marginBottom: 6 }}>
+                    <span>{current} / {m.referrals} completed</span>
+                    <span>{Math.round((current / m.referrals) * 100)}%</span>
+                  </div>
+                  <div style={{ height: 4, background: "#E2E8F0", borderRadius: 99 }}>
+                    <div style={{ height: "100%", width: `${(current / m.referrals) * 100}%`, background: "#6366F1", borderRadius: 99 }} />
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
+      <style>{`
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+          70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+      `}</style>
     </div>
   );
 }
@@ -598,41 +737,12 @@ export default function CreatorDashboard() {
           {/* ───────────────── Tab View: Overview ───────────────── */}
           {activeTab === "overview" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-              {/* Progress Milestones */}
-              <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "24px 24px 44px" }}>
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 8 }}>
+              {/* Progress Milestones Container */}
+              <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "24px" }}>
+                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 24px", display: "flex", alignItems: "center", gap: 8 }}>
                   <TrophyIcon size={20} color="#6366F1" /> Referral Milestone Levels
                 </h2>
                 <MilestoneProgress milestones={milestones} current={creator.totalReferrals} />
-              </div>
-
-              {/* Milestones grid details */}
-              <div className="milestones-grid">
-                {milestones.sort((a, b) => a.referrals - b.referrals).map(m => {
-                  const unlocked = creator.totalReferrals >= m.referrals;
-                  return (
-                    <div key={m.id} style={{
-                      padding: "16px", borderRadius: 12,
-                      background: unlocked ? "#F0FDF4" : "#FFFFFF",
-                      border: `1px solid ${unlocked ? "#A7F3D0" : "#E2E8F0"}`,
-                      display: "flex", alignItems: "center", gap: 14
-                    }}>
-                      <div style={{
-                        width: 32, height: 32, borderRadius: "50%",
-                        background: unlocked ? "#10B981" : "#EEF2F6",
-                        color: unlocked ? "#FFFFFF" : "#64748B",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 12, fontWeight: 800, flexShrink: 0
-                      }}>
-                        {unlocked ? "✓" : m.referrals}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#0F172A", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{m.label}</div>
-                        <div style={{ fontSize: 11, color: "#64748B", marginTop: 2 }}>{m.referrals} Sales · +{m.bonusPercentage}% bonus</div>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
 
               {/* Rewards Program */}
