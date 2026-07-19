@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getCreatorDB } from "@/lib/db";
 
@@ -16,62 +16,16 @@ export default function CreatorLoginPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // 1. Listen to Auth State
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const existing = await getCreatorDB(user.uid);
         if (existing) {
           router.replace("/creator/dashboard");
           return;
-        } else {
-          setPendingUser({
-            uid: user.uid,
-            name: user.displayName || "Creator",
-            email: user.email || "",
-            photoURL: user.photoURL || ""
-          });
-          setStep("register");
         }
       }
       setCheckingAuth(false);
     });
-
-    // 2. Handle Google Sign-in Redirect Result
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result?.user) {
-          const user = result.user;
-          const existing = await getCreatorDB(user.uid);
-          if (existing) {
-            // Update profile
-            await fetch("/api/creator/register", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                uid: user.uid,
-                name: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                googleId: user.uid
-              }),
-            });
-            router.replace("/creator/dashboard");
-          } else {
-            setPendingUser({
-              uid: user.uid,
-              name: user.displayName || "Creator",
-              email: user.email || "",
-              photoURL: user.photoURL || ""
-            });
-            setStep("register");
-          }
-        }
-      })
-      .catch((err) => {
-        console.error("Google Redirect Error:", err);
-        setError(err?.message || "Sign-in failed. Please try again.");
-      });
-
     return () => unsub();
   }, [router]);
 
@@ -80,11 +34,29 @@ export default function CreatorLoginPage() {
     setError("");
     try {
       const provider = new GoogleAuthProvider();
-      // Using Redirect instead of Popup to bypass COOP headers issues
-      await signInWithRedirect(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const existing = await getCreatorDB(user.uid);
+      if (existing) {
+        await fetch("/api/creator/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid: user.uid, name: user.displayName, email: user.email, photoURL: user.photoURL, googleId: user.uid }),
+        });
+        router.replace("/creator/dashboard");
+        return;
+      }
+
+      setPendingUser({ uid: user.uid, name: user.displayName || "Creator", email: user.email || "", photoURL: user.photoURL || "" });
+      setStep("register");
     } catch (err: any) {
-      console.error("Sign-in Error:", err);
-      setError(err?.message || "Sign-in failed. Please try again.");
+      if (err?.code === "auth/popup-closed-by-user") {
+        setError("Sign-in was cancelled.");
+      } else {
+        setError(err?.message || "Sign-in failed. Please try again.");
+      }
+    } finally {
       setLoading(false);
     }
   };

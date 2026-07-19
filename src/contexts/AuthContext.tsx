@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { onAuthStateChanged, User, signOut as firebaseSignOut, getRedirectResult } from "firebase/auth";
+import { onAuthStateChanged, User, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getUserProfileDB, UserProfile } from "@/lib/db";
 import CompleteProfileModal from "@/components/CompleteProfileModal";
@@ -43,11 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Handle redirect results to capture errors cleanly
-    getRedirectResult(auth).catch((err) => {
-      console.error("Google auth redirect error:", err);
-    });
-
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
