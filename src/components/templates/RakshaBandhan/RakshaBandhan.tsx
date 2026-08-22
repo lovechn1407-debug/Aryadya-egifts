@@ -475,7 +475,7 @@ function RakhiSlide({ onComplete, d, editMode, onFieldChange }: {
         />
       </div>
 
-      <div className="raksha-glass-card" style={{ marginTop: 24, padding: "16px 12px" }}>
+      <div style={{ marginTop: 20, width: "100%", position: "relative" }}>
         <RakhiTie
           progress={progress}
           onProgress={setProgress}

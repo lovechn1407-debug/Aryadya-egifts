@@ -3,9 +3,6 @@ import { useRef, useState } from "react";
 import { Burst } from "./Confetti";
 import { RakhiDesignState, RenderRakhiMedallion, DEFAULT_RAKHI_DESIGN } from "./RakhiDesigner";
 
-const START_X = 40;
-const END_X = 300;
-
 export function RakhiTie({
   progress,
   onProgress,
@@ -30,18 +27,24 @@ export function RakhiTie({
     if (tied || editMode) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const x = ((clientX - rect.left) / rect.width) * 380;
-    const p = Math.min(1, Math.max(0, (x - START_X) / (END_X - START_X)));
+
+    // Track drag across container width
+    const relX = clientX - rect.left;
+    const centerPoint = rect.width * 0.5; // Center of wrist
+    const startPoint = rect.width * 0.15; // Left start area
+
+    const p = Math.min(1, Math.max(0, (relX - startPoint) / (centerPoint - startPoint)));
     if (p > progress) onProgress(p);
-    if (p >= 0.99) onTied();
+    if (p >= 0.98) onTied();
   };
 
   const effectiveProgress = editMode ? 1 : progress;
   const effectiveTied = editMode ? true : tied;
 
-  // Medallion position along path
-  const medallionX = START_X + (END_X - START_X) * effectiveProgress;
-  const medallionY = 125;
+  // Medallion position: from left (18%) smoothly to wrist center (50%)
+  const medallionXPercent = 18 + 32 * effectiveProgress;
+  // Wrist center vertical placement on real_hand.png
+  const wristYPercent = 66;
 
   return (
     <div
@@ -49,17 +52,14 @@ export function RakhiTie({
       style={{
         position: "relative",
         userSelect: "none",
-        width: "min(420px, 92vw)",
-        height: 250,
-        borderRadius: 24,
-        overflow: "hidden",
-        boxShadow: "0 20px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1)",
-        background: "linear-gradient(180deg, rgba(30,10,20,0.7) 0%, rgba(15,5,10,0.85) 100%)",
+        width: "min(380px, 94vw)",
+        height: "clamp(380px, 58vh, 520px)",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-end",
         justifyContent: "center",
         touchAction: "none",
         cursor: effectiveTied || editMode ? "default" : "grab",
+        margin: "0 auto",
       }}
       onPointerDown={(e) => {
         if (editMode) return;
@@ -71,26 +71,28 @@ export function RakhiTie({
       onPointerUp={() => setDragging(false)}
       onPointerCancel={() => setDragging(false)}
     >
-      {/* Cartoon Hand Top-View Background Image */}
+      {/* 3D Vertical Real Hand Image with Bottom-to-Top Slide-Up Entrance Transition */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/templates/raksha-bandhan/cartoon_hand.png"
-        alt="Cartoon Hand Top View"
+        src="/templates/raksha-bandhan/real_hand.png"
+        alt="Real Cartoon Hand Top View"
+        className="raksha-animate-hand-slide-up"
         style={{
           position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          opacity: 0.85,
-          filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))",
+          left: "50%",
+          bottom: 0,
+          maxHeight: "100%",
+          maxWidth: "100%",
+          objectFit: "contain",
+          filter: "drop-shadow(0 12px 24px rgba(0,0,0,0.5))",
           pointerEvents: "none",
+          transformOrigin: "bottom center",
         }}
       />
 
-      {/* SVG Thread & Bow Overlay */}
+      {/* SVG Thread & Bow Overlay across the Wrist */}
       <svg
-        viewBox="0 0 380 240"
+        viewBox="0 0 380 500"
         style={{
           position: "absolute",
           inset: 0,
@@ -100,77 +102,82 @@ export function RakhiTie({
         }}
       >
         <defs>
-          <linearGradient id="raksha-saffronThread" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id="raksha-wristSilkThread" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#f5c842" />
             <stop offset="50%" stopColor="#ff7c1a" />
             <stop offset="100%" stopColor="#e0185a" />
           </linearGradient>
         </defs>
 
-        {/* Wrist Guide Track */}
-        <path
-          d="M40 125 C90 92, 140 158, 190 125 C230 98, 250 150, 282 125"
-          fill="none"
-          stroke="rgba(255,255,255,0.15)"
-          strokeWidth="6"
+        {/* Wrist Guide Track Line */}
+        <line
+          x1="60"
+          y1="330"
+          x2="190"
+          y2="330"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="4"
           strokeDasharray="4 6"
         />
 
-        {/* Dynamic Saffron/Silk Thread */}
+        {/* Saffron Silk Thread wrapping around wrist */}
         <path
-          d="M40 125 C90 92, 140 158, 190 125 C230 98, 250 150, 282 125"
+          d={`M60 330 C 110 ${330 - 15 * effectiveProgress}, 150 ${330 + 15 * effectiveProgress}, 190 330`}
           fill="none"
-          stroke="url(#raksha-saffronThread)"
-          strokeWidth="4"
+          stroke="url(#raksha-wristSilkThread)"
+          strokeWidth="5"
           strokeLinecap="round"
-          strokeDasharray="600"
-          strokeDashoffset={600 - 600 * effectiveProgress}
+          strokeDasharray="300"
+          strokeDashoffset={300 - 300 * effectiveProgress}
         />
-        {/* Shimmer thread overlay */}
+        {/* Shimmer thread */}
         <path
-          d="M40 125 C90 92, 140 158, 190 125 C230 98, 250 150, 282 125"
+          d={`M60 330 C 110 ${330 - 15 * effectiveProgress}, 150 ${330 + 15 * effectiveProgress}, 190 330`}
           fill="none"
           stroke="#fff4c2"
-          strokeWidth="1.5"
+          strokeWidth="1.8"
           strokeDasharray="6 10"
-          strokeDashoffset={600 - 600 * effectiveProgress}
+          strokeDashoffset={300 - 300 * effectiveProgress}
           opacity={effectiveProgress > 0 ? 0.9 : 0}
         />
 
-        {/* Bow tie on wrist when tied */}
+        {/* Bow tie ribbons when tied around wrist */}
         {effectiveTied && (
           <g
             style={{
-              transformOrigin: "295px 125px",
+              transformOrigin: "190px 330px",
               animation: "raksha-fade-in-up 0.5s ease-out both",
             }}
           >
-            <ellipse cx="275" cy="125" rx="18" ry="10" fill="#e0185a" transform="rotate(-20 275 125)" />
-            <ellipse cx="315" cy="125" rx="18" ry="10" fill="#e0185a" transform="rotate(20 315 125)" />
-            <circle cx="295" cy="125" r="7" fill="#f5c842" />
+            <ellipse cx="170" cy="330" rx="16" ry="9" fill="#e0185a" transform="rotate(-20 170 330)" />
+            <ellipse cx="210" cy="330" rx="16" ry="9" fill="#e0185a" transform="rotate(20 210 330)" />
+            <circle cx="190" cy="330" r="6" fill="#f5c842" />
           </g>
         )}
       </svg>
 
-      {/* Dynamic Custom-Designed Rakhi Medallion */}
+      {/* Dynamic Custom-Designed Rakhi Medallion (Lands directly on Wrist Center) */}
       <div
         style={{
           position: "absolute",
-          left: `${(medallionX / 380) * 100}%`,
-          top: `${(medallionY / 240) * 100}%`,
+          left: `${medallionXPercent}%`,
+          top: `${wristYPercent}%`,
           transform: "translate(-50%, -50%)",
-          transition: dragging ? "none" : "all 0.2s ease-out",
-          filter: effectiveTied ? "drop-shadow(0 0 16px rgba(245,200,66,0.8))" : "drop-shadow(0 6px 16px rgba(0,0,0,0.5))",
+          transition: dragging ? "none" : "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+          filter: effectiveTied
+            ? "drop-shadow(0 0 20px rgba(245,200,66,0.9))"
+            : "drop-shadow(0 6px 16px rgba(0,0,0,0.6))",
           pointerEvents: "none",
+          zIndex: 10,
         }}
       >
-        <RenderRakhiMedallion design={activeDesign} size={88} />
+        <RenderRakhiMedallion design={activeDesign} size={90} />
       </div>
 
-      {/* Burst Particles on Tie Complete */}
+      {/* Celebration Burst Particles directly over Wrist Center */}
       {effectiveTied && (
-        <span style={{ position: "absolute", left: "76%", top: "52%" }}>
-          <Burst count={18} colors={["#ff7c1a", "#f5c842", "#e0185a"]} spread={110} />
+        <span style={{ position: "absolute", left: "50%", top: `${wristYPercent}%` }}>
+          <Burst count={20} colors={["#ff7c1a", "#f5c842", "#e0185a"]} spread={120} />
         </span>
       )}
     </div>

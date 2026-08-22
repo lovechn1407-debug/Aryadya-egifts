@@ -1236,3 +1236,13 @@ textarea.input-field { resize: vertical; min-height: 100px; }
   50% { transform: translateY(-6px); }
 }
 
+/* ── Real Hand Slide Up Animation ── */
+@keyframes raksha-hand-slide-up {
+  from { transform: translate(-50%, 160px); opacity: 0; }
+  to   { transform: translate(-50%, 0);     opacity: 1; }
+}
+.raksha-animate-hand-slide-up {
+  animation: raksha-hand-slide-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+
