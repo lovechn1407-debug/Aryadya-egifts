@@ -109,7 +109,7 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
         </button>
       </div>
 
-      {/* 9:16 Poster Card Container */}
+      {/* 9:16 Poster Card Container with Baked-in Frames */}
       <div
         ref={posterRef}
         style={{
@@ -117,161 +117,87 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
           width: "min(340px, 84vw)",
           height: "min(604px, 78vh)",
           aspectRatio: "9/16",
-          borderRadius: 0, // Sharp crisp outer container
           overflow: "hidden",
           boxShadow: "0 24px 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.15)",
           backgroundImage: "url(/templates/raksha-bandhan/card_bg.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
           userSelect: "none",
         }}
       >
-        {/* Center Space: Sharp White Photo Frames (No Radius, 3:4 & >3:4 Ratios) */}
+        {/* Photo 1: Tilak Sibling Photo (Precisely aligned inside Left Top Frame "TILAK") */}
         <div
           style={{
             position: "absolute",
-            top: "20%",
-            left: "6%",
-            right: "6%",
-            bottom: "21%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
+            left: "5.3%",
+            top: "14.7%",
+            width: "43%",
+            height: "23.5%",
+            overflow: "hidden",
+            background: "#000",
           }}
         >
-          {/* Frame 1: Applied Tilak Photo (3:4 ratio, Sharp edges, Clean font) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={faceImgUrl}
+            alt="Sibling Tilak Photo"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+          {/* Authentic Red Tilak Mark overlay on forehead */}
           <div
             style={{
-              background: "#ffffff",
-              borderRadius: 0, // No border radius
-              padding: "6px 6px 10px 6px",
-              boxShadow: "0 12px 28px rgba(0,0,0,0.45)",
-              transform: "rotate(-2.5deg)",
-              width: "78%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              position: "absolute",
+              left: `${targetX}%`,
+              top: `${targetY}%`,
+              width: Math.min(36, tilakSize * 0.6),
+              height: Math.min(65, tilakSize * 1.1),
+              transform: "translate(-50%, -50%)",
+              pointerEvents: "none",
             }}
           >
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: "3/4", // Strict 3:4 portrait ratio for tilak photo
-                borderRadius: 0,
-                overflow: "hidden",
-                background: "#000",
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={faceImgUrl}
-                alt="Sibling Tilak Photo"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-              {/* Authentic Red Tilak Mark overlay on forehead */}
-              <div
-                style={{
-                  position: "absolute",
-                  left: `${targetX}%`,
-                  top: `${targetY}%`,
-                  width: Math.min(36, tilakSize * 0.6),
-                  height: Math.min(65, tilakSize * 1.1),
-                  transform: "translate(-50%, -50%)",
-                  pointerEvents: "none",
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/templates/raksha-bandhan/tilak_mark.png"
-                  alt="Tilak Mark"
-                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                />
-              </div>
-            </div>
-            {/* Clean Sans-Serif Upper-case Caption (No Handwriting font) */}
-            <span
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "#5a1226",
-                marginTop: 6,
-              }}
-            >
-              Tilak Applied 🔴
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/templates/raksha-bandhan/tilak_mark.png"
+              alt="Tilak Mark"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
           </div>
+        </div>
 
-          {/* Frame 2: Tied Rakhi Hand (Greater than 3:4 height ratio, Sharp edges, Clean font) */}
+        {/* Photo 2: Tied Rakhi Hand Photo (Precisely aligned inside Right Bottom Frame "CUSTOM RAKHI") */}
+        <div
+          style={{
+            position: "absolute",
+            left: "51.3%",
+            top: "35.8%",
+            width: "43%",
+            height: "26.8%",
+            overflow: "hidden",
+            background: "linear-gradient(180deg, #2a0e1a 0%, #15060d 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* 3D Hand */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/templates/raksha-bandhan/real_hand.png"
+            alt="Tied Hand"
+            style={{ width: "100%", height: "100%", objectFit: "contain", opacity: 0.95 }}
+          />
+          {/* Tied Custom Medallion */}
           <div
             style={{
-              background: "#ffffff",
-              borderRadius: 0, // No border radius
-              padding: "6px 6px 10px 6px",
-              boxShadow: "0 12px 28px rgba(0,0,0,0.45)",
-              transform: "rotate(2.5deg)",
-              width: "78%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              position: "absolute",
+              left: "50%",
+              top: "66%",
+              transform: "translate(-50%, -50%) scale(0.68)",
+              filter: "drop-shadow(0 0 10px rgba(245,200,66,0.9))",
             }}
           >
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: "3/4.8", // More than 3:4 height ratio (taller portrait for full arm display)
-                borderRadius: 0,
-                overflow: "hidden",
-                background: "linear-gradient(180deg, #2a0e1a 0%, #15060d 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* 3D Hand */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/templates/raksha-bandhan/real_hand.png"
-                alt="Tied Hand"
-                style={{ width: "100%", height: "100%", objectFit: "contain", opacity: 0.95 }}
-              />
-              {/* Tied Medallion */}
-              <div
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  top: "66%",
-                  transform: "translate(-50%, -50%) scale(0.68)",
-                  filter: "drop-shadow(0 0 10px rgba(245,200,66,0.9))",
-                }}
-              >
-                <RenderRakhiMedallion design={activeDesign} size={80} />
-              </div>
-            </div>
-            {/* Clean Sans-Serif Upper-case Caption (No Handwriting font) */}
-            <span
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "#5a1226",
-                marginTop: 6,
-              }}
-            >
-              Rakhi Tied 🎀
-            </span>
+            <RenderRakhiMedallion design={activeDesign} size={80} />
           </div>
         </div>
       </div>
