@@ -14,6 +14,8 @@ import Propose3 from "@/components/templates/Propose3/Propose3";
 import Confess from "@/components/templates/Confess/Confess";
 import BirthdaySerenade from "@/components/templates/BirthdaySerenade/BirthdaySerenade";
 import MyLoveLanguage from "@/components/templates/MyLoveLanguage/MyLoveLanguage";
+import RakshaBandhan from "@/components/templates/RakshaBandhan/RakshaBandhan";
+import RakshaBandhanBrother from "@/components/templates/RakshaBandhanBrother/RakshaBandhanBrother";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { trackEvent } from "@/lib/analytics";
@@ -44,6 +46,10 @@ function renderTemplate(productId: string, customData: Record<string, string>, a
       return <BirthdaySerenade customData={customData} autoPlay={autoPlay} />;
     case "my-love-language":
       return <MyLoveLanguage customData={customData} autoPlay={autoPlay} editMode={false} />;
+    case "raksha-bandhan":
+      return <RakshaBandhan customData={customData} autoPlay={autoPlay} editMode={false} />;
+    case "raksha-bandhan-brother":
+      return <RakshaBandhanBrother customData={customData} autoPlay={autoPlay} editMode={false} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#fff" }}>

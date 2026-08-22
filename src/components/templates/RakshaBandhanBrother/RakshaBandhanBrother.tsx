@@ -514,6 +514,19 @@ export default function RakshaBandhanBrother({
     if (forcedSlide != null) setStage(stageFromSlide(forcedSlide));
   }, [forcedSlide]);
 
+  // Auto-play cycling for homepage preview iframe
+  useEffect(() => {
+    if (!autoPlay || editMode) return;
+    const stages: Stage[] = ["intro", "rakhi", "collage", "diyas", "promises", "letter"];
+    const timer = setInterval(() => {
+      setStage((current) => {
+        const idx = stages.indexOf(current);
+        return stages[(idx + 1) % stages.length];
+      });
+    }, 1500);
+    return () => clearInterval(timer);
+  }, [autoPlay, editMode]);
+
   const handleRakhiSelect = (id: string) => {
     setSelectedRakhi(id);
     onFieldChange?.("rb_selected_rakhi", id);
