@@ -460,7 +460,12 @@ function PromiseSlide({ onContinue, d, editMode, onFieldChange }: {
     "I'll celebrate\nevery win with you",
     "I'll be there\nin every storm",
   ];
-  const frontEmojis = ["🎀", "🛡️", "💛", "🌙"];
+  const defaultGifs = [
+    "/templates/raksha-bandhan/bear1.gif",
+    "/templates/raksha-bandhan/bear2.gif",
+    "/templates/raksha-bandhan/bear3.gif",
+    "/templates/raksha-bandhan/bear4.gif",
+  ];
 
   const [flipped, setFlipped] = useState(editMode ? [true, true, true, true] : [false, false, false, false]);
   const flippedCount = flipped.filter(Boolean).length;
@@ -497,14 +502,16 @@ function PromiseSlide({ onContinue, d, editMode, onFieldChange }: {
       >
         {[0, 1, 2, 3].map(i => {
           const fid = `rb_promise${i + 1}`;
+          const imgFid = `rb_img${i + 1}`;
           const promiseText = d[fid] !== undefined ? d[fid] : defaultPromises[i];
+          const bearGif = d[imgFid] || defaultGifs[i];
           const isFlipped = flipped[i];
 
           return (
             <div
               key={i}
               className="raksha-promise-card-scene"
-              style={{ position: "relative", height: editMode ? "auto" : 176, cursor: isFlipped || editMode ? "default" : "pointer" }}
+              style={{ position: "relative", height: editMode ? "auto" : 185, cursor: isFlipped || editMode ? "default" : "pointer" }}
               onClick={() => !editMode && setFlipped(f => f.map((v, j) => (j === i ? true : v)))}
             >
               {editMode ? (
@@ -522,7 +529,11 @@ function PromiseSlide({ onContinue, d, editMode, onFieldChange }: {
                     justifyContent: "center",
                   }}
                 >
-                  <span style={{ fontSize: 28, marginBottom: 8 }}>{frontEmojis[i]}</span>
+                  <img
+                    src={bearGif}
+                    alt={`bear-${i + 1}`}
+                    style={{ width: 60, height: 60, objectFit: "contain", marginBottom: 8, filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.3))" }}
+                  />
                   <ET
                     fid={fid}
                     d={d}
@@ -543,8 +554,12 @@ function PromiseSlide({ onContinue, d, editMode, onFieldChange }: {
                       boxShadow: "0 20px 50px -20px rgba(0,0,0,0.7)",
                     }}
                   >
-                    <span style={{ fontSize: 36 }}>{frontEmojis[i]}</span>
-                    <span style={{ marginTop: 12, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.2em", color: "#f0cfa8" }}>
+                    <img
+                      src={bearGif}
+                      alt={`bear-${i + 1}`}
+                      style={{ width: 72, height: 72, objectFit: "contain", filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))" }}
+                    />
+                    <span style={{ marginTop: 8, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.2em", color: "#f0cfa8" }}>
                       Tap to reveal
                     </span>
                   </div>
