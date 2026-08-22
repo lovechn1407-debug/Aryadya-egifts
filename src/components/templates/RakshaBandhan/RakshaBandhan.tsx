@@ -416,8 +416,10 @@ function RakhiSlide({ onComplete, d, editMode, onFieldChange }: {
   const [progress, setProgress] = useState(editMode ? 1 : 0);
   const [tied, setTied] = useState(editMode);
   const [designerOpen, setDesignerOpen] = useState(false);
+  const [localDesign, setLocalDesign] = useState<RakhiDesignState | null>(null);
 
   const rakhiDesign: RakhiDesignState = useMemo(() => {
+    if (localDesign) return localDesign;
     if (d.rb_rakhi_design) {
       try {
         return JSON.parse(d.rb_rakhi_design);
@@ -426,7 +428,7 @@ function RakhiSlide({ onComplete, d, editMode, onFieldChange }: {
       }
     }
     return DEFAULT_RAKHI_DESIGN;
-  }, [d.rb_rakhi_design]);
+  }, [d.rb_rakhi_design, localDesign]);
 
   return (
     <Stagewrap soft>
@@ -448,14 +450,16 @@ function RakhiSlide({ onComplete, d, editMode, onFieldChange }: {
         {editMode ? "Preview — rakhi shown tied" : "Drag the thread across the wrist to tie it"}
       </p>
 
-      {/* Button to open DIY Rakhi Designer */}
-      <button
-        onClick={() => setDesignerOpen(true)}
-        className="raksha-btn-pill raksha-btn-pill-saffron"
-        style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6 }}
-      >
-        🎨 Design Custom Rakhi
-      </button>
+      {/* Button to open DIY Rakhi Designer (disabled in editor panel) */}
+      {!editMode && (
+        <button
+          onClick={() => setDesignerOpen(true)}
+          className="raksha-btn-pill raksha-btn-pill-saffron"
+          style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6 }}
+        >
+          🎨 Design Custom Rakhi
+        </button>
+      )}
 
       {/* Progress bar */}
       <div style={{ marginTop: 20, height: 8, width: "100%", maxWidth: 320, overflow: "hidden", borderRadius: 999, background: "rgba(255,255,255,0.1)" }}>
@@ -486,6 +490,7 @@ function RakhiSlide({ onComplete, d, editMode, onFieldChange }: {
         <RakhiDesigner
           initialState={rakhiDesign}
           onSave={(newDesign) => {
+            setLocalDesign(newDesign);
             onFieldChange?.("rb_rakhi_design", JSON.stringify(newDesign));
             setDesignerOpen(false);
           }}

@@ -194,28 +194,32 @@ export function RenderRakhiMedallion({
         <div
           style={{
             position: "absolute",
-            inset: -8,
-            borderRadius: d.shape === "square" ? "20px" : "50%",
-            border: "3px stroke #fef08a",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            inset: 0,
+            pointerEvents: "none",
           }}
         >
-          {Array.from({ length: 12 }, (_, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                background: "radial-gradient(circle, #ffffff 0%, #fef08a 70%, #ca8a04 100%)",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                transform: `rotate(${i * 30}deg) translateY(-${size / 2 + 4}px)`,
-              }}
-            />
-          ))}
+          {Array.from({ length: 14 }, (_, i) => {
+            const angle = (i * 360) / 14;
+            const r = size / 2 + 4;
+            return (
+              <div
+                key={i}
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  width: 10,
+                  height: 10,
+                  marginLeft: -5,
+                  marginTop: -5,
+                  borderRadius: "50%",
+                  background: "radial-gradient(circle, #ffffff 0%, #fef08a 70%, #ca8a04 100%)",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                  transform: `rotate(${angle}deg) translateY(-${r}px)`,
+                }}
+              />
+            );
+          })}
         </div>
       )}
 
@@ -223,24 +227,32 @@ export function RenderRakhiMedallion({
         <div
           style={{
             position: "absolute",
-            inset: -10,
-            borderRadius: "50%",
+            inset: 0,
+            pointerEvents: "none",
           }}
         >
-          {Array.from({ length: 14 }, (_, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                width: 14,
-                height: 14,
-                borderRadius: "50%",
-                background: i % 2 === 0 ? "#f97316" : "#facc15",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                transform: `rotate(${i * (360 / 14)}deg) translateY(-${size / 2 + 4}px)`,
-              }}
-            />
-          ))}
+          {Array.from({ length: 14 }, (_, i) => {
+            const angle = (i * 360) / 14;
+            const r = size / 2 + 6;
+            return (
+              <div
+                key={i}
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  width: 14,
+                  height: 14,
+                  marginLeft: -7,
+                  marginTop: -7,
+                  borderRadius: "50%",
+                  background: i % 2 === 0 ? "#f97316" : "#facc15",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.35)",
+                  transform: `rotate(${angle}deg) translateY(-${r}px)`,
+                }}
+              />
+            );
+          })}
         </div>
       )}
 
