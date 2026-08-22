@@ -5,6 +5,7 @@ import html2canvas from "html2canvas";
 import { Burst, Confetti, Orbs } from "./Confetti";
 import { Diya } from "./Diya";
 import { RakhiTie } from "./RakhiTie";
+import { RakhiDesigner, DEFAULT_RAKHI_DESIGN, RakhiDesignState } from "./RakhiDesigner";
 import SongLibraryPopup from "@/components/SongLibraryPopup";
 
 /* ─── Props ─────────────────────────────────────────────────────── */
@@ -190,7 +191,7 @@ export default function RakshaBandhan({
       )}
 
       {stage === "intro"    && <IntroSlide    onDone={() => go("rakhi")}     d={d} editMode={editMode} onFieldChange={onFieldChange} />}
-      {stage === "rakhi"    && <RakhiSlide    onComplete={() => go("diyas")} d={d} editMode={editMode} />}
+      {stage === "rakhi"    && <RakhiSlide    onComplete={() => go("diyas")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "diyas"    && <DiyaSlide     onContinue={() => go("promises")} d={d} editMode={editMode} />}
       {stage === "promises" && <PromiseSlide  onContinue={() => go("envelope")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "envelope" && <EnvelopeSlide onOpen={() => go("letter")}    editMode={editMode} />}
@@ -406,13 +407,26 @@ function IntroSlide({ onDone, d, editMode, onFieldChange }: {
 /* ══════════════════════════════════════════════════════
    STAGE 2 — RAKHI TIE
 ══════════════════════════════════════════════════════ */
-function RakhiSlide({ onComplete, d, editMode }: {
+function RakhiSlide({ onComplete, d, editMode, onFieldChange }: {
   onComplete: () => void;
   d: Record<string, string>;
   editMode: boolean;
+  onFieldChange?: (id: string, v: string) => void;
 }) {
   const [progress, setProgress] = useState(editMode ? 1 : 0);
   const [tied, setTied] = useState(editMode);
+  const [designerOpen, setDesignerOpen] = useState(false);
+
+  const rakhiDesign: RakhiDesignState = useMemo(() => {
+    if (d.rb_rakhi_design) {
+      try {
+        return JSON.parse(d.rb_rakhi_design);
+      } catch {
+        return DEFAULT_RAKHI_DESIGN;
+      }
+    }
+    return DEFAULT_RAKHI_DESIGN;
+  }, [d.rb_rakhi_design]);
 
   return (
     <Stagewrap soft>
@@ -434,8 +448,17 @@ function RakhiSlide({ onComplete, d, editMode }: {
         {editMode ? "Preview — rakhi shown tied" : "Drag the thread across the wrist to tie it"}
       </p>
 
+      {/* Button to open DIY Rakhi Designer */}
+      <button
+        onClick={() => setDesignerOpen(true)}
+        className="raksha-btn-pill raksha-btn-pill-saffron"
+        style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6 }}
+      >
+        🎨 Design Custom Rakhi
+      </button>
+
       {/* Progress bar */}
-      <div style={{ marginTop: 24, height: 8, width: "100%", maxWidth: 320, overflow: "hidden", borderRadius: 999, background: "rgba(255,255,255,0.1)" }}>
+      <div style={{ marginTop: 20, height: 8, width: "100%", maxWidth: 320, overflow: "hidden", borderRadius: 999, background: "rgba(255,255,255,0.1)" }}>
         <div
           style={{
             height: "100%",
@@ -448,15 +471,27 @@ function RakhiSlide({ onComplete, d, editMode }: {
         />
       </div>
 
-      <div className="raksha-glass-card" style={{ marginTop: 32, padding: "16px 12px" }}>
+      <div className="raksha-glass-card" style={{ marginTop: 24, padding: "16px 12px" }}>
         <RakhiTie
           progress={progress}
           onProgress={setProgress}
           tied={tied}
           onTied={() => { setProgress(1); setTied(true); }}
           editMode={editMode}
+          design={rakhiDesign}
         />
       </div>
+
+      {designerOpen && (
+        <RakhiDesigner
+          initialState={rakhiDesign}
+          onSave={(newDesign) => {
+            onFieldChange?.("rb_rakhi_design", JSON.stringify(newDesign));
+            setDesignerOpen(false);
+          }}
+          onClose={() => setDesignerOpen(false)}
+        />
+      )}
 
       {(tied || editMode) && (
         <div className="raksha-animate-fade-in-up raksha-glass-card" style={{ marginTop: 32, width: "100%", maxWidth: 360, padding: "28px 24px", textAlign: "center" }}>
