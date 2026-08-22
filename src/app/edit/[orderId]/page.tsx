@@ -194,8 +194,9 @@ const RAKSHA_SLIDES = [
   { n: -1, label: "BG Music" },
   { n: 0, label: "Intro" },
   { n: 1, label: "Rakhi" },
-  { n: 2, label: "Diyas" },
-  { n: 3, label: "Promises" },
+  { n: 2, label: "Tilak" },
+  { n: 3, label: "Diyas" },
+  { n: 4, label: "Promises" },
   { n: 5, label: "Letter" },
 ];
 

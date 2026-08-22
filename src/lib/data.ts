@@ -1401,12 +1401,22 @@ export const PRODUCT_REGISTRY: Product[] = [
       },
       {
         slideNumber: 2,
+        title: "Apply Tilak 🔴",
+        description: "Upload sibling face photo & swipe up on forehead to apply Tilak",
+        fields: [
+          { id: "rb_face_img", label: "Sibling Face Photo", type: "image" as const, defaultValue: "/templates/raksha-bandhan/default_brother.png" },
+          { id: "rb_tilak_x",  label: "Forehead Spot X % (10 - 90)", type: "text" as const, defaultValue: "50" },
+          { id: "rb_tilak_y",  label: "Forehead Spot Y % (10 - 90)", type: "text" as const, defaultValue: "28" },
+        ],
+      },
+      {
+        slideNumber: 3,
         title: "Light the Diyas",
         description: "Tap 5 oil-lamp diyas to light them — shown lit in preview",
         fields: [],
       },
       {
-        slideNumber: 3,
+        slideNumber: 4,
         title: "Promise Cards",
         description: "4 flip cards revealing your heartfelt promises",
         fields: [

@@ -6,6 +6,7 @@ import { Burst, Confetti, Orbs } from "./Confetti";
 import { Diya } from "./Diya";
 import { RakhiTie } from "./RakhiTie";
 import { RakhiDesigner, DEFAULT_RAKHI_DESIGN, RakhiDesignState } from "./RakhiDesigner";
+import { TilakSlide } from "./TilakSlide";
 import SongLibraryPopup from "@/components/SongLibraryPopup";
 
 /* ─── Props ─────────────────────────────────────────────────────── */
@@ -18,15 +19,15 @@ interface RakshaProps {
 }
 
 /* ─── Stage type ─────────────────────────────────────────────────── */
-type Stage = "intro" | "rakhi" | "diyas" | "promises" | "envelope" | "letter";
+type Stage = "intro" | "rakhi" | "tilak" | "diyas" | "promises" | "envelope" | "letter";
 
 /* ─── Slide # → Stage map ────────────────────────────────────────── */
 function stageFromSlide(n?: number): Stage {
   if (n === 0) return "intro";
   if (n === 1) return "rakhi";
-  if (n === 2) return "diyas";
-  if (n === 3) return "promises";
-  if (n === 4) return "envelope";
+  if (n === 2) return "tilak";
+  if (n === 3) return "diyas";
+  if (n === 4) return "promises";
   if (n === 5) return "letter";
   return "intro";
 }
@@ -166,7 +167,7 @@ export default function RakshaBandhan({
   // Auto-play cycling for homepage preview
   useEffect(() => {
     if (!autoPlay || editMode) return;
-    const stages: Stage[] = ["intro", "rakhi", "diyas", "promises", "envelope", "letter"];
+    const stages: Stage[] = ["intro", "rakhi", "tilak", "diyas", "promises", "letter"];
     const timer = setInterval(() => {
       setStage(current => {
         const idx = stages.indexOf(current);
@@ -191,10 +192,10 @@ export default function RakshaBandhan({
       )}
 
       {stage === "intro"    && <IntroSlide    onDone={() => go("rakhi")}     d={d} editMode={editMode} onFieldChange={onFieldChange} />}
-      {stage === "rakhi"    && <RakhiSlide    onComplete={() => go("diyas")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
+      {stage === "rakhi"    && <RakhiSlide    onComplete={() => go("tilak")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
+      {stage === "tilak"    && <TilakSlide    onContinue={() => go("diyas")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "diyas"    && <DiyaSlide     onContinue={() => go("promises")} d={d} editMode={editMode} />}
-      {stage === "promises" && <PromiseSlide  onContinue={() => go("envelope")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
-      {stage === "envelope" && <EnvelopeSlide onOpen={() => go("letter")}    editMode={editMode} />}
+      {stage === "promises" && <PromiseSlide  onContinue={() => go("letter")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "letter"   && <LetterSlide   onReset={reset} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
 
       {editMode && forcedSlide === -1 && (
