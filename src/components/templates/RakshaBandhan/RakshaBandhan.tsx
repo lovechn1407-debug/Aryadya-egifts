@@ -197,14 +197,98 @@ export default function RakshaBandhan({
       {stage === "letter"   && <LetterSlide   onReset={reset} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
 
       {editMode && forcedSlide === -1 && (
-        <div style={{ position: "absolute", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
-          <button
-            onClick={() => setBgModalOpen(true)}
-            className="raksha-btn-pill raksha-btn-pill-saffron"
-            style={{ padding: "16px 32px", fontSize: 18, boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 50,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(20, 5, 15, 0.85)",
+            backdropFilter: "blur(8px)",
+            padding: 20,
+          }}
+        >
+          <div
+            className="raksha-glass-card"
+            style={{
+              padding: "36px 28px",
+              maxWidth: 420,
+              width: "100%",
+              textAlign: "center",
+              border: "1px solid rgba(255,190,60,0.4)",
+            }}
           >
-            🎵 Choose Background Music
-          </button>
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: "50%",
+                background: "rgba(255,124,26,0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 16px",
+                fontSize: 28,
+              }}
+            >
+              🎵
+            </div>
+
+            <h3
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "1.6rem",
+                margin: "0 0 6px",
+                color: "#fff4c2",
+              }}
+            >
+              Background Music
+            </h3>
+
+            <p style={{ fontSize: 13, color: "#f0cfa8", marginBottom: 20 }}>
+              Plays continuously throughout the website
+            </p>
+
+            <div
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 14,
+                padding: "16px 18px",
+                marginBottom: 24,
+              }}
+            >
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.15em", color: "#f0cfa8", marginBottom: 6 }}>
+                Currently Selected Song
+              </div>
+              <div style={{ fontWeight: 700, fontSize: 16, color: "#fff" }}>
+                {d.bg_song_name ? (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <Sparkles size={14} style={{ color: "#f5c842" }} />
+                    {d.bg_song_name}
+                  </span>
+                ) : (
+                  <span style={{ opacity: 0.6, fontStyle: "italic" }}>No song selected</span>
+                )}
+              </div>
+              {d.bg_song_url && (
+                <div style={{ fontSize: 12, color: "#4ade80", marginTop: 8, fontWeight: 500 }}>
+                  ✓ Audio loaded & ready
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setBgModalOpen(true)}
+              className="raksha-btn-pill raksha-btn-pill-saffron"
+              style={{ width: "100%", padding: "14px", fontSize: 15, fontWeight: 600 }}
+            >
+              {d.bg_song_name ? "🎵 Change Song" : "🎵 Choose Background Music"}
+            </button>
+          </div>
         </div>
       )}
 

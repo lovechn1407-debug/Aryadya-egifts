@@ -1417,12 +1417,6 @@ export const PRODUCT_REGISTRY: Product[] = [
         ],
       },
       {
-        slideNumber: 4,
-        title: "Envelope",
-        description: "Drag/swipe up to open the envelope — shown open in preview",
-        fields: [],
-      },
-      {
         slideNumber: 5,
         title: "Letter",
         description: "The final heartfelt Raksha Bandhan letter",

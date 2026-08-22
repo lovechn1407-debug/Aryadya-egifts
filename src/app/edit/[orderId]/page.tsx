@@ -196,7 +196,6 @@ const RAKSHA_SLIDES = [
   { n: 1, label: "Rakhi" },
   { n: 2, label: "Diyas" },
   { n: 3, label: "Promises" },
-  { n: 4, label: "Envelope" },
   { n: 5, label: "Letter" },
 ];
 
