@@ -7,6 +7,7 @@ import { Diya } from "./Diya";
 import { RakhiTie } from "./RakhiTie";
 import { RakhiDesigner, DEFAULT_RAKHI_DESIGN, RakhiDesignState } from "./RakhiDesigner";
 import { TilakSlide } from "./TilakSlide";
+import { RakshaPosterModal } from "./RakshaPosterModal";
 import SongLibraryPopup from "@/components/SongLibraryPopup";
 
 /* ─── Props ─────────────────────────────────────────────────────── */
@@ -157,6 +158,15 @@ export default function RakshaBandhan({
 }: RakshaProps) {
   const d = customData;
 
+  const rakhiDesign: RakhiDesignState | undefined = useMemo(() => {
+    if (!d.rb_rakhi_design) return undefined;
+    try {
+      return JSON.parse(d.rb_rakhi_design);
+    } catch {
+      return undefined;
+    }
+  }, [d.rb_rakhi_design]);
+
   const [stage, setStage] = useState<Stage>(forcedSlide != null ? stageFromSlide(forcedSlide) : "intro");
   const [bgModalOpen, setBgModalOpen] = useState(false);
 
@@ -196,7 +206,7 @@ export default function RakshaBandhan({
       {stage === "tilak"    && <TilakSlide    onContinue={() => go("diyas")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "diyas"    && <DiyaSlide     onContinue={() => go("promises")} d={d} editMode={editMode} />}
       {stage === "promises" && <PromiseSlide  onContinue={() => go("letter")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
-      {stage === "letter"   && <LetterSlide   onReset={reset} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
+      {stage === "letter"   && <LetterSlide   onReset={reset} d={d} editMode={editMode} onFieldChange={onFieldChange} design={rakhiDesign} />}
 
       {editMode && forcedSlide === -1 && (
         <div
@@ -835,15 +845,17 @@ function EnvelopeSlide({ onOpen, editMode }: { onOpen: () => void; editMode: boo
 /* ══════════════════════════════════════════════════════
    STAGE 6 — LETTER
 ══════════════════════════════════════════════════════ */
-function LetterSlide({ onReset, d, editMode, onFieldChange }: {
+function LetterSlide({ onReset, d, editMode, onFieldChange, design }: {
   onReset: () => void;
   d: Record<string, string>;
   editMode: boolean;
   onFieldChange?: (id: string, v: string) => void;
+  design?: RakhiDesignState;
 }) {
   const letterRef = useRef<HTMLDivElement>(null);
   const [sealed, setSealed] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [posterOpen, setPosterOpen] = useState(false);
 
   const siblingName = d.rb_sibling_name || "Didi";
   const senderName = d.rb_sender_name || "Your Bhai";
@@ -969,21 +981,44 @@ function LetterSlide({ onReset, d, editMode, onFieldChange }: {
           <button
             className="raksha-btn-pill raksha-btn-pill-saffron"
             style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
-            onClick={() => !editMode && setSealed(true)}
+            onClick={() => {
+              if (!editMode) {
+                setSealed(true);
+                setPosterOpen(true);
+              }
+            }}
           >
-            <StampIcon size={14} /> Seal the letter
+            <StampIcon size={14} /> Seal & Generate Memory Poster 💌
           </button>
         ) : (
-          <button
-            className="raksha-btn-pill raksha-btn-pill-rose"
-            style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
-            onClick={share}
-            disabled={sharing}
-          >
-            <Share2 size={14} /> {sharing ? "Preparing…" : "Share 💌"}
-          </button>
+          <>
+            <button
+              className="raksha-btn-pill raksha-btn-pill-saffron"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+              onClick={() => setPosterOpen(true)}
+            >
+              <Sparkles size={14} /> 9:16 Memory Poster 🖼️
+            </button>
+            <button
+              className="raksha-btn-pill raksha-btn-pill-rose"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+              onClick={share}
+              disabled={sharing}
+            >
+              <Share2 size={14} /> {sharing ? "Preparing…" : "Share Letter 💌"}
+            </button>
+          </>
         )}
       </div>
+
+      {/* 9:16 Raksha Memory Poster Modal */}
+      {posterOpen && (
+        <RakshaPosterModal
+          d={d}
+          design={design}
+          onClose={() => setPosterOpen(false)}
+        />
+      )}
     </Stagewrap>
   );
 }
