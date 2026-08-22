@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { ChevronUp, Sparkles, Move, ZoomIn, Sliders } from "lucide-react";
 import { Burst, Confetti } from "./Confetti";
 import ImageUploader from "@/components/ImageCropperUploader";
@@ -23,30 +23,43 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
   const [handY, setHandY] = useState(0); // relative Y offset for sliding hand
   const isComplete = wipeProgress >= 95 || editMode;
 
-  // Editor state: Zoom level around forehead target spot
+  // Editor state: Zoom level & Target Drag state
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [draggingTarget, setDraggingTarget] = useState(false);
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const startDragYRef = useRef<number | null>(null);
 
-  // Tap/click photo in editor mode to pinpoint forehead spot
-  const handleFrameClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!editMode || !imageFrameRef.current) return;
+  // Calculate & update target spot from pointer position (supports both click and smooth drag)
+  const updateTargetFromPointer = (clientX: number, clientY: number) => {
+    if (!imageFrameRef.current || !onFieldChange) return;
     const rect = imageFrameRef.current.getBoundingClientRect();
-    const xPct = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-    const yPct = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-    onFieldChange?.("rb_tilak_x", String(Math.max(10, Math.min(90, xPct))));
-    onFieldChange?.("rb_tilak_y", String(Math.max(10, Math.min(90, yPct))));
+    const xPct = Math.round(((clientX - rect.left) / rect.width) * 100);
+    const yPct = Math.round(((clientY - rect.top) / rect.height) * 100);
+    onFieldChange("rb_tilak_x", String(Math.max(5, Math.min(95, xPct))));
+    onFieldChange("rb_tilak_y", String(Math.max(5, Math.min(95, yPct))));
   };
 
-  // View Mode: Pointer drag up to reveal Tilak with wiping transition
+  // Pointer event handlers (editMode: drag target spot; viewMode: swipe hand to reveal tilak)
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (isComplete || editMode) return;
+    if (editMode) {
+      setDraggingTarget(true);
+      e.currentTarget.setPointerCapture(e.pointerId);
+      updateTargetFromPointer(e.clientX, e.clientY);
+      return;
+    }
+
+    if (isComplete) return;
     startDragYRef.current = e.clientY;
     setDraggingHand(true);
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (editMode && draggingTarget) {
+      updateTargetFromPointer(e.clientX, e.clientY);
+      return;
+    }
+
     if (!draggingHand || startDragYRef.current === null || isComplete || editMode) return;
     const deltaY = startDragYRef.current - e.clientY; // Positive when dragging UP
     const maxDragPx = 100; // Drag distance required for 100% wipe
@@ -63,6 +76,11 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
   };
 
   const handlePointerUp = () => {
+    if (editMode) {
+      setDraggingTarget(false);
+      return;
+    }
+
     setDraggingHand(false);
     startDragYRef.current = null;
     if (wipeProgress < 95) {
@@ -108,7 +126,7 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
 
       <p style={{ marginTop: 0, textAlign: "center", fontSize: 14, color: "#f0cfa8", marginBottom: 20 }}>
         {editMode
-          ? "Upload sibling photo & tap forehead to pinpoint target spot"
+          ? "Upload sibling photo & drag pin to position forehead target spot"
           : isComplete
           ? "Tilak applied with love & blessings ✨"
           : "Slide your hand upwards over the forehead to apply Tilak"}
@@ -189,7 +207,6 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
       {/* Main Face Photo Frame */}
       <div
         ref={imageFrameRef}
-        onClick={handleFrameClick}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -204,7 +221,7 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
           border: "2px solid rgba(245,200,66,0.5)",
           boxShadow: "0 20px 50px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2)",
           touchAction: "none",
-          cursor: isComplete || editMode ? "pointer" : "grab",
+          cursor: editMode ? "crosshair" : isComplete ? "default" : "grab",
         }}
       >
         {/* Face Image Container with Target Zoom in Editor Mode */}
@@ -311,7 +328,7 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
           </div>
         )}
 
-        {/* Authentic Red Tilak PNG Image with Wiping Transition Controlled by Sliding Hand */}
+        {/* Authentic Red Tilak PNG Image without Red Glow (Clean Display) */}
         {(wipeProgress > 0 || editMode) && (
           <div
             style={{
@@ -327,7 +344,6 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
               clipPath: `inset(${100 - wipeProgress}% 0 0 0)`,
               WebkitClipPath: `inset(${100 - wipeProgress}% 0 0 0)`,
               transition: draggingHand ? "none" : "clip-path 0.2s ease-out, -webkit-clip-path 0.2s ease-out",
-              filter: "drop-shadow(0 0 12px rgba(220,38,38,0.8))",
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -360,7 +376,7 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
           </span>
         )}
 
-        {/* Pinpoint Target Marker in Edit Mode */}
+        {/* Draggable Pinpoint Target Marker in Edit Mode */}
         {editMode && (
           <div
             style={{
@@ -372,13 +388,14 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              cursor: "move",
               pointerEvents: "none",
             }}
           >
             <div
               style={{
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 borderRadius: "50%",
                 background: "#ef4444",
                 border: "2px solid #fff",
@@ -389,10 +406,10 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
                 color: "#fff",
               }}
             >
-              <Move size={12} />
+              <Move size={14} />
             </div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: "#ffe0a0", background: "rgba(0,0,0,0.75)", padding: "2px 6px", borderRadius: 4, marginTop: 4 }}>
-              Target ({targetX}%, {targetY}%)
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#ffe0a0", background: "rgba(0,0,0,0.85)", padding: "2px 6px", borderRadius: 4, marginTop: 4 }}>
+              Drag Target ({targetX}%, {targetY}%)
             </span>
           </div>
         )}
