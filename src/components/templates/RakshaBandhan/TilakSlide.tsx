@@ -157,6 +157,7 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
               data={d}
               onChange={onFieldChange}
               defaultSrc="/templates/raksha-bandhan/default_brother.png"
+              aspect={3 / 4}
             />
           </div>
 

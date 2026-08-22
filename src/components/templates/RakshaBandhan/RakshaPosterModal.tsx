@@ -117,7 +117,7 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
           width: "min(340px, 84vw)",
           height: "min(604px, 78vh)",
           aspectRatio: "9/16",
-          borderRadius: 24,
+          borderRadius: 0, // Sharp crisp outer container
           overflow: "hidden",
           boxShadow: "0 24px 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.15)",
           backgroundImage: "url(/templates/raksha-bandhan/card_bg.png)",
@@ -130,30 +130,30 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
           userSelect: "none",
         }}
       >
-        {/* Center Space: Polaroid White Photo Frames */}
+        {/* Center Space: Sharp White Photo Frames (No Radius, 3:4 & >3:4 Ratios) */}
         <div
           style={{
             position: "absolute",
-            top: "21%",
+            top: "20%",
             left: "6%",
             right: "6%",
-            bottom: "22%",
+            bottom: "21%",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: 14,
+            gap: 12,
           }}
         >
-          {/* Polaroid Frame 1: Applied Tilak Photo */}
+          {/* Frame 1: Applied Tilak Photo (3:4 ratio, Sharp edges, Clean font) */}
           <div
             style={{
               background: "#ffffff",
-              borderRadius: 12,
-              padding: "8px 8px 12px 8px",
-              boxShadow: "0 10px 24px rgba(0,0,0,0.4)",
-              transform: "rotate(-3deg)",
-              width: "82%",
+              borderRadius: 0, // No border radius
+              padding: "6px 6px 10px 6px",
+              boxShadow: "0 12px 28px rgba(0,0,0,0.45)",
+              transform: "rotate(-2.5deg)",
+              width: "78%",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -163,8 +163,8 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
               style={{
                 position: "relative",
                 width: "100%",
-                height: 120,
-                borderRadius: 8,
+                aspectRatio: "3/4", // Strict 3:4 portrait ratio for tilak photo
+                borderRadius: 0,
                 overflow: "hidden",
                 background: "#000",
               }}
@@ -195,11 +195,15 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
                 />
               </div>
             </div>
+            {/* Clean Sans-Serif Upper-case Caption (No Handwriting font) */}
             <span
               style={{
-                fontFamily: "'Pacifico', cursive",
-                fontSize: 12,
-                color: "#7c1c3a",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "#5a1226",
                 marginTop: 6,
               }}
             >
@@ -207,15 +211,15 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
             </span>
           </div>
 
-          {/* Polaroid Frame 2: Tied Rakhi Hand */}
+          {/* Frame 2: Tied Rakhi Hand (Greater than 3:4 height ratio, Sharp edges, Clean font) */}
           <div
             style={{
               background: "#ffffff",
-              borderRadius: 12,
-              padding: "8px 8px 12px 8px",
-              boxShadow: "0 10px 24px rgba(0,0,0,0.4)",
-              transform: "rotate(3deg)",
-              width: "82%",
+              borderRadius: 0, // No border radius
+              padding: "6px 6px 10px 6px",
+              boxShadow: "0 12px 28px rgba(0,0,0,0.45)",
+              transform: "rotate(2.5deg)",
+              width: "78%",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -225,8 +229,8 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
               style={{
                 position: "relative",
                 width: "100%",
-                height: 120,
-                borderRadius: 8,
+                aspectRatio: "3/4.8", // More than 3:4 height ratio (taller portrait for full arm display)
+                borderRadius: 0,
                 overflow: "hidden",
                 background: "linear-gradient(180deg, #2a0e1a 0%, #15060d 100%)",
                 display: "flex",
@@ -239,7 +243,7 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
               <img
                 src="/templates/raksha-bandhan/real_hand.png"
                 alt="Tied Hand"
-                style={{ width: "100%", height: "100%", objectFit: "contain", opacity: 0.9 }}
+                style={{ width: "100%", height: "100%", objectFit: "contain", opacity: 0.95 }}
               />
               {/* Tied Medallion */}
               <div
@@ -247,18 +251,22 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
                   position: "absolute",
                   left: "50%",
                   top: "66%",
-                  transform: "translate(-50%, -50%) scale(0.65)",
+                  transform: "translate(-50%, -50%) scale(0.68)",
                   filter: "drop-shadow(0 0 10px rgba(245,200,66,0.9))",
                 }}
               >
                 <RenderRakhiMedallion design={activeDesign} size={80} />
               </div>
             </div>
+            {/* Clean Sans-Serif Upper-case Caption (No Handwriting font) */}
             <span
               style={{
-                fontFamily: "'Pacifico', cursive",
-                fontSize: 12,
-                color: "#7c1c3a",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "#5a1226",
                 marginTop: 6,
               }}
             >

@@ -175,7 +175,7 @@ export default function ImageCropperUploader({
               image={imageSrc}
               crop={crop}
               zoom={zoom}
-              aspect={aspect} // if undefined, it behaves free-form or default 4/3 depending on library version. We'll pass aspect ratio from templates if needed.
+              aspect={aspect || 3 / 4}
               onCropChange={setCrop}
               onCropComplete={onCropComplete}
               onZoomChange={setZoom}
