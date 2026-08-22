@@ -191,6 +191,7 @@ const MLL_SLIDES = [
 ];
 
 const RAKSHA_SLIDES = [
+  { n: -1, label: "BG Music" },
   { n: 0, label: "Intro" },
   { n: 1, label: "Rakhi" },
   { n: 2, label: "Diyas" },

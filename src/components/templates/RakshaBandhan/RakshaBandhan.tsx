@@ -5,6 +5,7 @@ import html2canvas from "html2canvas";
 import { Burst, Confetti, Orbs } from "./Confetti";
 import { Diya } from "./Diya";
 import { RakhiTie } from "./RakhiTie";
+import SongLibraryPopup from "@/components/SongLibraryPopup";
 
 /* ─── Props ─────────────────────────────────────────────────────── */
 interface RakshaProps {
@@ -155,6 +156,7 @@ export default function RakshaBandhan({
   const d = customData;
 
   const [stage, setStage] = useState<Stage>(forcedSlide != null ? stageFromSlide(forcedSlide) : "intro");
+  const [bgModalOpen, setBgModalOpen] = useState(false);
 
   useEffect(() => {
     if (forcedSlide != null) setStage(stageFromSlide(forcedSlide));
@@ -183,12 +185,39 @@ export default function RakshaBandhan({
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@300;400;500;600&family=Pacifico&display=swap');
       `}</style>
 
+      {d.bg_song_url && !editMode && (
+        <audio id="raksha-bg-audio" src={d.bg_song_url} autoPlay loop />
+      )}
+
       {stage === "intro"    && <IntroSlide    onDone={() => go("rakhi")}     d={d} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "rakhi"    && <RakhiSlide    onComplete={() => go("diyas")} d={d} editMode={editMode} />}
       {stage === "diyas"    && <DiyaSlide     onContinue={() => go("promises")} d={d} editMode={editMode} />}
       {stage === "promises" && <PromiseSlide  onContinue={() => go("envelope")} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
       {stage === "envelope" && <EnvelopeSlide onOpen={() => go("letter")}    editMode={editMode} />}
       {stage === "letter"   && <LetterSlide   onReset={reset} d={d} editMode={editMode} onFieldChange={onFieldChange} />}
+
+      {editMode && forcedSlide === -1 && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+          <button
+            onClick={() => setBgModalOpen(true)}
+            className="raksha-btn-pill raksha-btn-pill-saffron"
+            style={{ padding: "16px 32px", fontSize: 18, boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}
+          >
+            🎵 Choose Background Music
+          </button>
+        </div>
+      )}
+
+      {bgModalOpen && (
+        <SongLibraryPopup
+          onClose={() => setBgModalOpen(false)}
+          onSelect={(song) => {
+            onFieldChange?.("bg_song_name", song.name);
+            onFieldChange?.("bg_song_url", song.url);
+            setBgModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
