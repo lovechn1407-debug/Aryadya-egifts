@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import { Sparkles, Check } from "lucide-react";
-import { Burst, Confetti } from "../RakshaBandhan/Confetti";
+import React, { useState } from "react";
+import { Sparkles } from "lucide-react";
+import { Burst, Confetti, Orbs } from "../RakshaBandhan/Confetti";
 
 export interface RakhiOption {
   id: string;
@@ -52,8 +52,9 @@ export function RakhiTieBrother({
 }: RakhiTieBrotherProps) {
   const currentOption = RAKHI_OPTIONS.find((r) => r.id === selectedRakhi) || RAKHI_OPTIONS[0];
 
+  // ALWAYS start at "select" in viewing mode so user sees the 4 choices first!
   const [phase, setPhase] = useState<"select" | "tying" | "tied">(
-    editMode ? "tied" : selectedRakhi ? "tied" : "select"
+    editMode ? "tied" : "select"
   );
   const [threadProgress, setThreadProgress] = useState(editMode ? 1 : 0);
 
@@ -74,20 +75,24 @@ export function RakhiTieBrother({
   };
 
   return (
-    <div
+    <section
+      className="raksha-gradient-bg"
       style={{
         fontFamily: "'Inter', sans-serif",
+        position: "relative",
         display: "flex",
+        minHeight: "100vh",
+        width: "100%",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        width: "100%",
-        minHeight: "100vh",
+        overflow: "hidden",
         padding: "56px 20px",
         color: "#fff0e0",
-        position: "relative",
       }}
     >
+      <Orbs />
+
       {phase === "tied" && !editMode && <Confetti count={40} />}
 
       <h2
@@ -100,12 +105,24 @@ export function RakhiTieBrother({
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
+          position: "relative",
+          zIndex: 10,
         }}
       >
         Tie Rakhi for Bhaiya 🎀
       </h2>
 
-      <p style={{ marginTop: 0, textAlign: "center", fontSize: 14, color: "#f0cfa8", marginBottom: 24 }}>
+      <p
+        style={{
+          marginTop: 0,
+          textAlign: "center",
+          fontSize: 14,
+          color: "#f0cfa8",
+          marginBottom: 24,
+          position: "relative",
+          zIndex: 10,
+        }}
+      >
         {phase === "select"
           ? "Select a Rakhi to tie on Bhaiya's wrist"
           : phase === "tying"
@@ -123,6 +140,8 @@ export function RakhiTieBrother({
             width: "100%",
             maxWidth: 380,
             marginBottom: 20,
+            position: "relative",
+            zIndex: 10,
           }}
         >
           {RAKHI_OPTIONS.map((rakhi) => (
@@ -201,6 +220,7 @@ export function RakhiTieBrother({
             alignItems: "flex-end",
             justifyContent: "center",
             margin: "0 auto",
+            zIndex: 10,
           }}
         >
           {/* 3D Hand with Slide-Up Entrance Transition */}
@@ -325,6 +345,8 @@ export function RakhiTieBrother({
             maxWidth: 360,
             padding: "18px 24px",
             textAlign: "center",
+            position: "relative",
+            zIndex: 10,
           }}
         >
           <Sparkles style={{ margin: "0 auto 6px", color: "#f5c842", display: "block" }} size={20} />
@@ -374,6 +396,6 @@ export function RakhiTieBrother({
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }
