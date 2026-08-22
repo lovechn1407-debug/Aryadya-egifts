@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronUp, Sparkles, Move } from "lucide-react";
+import { ChevronUp, Sparkles, Move, ZoomIn, Sliders } from "lucide-react";
 import { Burst, Confetti } from "./Confetti";
+import ImageUploader from "@/components/ImageCropperUploader";
 
 interface TilakSlideProps {
   onContinue: () => void;
@@ -14,13 +15,20 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
   const faceImgUrl = d.rb_face_img || "/templates/raksha-bandhan/default_brother.png";
   const targetX = Number(d.rb_tilak_x || 50);
   const targetY = Number(d.rb_tilak_y || 28);
+  const tilakSize = Number(d.rb_tilak_size || 60);
 
-  const [applied, setApplied] = useState(editMode);
-  const [swiping, setSwiping] = useState(false);
-  const startYRef = useRef<number | null>(null);
+  // View Mode state: Wiping progress controlled by hand drag
+  const [wipeProgress, setWipeProgress] = useState(editMode ? 100 : 0);
+  const [draggingHand, setDraggingHand] = useState(false);
+  const [handY, setHandY] = useState(0); // relative Y offset for sliding hand
+  const isComplete = wipeProgress >= 95 || editMode;
+
+  // Editor state: Zoom level around forehead target spot
+  const [zoomLevel, setZoomLevel] = useState(1);
   const imageFrameRef = useRef<HTMLDivElement>(null);
+  const startDragYRef = useRef<number | null>(null);
 
-  // In edit mode: click on image to set forehead target spot
+  // Tap/click photo in editor mode to pinpoint forehead spot
   const handleFrameClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!editMode || !imageFrameRef.current) return;
     const rect = imageFrameRef.current.getBoundingClientRect();
@@ -30,28 +38,38 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
     onFieldChange?.("rb_tilak_y", String(Math.max(10, Math.min(90, yPct))));
   };
 
-  // Swipe up gesture detection on view mode
+  // View Mode: Pointer drag up to reveal Tilak with wiping transition
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (applied || editMode) return;
-    startYRef.current = e.clientY;
-    setSwiping(true);
+    if (isComplete || editMode) return;
+    startDragYRef.current = e.clientY;
+    setDraggingHand(true);
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!swiping || startYRef.current === null || applied || editMode) return;
-    const deltaY = e.clientY - startYRef.current;
-    // If swiped up by more than 35px
-    if (deltaY < -35) {
-      setApplied(true);
-      setSwiping(false);
-      startYRef.current = null;
+    if (!draggingHand || startDragYRef.current === null || isComplete || editMode) return;
+    const deltaY = startDragYRef.current - e.clientY; // Positive when dragging UP
+    const maxDragPx = 100; // Drag distance required for 100% wipe
+    const currentProgress = Math.min(100, Math.max(0, (deltaY / maxDragPx) * 100));
+
+    setWipeProgress(currentProgress);
+    setHandY(-deltaY);
+
+    if (currentProgress >= 95) {
+      setWipeProgress(100);
+      setDraggingHand(false);
+      startDragYRef.current = null;
     }
   };
 
   const handlePointerUp = () => {
-    setSwiping(false);
-    startYRef.current = null;
+    setDraggingHand(false);
+    startDragYRef.current = null;
+    if (wipeProgress < 95) {
+      // Reset if drag incomplete
+      setWipeProgress(0);
+      setHandY(0);
+    }
   };
 
   return (
@@ -71,7 +89,7 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
         color: "#fff0e0",
       }}
     >
-      {applied && !editMode && <Confetti count={35} />}
+      {isComplete && !editMode && <Confetti count={35} />}
 
       <h2
         style={{
@@ -88,13 +106,85 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
         Apply Tilak 🔴
       </h2>
 
-      <p style={{ marginTop: 0, textAlign: "center", fontSize: 14, color: "#f0cfa8", marginBottom: 24 }}>
+      <p style={{ marginTop: 0, textAlign: "center", fontSize: 14, color: "#f0cfa8", marginBottom: 20 }}>
         {editMode
-          ? "Tap photo below to position forehead spot for Tilak"
-          : applied
+          ? "Upload sibling photo & tap forehead to pinpoint target spot"
+          : isComplete
           ? "Tilak applied with love & blessings ✨"
-          : "Swipe up on the forehead to apply Tilak"}
+          : "Slide your hand upwards over the forehead to apply Tilak"}
       </p>
+
+      {/* Editor Controls: Image Uploader, Target Zoom & Tilak Size Slider */}
+      {editMode && (
+        <div
+          className="raksha-glass-card"
+          style={{
+            width: "100%",
+            maxWidth: 420,
+            padding: "16px 20px",
+            marginBottom: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+            border: "1px solid rgba(245,200,66,0.4)",
+          }}
+        >
+          {/* Explicit Image Uploader */}
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "#ffe0a0", display: "block", marginBottom: 6 }}>
+              Upload Sibling Photo (Hosts to ImgBB):
+            </label>
+            <ImageUploader
+              fid="rb_face_img"
+              data={d}
+              onChange={onFieldChange}
+              defaultSrc="/templates/raksha-bandhan/default_brother.png"
+            />
+          </div>
+
+          {/* Zoom & Tilak Size Controls */}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            {/* Zoom Control */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <ZoomIn size={14} style={{ color: "#f5c842" }} />
+              <span style={{ fontSize: 12, color: "#f0cfa8" }}>Zoom:</span>
+              {[1, 1.5, 2, 2.5].map((z) => (
+                <button
+                  key={z}
+                  onClick={() => setZoomLevel(z)}
+                  style={{
+                    padding: "3px 8px",
+                    borderRadius: 6,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    border: "none",
+                    background: zoomLevel === z ? "#ff7c1a" : "rgba(255,255,255,0.1)",
+                    color: "#fff",
+                    cursor: "pointer",
+                  }}
+                >
+                  {z}x
+                </button>
+              ))}
+            </div>
+
+            {/* Tilak Size Slider */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Sliders size={14} style={{ color: "#f5c842" }} />
+              <span style={{ fontSize: 12, color: "#f0cfa8" }}>Tilak Size:</span>
+              <input
+                type="range"
+                min="30"
+                max="100"
+                value={tilakSize}
+                onChange={(e) => onFieldChange?.("rb_tilak_size", e.target.value)}
+                style={{ width: 80, accentColor: "#ff7c1a" }}
+              />
+              <span style={{ fontSize: 11, color: "#ffe0a0" }}>{tilakSize}px</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Face Photo Frame */}
       <div
@@ -114,25 +204,35 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
           border: "2px solid rgba(245,200,66,0.5)",
           boxShadow: "0 20px 50px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2)",
           touchAction: "none",
-          cursor: applied || editMode ? "pointer" : "grab",
+          cursor: isComplete || editMode ? "pointer" : "grab",
         }}
       >
-        {/* Face Image */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={faceImgUrl}
-          alt="Sibling Face"
+        {/* Face Image Container with Target Zoom in Editor Mode */}
+        <div
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "cover",
-            display: "block",
-            userSelect: "none",
+            transition: "transform 0.25s ease-out",
+            transformOrigin: `${targetX}% ${targetY}%`,
+            transform: editMode ? `scale(${zoomLevel})` : "none",
           }}
-        />
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={faceImgUrl}
+            alt="Sibling Face"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+              userSelect: "none",
+            }}
+          />
+        </div>
 
-        {/* Highlighted Forehead Target Spot Indicator (View Mode when not applied) */}
-        {!applied && !editMode && (
+        {/* Forehead Target Spot Indicator (View Mode when not wiped) */}
+        {!isComplete && !editMode && (
           <div
             style={{
               position: "absolute",
@@ -146,8 +246,8 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
             {/* Pulsing Target Ring */}
             <div
               style={{
-                width: 44,
-                height: 44,
+                width: 46,
+                height: 46,
                 borderRadius: "50%",
                 border: "2px dashed #f5c842",
                 background: "rgba(245,200,66,0.25)",
@@ -160,44 +260,23 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
             >
               <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
             </div>
-
-            {/* Target Label */}
-            <div
-              style={{
-                position: "absolute",
-                top: 48,
-                left: "50%",
-                transform: "translateX(-50%)",
-                whiteSpace: "nowrap",
-                fontSize: 10,
-                fontWeight: 700,
-                color: "#ffe0a0",
-                background: "rgba(0,0,0,0.65)",
-                backdropFilter: "blur(4px)",
-                padding: "2px 8px",
-                borderRadius: 999,
-                border: "1px solid rgba(245,200,66,0.4)",
-              }}
-            >
-              Forehead Spot 🔴
-            </div>
           </div>
         )}
 
-        {/* Animated Swipe Up Gesture Direction Hint */}
-        {!applied && !editMode && (
+        {/* Animated Direction Guide Banner */}
+        {!isComplete && !editMode && (
           <div
             className="raksha-animate-slide-hint"
             style={{
               position: "absolute",
-              bottom: 24,
+              bottom: 20,
               left: "50%",
               transform: "translateX(-50%)",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               gap: 4,
-              background: "rgba(0,0,0,0.65)",
+              background: "rgba(0,0,0,0.7)",
               backdropFilter: "blur(8px)",
               padding: "8px 18px",
               borderRadius: 999,
@@ -208,64 +287,80 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
           >
             <ChevronUp size={22} style={{ color: "#f5c842" }} />
             <span style={{ fontSize: 12, fontWeight: 600, color: "#fff0e0" }}>
-              Swipe Up to Apply Tilak 🔴
+              Slide Hand Upwards to Apply Tilak 🔴
             </span>
           </div>
         )}
 
-        {/* Applied Tilak Mark (Red Vermillion Kumkum & Yellow Rice Grains Akshat) */}
-        {applied && (
+        {/* Sliding Hand Icon Follower during drag */}
+        {!isComplete && !editMode && (
+          <div
+            style={{
+              position: "absolute",
+              left: `${targetX}%`,
+              top: `calc(${targetY}% + 40px + ${handY}px)`,
+              transform: "translateX(-50%)",
+              fontSize: 32,
+              filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.6))",
+              zIndex: 30,
+              pointerEvents: "none",
+              transition: draggingHand ? "none" : "all 0.2s ease-out",
+            }}
+          >
+            👆
+          </div>
+        )}
+
+        {/* Authentic Red Tilak PNG Image with Wiping Transition Controlled by Sliding Hand */}
+        {(wipeProgress > 0 || editMode) && (
           <div
             style={{
               position: "absolute",
               left: `${targetX}%`,
               top: `${targetY}%`,
+              width: tilakSize,
+              height: tilakSize * 1.8,
               transform: "translate(-50%, -50%)",
               pointerEvents: "none",
               zIndex: 25,
-              animation: "raksha-stamp-down 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards",
+              /* Vertical Wiping Transition: reveals Tilak PNG from bottom to top as wipeProgress increases */
+              clipPath: `inset(${100 - wipeProgress}% 0 0 0)`,
+              WebkitClipPath: `inset(${100 - wipeProgress}% 0 0 0)`,
+              transition: draggingHand ? "none" : "clip-path 0.2s ease-out, -webkit-clip-path 0.2s ease-out",
+              filter: "drop-shadow(0 0 12px rgba(220,38,38,0.8))",
             }}
           >
-            <Burst count={16} colors={["#ef4444", "#f59e0b", "#facc15"]} spread={70} />
-
-            {/* Traditional Vertical Tilak (Kumkum + Rice) */}
-            <div
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/templates/raksha-bandhan/tilak_mark.png"
+              alt="Authentic Red Tilak Mark"
               style={{
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))",
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                display: "block",
               }}
-            >
-              {/* Vertical Red Tilak Stroke */}
-              <div
-                style={{
-                  width: 10,
-                  height: 32,
-                  borderRadius: "5px 5px 8px 8px",
-                  background: "linear-gradient(180deg, #dc2626 0%, #b91c1c 100%)",
-                  boxShadow: "0 0 10px rgba(220,38,38,0.8)",
-                }}
-              />
-              {/* Yellow Rice Grains (Akshat) scattered over tilak */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 6,
-                  display: "flex",
-                  gap: 3,
-                }}
-              >
-                <div style={{ width: 3, height: 6, borderRadius: "50%", background: "#fef08a", transform: "rotate(-15deg)" }} />
-                <div style={{ width: 3, height: 6, borderRadius: "50%", background: "#ffffff", transform: "rotate(10deg)" }} />
-                <div style={{ width: 3, height: 6, borderRadius: "50%", background: "#fef08a", transform: "rotate(-5deg)" }} />
-              </div>
-            </div>
+            />
           </div>
         )}
 
-        {/* Pinpoint Position Marker in Edit Mode */}
+        {/* Particle Burst on Full Wipe Complete */}
+        {wipeProgress >= 95 && (
+          <span
+            style={{
+              position: "absolute",
+              left: `${targetX}%`,
+              top: `${targetY}%`,
+              transform: "translate(-50%, -50%)",
+              zIndex: 35,
+              pointerEvents: "none",
+            }}
+          >
+            <Burst count={24} colors={["#dc2626", "#f59e0b", "#facc15"]} spread={80} />
+          </span>
+        )}
+
+        {/* Pinpoint Target Marker in Edit Mode */}
         {editMode && (
           <div
             style={{
@@ -277,6 +372,7 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              pointerEvents: "none",
             }}
           >
             <div
@@ -295,15 +391,15 @@ export function TilakSlide({ onContinue, d, editMode, onFieldChange }: TilakSlid
             >
               <Move size={12} />
             </div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: "#ffe0a0", background: "rgba(0,0,0,0.7)", padding: "1px 6px", borderRadius: 4, marginTop: 2 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#ffe0a0", background: "rgba(0,0,0,0.75)", padding: "2px 6px", borderRadius: 4, marginTop: 4 }}>
               Target ({targetX}%, {targetY}%)
             </span>
           </div>
         )}
       </div>
 
-      {/* Confirmation & Continue Button */}
-      {(applied || editMode) && (
+      {/* Celebration & Continue Card */}
+      {(isComplete || editMode) && (
         <div
           className="raksha-animate-fade-in-up raksha-glass-card"
           style={{ marginTop: 24, width: "100%", maxWidth: 360, padding: "20px 24px", textAlign: "center" }}

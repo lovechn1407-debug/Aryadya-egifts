@@ -1404,9 +1404,10 @@ export const PRODUCT_REGISTRY: Product[] = [
         title: "Apply Tilak 🔴",
         description: "Upload sibling face photo & swipe up on forehead to apply Tilak",
         fields: [
-          { id: "rb_face_img", label: "Sibling Face Photo", type: "image" as const, defaultValue: "/templates/raksha-bandhan/default_brother.png" },
-          { id: "rb_tilak_x",  label: "Forehead Spot X % (10 - 90)", type: "text" as const, defaultValue: "50" },
-          { id: "rb_tilak_y",  label: "Forehead Spot Y % (10 - 90)", type: "text" as const, defaultValue: "28" },
+          { id: "rb_face_img",   label: "Sibling Face Photo", type: "image" as const, defaultValue: "/templates/raksha-bandhan/default_brother.png" },
+          { id: "rb_tilak_x",    label: "Forehead Spot X % (10 - 90)", type: "text" as const, defaultValue: "50" },
+          { id: "rb_tilak_y",    label: "Forehead Spot Y % (10 - 90)", type: "text" as const, defaultValue: "28" },
+          { id: "rb_tilak_size", label: "Tilak Size in px (30 - 100)", type: "text" as const, defaultValue: "60" },
         ],
       },
       {
