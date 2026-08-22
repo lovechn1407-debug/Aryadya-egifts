@@ -135,7 +135,7 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
             top: "14.8%",
             width: "42.6%",
             height: "22.8%",
-            borderRadius: 14,
+            borderRadius: 0,
             overflow: "hidden",
             background: "#000",
           }}
@@ -175,7 +175,7 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
             top: "35.8%",
             width: "42.6%",
             height: "26.2%",
-            borderRadius: 14,
+            borderRadius: 0,
             overflow: "hidden",
             background: "linear-gradient(180deg, #2a0e1a 0%, #15060d 100%)",
             display: "flex",
