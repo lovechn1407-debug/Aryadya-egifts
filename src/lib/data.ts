@@ -1438,6 +1438,81 @@ export const PRODUCT_REGISTRY: Product[] = [
       },
     ],
   },
+  {
+    id: "raksha-bandhan-brother",
+    name: "Raksha Bandhan — Sister to Brother 🎁",
+    tagline: "Heartfelt gift experience with 4 Rakhi choices, multi-photo collage, Bhaiya defaults, & 9:16 poster export",
+    category: "friendship" as const,
+    price: 9900,
+    visible: true,
+    badge: "new",
+    thumbnail: "🎁",
+    previewRoute: "/preview/raksha-bandhan-brother",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: -1,
+        title: "Background Music",
+        description: "Plays continuously throughout the website",
+        fields: [
+          { id: "bg_song_name", label: "Background Song Name", type: "text" as const, defaultValue: "Classic Saffron Tune" },
+          { id: "bg_song_url", label: "Background Song URL (.mp3)", type: "text" as const, defaultValue: "" },
+        ],
+      },
+      {
+        slideNumber: 0,
+        title: "Intro",
+        description: "Opening animated greeting with brother name",
+        fields: [
+          { id: "rb_sibling_name", label: "Brother's Name (receiving)", type: "text" as const, defaultValue: "Bhaiya" },
+        ],
+      },
+      {
+        slideNumber: 1,
+        title: "Select Rakhi 🎀",
+        description: "Choose from 4 Rakhi options (Diet Coke, Spiderman, Om, Traditional)",
+        fields: [
+          { id: "rb_selected_rakhi", label: "Selected Rakhi ID", type: "text" as const, defaultValue: "dietcoke" },
+        ],
+      },
+      {
+        slideNumber: 2,
+        title: "Photo Collage 📸",
+        description: "Upload multiple photos for brother-sister memories",
+        fields: [
+          { id: "rb_collage_img_1", label: "Collage Photo 1", type: "image" as const, defaultValue: "/templates/raksha-bandhan/default_brother.png" },
+          { id: "rb_collage_img_2", label: "Collage Photo 2", type: "image" as const, defaultValue: "" },
+          { id: "rb_collage_img_3", label: "Collage Photo 3", type: "image" as const, defaultValue: "" },
+        ],
+      },
+      {
+        slideNumber: 3,
+        title: "Light the Diyas",
+        description: "Tap 5 oil-lamp diyas to light them",
+        fields: [],
+      },
+      {
+        slideNumber: 4,
+        title: "Promise Cards",
+        description: "4 flip cards revealing promises for Bhaiya",
+        fields: [
+          { id: "rb_promise1", label: "Promise 1", type: "textarea" as const, defaultValue: "I'll always save the last slice of pizza for you" },
+          { id: "rb_promise2", label: "Promise 2", type: "textarea" as const, defaultValue: "I'll always cover for you when you're late" },
+          { id: "rb_promise3", label: "Promise 3", type: "textarea" as const, defaultValue: "I'll always celebrate every one of your big wins" },
+          { id: "rb_promise4", label: "Promise 4", type: "textarea" as const, defaultValue: "I'll always be here whenever you need me" },
+        ],
+      },
+      {
+        slideNumber: 5,
+        title: "Letter",
+        description: "The final heartfelt Raksha Bandhan letter for Bhaiya",
+        fields: [
+          { id: "rb_sender_name",   label: "Sender's Name (sign-off)", type: "text"     as const, defaultValue: "Your Didi" },
+          { id: "rb_final_message", label: "Final Letter Message",      type: "textarea" as const, defaultValue: "No matter how much we fight, you'll always be my favorite protector & partner in crime." },
+        ],
+      },
+    ],
+  },
 ];
 
 

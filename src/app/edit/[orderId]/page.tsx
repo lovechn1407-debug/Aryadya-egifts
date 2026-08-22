@@ -56,6 +56,7 @@ import Confess from "@/components/templates/Confess/Confess";
 import BirthdaySerenade from "@/components/templates/BirthdaySerenade/BirthdaySerenade";
 import MyLoveLanguage from "@/components/templates/MyLoveLanguage/MyLoveLanguage";
 import RakshaBandhan from "@/components/templates/RakshaBandhan/RakshaBandhan";
+import RakshaBandhanBrother from "@/components/templates/RakshaBandhanBrother/RakshaBandhanBrother";
 import QRSharePopup from "@/components/QRSharePopup";
 import Link from "next/link";
 import { sendFinalizationEmail } from "@/lib/email";
@@ -200,6 +201,16 @@ const RAKSHA_SLIDES = [
   { n: 5, label: "Letter" },
 ];
 
+const RAKSHA_BROTHER_SLIDES = [
+  { n: -1, label: "BG Music" },
+  { n: 0, label: "Intro" },
+  { n: 1, label: "Rakhi" },
+  { n: 2, label: "Collage" },
+  { n: 3, label: "Diyas" },
+  { n: 4, label: "Promises" },
+  { n: 5, label: "Letter" },
+];
+
 function getSlideList(productId: string) {
   if (productId === "lovers-enchanted-journey") return LOVERS_SLIDES;
   if (productId === "birthday-magic-box") return BIRTHDAY_SLIDES;
@@ -214,6 +225,7 @@ function getSlideList(productId: string) {
   if (productId === "birthday-serenade") return SERENADE_SLIDES;
   if (productId === "my-love-language") return MLL_SLIDES;
   if (productId === "raksha-bandhan") return RAKSHA_SLIDES;
+  if (productId === "raksha-bandhan-brother") return RAKSHA_BROTHER_SLIDES;
   return [];
 }
 
@@ -346,6 +358,16 @@ function renderEditorTemplate(
   if (productId === "raksha-bandhan") {
     return (
       <RakshaBandhan
+        customData={customData}
+        editMode={true}
+        onFieldChange={onFieldChange}
+        forcedSlide={forcedSlide}
+      />
+    );
+  }
+  if (productId === "raksha-bandhan-brother") {
+    return (
+      <RakshaBandhanBrother
         customData={customData}
         editMode={true}
         onFieldChange={onFieldChange}

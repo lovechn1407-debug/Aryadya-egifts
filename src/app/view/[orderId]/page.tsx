@@ -17,6 +17,7 @@ import Confess from "@/components/templates/Confess/Confess";
 import BirthdaySerenade from "@/components/templates/BirthdaySerenade/BirthdaySerenade";
 import MyLoveLanguage from "@/components/templates/MyLoveLanguage/MyLoveLanguage";
 import RakshaBandhan from "@/components/templates/RakshaBandhan/RakshaBandhan";
+import RakshaBandhanBrother from "@/components/templates/RakshaBandhanBrother/RakshaBandhanBrother";
 import Link from "next/link";
 
 /* ── Vector SVG Components ── */
@@ -97,6 +98,8 @@ function renderFinalTemplate(productId: string, customData: Record<string, strin
       return <MyLoveLanguage customData={customData} />;
     case "raksha-bandhan":
       return <RakshaBandhan customData={customData} />;
+    case "raksha-bandhan-brother":
+      return <RakshaBandhanBrother customData={customData} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#FFF" }}>
