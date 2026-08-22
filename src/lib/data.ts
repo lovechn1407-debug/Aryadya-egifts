@@ -1365,7 +1365,67 @@ export const PRODUCT_REGISTRY: Product[] = [
       },
     ],
   },
+  {
+    id: "raksha-bandhan",
+    name: "Raksha Bandhan 🎀",
+    tagline: "An interactive Raksha Bandhan microsite: tie the rakhi, light the diyas, flip promise cards & read a heartfelt letter",
+    category: "friendship" as const,
+    price: 9900,
+    visible: true,
+    thumbnail: "🎀",
+    previewRoute: "/preview/raksha-bandhan",
+    createdAt: new Date().toISOString(),
+    slides: [
+      {
+        slideNumber: 0,
+        title: "Intro",
+        description: "Opening animated greeting with sibling name",
+        fields: [
+          { id: "rb_sibling_name", label: "Sibling's Name (receiving)", type: "text" as const, defaultValue: "Didi" },
+        ],
+      },
+      {
+        slideNumber: 1,
+        title: "Tie the Rakhi",
+        description: "Interactive drag-thread game — shown tied in preview",
+        fields: [],
+      },
+      {
+        slideNumber: 2,
+        title: "Light the Diyas",
+        description: "Tap 5 oil-lamp diyas to light them — shown lit in preview",
+        fields: [],
+      },
+      {
+        slideNumber: 3,
+        title: "Promise Cards",
+        description: "4 flip cards revealing your heartfelt promises",
+        fields: [
+          { id: "rb_promise1", label: "Promise 1", type: "textarea" as const, defaultValue: "I'll always be\nyour safe space" },
+          { id: "rb_promise2", label: "Promise 2", type: "textarea" as const, defaultValue: "I'll protect you,\nalways & forever" },
+          { id: "rb_promise3", label: "Promise 3", type: "textarea" as const, defaultValue: "I'll celebrate\nevery win with you" },
+          { id: "rb_promise4", label: "Promise 4", type: "textarea" as const, defaultValue: "I'll be there\nin every storm" },
+        ],
+      },
+      {
+        slideNumber: 4,
+        title: "Envelope",
+        description: "Drag/swipe up to open the envelope — shown open in preview",
+        fields: [],
+      },
+      {
+        slideNumber: 5,
+        title: "Letter",
+        description: "The final heartfelt Raksha Bandhan letter",
+        fields: [
+          { id: "rb_sender_name",   label: "Sender's Name (sign-off)", type: "text"     as const, defaultValue: "Your Bhai" },
+          { id: "rb_final_message", label: "Final Letter Message",      type: "textarea" as const, defaultValue: "No matter how far life takes us, this thread always finds its way back to you." },
+        ],
+      },
+    ],
+  },
 ];
+
 
 // ─── LOCALSTORAGE HELPERS ─────────────────────────────────────────────────────
 

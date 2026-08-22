@@ -16,6 +16,7 @@ import Propose3 from "@/components/templates/Propose3/Propose3";
 import Confess from "@/components/templates/Confess/Confess";
 import BirthdaySerenade from "@/components/templates/BirthdaySerenade/BirthdaySerenade";
 import MyLoveLanguage from "@/components/templates/MyLoveLanguage/MyLoveLanguage";
+import RakshaBandhan from "@/components/templates/RakshaBandhan/RakshaBandhan";
 import Link from "next/link";
 
 /* ── Vector SVG Components ── */
@@ -94,6 +95,8 @@ function renderFinalTemplate(productId: string, customData: Record<string, strin
       return <BirthdaySerenade customData={customData} />;
     case "my-love-language":
       return <MyLoveLanguage customData={customData} />;
+    case "raksha-bandhan":
+      return <RakshaBandhan customData={customData} />;
     default:
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "#FFF" }}>
