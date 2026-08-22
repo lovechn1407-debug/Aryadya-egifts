@@ -109,7 +109,7 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
         </button>
       </div>
 
-      {/* Responsive 9:16 Poster Card Container (100% Centered, Zero Overflow) */}
+      {/* Responsive 9:16 Poster Card Container (Zero Corner Radius, Unstretched) */}
       <div
         ref={posterRef}
         style={{
@@ -117,16 +117,28 @@ export function RakshaPosterModal({ d, design, onClose }: RakshaPosterModalProps
           width: "min(340px, 80vw)",
           height: "min(604px, 74vh)",
           aspectRatio: "9/16",
-          borderRadius: 20,
+          borderRadius: 0,
           overflow: "hidden",
           boxShadow: "0 24px 60px rgba(0,0,0,0.9)",
-          backgroundImage: "url(/templates/raksha-bandhan/card_bg.png)",
-          backgroundSize: "100% 100%",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          background: "#180614",
           userSelect: "none",
         }}
       >
+        {/* Explicit Poster Background Image (Zero Stretching) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/templates/raksha-bandhan/card_bg.png"
+          alt="Raksha Bandhan Card Background"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            display: "block",
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+          }}
+        />
         {/* Cutout 1: Tilak Sibling Photo (Aligned inside Left Top Frame "TILAK") */}
         <div
           style={{
