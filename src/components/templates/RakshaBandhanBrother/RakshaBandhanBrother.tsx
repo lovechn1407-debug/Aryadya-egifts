@@ -1,13 +1,21 @@
 "use client";
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Sparkles, RotateCcw, Share2, Music, Check } from "lucide-react";
+import { Sparkles, RotateCcw, Music, Check } from "lucide-react";
 
 import { Burst, Confetti, Orbs } from "../RakshaBandhan/Confetti";
 import { Diya } from "../RakshaBandhan/Diya";
-import { RakhiTieBrother, RAKHI_OPTIONS } from "./RakhiTieBrother";
+import { RakhiTieBrother } from "./RakhiTieBrother";
 import { PhotoCollageSlide } from "./PhotoCollageSlide";
 import { RakshaPosterModalBrother } from "./RakshaPosterModalBrother";
 import SongLibraryPopup from "@/components/SongLibraryPopup";
+
+function RakhiMotif() {
+  return (
+    <div className="raksha-marigold-ring">
+      <div style={{ fontSize: "clamp(3.5rem, 12vw, 5.5rem)" }}>🎀</div>
+    </div>
+  );
+}
 
 /* ─── Props ─────────────────────────────────────────────────────── */
 interface RakshaBrotherProps {
@@ -147,8 +155,14 @@ function Stagewrap({
 }
 
 /* ══════════════════════════════════════════════════════
-   STAGE 0 — INTRO
+   STAGE 0 — INTRO (Multi-text animated sequence)
 ══════════════════════════════════════════════════════ */
+const INTRO_MESSAGES_BROTHER = [
+  { text: "Hey {name},", sub: "this is for you 🎀", icon: "✦" },
+  { text: "A little something", sub: "crafted with all my love.", icon: "✦" },
+  { text: "This Raksha Bandhan,", sub: "I wanted to do something special for Bhaiya.", icon: "✦" },
+];
+
 function IntroSlide({
   onDone,
   d,
@@ -161,48 +175,92 @@ function IntroSlide({
   onFieldChange?: (id: string, val: string) => void;
 }) {
   const siblingName = d.rb_sibling_name || "Bhaiya";
+  const [index, setIndex] = useState(editMode ? 2 : 0);
+  const [leaving, setLeaving] = useState(false);
+  const [ready, setReady] = useState(editMode);
+
+  useEffect(() => {
+    if (ready || editMode) return;
+    const out = setTimeout(() => setLeaving(true), 2600);
+    const next = setTimeout(() => {
+      setLeaving(false);
+      if (index === INTRO_MESSAGES_BROTHER.length - 1) setReady(true);
+      else setIndex((i) => i + 1);
+    }, 3200);
+    return () => {
+      clearTimeout(out);
+      clearTimeout(next);
+    };
+  }, [index, ready, editMode]);
+
+  const m = INTRO_MESSAGES_BROTHER[index] ?? INTRO_MESSAGES_BROTHER[0]!;
+  const displayText = m.text.replace("{name}", siblingName);
 
   return (
     <Stagewrap>
-      <div className="raksha-marigold-ring">
-        <div style={{ fontSize: "clamp(3.5rem, 12vw, 5.5rem)" }}>🎀</div>
-      </div>
-
-      <p className="raksha-animate-fade-in-up" style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.3em", color: "#f5c842", marginTop: 24 }}>
-        Raksha Bandhan Greetings
-      </p>
-
-      <h1
-        className="raksha-animate-fade-in-up"
-        style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: "clamp(2.2rem, 8vw, 3.8rem)",
-          textAlign: "center",
-          lineHeight: 1.15,
-          margin: "12px 0 20px",
-          background: "linear-gradient(135deg, #fff4c2 0%, #f5c842 50%, #ff9d00 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}
-      >
-        Happy Raksha Bandhan, <br />
-        <ET fid="rb_sibling_name" d={d} onChange={onFieldChange} editMode={editMode} def={siblingName} />!
-      </h1>
-
-      <p style={{ textAlign: "center", maxWidth: 360, color: "#f0cfa8", lineHeight: 1.6 }}>
-        A special gift crafted with endless love, laughter, and lifelong memories just for you.
-      </p>
-
-      <button className="raksha-btn-pill raksha-btn-pill-saffron raksha-animate-fade-in-up" style={{ marginTop: 32 }} onClick={onDone}>
-        Begin Experience ✨
-      </button>
+      <RakhiMotif />
+      {!ready ? (
+        <div
+          key={index}
+          style={{ textAlign: "center" }}
+          className={leaving ? "raksha-animate-fade-out-up" : "raksha-animate-fade-in-up"}
+        >
+          <div style={{ color: "#f5c842", marginBottom: 16, fontSize: 22 }}>{m.icon}</div>
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "clamp(2rem, 8vw, 3.5rem)",
+              lineHeight: 1.1,
+              margin: 0,
+              background: "linear-gradient(135deg, #ffe0a0 0%, #ff7c1a 50%, #e0185a 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            {displayText}
+          </h1>
+          <p style={{ marginTop: 16, fontSize: "1rem", color: "#f0cfa8" }}>{m.sub}</p>
+        </div>
+      ) : (
+        <div className="raksha-animate-fade-in-up raksha-glass-card" style={{ width: "100%", maxWidth: 440, padding: "40px 28px", textAlign: "center" }}>
+          <Sparkles style={{ margin: "0 auto 16px", color: "#f5c842", display: "block" }} size={24} />
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "clamp(1.6rem, 6vw, 2.5rem)",
+              margin: "0 0 8px",
+              background: "linear-gradient(135deg, #ffe0a0 0%, #ff7c1a 50%, #e0185a 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Shall we begin?
+          </h1>
+          {editMode && (
+            <div style={{ marginBottom: 16, marginTop: 12 }}>
+              <label style={{ fontSize: 12, color: "#f0cfa8", display: "block", marginBottom: 4 }}>Brother&apos;s Name</label>
+              <ET fid="rb_sibling_name" d={d} onChange={onFieldChange} editMode={editMode} def="Bhaiya" />
+            </div>
+          )}
+          <div style={{ marginTop: 32, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 12 }}>
+            <button className="raksha-btn-pill raksha-btn-pill-saffron" onClick={onDone}>
+              Yes, of course 🎀
+            </button>
+            <button className="raksha-btn-pill" onClick={onDone}>
+              Let&apos;s go 💛
+            </button>
+          </div>
+          <p style={{ fontFamily: "'Pacifico', cursive", marginTop: 32, fontSize: 18, color: "#f5c842" }}>made with love</p>
+        </div>
+      )}
     </Stagewrap>
   );
 }
 
 /* ══════════════════════════════════════════════════════
-   STAGE 3 — DIYAS
+   STAGE 3 — DIYAS (Fixed Background)
 ══════════════════════════════════════════════════════ */
 function DiyaSlide({ onContinue, editMode }: { onContinue: () => void; editMode: boolean }) {
   const [litCount, setLitCount] = useState(editMode ? 5 : 0);
@@ -217,7 +275,7 @@ function DiyaSlide({ onContinue, editMode }: { onContinue: () => void; editMode:
   };
 
   return (
-    <Stagewrap soft>
+    <Stagewrap>
       <h2
         style={{
           fontFamily: "'Playfair Display', serif",
@@ -252,13 +310,20 @@ function DiyaSlide({ onContinue, editMode }: { onContinue: () => void; editMode:
 }
 
 /* ══════════════════════════════════════════════════════
-   STAGE 4 — PROMISES
+   STAGE 4 — PROMISES (With Bear GIFs)
 ══════════════════════════════════════════════════════ */
 const DEFAULT_PROMISES_BROTHER = [
   { id: "rb_promise1", def: "I'll always save the last slice of pizza for you" },
   { id: "rb_promise2", def: "I'll always cover for you when you're late" },
   { id: "rb_promise3", def: "I'll always celebrate every one of your big wins" },
   { id: "rb_promise4", def: "I'll always be here whenever you need me" },
+];
+
+const DEFAULT_BEAR_GIFS = [
+  "/templates/raksha-bandhan/bear1.gif",
+  "/templates/raksha-bandhan/bear2.gif",
+  "/templates/raksha-bandhan/bear3.gif",
+  "/templates/raksha-bandhan/bear4.gif",
 ];
 
 function PromiseSlide({
@@ -272,7 +337,7 @@ function PromiseSlide({
   editMode: boolean;
   onFieldChange?: (id: string, v: string) => void;
 }) {
-  const [flipped, setFlipped] = useState<boolean[]>([false, false, false, false]);
+  const [flipped, setFlipped] = useState<boolean[]>(editMode ? [true, true, true, true] : [false, false, false, false]);
   const flip = (i: number) => {
     if (editMode) return;
     setFlipped((f) => {
@@ -307,27 +372,33 @@ function PromiseSlide({
       <div style={{ marginTop: 32, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, width: "100%", maxWidth: 440 }}>
         {DEFAULT_PROMISES_BROTHER.map((p, idx) => {
           const isFlipped = editMode || flipped[idx];
+          const bearGif = d[`rb_img${idx + 1}`] || DEFAULT_BEAR_GIFS[idx];
+
           return (
             <div
               key={p.id}
               className="raksha-promise-card-scene"
-              style={{ height: 170, cursor: editMode ? "default" : "pointer" }}
+              style={{ height: 185, cursor: editMode ? "default" : "pointer" }}
               onClick={() => flip(idx)}
             >
               <div className={`raksha-promise-card-inner ${isFlipped ? "flipped" : ""}`} style={{ height: "100%" }}>
-                {/* Front */}
+                {/* Front Card with Cute Bear GIF */}
                 <div
                   className="raksha-promise-card-face raksha-glass-card"
-                  style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(245,200,66,0.15))" }}
+                  style={{ background: "linear-gradient(135deg, rgba(124,28,58,0.55), rgba(30,10,0,0.7))", border: "1px solid rgba(224,24,90,0.4)" }}
                 >
-                  <span style={{ fontSize: 24, marginBottom: 8 }}>🎁</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", color: "#ffe0a0" }}>
-                    Promise #{idx + 1}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={bearGif}
+                    alt={`bear-${idx + 1}`}
+                    style={{ width: 72, height: 72, objectFit: "contain", filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))" }}
+                  />
+                  <span style={{ marginTop: 8, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.2em", color: "#f0cfa8" }}>
+                    Tap to reveal
                   </span>
-                  <span style={{ fontSize: 10, color: "#f0cfa8", marginTop: 4 }}>Tap to reveal</span>
                 </div>
 
-                {/* Back */}
+                {/* Back Card with Promise Text */}
                 <div
                   className="raksha-promise-card-face raksha-promise-card-back raksha-glass-card"
                   style={{ background: "linear-gradient(135deg, rgba(224,24,90,0.25), rgba(245,200,66,0.3))", border: "1.5px solid #f5c842" }}
@@ -337,6 +408,7 @@ function PromiseSlide({
                   </div>
                 </div>
               </div>
+              {isFlipped && <Burst count={10} spread={80} />}
             </div>
           );
         })}

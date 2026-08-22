@@ -52,15 +52,18 @@ export function RakhiTieBrother({
 }: RakhiTieBrotherProps) {
   const currentOption = RAKHI_OPTIONS.find((r) => r.id === selectedRakhi) || RAKHI_OPTIONS[0];
 
-  // ALWAYS start at "select" in viewing mode so user sees the 4 choices first!
   const [phase, setPhase] = useState<"select" | "tying" | "tied">(
     editMode ? "tied" : "select"
   );
   const [threadProgress, setThreadProgress] = useState(editMode ? 1 : 0);
 
-  // Auto tie animation when user selects a Rakhi
-  const handleSelect = (id: string) => {
+  // User taps a Rakhi card to select/highlight it
+  const handleSelectCard = (id: string) => {
     onSelectRakhi(id);
+  };
+
+  // User clicks the explicit "Confirm & Tie Rakhi 🎀" button
+  const handleConfirmTie = () => {
     if (editMode) return;
 
     setPhase("tying");
@@ -124,7 +127,7 @@ export function RakhiTieBrother({
         }}
       >
         {phase === "select"
-          ? "Select a Rakhi to tie on Bhaiya's wrist"
+          ? "Select your favorite Rakhi for Bhaiya and tap confirm"
           : phase === "tying"
           ? "Tying Rakhi on Bhaiya's wrist…"
           : `Tied the ${currentOption.name} with love ✨`}
@@ -134,78 +137,105 @@ export function RakhiTieBrother({
       {phase === "select" && (
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-            gap: 16,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             width: "100%",
             maxWidth: 380,
-            marginBottom: 20,
-            position: "relative",
             zIndex: 10,
+            position: "relative",
           }}
         >
-          {RAKHI_OPTIONS.map((rakhi) => (
-            <button
-              key={rakhi.id}
-              onClick={() => handleSelect(rakhi.id)}
-              className="raksha-glass-card"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                padding: "16px 12px",
-                borderRadius: 20,
-                border: selectedRakhi === rakhi.id ? "2px solid #f5c842" : "1px solid rgba(255,255,255,0.15)",
-                background: selectedRakhi === rakhi.id ? "rgba(245,200,66,0.2)" : "rgba(255,255,255,0.06)",
-                cursor: "pointer",
-                transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                textAlign: "center",
-              }}
-            >
-              {/* Rakhi Center Image Preview */}
-              <div
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+              gap: 16,
+              width: "100%",
+              marginBottom: 24,
+            }}
+          >
+            {RAKHI_OPTIONS.map((rakhi) => (
+              <button
+                key={rakhi.id}
+                onClick={() => handleSelectCard(rakhi.id)}
+                className="raksha-glass-card"
                 style={{
-                  position: "relative",
-                  width: 76,
-                  height: 76,
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: 10,
-                  filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.5))",
+                  padding: "16px 12px",
+                  borderRadius: 20,
+                  border: selectedRakhi === rakhi.id ? "2px solid #f5c842" : "1px solid rgba(255,255,255,0.15)",
+                  background: selectedRakhi === rakhi.id ? "rgba(245,200,66,0.22)" : "rgba(255,255,255,0.06)",
+                  boxShadow: selectedRakhi === rakhi.id ? "0 0 20px rgba(245,200,66,0.4)" : "none",
+                  cursor: "pointer",
+                  transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                  textAlign: "center",
                 }}
               >
-                {/* Ribbon background line */}
+                {/* Rakhi Center Image Preview */}
                 <div
                   style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "-10px",
-                    right: "-10px",
-                    height: 6,
-                    background: "linear-gradient(90deg, #f5c842, #ff7c1a, #e0185a)",
-                    transform: "translateY(-50%)",
-                    borderRadius: 4,
-                  }}
-                />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={rakhi.imgSrc}
-                  alt={rakhi.name}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
                     position: "relative",
-                    zIndex: 2,
+                    width: 76,
+                    height: 76,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 10,
+                    filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.5))",
                   }}
-                />
-              </div>
+                >
+                  {/* Ribbon background line */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "-10px",
+                      right: "-10px",
+                      height: 6,
+                      background: "linear-gradient(90deg, #f5c842, #ff7c1a, #e0185a)",
+                      transform: "translateY(-50%)",
+                      borderRadius: 4,
+                    }}
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={rakhi.imgSrc}
+                    alt={rakhi.name}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      position: "relative",
+                      zIndex: 2,
+                    }}
+                  />
+                </div>
 
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#fff0e0" }}>{rakhi.name}</span>
-              <span style={{ fontSize: 10, color: "#ffe0a0", marginTop: 2 }}>{rakhi.badge}</span>
-            </button>
-          ))}
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#fff0e0" }}>{rakhi.name}</span>
+                <span style={{ fontSize: 10, color: "#ffe0a0", marginTop: 2 }}>{rakhi.badge}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Explicit Confirm & Tie Rakhi Button */}
+          <button
+            className="raksha-btn-pill raksha-btn-pill-saffron raksha-animate-fade-in-up"
+            style={{
+              padding: "14px 28px",
+              fontSize: 15,
+              fontWeight: 700,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              boxShadow: "0 10px 25px rgba(255,124,26,0.5)",
+            }}
+            onClick={handleConfirmTie}
+          >
+            <Sparkles size={18} /> Confirm & Tie {currentOption.name} 🎀
+          </button>
         </div>
       )}
 
