@@ -125,6 +125,61 @@ function Toast({ toast, onClose }: { toast: { message: string; type: "success" |
   );
 }
 
+function PremiumMissionItem({ title, subtitle, rightValue, ratio, statusColor, isFulfilled, isPending, unlocked, icon: Icon, onClick, current, total }: any) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        position: "relative", padding: "20px", borderRadius: 20, cursor: "pointer", overflow: "hidden",
+        background: isFulfilled ? "linear-gradient(135deg, #ECFDF5 0%, #FFFFFF 100%)" : isPending ? "linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%)" : unlocked ? "linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 100%)" : "#FFFFFF",
+        border: `1px solid ${isFulfilled ? "#A7F3D0" : isPending ? "#FDE68A" : unlocked ? "#BFDBFE" : "#E5E7EB"}`,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", gap: 16,
+        transition: "transform 0.2s, box-shadow 0.2s"
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{
+            position: "relative", width: 48, height: 48, borderRadius: 14,
+            background: "#FFFFFF",
+            border: "1px solid #E5E7EB",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
+          }}>
+            {Icon && <Icon size={24} />}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#111827", letterSpacing: "-0.01em" }}>{title}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: statusColor }}>{subtitle}</span>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{
+            fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 99,
+            background: isFulfilled ? "#D1FAE5" : isPending ? "#FEF3C7" : unlocked ? "#DBEAFE" : "#F3F4F6",
+            color: statusColor
+          }}>
+            {rightValue}
+          </span>
+          <ChevronRight size={16} color="#9CA3AF" />
+        </div>
+      </div>
+      
+      {!isFulfilled && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 600, color: "#6B7280" }}>
+            <span>Progress</span>
+            <span>{current} / {total}</span>
+          </div>
+          <div style={{ height: 6, background: "#E5E7EB", borderRadius: 99, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${ratio}%`, background: statusColor, borderRadius: 99, transition: "width 0.5s ease" }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main Page ── */
 
 export default function CreatorDashboard() {
@@ -361,7 +416,7 @@ export default function CreatorDashboard() {
           <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 12 }}>
             <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>Missions</h1>
             
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {rewards.map(r => {
                 const claim = rewardClaims.find(c => c.rewardId === r.id);
                 const unlocked = creator.totalReferrals >= r.referrals;
@@ -373,26 +428,23 @@ export default function CreatorDashboard() {
                 let statusText = `${ratio}%`;
                 if (isFulfilled) { statusColor = "#10B981"; statusText = "Delivered"; }
                 else if (isPending) { statusColor = "#F59E0B"; statusText = "Reviewing"; }
-                else if (unlocked) { statusColor = "#3B82F6"; statusText = "Unlocked"; }
+                else if (unlocked) { statusColor = "#3B82F6"; statusText = "Claim Now"; }
 
                 return (
-                  <NativeListItem
+                  <PremiumMissionItem
                     key={r.id}
                     title={r.label}
                     subtitle={`Reward: ${fmt(r.rewardAmountPaise)}`}
                     rightValue={statusText}
-                    rightSub={`${creator.totalReferrals}/${r.referrals} Sales`}
+                    ratio={ratio}
+                    statusColor={statusColor}
+                    isFulfilled={isFulfilled}
+                    isPending={isPending}
+                    unlocked={unlocked}
+                    current={creator.totalReferrals}
+                    total={r.referrals}
                     onClick={() => setSelectedReward(r)}
-                    style={{ borderBottom: "1px solid #E5E7EB" }}
-                    icon={() => (
-                      <div style={{ position: "relative", width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <svg width="40" height="40" viewBox="0 0 40 40" style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}>
-                          <circle cx="20" cy="20" r="18" fill="none" stroke="#E5E7EB" strokeWidth="3" />
-                          <circle cx="20" cy="20" r="18" fill="none" stroke={statusColor} strokeWidth="3" strokeDasharray="113" strokeDashoffset={113 - (113 * ratio) / 100} strokeLinecap="round" />
-                        </svg>
-                        <RewardIcon type={r.rewardType} size={18} />
-                      </div>
-                    )}
+                    icon={({ size }: any) => <RewardIcon type={r.rewardType} size={size} />}
                   />
                 );
               })}
