@@ -325,7 +325,11 @@ function MilestoneProgress({ milestones, current }: { milestones: AffiliateMiles
           }
         }
       `}</style>
-   function RewardTypeIcon({ type, size = 26 }: { type?: RewardType; size?: number }) {
+    </div>
+  );
+}
+
+function RewardTypeIcon({ type, size = 26 }: { type?: RewardType; size?: number }) {
   if (type === "amazon") {
     return <img src="/icons/amazon.png" alt="Amazon" style={{ width: size, height: size, objectFit: "contain", borderRadius: 6, display: "inline-block", verticalAlign: "middle" }} />;
   }
@@ -663,6 +667,32 @@ export default function CreatorDashboard() {
     setShowDismissModal(false);
   };
 
+  const fetchData = useCallback(async (userId: string) => {
+    try {
+      const res = await fetch(`/api/creator/me?uid=${userId}`);
+      const json = await res.json();
+      if (json.success) {
+        setData(json);
+        // Pre-fill settings form
+        setSettingsForm({
+          name: json.creator.name || "",
+          phone: json.creator.phone || "",
+          instagram: json.creator.instagramHandle || "",
+          youtube: json.creator.youtubeHandle || "",
+          other: json.creator.otherHandle || "",
+          upiId: json.creator.upiId || "",
+          upiName: json.creator.upiName || "",
+        });
+      } else {
+        router.replace("/creator");
+      }
+    } catch {
+      router.replace("/creator");
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
   const handleClaimReward = async (rewardId: string) => {
     if (!data?.creator.uid) return;
     setClaimingRewardId(rewardId);
@@ -692,32 +722,6 @@ export default function CreatorDashboard() {
       showToast(`📋 ${label} copied to clipboard!`, "success");
     }
   };
-
-  const fetchData = useCallback(async (userId: string) => {
-    try {
-      const res = await fetch(`/api/creator/me?uid=${userId}`);
-      const json = await res.json();
-      if (json.success) {
-        setData(json);
-        // Pre-fill settings form
-        setSettingsForm({
-          name: json.creator.name || "",
-          phone: json.creator.phone || "",
-          instagram: json.creator.instagramHandle || "",
-          youtube: json.creator.youtubeHandle || "",
-          other: json.creator.otherHandle || "",
-          upiId: json.creator.upiId || "",
-          upiName: json.creator.upiName || "",
-        });
-      } else {
-        router.replace("/creator");
-      }
-    } catch {
-      router.replace("/creator");
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
