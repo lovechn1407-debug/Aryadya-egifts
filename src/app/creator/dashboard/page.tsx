@@ -38,9 +38,9 @@ function fmt(paise: number) { return `₹${(paise / 100).toLocaleString("en-IN",
 
 function RewardIcon({ type, size = 20 }: { type?: RewardType, size?: number }) {
   if (type === "amazon") return <img src="/icons/amazon.png" alt="Amazon" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4 }} />;
-  if (type === "flipkart") return <img src="/icons/flipkart.png" alt="Flipkart" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4 }} />;
+  if (type === "flipkart") return <img src="https://upload.wikimedia.org/wikipedia/en/7/7a/Flipkart_logo.svg" alt="Flipkart" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4 }} />;
   if (type === "myntra") return <img src="/icons/myntra.png" alt="Myntra" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4 }} />;
-  if (type === "cash") return <DollarSign size={size} color="#10B981" strokeWidth={2.5} />;
+  if (type === "cash") return <img src="/icons/flipkart.png" alt="UPI" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4 }} />;
   return <Gift size={size} color="#64748B" strokeWidth={2.5} />;
 }
 
@@ -130,7 +130,7 @@ function PremiumMissionItem({ title, subtitle, rightValue, ratio, statusColor, i
     <div
       onClick={onClick}
       style={{
-        position: "relative", padding: "20px", borderRadius: 20, cursor: "pointer", overflow: "hidden",
+        position: "relative", padding: "20px", borderRadius: 16, cursor: "pointer", overflow: "hidden",
         background: isFulfilled ? "linear-gradient(135deg, #ECFDF5 0%, #FFFFFF 100%)" : isPending ? "linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%)" : unlocked ? "linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 100%)" : "#FFFFFF",
         border: `1px solid ${isFulfilled ? "#A7F3D0" : isPending ? "#FDE68A" : unlocked ? "#BFDBFE" : "#E5E7EB"}`,
         boxShadow: "0 4px 20px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", gap: 16,
@@ -312,19 +312,23 @@ export default function CreatorDashboard() {
 
       {/* ── Native App Header ── */}
       <header style={{
-        padding: "20px 24px 12px", background: "#F9FAFB", position: "sticky", top: 0, zIndex: 10,
-        display: "flex", alignItems: "center", justifyContent: "space-between"
+        padding: "16px 24px", background: "#FFFFFF", position: "sticky", top: 0, zIndex: 10,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        borderBottom: "1px solid #E5E7EB", boxShadow: "0 2px 10px rgba(0,0,0,0.02)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <img src="/logo.png" alt="Aradhya E-Gifting" style={{ height: 32, objectFit: "contain" }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>Creator</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>{creator.name?.split(" ")[0] || "Account"}</div>
+          </div>
           <div style={{
-            width: 44, height: 44, borderRadius: "50%", background: "#111827", color: "#FFFFFF",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700
+            width: 36, height: 36, borderRadius: "50%", background: "#F3F4F6", color: "#111827",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700
           }}>
             {creator.name?.charAt(0)?.toUpperCase() || "C"}
-          </div>
-          <div>
-            <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500 }}>Welcome back,</div>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em" }}>{creator.name}</div>
           </div>
         </div>
       </header>
@@ -337,7 +341,7 @@ export default function CreatorDashboard() {
             
             {/* Hero Stats */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Balance</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Earnings</div>
               <div style={{ fontSize: 48, fontWeight: 800, letterSpacing: "-0.04em", color: "#111827", display: "flex", alignItems: "baseline", gap: 4 }}>
                 <span style={{ fontSize: 32, color: "#9CA3AF" }}>₹</span>
                 {(creator.totalEarningsPaise / 100).toLocaleString("en-IN")}
@@ -360,7 +364,7 @@ export default function CreatorDashboard() {
               <div style={{ fontSize: 18, fontWeight: 700 }}>Your Codes</div>
               {coupons.slice(0, 2).map(c => (
                 <div key={c.id} style={{
-                  background: "#FFFFFF", padding: 20, borderRadius: 20,
+                  background: "#FFFFFF", padding: 20, borderRadius: 16,
                   boxShadow: "0 2px 10px rgba(0,0,0,0.02)", display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
                   <div>
@@ -381,7 +385,7 @@ export default function CreatorDashboard() {
 
             {/* Static Bonus Commission Milestone */}
             <div style={{
-              background: "linear-gradient(135deg, #111827 0%, #1F2937 100%)", borderRadius: 24, padding: 24,
+              background: "linear-gradient(135deg, #111827 0%, #1F2937 100%)", borderRadius: 16, padding: 24,
               color: "#FFFFFF", position: "relative", overflow: "hidden"
             }}>
               <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}>
@@ -513,6 +517,25 @@ export default function CreatorDashboard() {
                 <input
                   type="tel" placeholder="Phone Number" value={settingsForm.phone}
                   onChange={e => setSettingsForm({ ...settingsForm, phone: e.target.value })}
+                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 8 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Social Links</div>
+                <input
+                  type="text" placeholder="Instagram Username" value={settingsForm.instagram}
+                  onChange={e => setSettingsForm({ ...settingsForm, instagram: e.target.value })}
+                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
+                />
+                <input
+                  type="text" placeholder="YouTube Channel" value={settingsForm.youtube}
+                  onChange={e => setSettingsForm({ ...settingsForm, youtube: e.target.value })}
+                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
+                />
+                <input
+                  type="text" placeholder="Other Links (Website, etc.)" value={settingsForm.other}
+                  onChange={e => setSettingsForm({ ...settingsForm, other: e.target.value })}
                   style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
                 />
               </div>
@@ -660,7 +683,7 @@ export default function CreatorDashboard() {
           <div onClick={() => setViewingClaim(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, backdropFilter: "blur(8px)", animation: "fadeIn 0.2s" }} />
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 201,
-            background: "#FFFFFF", borderRadius: 24, padding: 32, width: "90%", maxWidth: 360,
+            background: "#FFFFFF", borderRadius: 16, padding: 32, width: "90%", maxWidth: 360,
             animation: "popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
           }}>
             <div style={{ textAlign: "center", marginBottom: 24 }}>
