@@ -13,6 +13,7 @@ import {
   TrendingUp, Activity, CheckCircle, Smartphone, ExternalLink,
   Menu, User, Phone, Camera, Video, Globe, Landmark, Wallet
 } from "lucide-react";
+import { FaInstagram, FaYoutube } from "react-icons/fa";
 
 interface OrderSummary {
   id: string; productName: string; buyerName: string;
@@ -217,8 +218,11 @@ export default function CreatorDashboard() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", instagram: "", youtube: "", other: "", upiId: "", upiName: "" });
+  const [settingsForm, setSettingsForm] = useState({
+    name: "", phone: "", instagram: "", youtube: "", other: "", upiId: "", upiName: ""
+  });
   const [settingsSaving, setSettingsSaving] = useState(false);
+  const [verifyingUpi, setVerifyingUpi] = useState(false);
 
   const [claimingRewardId, setClaimingRewardId] = useState<string | null>(null);
   const [viewingClaim, setViewingClaim] = useState<RewardClaim | null>(null);
@@ -302,10 +306,33 @@ export default function CreatorDashboard() {
       } else {
         showToast(json.message || "Update failed.", "error");
       }
-    } catch {
-      showToast("Network error.", "error");
+    } catch (e) {
+      console.error(e);
+      showToast("Error updating settings.", "error");
     } finally {
       setSettingsSaving(false);
+    }
+  };
+
+  const handleVerifyUpi = async () => {
+    if (!settingsForm.upiId) return showToast("Enter a UPI ID first.", "error");
+    setVerifyingUpi(true);
+    try {
+      const res = await fetch("/api/creator/verify-upi", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ upiId: settingsForm.upiId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSettingsForm({ ...settingsForm, upiName: data.payeeAccountName });
+        showToast(data.message, "success");
+      } else {
+        showToast(data.message, "error");
+      }
+    } catch (e: any) {
+      showToast("Verification failed.", "error");
+    } finally {
+      setVerifyingUpi(false);
     }
   };
 
@@ -527,6 +554,36 @@ export default function CreatorDashboard() {
         {activeTab === "settings" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 12 }}>
             <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>Profile</h1>
+
+            {/* Profile Card */}
+            <div style={{
+              background: "linear-gradient(135deg, #111827 0%, #1F2937 100%)", borderRadius: 20, padding: 24,
+              color: "#FFFFFF", display: "flex", alignItems: "center", gap: 20, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)"
+            }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: "50%", background: "#3B82F6",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "#FFFFFF",
+                boxShadow: "0 0 0 4px rgba(255,255,255,0.1)"
+              }}>
+                {creator.name?.charAt(0)?.toUpperCase() || "C"}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{creator.name}</h2>
+                <div style={{ fontSize: 14, color: "#9CA3AF", marginBottom: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{creator.email}</div>
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                  {settingsForm.instagram && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, background: "rgba(255,255,255,0.1)", padding: "6px 12px", borderRadius: 99 }}>
+                      <FaInstagram color="#E1306C" size={16} /> <span style={{ maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis" }}>{settingsForm.instagram.replace(/^@/, '')}</span>
+                    </div>
+                  )}
+                  {settingsForm.youtube && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, background: "rgba(255,255,255,0.1)", padding: "6px 12px", borderRadius: 99 }}>
+                      <FaYoutube color="#FF0000" size={16} /> <span style={{ maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis" }}>{settingsForm.youtube.replace(/^@/, '')}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             
             <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -544,7 +601,17 @@ export default function CreatorDashboard() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 8 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Payout Details (UPI)</div>
-                <NativeInput icon={Wallet} placeholder="UPI ID (e.g., name@upi)" value={settingsForm.upiId} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiId: e.target.value })} />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <NativeInput icon={Wallet} placeholder="UPI ID (e.g., name@upi)" value={settingsForm.upiId} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiId: e.target.value })} />
+                  </div>
+                  <button type="button" onClick={handleVerifyUpi} disabled={verifyingUpi} style={{
+                    padding: "0 16px", background: "#EFF6FF", color: "#3B82F6", border: "1px solid #BFDBFE", borderRadius: 16,
+                    fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, transition: "0.2s"
+                  }}>
+                    {verifyingUpi ? <Loader2 size={18} className="animate-spin" /> : "Verify"}
+                  </button>
+                </div>
                 <NativeInput icon={Landmark} placeholder="Account Holder Name" value={settingsForm.upiName} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiName: e.target.value })} />
               </div>
 
@@ -674,37 +741,67 @@ export default function CreatorDashboard() {
       {/* ── VOUCHER MODAL ── */}
       {viewingClaim && (
         <>
-          <div onClick={() => setViewingClaim(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, backdropFilter: "blur(8px)", animation: "fadeIn 0.2s" }} />
+          <div onClick={() => setViewingClaim(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 200, backdropFilter: "blur(12px)", animation: "fadeIn 0.2s" }} />
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 201,
-            background: "#FFFFFF", borderRadius: 16, padding: 32, width: "90%", maxWidth: 360,
-            animation: "popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+            width: "90%", maxWidth: 380, animation: "popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
           }}>
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <div style={{ width: 64, height: 64, borderRadius: 16, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                <RewardIcon type={viewingClaim.rewardType} size={32} />
+            {/* Ticket Top */}
+            <div style={{
+              background: "#FFFFFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 32,
+              textAlign: "center", position: "relative"
+            }}>
+              <div style={{ width: 72, height: 72, borderRadius: 20, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+                <RewardIcon type={viewingClaim.rewardType} size={40} />
               </div>
-              <h3 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 8px" }}>{viewingClaim.rewardLabel}</h3>
-              <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>Your voucher is ready.</p>
+              <h3 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", margin: "0 0 8px", color: "#111827" }}>{viewingClaim.rewardLabel}</h3>
+              <p style={{ fontSize: 15, color: "#10B981", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                <CheckCircle size={18} /> Voucher is Ready
+              </p>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
-              <div style={{ background: "#F9FAFB", padding: 16, borderRadius: 12, border: "2px dashed #E5E7EB", textAlign: "center", position: "relative" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Voucher Code</div>
-                <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: "0.05em", wordBreak: "break-all" }}>{viewingClaim.voucherCode || "N/A"}</div>
-                <button onClick={() => viewingClaim.voucherCode && handleCopyText(viewingClaim.voucherCode, "Code")} style={{ position: "absolute", top: 12, right: 12, background: "transparent", border: "none", color: "#6B7280", cursor: "pointer" }}><Copy size={16} /></button>
-              </div>
+            {/* Ticket Divider */}
+            <div style={{ display: "flex", width: "100%", height: 32, overflow: "hidden", position: "relative", background: "transparent" }}>
+              <div style={{ position: "absolute", top: 0, left: -16, width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.7)", zIndex: 1 }} />
+              <div style={{ position: "absolute", top: 15, left: 16, right: 16, borderTop: "2px dashed #E5E7EB" }} />
+              <div style={{ position: "absolute", top: 0, right: -16, width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.7)", zIndex: 1 }} />
+              <div style={{ width: "100%", height: "100%", background: "#FFFFFF" }} />
+            </div>
 
-              {viewingClaim.hasPin && viewingClaim.voucherPin && (
-                <div style={{ background: "#F9FAFB", padding: 16, borderRadius: 12, border: "2px dashed #E5E7EB", textAlign: "center", position: "relative" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Security PIN</div>
-                  <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: "0.05em" }}>{viewingClaim.voucherPin}</div>
-                  <button onClick={() => viewingClaim.voucherPin && handleCopyText(viewingClaim.voucherPin, "PIN")} style={{ position: "absolute", top: 12, right: 12, background: "transparent", border: "none", color: "#6B7280", cursor: "pointer" }}><Copy size={16} /></button>
+            {/* Ticket Bottom */}
+            <div style={{
+              background: "#FFFFFF", borderBottomLeftRadius: 24, borderBottomRightRadius: 24, padding: "24px 32px 32px"
+            }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Voucher Code</div>
+                  <div onClick={() => viewingClaim.voucherCode && handleCopyText(viewingClaim.voucherCode, "Code")} style={{
+                    background: "#F9FAFB", padding: "16px 20px", borderRadius: 16, border: "2px dashed #E5E7EB",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#111827", letterSpacing: "0.05em", wordBreak: "break-all" }}>{viewingClaim.voucherCode || "N/A"}</div>
+                    <Copy size={20} color="#6B7280" />
+                  </div>
                 </div>
-              )}
-            </div>
 
-            <NativeButton onClick={() => setViewingClaim(null)}>Done</NativeButton>
+                {viewingClaim.hasPin && viewingClaim.voucherPin && (
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Security PIN</div>
+                    <div onClick={() => viewingClaim.voucherPin && handleCopyText(viewingClaim.voucherPin, "PIN")} style={{
+                      background: "#F9FAFB", padding: "16px 20px", borderRadius: 16, border: "2px dashed #E5E7EB",
+                      display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}>
+                      <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#111827", letterSpacing: "0.05em" }}>{viewingClaim.voucherPin}</div>
+                      <Copy size={20} color="#6B7280" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <NativeButton onClick={() => setViewingClaim(null)} style={{ marginTop: 32 }}>Done</NativeButton>
+            </div>
           </div>
         </>
       )}
