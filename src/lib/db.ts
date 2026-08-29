@@ -838,6 +838,8 @@ export async function deleteMilestoneDB(id: string): Promise<void> {
 }
 
 // ── AFFILIATE PROGRAM — REWARD MISSIONS ──────────────────────────────────────
+export type RewardType = "amazon" | "flipkart" | "myntra" | "cash" | "other";
+
 export interface AffiliateReward {
   id: string;
   referrals: number; // threshold to unlock
@@ -845,6 +847,27 @@ export interface AffiliateReward {
   label: string;
   description: string;
   order: number;
+  rewardType?: RewardType;
+}
+
+export interface RewardClaim {
+  id: string;
+  rewardId: string;
+  creatorId: string;
+  creatorName: string;
+  creatorEmail: string;
+  rewardLabel: string;
+  rewardType: RewardType;
+  rewardAmountPaise: number;
+  status: "pending" | "fulfilled" | "rejected";
+  claimedAt: string;
+  fulfilledAt?: string;
+  // Voucher info (Amazon, Myntra, Flipkart, etc.)
+  voucherCode?: string;
+  voucherPin?: string;
+  hasPin?: boolean;
+  // Cash info
+  utr?: string;
 }
 
 export async function getRewardsDB(): Promise<AffiliateReward[]> {
@@ -861,6 +884,34 @@ export async function saveRewardDB(reward: AffiliateReward): Promise<void> {
 export async function deleteRewardDB(id: string): Promise<void> {
   await remove(ref(database, `affiliateProgram/rewards/${id}`));
 }
+
+export async function getRewardClaimsDB(): Promise<RewardClaim[]> {
+  const snap = await get(ref(database, "affiliateProgram/rewardClaims"));
+  if (!snap.exists()) return [];
+  return Object.values(snap.val() as Record<string, RewardClaim>)
+    .sort((a, b) => b.claimedAt.localeCompare(a.claimedAt));
+}
+
+export async function getRewardClaimsByCreatorDB(creatorId: string): Promise<RewardClaim[]> {
+  const all = await getRewardClaimsDB();
+  return all.filter(c => c.creatorId === creatorId);
+}
+
+export async function saveRewardClaimDB(claim: RewardClaim): Promise<void> {
+  await set(ref(database, `affiliateProgram/rewardClaims/${claim.id}`), claim);
+}
+
+export async function fulfillRewardClaimDB(
+  claimId: string,
+  data: { voucherCode?: string; voucherPin?: string; hasPin?: boolean; utr?: string }
+): Promise<void> {
+  await update(ref(database, `affiliateProgram/rewardClaims/${claimId}`), {
+    ...data,
+    status: "fulfilled",
+    fulfilledAt: new Date().toISOString(),
+  });
+}
+
 
 export async function syncCreatorStatsDB(uid: string) {
   const creator = await getCreatorDB(uid);

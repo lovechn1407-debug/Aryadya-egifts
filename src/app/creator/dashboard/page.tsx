@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import type { Creator, AffiliateMilestone, AffiliateReward, Payout } from "@/lib/db";
+import type { Creator, AffiliateMilestone, AffiliateReward, Payout, RewardClaim, RewardType } from "@/lib/db";
 import type { Coupon } from "@/lib/data";
 
 interface OrderSummary {
@@ -19,6 +19,7 @@ interface DashboardData {
   payouts: Payout[];
   milestones: AffiliateMilestone[];
   rewards: AffiliateReward[];
+  rewardClaims: RewardClaim[];
   monthlyEarnings: Record<string, number>;
   pendingPayoutPaise: number;
 }
@@ -328,56 +329,94 @@ function MilestoneProgress({ milestones, current }: { milestones: AffiliateMiles
   );
 }
 
+function RewardTypeIcon({ type, size = 24 }: { type?: RewardType; size?: number }) {
+  if (type === "amazon") {
+    return <img src="/icons/amazon.png" alt="Amazon" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
+  }
+  if (type === "flipkart") {
+    return <img src="/icons/flipkart.png" alt="Flipkart" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
+  }
+  if (type === "myntra") {
+    return <img src="/icons/myntra.png" alt="Myntra" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
+  }
+  if (type === "cash") {
+    return <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>💵</span>;
+  }
+  return <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>🎁</span>;
+}
+
 // Reward Missions
 function RewardMissionsList({ 
   rewards, 
   current,
-  claimedIds = [],
-  onClaim
+  rewardClaims = [],
+  onClaim,
+  onShowCode,
+  claimingId,
 }: { 
   rewards: AffiliateReward[]; 
   current: number;
-  claimedIds: string[];
-  onClaim: (id: string) => void;
+  rewardClaims: RewardClaim[];
+  onClaim: (rewardId: string) => void;
+  onShowCode: (claim: RewardClaim) => void;
+  claimingId: string | null;
 }) {
   if (!rewards.length) return (
     <div style={{ textAlign: "center", padding: "24px", color: "#64748B", fontSize: 13 }}>No rewards program set yet.</div>
   );
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
       {rewards.map(r => {
         const unlocked = current >= r.referrals;
-        const claimed = claimedIds.includes(r.id);
+        const claim = rewardClaims.find(c => c.rewardId === r.id);
         const ratio = Math.min(100, (current / r.referrals) * 100);
+        const isPending = claim && claim.status === "pending";
+        const isFulfilled = claim && claim.status === "fulfilled";
+
         return (
           <div key={r.id} style={{
-            background: claimed ? "#F8FAFC" : unlocked ? "#F0FDF4" : "#FFFFFF",
-            border: `1px solid ${claimed ? "#E2E8F0" : unlocked ? "#A7F3D0" : "#E2E8F0"}`,
+            background: isFulfilled ? "#F0FDF4" : isPending ? "#FFFBEB" : unlocked ? "#FFFFFF" : "#FFFFFF",
+            border: `1px solid ${isFulfilled ? "#A7F3D0" : isPending ? "#FDE68A" : unlocked ? "#6366F1" : "#E2E8F0"}`,
             borderRadius: 16, padding: 18, position: "relative",
             display: "flex", flexDirection: "column", gap: 12,
             boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
           }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <span style={{ color: claimed ? "#94A3B8" : unlocked ? "#10B981" : "#6366F1" }}>
-                {unlocked ? <TrophyIcon size={24} /> : <TargetIcon size={24} />}
-              </span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <RewardTypeIcon type={r.rewardType} size={28} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "capitalize" }}>
+                  {r.rewardType || "Voucher"}
+                </span>
+              </div>
               <span style={{
                 fontSize: 11, fontWeight: 700,
-                color: claimed ? "#64748B" : unlocked ? "#166534" : "#4F46E5",
-                background: claimed ? "#E2E8F0" : unlocked ? "#DCFCE7" : "#EEF2F6",
+                color: isFulfilled ? "#166534" : isPending ? "#92400E" : unlocked ? "#4F46E5" : "#64748B",
+                background: isFulfilled ? "#DCFCE7" : isPending ? "#FEF3C7" : unlocked ? "#EEF2F6" : "#F1F5F9",
                 padding: "2px 8px", borderRadius: 20
-              }}>{claimed ? "Claimed" : unlocked ? "Completed" : "Active"}</span>
+              }}>
+                {isFulfilled ? "Fulfilled ✓" : isPending ? "Processing ⏳" : unlocked ? "Unlocked 🎉" : "Locked"}
+              </span>
             </div>
             
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>{r.label}</div>
-              <div style={{ fontSize: 12, color: "#64748B", marginBottom: 14, lineHeight: 1.4 }}>{r.description}</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A", marginBottom: 4 }}>{r.label}</div>
+              <div style={{ fontSize: 12, color: "#64748B", marginBottom: 12, lineHeight: 1.4 }}>{r.description}</div>
             </div>
+
+            {/* If pending, display 24h processing notice */}
+            {isPending && (
+              <div style={{
+                background: "#FEF3C7", border: "1px solid #FCD34D", borderRadius: 10, padding: "8px 12px",
+                fontSize: 11, color: "#92400E", fontWeight: 700, lineHeight: 1.4
+              }}>
+                ⏳ Reward is being processed and will be credited within 24 hours.
+              </div>
+            )}
 
             <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 4 }}>
               <div>
-                <div style={{ fontSize: 10, color: "#94A3B8", fontWeight: 600, textTransform: "uppercase" }}>Bonus Reward</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: claimed ? "#64748B" : unlocked ? "#10B981" : "#0F172A" }}>{fmt(r.rewardAmountPaise)}</div>
+                <div style={{ fontSize: 10, color: "#94A3B8", fontWeight: 600, textTransform: "uppercase" }}>Bonus Value</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: isFulfilled ? "#10B981" : "#0F172A" }}>{fmt(r.rewardAmountPaise)}</div>
               </div>
               {!unlocked && (
                 <div style={{ textAlign: "right", minWidth: 80 }}>
@@ -389,21 +428,55 @@ function RewardMissionsList({
               )}
             </div>
 
-            {/* Claim Reward Button */}
-            <button
-              onClick={() => onClaim(r.id)}
-              disabled={!unlocked || claimed}
-              style={{
-                width: "100%", padding: "10px", borderRadius: 10, border: "none",
-                fontSize: 12, fontWeight: 700, cursor: (unlocked && !claimed) ? "pointer" : "not-allowed",
-                background: claimed ? "#F1F5F9" : unlocked ? "#10B981" : "#EEF2F6",
-                color: claimed ? "#94A3B8" : unlocked ? "#FFFFFF" : "#64748B",
-                transition: "all 0.2s",
-                boxShadow: (unlocked && !claimed) ? "0 2px 6px rgba(16,185,129,0.2)" : "none"
-              }}
-            >
-              {claimed ? "Claimed ✓" : unlocked ? "Claim Reward 🎁" : `Locked (Need ${r.referrals - current} More Sales)`}
-            </button>
+            {/* Claim Action Button Logic */}
+            {isFulfilled ? (
+              r.rewardType === "cash" ? (
+                <div style={{
+                  width: "100%", padding: "10px", borderRadius: 10, background: "#DCFCE7",
+                  border: "1px solid #86EFAC", color: "#166534", fontSize: 12, fontWeight: 800, textAlign: "center"
+                }}>
+                  Credited ✓ {claim.utr ? `(UTR: ${claim.utr})` : ""}
+                </div>
+              ) : (
+                <button
+                  onClick={() => onShowCode(claim)}
+                  style={{
+                    width: "100%", padding: "10px", borderRadius: 10, border: "none",
+                    fontSize: 12, fontWeight: 800, cursor: "pointer",
+                    background: "linear-gradient(135deg, #10B981, #059669)",
+                    color: "#FFFFFF", boxShadow: "0 2px 8px rgba(16,185,129,0.25)"
+                  }}
+                >
+                  Show Code 🎟️
+                </button>
+              )
+            ) : isPending ? (
+              <button
+                disabled
+                style={{
+                  width: "100%", padding: "10px", borderRadius: 10, border: "1px solid #FCD34D",
+                  fontSize: 12, fontWeight: 700, cursor: "not-allowed",
+                  background: "#FEF3C7", color: "#92400E"
+                }}
+              >
+                Processing (Credited in 24h) ⏳
+              </button>
+            ) : (
+              <button
+                onClick={() => onClaim(r.id)}
+                disabled={!unlocked || claimingId === r.id}
+                style={{
+                  width: "100%", padding: "10px", borderRadius: 10, border: "none",
+                  fontSize: 12, fontWeight: 700, cursor: unlocked ? "pointer" : "not-allowed",
+                  background: unlocked ? "linear-gradient(135deg, #6366F1, #4F46E5)" : "#EEF2F6",
+                  color: unlocked ? "#FFFFFF" : "#64748B",
+                  transition: "all 0.2s",
+                  boxShadow: unlocked ? "0 2px 8px rgba(99,102,241,0.25)" : "none"
+                }}
+              >
+                {claimingId === r.id ? "Submitting..." : unlocked ? "Claim Reward 🎁" : `Locked (Need ${r.referrals - current} More Sales)`}
+              </button>
+            )}
           </div>
         );
       })}
@@ -427,6 +500,10 @@ export default function CreatorDashboard() {
   const [showDismissModal, setShowDismissModal] = useState(false);
   const [dontShowAgainCheck, setDontShowAgainCheck] = useState(false);
 
+  // Claim & Voucher Modal states
+  const [claimingRewardId, setClaimingRewardId] = useState<string | null>(null);
+  const [viewingClaim, setViewingClaim] = useState<RewardClaim | null>(null);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const dismissed = localStorage.getItem("hide_creator_notice");
@@ -444,25 +521,27 @@ export default function CreatorDashboard() {
     setShowDismissModal(false);
   };
 
-  // Claimed Rewards state persistence
-  const [claimedRewards, setClaimedRewards] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("claimed_rewards");
-        if (stored) setClaimedRewards(JSON.parse(stored));
-      } catch {}
+  const handleClaimReward = async (rewardId: string) => {
+    if (!data?.creator.uid) return;
+    setClaimingRewardId(rewardId);
+    try {
+      const res = await fetch("/api/creator/claim-reward", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rewardId, creatorId: data.creator.uid }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert("🎉 Claim Request Submitted!\n\nYour reward claim has been registered. It is being processed and will be credited within 24 hours.");
+        await fetchData(data.creator.uid);
+      } else {
+        alert(`❌ ${json.message || "Failed to submit claim."}`);
+      }
+    } catch {
+      alert("❌ Network error. Please try again.");
+    } finally {
+      setClaimingRewardId(null);
     }
-  }, []);
-
-  const handleClaimReward = (rewardId: string) => {
-    const updated = [...claimedRewards, rewardId];
-    setClaimedRewards(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("claimed_rewards", JSON.stringify(updated));
-    }
-    alert("🎉 Claim Request Submitted!\n\nYour reward claim has been registered. The admin team will credit this bonus reward in your next payout.");
   };
 
   const fetchData = useCallback(async (userId: string) => {
@@ -880,7 +959,7 @@ export default function CreatorDashboard() {
               {/* Progress Milestones Container */}
               <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "24px" }}>
                 <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 24px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <TrophyIcon size={20} color="#6366F1" /> Referral Milestone Levels
+                  <TrophyIcon size={20} color="#6366F1" /> Referral Milestone Levels (Static Badges)
                 </h2>
                 <MilestoneProgress milestones={milestones} current={creator.totalReferrals} />
               </div>
@@ -893,8 +972,10 @@ export default function CreatorDashboard() {
                 <RewardMissionsList 
                   rewards={rewards} 
                   current={creator.totalReferrals} 
-                  claimedIds={claimedRewards}
+                  rewardClaims={data.rewardClaims || []}
                   onClaim={handleClaimReward}
+                  onShowCode={(claim) => setViewingClaim(claim)}
+                  claimingId={claimingRewardId}
                 />
               </div>
 
@@ -1240,6 +1321,64 @@ export default function CreatorDashboard() {
           )}
         </div>
       </main>
+
+      {/* ─── VOUCHER SHOW CODE MODAL ─────────────────────────────────────── */}
+      {viewingClaim && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(4px)" }}>
+          <div style={{ background: "#FFFFFF", borderRadius: 20, padding: 28, maxWidth: 440, width: "100%", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)", textAlign: "center" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+              <RewardTypeIcon type={viewingClaim.rewardType} size={48} />
+            </div>
+            <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800, color: "#0F172A" }}>{viewingClaim.rewardLabel}</h3>
+            <p style={{ margin: "0 0 20px", fontSize: 13, color: "#64748B" }}>
+              Your gift voucher code has been processed and verified by administration.
+            </p>
+
+            {/* Voucher Code Box */}
+            <div style={{ background: "#F8FAFC", border: "2px dashed #CBD5E1", borderRadius: 14, padding: 16, marginBottom: viewingClaim.hasPin && viewingClaim.voucherPin ? 14 : 20 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>VOUCHER CODE</div>
+              <div style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#6366F1", letterSpacing: 1, marginBottom: 10, wordBreak: "break-all" }}>
+                {viewingClaim.voucherCode || "N/A"}
+              </div>
+              <button
+                onClick={() => {
+                  if (viewingClaim.voucherCode) navigator.clipboard.writeText(viewingClaim.voucherCode);
+                  alert("📋 Voucher Code copied to clipboard!");
+                }}
+                style={{ padding: "6px 16px", borderRadius: 8, background: "#EEF2F6", color: "#6366F1", border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
+              >
+                📋 Copy Code
+              </button>
+            </div>
+
+            {/* Voucher PIN Box */}
+            {viewingClaim.hasPin && viewingClaim.voucherPin && (
+              <div style={{ background: "#F8FAFC", border: "2px dashed #CBD5E1", borderRadius: 14, padding: 16, marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>VOUCHER PIN</div>
+                <div style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#0F172A", letterSpacing: 1, marginBottom: 10 }}>
+                  {viewingClaim.voucherPin}
+                </div>
+                <button
+                  onClick={() => {
+                    if (viewingClaim.voucherPin) navigator.clipboard.writeText(viewingClaim.voucherPin);
+                    alert("📋 Voucher PIN copied to clipboard!");
+                  }}
+                  style={{ padding: "6px 16px", borderRadius: 8, background: "#EEF2F6", color: "#0F172A", border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
+                >
+                  📋 Copy PIN
+                </button>
+              </div>
+            )}
+
+            <button
+              onClick={() => setViewingClaim(null)}
+              style={{ width: "100%", padding: "11px", borderRadius: 10, background: "#6366F1", color: "#FFFFFF", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

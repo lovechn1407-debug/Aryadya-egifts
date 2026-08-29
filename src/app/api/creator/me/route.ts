@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getMilestonesDB,
   getRewardsDB,
+  getRewardClaimsByCreatorDB,
   syncCreatorStatsDB,
 } from "@/lib/db";
 
@@ -24,9 +25,10 @@ export async function GET(req: NextRequest) {
     // Call unified sync and self-healing stats function
     const { creator, coupons, orders, payouts } = await syncCreatorStatsDB(uid);
 
-    // Get milestones and rewards
+    // Get milestones, rewards, and claims
     const milestones = await getMilestonesDB();
     const rewards = await getRewardsDB();
+    const rewardClaims = await getRewardClaimsByCreatorDB(uid);
 
     // Compute monthly earnings from orders
     const monthlyEarnings: Record<string, number> = {};
@@ -59,6 +61,7 @@ export async function GET(req: NextRequest) {
       payouts,
       milestones,
       rewards,
+      rewardClaims,
       monthlyEarnings,
       pendingPayoutPaise: pendingPayoutTotal,
     });

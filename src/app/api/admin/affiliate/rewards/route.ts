@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, referrals, rewardAmountPaise, label, description, order } = body;
+    const { id, referrals, rewardAmountPaise, label, description, order, rewardType } = body;
     if (!referrals || !label) {
       return NextResponse.json({ success: false, message: "referrals and label are required." }, { status: 400 });
     }
@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       label: String(label),
       description: String(description || ""),
       order: Number(order) || 0,
+      rewardType: rewardType || "other",
     };
     await saveRewardDB(reward);
     return NextResponse.json({ success: true, reward });
