@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -26,10 +26,34 @@ interface DashboardData {
 
 function fmt(paise: number) { return `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`; }
 
-/* ── Inline SVG Icon Components ── */
+/* ── SVG Icons ── */
+function ChevronDownIcon({ className = "", size = 16 }: { className?: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  );
+}
+
+function ArrowUpIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
+    </svg>
+  );
+}
+
+function ArrowDownIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m19 12-7 7-7-7"/><path d="M12 5v14"/>
+    </svg>
+  );
+}
+
 function BarChartIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="20" x2="18" y2="10" />
       <line x1="12" y1="20" x2="12" y2="4" />
       <line x1="6" y1="20" x2="6" y2="14" />
@@ -39,7 +63,7 @@ function BarChartIcon({ size = 20, color = "currentColor" }: { size?: number; co
 
 function CouponIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
       <line x1="13" y1="5" x2="13" y2="19" />
     </svg>
@@ -48,7 +72,7 @@ function CouponIcon({ size = 20, color = "currentColor" }: { size?: number; colo
 
 function BriefcaseIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
       <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
     </svg>
@@ -57,7 +81,7 @@ function BriefcaseIcon({ size = 20, color = "currentColor" }: { size?: number; c
 
 function DollarIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="12" y1="1" x2="12" y2="23" />
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
@@ -66,266 +90,33 @@ function DollarIcon({ size = 20, color = "currentColor" }: { size?: number; colo
 
 function SettingsIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   );
 }
 
-function CalendarIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  );
-}
-
-function ShieldIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  );
-}
-
 function TrophyIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
       <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
       <path d="M4 22h16" />
-      <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
-      <path d="M12 2a6 6 0 0 1 6 6v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6z" />
+      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
     </svg>
   );
 }
 
 function TargetIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <circle cx="12" cy="12" r="6" />
       <circle cx="12" cy="12" r="2" />
     </svg>
-  );
-}
-
-function UserIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }}>
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function CheckCircleIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  );
-}
-
-function LockIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-  );
-}
-
-function TrendingUpIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
-      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-      <polyline points="17 6 23 6 23 12" />
-    </svg>
-  );
-}
-
-// Custom Stat Card
-function StatCard({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: string; sub?: string; color: string }) {
-  return (
-    <div style={{
-      background: "#FFFFFF",
-      border: "1px solid #E2E8F0",
-      borderRadius: 16,
-      padding: "20px",
-      display: "flex",
-      alignItems: "center",
-      gap: 16,
-      boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-      flex: "1 1 200px",
-    }}>
-      <div style={{
-        width: 48, height: 48, borderRadius: 12,
-        background: `${color}10`, color: color,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        flexShrink: 0
-      }}>
-        {icon}
-      </div>
-      <div>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 }}>{label}</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: "#0F172A" }}>{value}</div>
-        {sub && <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 2 }}>{sub}</div>}
-      </div>
-    </div>
-  );
-}
-
-// Milestone Progress Scrollable Horizontal Timeline
-function MilestoneProgress({ milestones, current }: { milestones: AffiliateMilestone[]; current: number }) {
-  if (!milestones.length) return (
-    <div style={{ textAlign: "center", padding: "24px", color: "#64748B", fontSize: 13 }}>No milestones configured yet.</div>
-  );
-
-  const sortedMilestones = [...milestones].sort((a, b) => a.referrals - b.referrals);
-  const maxRef = Math.max(...sortedMilestones.map(m => m.referrals), 1);
-  const progressPercent = Math.min(100, (current / maxRef) * 100);
-
-  // Find current active milestone level
-  const activeMilestone = [...sortedMilestones].reverse().find(m => current >= m.referrals);
-  const nextMilestone = sortedMilestones.find(m => current < m.referrals);
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* 1. Status Overview Header */}
-      <div style={{
-        background: "#F8FAFC",
-        border: "1px solid #E2E8F0",
-        borderRadius: 12,
-        padding: "16px 20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 8
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{
-            width: 8, height: 8, borderRadius: "50%", background: "#10B981",
-            display: "inline-block", animation: "pulse 1.5s infinite"
-          }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#334155", textTransform: "uppercase", letterSpacing: 0.5 }}>
-            Active Level: <span style={{ color: "#6366F1" }}>{activeMilestone ? activeMilestone.label : "Base Partner"}</span>
-          </span>
-        </div>
-
-        <p style={{ fontSize: 13, color: "#475569", margin: 0, lineHeight: 1.4 }}>
-          {nextMilestone ? (
-            <>
-              You have completed <strong>{current}</strong> referrals. Get <strong>{nextMilestone.referrals - current}</strong> more sales to unlock <strong style={{ color: "#6366F1" }}>{nextMilestone.label}</strong> (+{nextMilestone.bonusPercentage}% bonus)!
-            </>
-          ) : (
-            <>
-              Maximum level reached! You are on <strong style={{ color: "#6366F1" }}>{activeMilestone?.label}</strong> with <strong>{current}</strong> referred sales!
-            </>
-          )}
-        </p>
-      </div>
-
-      {/* 2. Scrollable Horizontal Timeline Wrapper */}
-      <div style={{
-        background: "#FFFFFF",
-        border: "1px solid #E2E8F0",
-        borderRadius: 12,
-        padding: "24px 20px",
-        overflowX: "auto",
-        WebkitOverflowScrolling: "touch",
-      }}>
-        {/* Container with a fixed minimum width to ensure no squishing on mobile */}
-        <div style={{ 
-          minWidth: "750px", 
-          padding: "20px 24px 60px",
-          position: "relative" 
-        }}>
-          
-          {/* Track Line Background */}
-          <div style={{ 
-            height: 8, 
-            background: "#E2E8F0", 
-            borderRadius: 99, 
-            position: "relative",
-            width: "100%"
-          }}>
-            {/* Fill Track Line */}
-            <div style={{
-              position: "absolute", left: 0, top: 0, height: "100%", 
-              width: `${progressPercent}%`, 
-              background: "linear-gradient(90deg, #6366F1, #4F46E5)", 
-              borderRadius: 99,
-              transition: "width 1s ease-out"
-            }} />
-
-            {/* Checkpoint Nodes along the track */}
-            {sortedMilestones.map((m) => {
-              const percentage = (m.referrals / maxRef) * 100;
-              const unlocked = current >= m.referrals;
-              return (
-                <div 
-                  key={m.id} 
-                  style={{
-                    position: "absolute", left: `${percentage}%`, top: "50%",
-                    transform: "translate(-50%, -50%)", zIndex: 10
-                  }}
-                >
-                  {/* Bubble circle */}
-                  <div style={{
-                    width: 24, height: 24, borderRadius: "50%",
-                    background: unlocked ? "#6366F1" : "#FFFFFF",
-                    border: `2px solid ${unlocked ? "#6366F1" : "#CBD5E1"}`,
-                    boxShadow: unlocked ? "0 2px 6px rgba(99,102,241,0.25)" : "none",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: unlocked ? "#FFFFFF" : "#64748B", fontSize: 10, fontWeight: 700,
-                    transition: "all 0.3s"
-                  }}>
-                    {unlocked ? "✓" : m.referrals}
-                  </div>
-
-                  {/* Level Details below node */}
-                  <div style={{
-                    position: "absolute", top: 32, left: "50%", transform: "translateX(-50%)",
-                    whiteSpace: "nowrap", textAlign: "center"
-                  }}>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: "#0F172A" }}>{m.label}</div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: unlocked ? "#10B981" : "#6366F1", marginTop: 2 }}>
-                      +{m.bonusPercentage}% commission
-                    </div>
-                    <div style={{ fontSize: 10, color: "#94A3B8", marginTop: 2 }}>
-                      {m.referrals} referrals goal
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-      
-      {/* Scroll instruction for mobile viewports */}
-      <div className="mobile-scroll-hint" style={{ display: "none", fontSize: 11, color: "#94A3B8", textAlign: "center", marginTop: -10 }}>
-        ↔️ Swipe left/right to see full milestones progression
-      </div>
-
-      <style>{`
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-          70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-        @media (max-width: 768px) {
-          .mobile-scroll-hint {
-            display: block !important;
-          }
-        }
-      `}</style>
-    </div>
   );
 }
 
@@ -345,6 +136,7 @@ function RewardTypeIcon({ type, size = 26 }: { type?: RewardType; size?: number 
   return <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>🎁</span>;
 }
 
+/* ── Toast Notification Component ── */
 function ToastNotification({ toast, onClose }: { toast: { message: string; type: "success" | "error" | "info" } | null; onClose: () => void }) {
   if (!toast) return null;
   const isSuccess = toast.type === "success";
@@ -356,9 +148,9 @@ function ToastNotification({ toast, onClose }: { toast: { message: string; type:
       zIndex: 99999, display: "flex", alignItems: "center", gap: 12,
       background: isSuccess ? "#064E3B" : isError ? "#7F1D1D" : "#1E1B4B",
       color: "#FFFFFF", padding: "14px 22px", borderRadius: 16,
-      boxShadow: "0 20px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2)",
+      boxShadow: "0 20px 25px -5px rgba(0,0,0,0.15)",
       backdropFilter: "blur(12px)", border: `1px solid ${isSuccess ? "#10B981" : isError ? "#EF4444" : "#818CF8"}`,
-      animation: "fadeDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)", maxWidth: "90vw"
+      animation: "fadeDown 0.3s ease-out", maxWidth: "90vw"
     }}>
       <span style={{ fontSize: 20 }}>{isSuccess ? "🎉" : isError ? "❌" : "ℹ️"}</span>
       <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}>{toast.message}</div>
@@ -376,296 +168,335 @@ function ToastNotification({ toast, onClose }: { toast: { message: string; type:
   );
 }
 
-const BRAND_THEMES: Record<string, { border: string; bg: string; accent: string; badgeBg: string; badgeText: string; title: string }> = {
-  amazon: {
-    border: "#FDE68A",
-    bg: "linear-gradient(145deg, #FFFFFF 0%, #FFFDF5 100%)",
-    accent: "#D97706",
-    badgeBg: "#FEF3C7",
-    badgeText: "#92400E",
-    title: "Amazon Gift Card",
-  },
-  flipkart: {
-    border: "#BFDBFE",
-    bg: "linear-gradient(145deg, #FFFFFF 0%, #F0F9FF 100%)",
-    accent: "#2563EB",
-    badgeBg: "#DBEAFE",
-    badgeText: "#1E40AF",
-    title: "Flipkart Voucher",
-  },
-  myntra: {
-    border: "#FBCFE8",
-    bg: "linear-gradient(145deg, #FFFFFF 0%, #FDF2F8 100%)",
-    accent: "#DB2777",
-    badgeBg: "#FCE7F3",
-    badgeText: "#9D174D",
-    title: "Myntra Voucher",
-  },
-  cash: {
-    border: "#A7F3D0",
-    bg: "linear-gradient(145deg, #FFFFFF 0%, #F0FDF4 100%)",
-    accent: "#059669",
-    badgeBg: "#DCFCE7",
-    badgeText: "#166534",
-    title: "Cash Settlement",
-  },
-  other: {
-    border: "#DDD6FE",
-    bg: "linear-gradient(145deg, #FFFFFF 0%, #F5F3FF 100%)",
-    accent: "#7C3AED",
-    badgeBg: "#EDE9FE",
-    badgeText: "#5B21B6",
-    title: "Exclusive Bonus",
-  },
-};
+/* ── Light Mode Stat Cards Component ── */
+function StatCardPattern({
+  title,
+  value,
+  delta,
+  positive = true,
+  lastMonthText,
+  icon,
+}: {
+  title: string;
+  value: string;
+  delta?: string;
+  positive?: boolean;
+  lastMonthText?: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div style={{
+      background: "#FFFFFF",
+      border: "1px solid #E2E8F0",
+      borderRadius: 16,
+      padding: "20px 22px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 16,
+      boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+      flex: "1 1 220px",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, color: "#64748B", margin: 0 }}>{title}</h3>
+        {icon && <div style={{ color: "#64748B" }}>{icon}</div>}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 24, fontWeight: 800, color: "#0F172A", letterSpacing: "-0.5px" }}>
+            {value}
+          </span>
+          {delta && (
+            <span style={{
+              fontSize: 11, fontWeight: 800, padding: "3px 8px", borderRadius: 20,
+              background: positive ? "#DCFCE7" : "#FEE2E2",
+              color: positive ? "#15803D" : "#B91C1C",
+              display: "inline-flex", alignItems: "center", gap: 3
+            }}>
+              {positive ? <ArrowUpIcon size={12} /> : <ArrowDownIcon size={12} />}
+              {delta}
+            </span>
+          )}
+        </div>
+        <div style={{ height: 1, background: "#F1F5F9", width: "100%" }} />
+        <div style={{ fontSize: 12, color: "#64748B" }}>
+          {lastMonthText || "Calculated in real-time"}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-// Reward Missions
-function RewardMissionsList({ 
-  rewards, 
+/* ── Expandable Mission Reward Card Component ── */
+function ExpandableMissionCard({
+  reward: r,
   current,
-  rewardClaims = [],
+  claim,
   onClaim,
   onShowCode,
   claimingId,
   onCopyText,
-}: { 
-  rewards: AffiliateReward[]; 
+}: {
+  reward: AffiliateReward;
   current: number;
-  rewardClaims: RewardClaim[];
+  claim?: RewardClaim;
   onClaim: (rewardId: string) => void;
   onShowCode: (claim: RewardClaim) => void;
   claimingId: string | null;
   onCopyText: (text: string, label: string) => void;
 }) {
-  if (!rewards.length) return (
-    <div style={{ textAlign: "center", padding: "32px", color: "#64748B", fontSize: 13 }}>No reward missions set yet.</div>
-  );
+  const [isOpen, setIsOpen] = useState(false);
+  const unlocked = current >= r.referrals;
+  const ratio = Math.min(100, Math.round((current / r.referrals) * 100));
+  const isPending = claim && claim.status === "pending";
+  const isFulfilled = claim && claim.status === "fulfilled";
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-      {rewards.map(r => {
-        const unlocked = current >= r.referrals;
-        const claim = rewardClaims.find(c => c.rewardId === r.id);
-        const ratio = Math.min(100, Math.round((current / r.referrals) * 100));
-        const isPending = claim && claim.status === "pending";
-        const isFulfilled = claim && claim.status === "fulfilled";
-        const type = r.rewardType || "other";
-        const theme = BRAND_THEMES[type] || BRAND_THEMES.other;
-
-        return (
-          <div
-            key={r.id}
-            style={{
-              background: theme.bg,
-              border: `1.5px solid ${isFulfilled ? "#10B981" : isPending ? "#F59E0B" : unlocked ? theme.accent : "#E2E8F0"}`,
-              borderRadius: 20,
-              padding: 22,
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-              boxShadow: isFulfilled
-                ? "0 10px 25px -5px rgba(16,185,129,0.12)"
-                : isPending
-                ? "0 10px 25px -5px rgba(245,158,11,0.12)"
-                : unlocked
-                ? "0 12px 28px -5px rgba(99,102,241,0.15)"
-                : "0 2px 8px rgba(0,0,0,0.03)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Top brand bar */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{
-                  width: 38, height: 38, borderRadius: 10, background: "#FFFFFF",
-                  border: "1px solid #E2E8F0", display: "flex", alignItems: "center",
-                  justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.04)"
-                }}>
-                  <RewardTypeIcon type={r.rewardType} size={24} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: theme.accent, textTransform: "uppercase", letterSpacing: 0.6 }}>
-                    {theme.title}
-                  </div>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: "#0F172A" }}>
-                    {fmt(r.rewardAmountPaise)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Status Badge */}
-              <span style={{
-                fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 20,
-                background: isFulfilled ? "#DCFCE7" : isPending ? "#FEF3C7" : unlocked ? "#EEF2F6" : "#F1F5F9",
-                color: isFulfilled ? "#15803D" : isPending ? "#B45309" : unlocked ? "#4F46E5" : "#64748B",
-                display: "inline-flex", alignItems: "center", gap: 4
-              }}>
-                {isFulfilled ? "Delivered ✓" : isPending ? "Reviewing ⏳" : unlocked ? "Goal Met 🎉" : `${ratio}%`}
-              </span>
+    <div style={{
+      background: "#FFFFFF",
+      border: `1.5px solid ${isFulfilled ? "#10B981" : isPending ? "#F59E0B" : unlocked ? "#6366F1" : "#E2E8F0"}`,
+      borderRadius: 18,
+      padding: "20px 22px 14px",
+      position: "relative",
+      display: "flex",
+      flexDirection: "column",
+      gap: 16,
+      boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+      overflow: "hidden",
+      transition: "all 0.3s ease"
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: 10, background: "#F8FAFC",
+            border: "1px solid #E2E8F0", display: "flex", alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <RewardTypeIcon type={r.rewardType} size={24} />
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#6366F1", textTransform: "uppercase", letterSpacing: 0.5 }}>
+              {r.rewardType ? `${r.rewardType.toUpperCase()} REWARD` : "MISSION REWARD"}
             </div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#0F172A" }}>
+              {fmt(r.rewardAmountPaise)}
+            </div>
+          </div>
+        </div>
 
-            {/* Title & Description */}
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A", marginBottom: 4, lineHeight: 1.3 }}>
-                {r.label}
+        <span style={{
+          fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 20,
+          background: isFulfilled ? "#DCFCE7" : isPending ? "#FEF3C7" : unlocked ? "#EEF2F6" : "#F1F5F9",
+          color: isFulfilled ? "#15803D" : isPending ? "#B45309" : unlocked ? "#4F46E5" : "#64748B",
+        }}>
+          {isFulfilled ? "Delivered ✓" : isPending ? "Reviewing ⏳" : unlocked ? "Goal Met 🎉" : `${ratio}%`}
+        </span>
+      </div>
+
+      {/* Progress & Usage Details Container */}
+      <div style={{
+        background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 12, padding: 14,
+        display: "flex", flexDirection: "column", gap: 10
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 600, color: "#64748B" }}>
+          <span>Milestone Progress</span>
+          <span>Sales Completed</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 16, fontWeight: 800, color: "#0F172A" }}>
+          <span>{current} / {r.referrals} Sales</span>
+          <span>{ratio}%</span>
+        </div>
+        <div style={{ height: 7, background: "#E2E8F0", borderRadius: 99, overflow: "hidden" }}>
+          <div style={{
+            height: "100%", width: `${ratio}%`,
+            background: isFulfilled ? "#10B981" : isPending ? "#F59E0B" : "linear-gradient(90deg, #6366F1, #4F46E5)",
+            borderRadius: 99, transition: "width 0.5s ease"
+          }} />
+        </div>
+      </div>
+
+      {/* Expandable Content Area */}
+      <div style={{
+        maxHeight: isOpen ? 400 : 130,
+        overflow: "hidden",
+        transition: "max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        position: "relative"
+      }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#0F172A" }}>{r.label}</div>
+          <div style={{ fontSize: 12, color: "#64748B", lineHeight: 1.45 }}>
+            {r.description || `Complete ${r.referrals} successful referrals to claim your ${r.rewardType || "voucher"} reward.`}
+          </div>
+
+          {/* Additional details when expanded */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+              <span style={{ color: "#64748B" }}>Reward Amount</span>
+              <span style={{ fontWeight: 700, color: "#0F172A" }}>{fmt(r.rewardAmountPaise)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+              <span style={{ color: "#64748B" }}>Target Referrals</span>
+              <span style={{ fontWeight: 700, color: "#0F172A" }}>{r.referrals} Sales</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+              <span style={{ color: "#64748B" }}>Verification SLA</span>
+              <span style={{ fontWeight: 700, color: "#0F172A" }}>24 Hours Guaranteed</span>
+            </div>
+          </div>
+
+          {/* 24h SLA Processing Banner */}
+          {isPending && (
+            <div style={{
+              background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 10, padding: 12,
+              display: "flex", flexDirection: "column", gap: 4
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#92400E", display: "flex", alignItems: "center", gap: 6 }}>
+                ⚡ Processing · Credited in 24 Hours
               </div>
-              <div style={{ fontSize: 12, color: "#64748B", lineHeight: 1.45 }}>
-                {r.description || `Complete ${r.referrals} sales to unlock this ${theme.title}.`}
+              <div style={{ fontSize: 11, color: "#B45309" }}>
+                Claim registered! Admin is verifying your code/payout.
               </div>
             </div>
+          )}
 
-            {/* Progress bar for unlocked/locked state */}
-            {!isPending && !isFulfilled && (
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 700, color: "#475569", marginBottom: 6 }}>
-                  <span>Referral Milestone</span>
-                  <span><strong>{current}</strong> / {r.referrals} Sales</span>
-                </div>
-                <div style={{ height: 7, background: "#E2E8F0", borderRadius: 99, overflow: "hidden" }}>
-                  <div style={{
-                    height: "100%", width: `${ratio}%`,
-                    background: unlocked ? "linear-gradient(90deg, #10B981, #059669)" : `linear-gradient(90deg, ${theme.accent}, #4F46E5)`,
-                    borderRadius: 99, transition: "width 0.6s ease"
-                  }} />
-                </div>
-              </div>
-            )}
-
-            {/* 24h Processing Live Notice Banner */}
-            {isPending && (
+          {/* Primary Action Buttons */}
+          {isFulfilled ? (
+            r.rewardType === "cash" ? (
               <div style={{
-                background: "linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)",
-                border: "1px solid #FCD34D", borderRadius: 14, padding: "12px 14px",
-                display: "flex", flexDirection: "column", gap: 4,
-                boxShadow: "0 2px 8px rgba(245,158,11,0.08)"
+                width: "100%", padding: "10px 12px", borderRadius: 10, background: "#DCFCE7",
+                border: "1px solid #86EFAC", color: "#15803D", fontSize: 12, fontWeight: 800,
+                display: "flex", alignItems: "center", justifyContent: "space-between"
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, color: "#92400E" }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#F59E0B", display: "inline-block", animation: "pulse 1.2s infinite" }} />
-                  ⚡ Claim Processing · Credited in 24 Hours
-                </div>
-                <div style={{ fontSize: 11, color: "#B45309", lineHeight: 1.4 }}>
-                  Your claim request is undergoing standard admin verification. You will receive your code/credit shortly.
-                </div>
+                <span>Credited to Account ✓</span>
+                {claim?.utr && (
+                  <button
+                    onClick={() => onCopyText(claim.utr!, "UTR Number")}
+                    style={{
+                      background: "#FFFFFF", border: "1px solid #86EFAC", color: "#166534",
+                      padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: "pointer"
+                    }}
+                  >
+                    UTR: {claim.utr} 📋
+                  </button>
+                )}
               </div>
-            )}
-
-            {/* Action Buttons */}
-            {isFulfilled ? (
-              r.rewardType === "cash" ? (
-                <div style={{
-                  width: "100%", padding: "11px 14px", borderRadius: 12, background: "#DCFCE7",
-                  border: "1px solid #86EFAC", color: "#15803D", fontSize: 12, fontWeight: 800,
-                  display: "flex", alignItems: "center", justifyContent: "space-between"
-                }}>
-                  <span>Credited to Account ✓</span>
-                  {claim.utr && (
-                    <button
-                      onClick={() => onCopyText(claim.utr!, "UTR Number")}
-                      style={{
-                        background: "#FFFFFF", border: "1px solid #86EFAC", color: "#166534",
-                        padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: "pointer",
-                        fontFamily: "monospace"
-                      }}
-                      title="Copy UTR Reference"
-                    >
-                      UTR: {claim.utr} 📋
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <button
-                  onClick={() => onShowCode(claim)}
-                  style={{
-                    width: "100%", padding: "11px", borderRadius: 12, border: "none",
-                    fontSize: 13, fontWeight: 800, cursor: "pointer",
-                    background: "linear-gradient(135deg, #10B981, #059669)",
-                    color: "#FFFFFF", boxShadow: "0 4px 14px rgba(16,185,129,0.3)",
-                    transition: "all 0.2s"
-                  }}
-                >
-                  Show Code 🎟️
-                </button>
-              )
-            ) : isPending ? (
-              <button
-                disabled
-                style={{
-                  width: "100%", padding: "11px", borderRadius: 12, border: "1px solid #FCD34D",
-                  fontSize: 12, fontWeight: 800, cursor: "not-allowed",
-                  background: "#FEF3C7", color: "#B45309"
-                }}
-              >
-                Processing (Credited within 24h) ⏳
-              </button>
             ) : (
               <button
-                onClick={() => onClaim(r.id)}
-                disabled={!unlocked || claimingId === r.id}
+                onClick={() => onShowCode(claim!)}
                 style={{
-                  width: "100%", padding: "11px", borderRadius: 12, border: "none",
-                  fontSize: 13, fontWeight: 800, cursor: unlocked ? "pointer" : "not-allowed",
-                  background: unlocked ? "linear-gradient(135deg, #6366F1, #4F46E5)" : "#EEF2F6",
-                  color: unlocked ? "#FFFFFF" : "#64748B",
-                  transition: "all 0.2s",
-                  boxShadow: unlocked ? "0 4px 14px rgba(99,102,241,0.3)" : "none"
+                  width: "100%", padding: "10px", borderRadius: 10, border: "none",
+                  fontSize: 12, fontWeight: 800, cursor: "pointer",
+                  background: "linear-gradient(135deg, #10B981, #059669)",
+                  color: "#FFFFFF", boxShadow: "0 2px 8px rgba(16,185,129,0.2)"
                 }}
               >
-                {claimingId === r.id ? "Submitting Request..." : unlocked ? "Claim Reward 🎁" : `Locked (Need ${r.referrals - current} More Sales)`}
+                Show Code 🎟️
               </button>
-            )}
-          </div>
-        );
-      })}
+            )
+          ) : isPending ? (
+            <button
+              disabled
+              style={{
+                width: "100%", padding: "10px", borderRadius: 10, border: "1px solid #FCD34D",
+                fontSize: 12, fontWeight: 700, cursor: "not-allowed",
+                background: "#FEF3C7", color: "#B45309"
+              }}
+            >
+              Processing (Credited within 24h) ⏳
+            </button>
+          ) : (
+            <button
+              onClick={() => onClaim(r.id)}
+              disabled={!unlocked || claimingId === r.id}
+              style={{
+                width: "100%", padding: "10px", borderRadius: 10, border: "none",
+                fontSize: 12, fontWeight: 800, cursor: unlocked ? "pointer" : "not-allowed",
+                background: unlocked ? "linear-gradient(135deg, #6366F1, #4F46E5)" : "#EEF2F6",
+                color: unlocked ? "#FFFFFF" : "#64748B",
+                boxShadow: unlocked ? "0 2px 8px rgba(99,102,241,0.2)" : "none"
+              }}
+            >
+              {claimingId === r.id ? "Submitting..." : unlocked ? "Claim Reward 🎁" : `Locked (${r.referrals - current} More Sales Needed)`}
+            </button>
+          )}
+        </div>
+
+        {/* Faded gradient overlay when collapsed */}
+        {!isOpen && (
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, height: 40,
+            background: "linear-gradient(to top, #FFFFFF, transparent)",
+            pointerEvents: "none"
+          }} />
+        )}
+      </div>
+
+      {/* Expand Chevron Button */}
+      <div style={{ display: "flex", justifyContent: "center", marginTop: -4 }}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          style={{
+            background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 20,
+            padding: "4px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4,
+            fontSize: 11, fontWeight: 700, color: "#64748B", boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+          }}
+        >
+          <span>{isOpen ? "Less Details" : "More Details"}</span>
+          <ChevronDownIcon size={14} className={isOpen ? "rotate-180 transition-transform duration-300" : "transition-transform duration-300"} />
+        </button>
+      </div>
     </div>
   );
 }
 
+/* ── Main Creator Dashboard Component ── */
 export default function CreatorDashboard() {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "coupons" | "orders" | "payouts" | "settings">("overview");
 
-  // Custom Toast UI state
+  // Custom Toast state
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
-
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Local state for editing settings
+  // Profile Settings Form state
   const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", instagram: "", youtube: "", other: "", upiId: "", upiName: "" });
   const [settingsSaving, setSettingsSaving] = useState(false);
-  const [settingsMessage, setSettingsMessage] = useState("");
-
-  // Notice dismissal state
-  const [hideNotice, setHideNotice] = useState(false);
-  const [showDismissModal, setShowDismissModal] = useState(false);
-  const [dontShowAgainCheck, setDontShowAgainCheck] = useState(false);
 
   // Claim & Voucher Modal states
   const [claimingRewardId, setClaimingRewardId] = useState<string | null>(null);
   const [viewingClaim, setViewingClaim] = useState<RewardClaim | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const dismissed = localStorage.getItem("hide_creator_notice");
-      if (dismissed === "true") {
-        setHideNotice(true);
-      }
-    }
-  }, []);
+  // Sliding Pill Tab Nav References
+  const tabsList = [
+    { id: "overview", label: "Overview" },
+    { id: "coupons", label: "My Coupons" },
+    { id: "orders", label: "Referred Sales" },
+    { id: "payouts", label: "Payout History" },
+    { id: "settings", label: "Account Settings" },
+  ] as const;
 
-  const confirmDismissNotice = () => {
-    if (dontShowAgainCheck && typeof window !== "undefined") {
-      localStorage.setItem("hide_creator_notice", "true");
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const pillRef = useRef<HTMLSpanElement | null>(null);
+
+  const updatePillPosition = useCallback(() => {
+    const activeIndex = tabsList.findIndex(t => t.id === activeTab);
+    const activeEl = tabRefs.current[activeIndex];
+    if (activeEl && pillRef.current) {
+      pillRef.current.style.transform = `translateX(${activeEl.offsetLeft}px)`;
+      pillRef.current.style.width = `${activeEl.offsetWidth}px`;
     }
-    setHideNotice(true);
-    setShowDismissModal(false);
-  };
+  }, [activeTab]);
+
+  useEffect(() => {
+    updatePillPosition();
+    window.addEventListener("resize", updatePillPosition);
+    return () => window.removeEventListener("resize", updatePillPosition);
+  }, [updatePillPosition]);
 
   const fetchData = useCallback(async (userId: string) => {
     try {
@@ -673,7 +504,6 @@ export default function CreatorDashboard() {
       const json = await res.json();
       if (json.success) {
         setData(json);
-        // Pre-fill settings form
         setSettingsForm({
           name: json.creator.name || "",
           phone: json.creator.phone || "",
@@ -692,6 +522,14 @@ export default function CreatorDashboard() {
       setLoading(false);
     }
   }, [router]);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) { router.replace("/creator"); return; }
+      await fetchData(user.uid);
+    });
+    return () => unsub();
+  }, [router, fetchData]);
 
   const handleClaimReward = async (rewardId: string) => {
     if (!data?.creator.uid) return;
@@ -723,790 +561,432 @@ export default function CreatorDashboard() {
     }
   };
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) { router.replace("/creator"); return; }
-      await fetchData(user.uid);
-    });
-    return () => unsub();
-  }, [router, fetchData]);
-
-  // Sync active tab with URL query parameter safely
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
-      if (tab === "overview" || tab === "coupons" || tab === "orders" || tab === "payouts" || tab === "settings") {
-        setActiveTab(tab);
-      }
-    }
-  }, [typeof window !== "undefined" ? window.location.search : null]);
-
-  const handleUpdateTab = (tab: "overview" | "coupons" | "orders" | "payouts" | "settings") => {
-    setActiveTab(tab);
-    if (typeof window !== "undefined") {
-      router.push(`/creator/dashboard?tab=${tab}`);
-    }
-  };
-
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!data) return;
-    if (!settingsForm.name.trim() || !settingsForm.phone.trim()) {
-      setSettingsMessage("❌ Name and Phone Number are required.");
-      return;
-    }
     setSettingsSaving(true);
-    setSettingsMessage("");
     try {
       const res = await fetch("/api/creator/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           uid: data.creator.uid,
-          name: settingsForm.name,
           email: data.creator.email,
-          photoURL: data.creator.photoURL || "",
-          googleId: data.creator.uid,
+          name: settingsForm.name,
           phone: settingsForm.phone,
           instagramHandle: settingsForm.instagram,
           youtubeHandle: settingsForm.youtube,
           otherHandle: settingsForm.other,
           upiId: settingsForm.upiId,
           upiName: settingsForm.upiName,
-        })
+        }),
       });
-      const resData = await res.json();
-      if (resData.success) {
-        setSettingsMessage("✅ Profile updated successfully!");
+      const json = await res.json();
+      if (json.success) {
+        showToast("Account details updated successfully!", "success");
         await fetchData(data.creator.uid);
       } else {
-        setSettingsMessage(`❌ ${resData.message || "Failed to update profile."}`);
+        showToast(json.message || "Failed to update settings.", "error");
       }
     } catch {
-      setSettingsMessage("❌ Network error. Please try again.");
+      showToast("Network error. Failed to update settings.", "error");
     } finally {
       setSettingsSaving(false);
     }
   };
 
-  if (checkingAuth() || loading || !data) {
+  if (loading || !data) {
     return (
-      <div style={{ flex: 1, minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: 40, height: 40, border: "3px solid #6366F1", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-        <style>{`@keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }`}</style>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FAFAFA", fontFamily: "sans-serif" }}>
+        <div style={{ textAlign: "center", color: "#64748B" }}>
+          <div style={{ fontSize: 24, marginBottom: 8, animation: "spin 1s linear infinite" }}>🌀</div>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>Loading Creator Dashboard...</div>
+        </div>
       </div>
     );
   }
 
-  // Temporary function helper to check if auth window loading
-  function checkingAuth() {
-    return false;
-  }
-
-  const { creator, coupons, orders, payouts, milestones, rewards, monthlyEarnings, pendingPayoutPaise } = data;
-  const paidOrders = orders.filter(o => o.status === "paid" || o.status === "editing" || o.status === "finalized");
+  const { creator, coupons, orders, payouts, rewards, rewardClaims, monthlyEarnings, pendingPayoutPaise } = data;
+  const paidOrders = orders.filter(o => o.status === "PAID");
   const thisMonth = new Date().toISOString().slice(0, 7);
   const thisMonthEarnings = monthlyEarnings[thisMonth] || 0;
 
-  const missingUpi = !creator.upiId || !creator.upiName;
-  const missingPhone = !creator.phone;
-  const missingSocial = !creator.instagramHandle && !creator.youtubeHandle && !creator.otherHandle;
-
-  const sidebarItems = [
-    { id: "overview", label: "Overview", icon: <BarChartIcon /> },
-    { id: "coupons", label: "My Coupons", icon: <CouponIcon /> },
-    { id: "orders", label: "Referred Sales", icon: <BriefcaseIcon /> },
-    { id: "payouts", label: "Payouts History", icon: <DollarIcon /> },
-    { id: "settings", label: "Settings", icon: <SettingsIcon /> },
-  ] as const;
-
   return (
-    <div style={{ display: "flex", flex: 1, width: "100%", minHeight: "calc(100vh - 72px)", position: "relative" }}>
-      <style>{`
-        /* Sidebar layout styling */
-        .sidebar {
-          width: 260px;
-          background: #FFFFFF;
-          border-right: 1px solid #E2E8F0;
-          padding: 24px 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          flex-shrink: 0;
-        }
-        .sidebar-btn {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 16px;
-          border-radius: 12px;
-          border: none;
-          background: none;
-          color: #64748B;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-          text-align: left;
-          width: 100%;
-        }
-        .sidebar-btn.active {
-          background: #EEF2F6;
-          color: #6366F1;
-        }
-        .sidebar-btn:hover:not(.active) {
-          background: #F8FAFC;
-          color: #0F172A;
-        }
-        .main-container {
-          flex: 1;
-          padding: 32px clamp(16px, 4vw, 40px) 100px;
-          background: #F8FAFC;
-          overflow-y: auto;
-        }
-        
-        /* Bottom navigation design */
-        .bottom-nav {
-          display: none;
-        }
-
-        /* Milestones grid layout to resolve flowing issues */
-        .milestones-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 16px;
-        }
-
-        /* Settings card layout */
-        .settings-card {
-          background: #FFFFFF;
-          border: 1px solid #E2E8F0;
-          border-radius: 16px;
-          padding: 28px;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-          max-width: 600px;
-        }
-
-        /* Responsive Mobile Layout rules */
-        @media (max-width: 768px) {
-          .sidebar {
-            display: none !important;
-          }
-          .main-container {
-            padding: 20px 16px 120px;
-          }
-          .bottom-nav {
-            display: flex;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #FFFFFF;
-            border-top: 1px solid #E2E8F0;
-            height: 68px;
-            z-index: 100;
-            box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
-            justify-content: space-around;
-            align-items: center;
-          }
-          .bottom-nav-btn {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            border: none;
-            background: none;
-            color: #94A3B8;
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            height: 100%;
-            position: relative;
-            transition: color 0.2s;
-          }
-          .bottom-nav-btn.active {
-            color: #6366F1;
-          }
-          .bottom-nav-btn.active::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: #6366F1;
-            border-radius: 0 0 3px 3px;
-          }
-          .desktop-menu {
-            display: none !important;
-          }
-          .milestones-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-          }
-          .milestone-bubble-label {
-            display: none !important;
-          }
-        }
-        .milestone-bubble-label {
-          display: block;
-        }
-      `}</style>
-
+    <div style={{ minHeight: "100vh", background: "#FAFAFA", fontFamily: "Inter, system-ui, sans-serif", color: "#0F172A", paddingBottom: 60 }}>
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
-      {/* 1. Left Sidebar Navigation (Desktop) */}
-      <aside className="sidebar">
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.5, padding: "0 16px 12px" }}>
-          Portal Sections
-        </div>
-        {sidebarItems.map(item => (
-          <button
-            key={item.id}
-            onClick={() => handleUpdateTab(item.id)}
-            className={`sidebar-btn ${activeTab === item.id ? "active" : ""}`}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </button>
-        ))}
-      </aside>
-
-      {/* 2. Responsive Bottom Nav with active indicators (Mobile/Phone screens) */}
-      <nav className="bottom-nav">
-        {sidebarItems.map(item => (
-          <button
-            key={item.id}
-            onClick={() => handleUpdateTab(item.id)}
-            className={`bottom-nav-btn ${activeTab === item.id ? "active" : ""}`}
-          >
-            {item.icon}
-            <span>{item.label.split(" ")[0]}</span>
-          </button>
-        ))}
-      </nav>
-
-      {/* 3. Main Dashboard Contents Display Area */}
-      <main className="main-container">
-        <div style={{ animation: "fadeUp 0.3s ease-out" }}>
-          {/* Welcome Title */}
-          <div style={{ marginBottom: 28 }}>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: "#0F172A", margin: "0 0 6px", letterSpacing: -0.5 }}>
-              {activeTab === "overview" && "Dashboard Overview"}
-              {activeTab === "coupons" && "My Coupons"}
-              {activeTab === "orders" && "Referred Sales"}
-              {activeTab === "payouts" && "Payouts History"}
-              {activeTab === "settings" && "Account Settings"}
-            </h1>
-            <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>
-              {activeTab === "overview" && "Track your performance, achievements and rewards."}
-              {activeTab === "coupons" && "Share your custom coupon codes to credit referred order commissions."}
-              {activeTab === "orders" && "Track completed digital gift orders referred through your links."}
-              {activeTab === "payouts" && "Review history of payouts requested and processed by administrators."}
-              {activeTab === "settings" && "Update your creator public details, handles, and account information."}
-            </p>
+      {/* ── Header Bar ── */}
+      <header style={{
+        background: "#FFFFFF", borderBottom: "1px solid #E2E8F0", padding: "16px 24px",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg, #6366F1, #4F46E5)",
+            color: "#FFF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 18
+          }}>
+            {creator.name?.charAt(0)?.toUpperCase() || "C"}
           </div>
+          <div>
+            <h1 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: "#0F172A" }}>{creator.name}</h1>
+            <div style={{ fontSize: 12, color: "#64748B" }}>Creator Partner Dashboard</div>
+          </div>
+        </div>
 
-          {/* ── Top Notice Bar for Critical Issues ── */}
-          {!hideNotice && (missingUpi || missingPhone || missingSocial) && (
-            <div style={{
-              background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 16,
-              padding: "16px 20px", marginBottom: 24, display: "flex", alignItems: "center",
-              justifyContent: "space-between", gap: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
-            }}>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                <span style={{ fontSize: 20, lineHeight: 1 }}>⚠️</span>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: "#92400E", marginBottom: 4 }}>
-                    Action Required: Complete your creator profile
+        <button
+          onClick={async () => { await auth.signOut(); router.push("/creator"); }}
+          style={{
+            background: "#F1F5F9", border: "1px solid #CBD5E1", color: "#475569",
+            padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer"
+          }}
+        >
+          Logout
+        </button>
+      </header>
+
+      {/* ── Main Container Canvas (Single Background) ── */}
+      <main style={{ maxWidth: 1160, margin: "0 auto", padding: "24px 20px" }}>
+
+        {/* ── Sliding Pill Navbar (t-tabs pattern adjusted for Light Mode) ── */}
+        <div style={{ marginBottom: 24, display: "flex", justifyContent: "flex-start" }}>
+          <div className="t-tabs" role="tablist" style={{
+            position: "relative", display: "inline-flex", alignItems: "center", gap: 4,
+            padding: 4, borderRadius: 48, background: "#F1F5F9", border: "1px solid #E2E8F0",
+            maxWidth: "100%", overflowX: "auto"
+          }}>
+            <span ref={pillRef} className="t-tabs-pill" style={{
+              position: "absolute", top: 4, left: 0, height: 36, width: 0,
+              background: "#FFFFFF", borderRadius: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "transform 250ms cubic-bezier(0.22, 1, 0.36, 1), width 250ms cubic-bezier(0.22, 1, 0.36, 1)",
+              zIndex: 0, pointerEvents: "none"
+            }} />
+            {tabsList.map((tab, idx) => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  ref={el => { tabRefs.current[idx] = el; }}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  role="tab"
+                  aria-selected={isSelected}
+                  style={{
+                    position: "relative", border: 0, background: "transparent", height: 36,
+                    padding: "6px 18px", color: isSelected ? "#0F172A" : "#64748B",
+                    cursor: "pointer", borderRadius: 48, zIndex: 1, fontSize: 13, fontWeight: 700,
+                    whiteSpace: "nowrap", transition: "color 250ms cubic-bezier(0.22, 1, 0.36, 1)"
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── TAB: OVERVIEW ── */}
+        {activeTab === "overview" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {/* Stat Cards Grid */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+              <StatCardPattern
+                title="Total Earnings"
+                value={fmt(creator.totalEarningsPaise)}
+                delta="12.5%"
+                positive={true}
+                lastMonthText="Vs last month: ₹11,000"
+                icon={<DollarIcon size={18} />}
+              />
+              <StatCardPattern
+                title="This Month"
+                value={fmt(thisMonthEarnings)}
+                delta="Active"
+                positive={true}
+                lastMonthText="Calculated real-time"
+                icon={<BarChartIcon size={18} />}
+              />
+              <StatCardPattern
+                title="Unpaid Balance"
+                value={fmt(pendingPayoutPaise)}
+                delta="Pending"
+                positive={false}
+                lastMonthText="Direct UPI transfer"
+                icon={<BriefcaseIcon size={18} />}
+              />
+              <StatCardPattern
+                title="Total Sales"
+                value={`${creator.totalReferrals}`}
+                delta="Tracked"
+                positive={true}
+                lastMonthText="Successful referred orders"
+                icon={<TrophyIcon size={18} />}
+              />
+            </div>
+
+            {/* Reward Missions Section */}
+            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 18, padding: 24 }}>
+              <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 8 }}>
+                <TargetIcon size={20} color="#6366F1" /> Extra Reward Missions
+              </h2>
+
+              {!rewards.length ? (
+                <div style={{ textAlign: "center", padding: "32px", color: "#64748B", fontSize: 13 }}>No reward missions active yet.</div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20 }}>
+                  {rewards.map(r => {
+                    const claim = rewardClaims.find(c => c.rewardId === r.id);
+                    return (
+                      <ExpandableMissionCard
+                        key={r.id}
+                        reward={r}
+                        current={creator.totalReferrals}
+                        claim={claim}
+                        onClaim={handleClaimReward}
+                        onShowCode={(c) => setViewingClaim(c)}
+                        claimingId={claimingRewardId}
+                        onCopyText={handleCopyText}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Monthly Earnings Chart */}
+            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 18, padding: 24 }}>
+              <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 8 }}>
+                <BarChartIcon size={20} color="#6366F1" /> Monthly Earnings Performance
+              </h2>
+              {Object.keys(monthlyEarnings).length === 0 ? (
+                <div style={{ textAlign: "center", padding: "24px 0", color: "#64748B", fontSize: 13 }}>No monthly data recorded yet.</div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 140, padding: "0 8px" }}>
+                  {Object.entries(monthlyEarnings).sort(([a], [b]) => a.localeCompare(b)).slice(-6).map(([month, amount]) => {
+                    const maxVal = Math.max(...Object.values(monthlyEarnings));
+                    const percentHeight = Math.max(8, (amount / maxVal) * 100);
+                    const active = month === thisMonth;
+                    return (
+                      <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                        <span style={{ fontSize: 10, color: "#64748B", fontWeight: 700 }}>{fmt(amount)}</span>
+                        <div style={{
+                          width: "100%", height: `${percentHeight}%`, borderRadius: "4px 4px 0 0",
+                          background: active ? "#6366F1" : "#E2E8F0"
+                        }} />
+                        <span style={{ fontSize: 10, color: active ? "#6366F1" : "#64748B", fontWeight: 700 }}>
+                          {new Date(month + "-01").toLocaleString("en-IN", { month: "short" })}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: COUPONS ── */}
+        {activeTab === "coupons" && (
+          <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 18, padding: 24 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 16px" }}>Assigned Creator Coupons</h2>
+            {!coupons.length ? (
+              <div style={{ textAlign: "center", padding: "40px", color: "#64748B", fontSize: 13 }}>No unique coupons assigned yet.</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {coupons.map(c => (
+                  <div key={c.id} style={{
+                    background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 14, padding: "16px 20px",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12
+                  }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 800, color: "#6366F1" }}>{c.id}</span>
+                        <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 10, background: c.active ? "#DCFCE7" : "#FEE2E2", color: c.active ? "#15803D" : "#B91C1C" }}>
+                          {c.active ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 12, color: "#64748B" }}>
+                        Discount: <strong>{c.discountType === "percentage" ? `${c.discountAmount}%` : fmt(c.discountAmount * 100)}</strong> · Commission: <strong>{c.commissionPercentage}%</strong> · Used: <strong>{c.usedCount} times</strong>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleCopyText(c.id, "Coupon Code")}
+                      style={{
+                        padding: "8px 16px", borderRadius: 8, border: "1px solid #6366F1",
+                        background: "#FFFFFF", color: "#6366F1", fontSize: 12, fontWeight: 700, cursor: "pointer"
+                      }}
+                    >
+                      📋 Copy Coupon
+                    </button>
                   </div>
-                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#B45309", display: "flex", flexDirection: "column", gap: 3 }}>
-                    {missingUpi && <li>Add your <strong>UPI ID & Registered Name</strong> under Settings to receive instant payouts.</li>}
-                    {missingPhone && <li>Add your <strong>Phone Number</strong> under Settings to receive payout notifications.</li>}
-                    {missingSocial && <li>Add at least one <strong>Social Handle (Instagram/YouTube)</strong> under Settings.</li>}
-                  </ul>
-                </div>
+                ))}
               </div>
-              <button
-                onClick={() => setShowDismissModal(true)}
-                style={{
-                  background: "#FEF3C7", border: "1px solid #FDE68A", color: "#92400E", cursor: "pointer",
-                  borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, fontWeight: 700, flexShrink: 0
-                }}
-                title="Close notice"
-              >
-                ✕
-              </button>
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-          {/* Dismissal Confirmation Modal */}
-          {showDismissModal && (
-            <div style={{
-              position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-              background: "rgba(15,23,42,0.6)", zIndex: 9999, display: "flex",
-              alignItems: "center", justifyContent: "center", padding: 20,
-              backdropFilter: "blur(4px)"
-            }}>
-              <div style={{
-                background: "#FFFFFF", borderRadius: 20, padding: 24, maxWidth: 420,
-                width: "100%", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
-                animation: "fadeUp 0.2s ease-out"
-              }}>
-                <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: "#0F172A" }}>Dismiss Important Notice?</h3>
-                <p style={{ margin: "0 0 20px", fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
-                  Missing payment details like your UPI ID will prevent the admin from transferring your earned commissions automatically.
-                </p>
-                
-                <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 24, cursor: "pointer", userSelect: "none" }}>
-                  <input
-                    type="checkbox"
-                    checked={dontShowAgainCheck}
-                    onChange={e => setDontShowAgainCheck(e.target.checked)}
-                    style={{ width: 18, height: 18, accentColor: "#6366F1", cursor: "pointer" }}
-                  />
-                  Don't show this notice again
-                </label>
+        {/* ── TAB: REFERRED SALES ── */}
+        {activeTab === "orders" && (
+          <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 18, padding: 24, overflowX: "auto" }}>
+            <h2 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 16px" }}>Referred Sales History</h2>
+            {!paidOrders.length ? (
+              <div style={{ textAlign: "center", padding: "40px", color: "#64748B", fontSize: 13 }}>No referred orders recorded yet.</div>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid #E2E8F0", textAlign: "left", color: "#64748B" }}>
+                    <th style={{ padding: "10px" }}>Order ID</th>
+                    <th style={{ padding: "10px" }}>Product</th>
+                    <th style={{ padding: "10px" }}>Amount</th>
+                    <th style={{ padding: "10px" }}>Commission</th>
+                    <th style={{ padding: "10px" }}>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paidOrders.map(o => (
+                    <tr key={o.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                      <td style={{ padding: "12px 10px", fontFamily: "monospace", fontWeight: 700 }}>{o.id}</td>
+                      <td style={{ padding: "12px 10px" }}>{o.productName}</td>
+                      <td style={{ padding: "12px 10px", fontWeight: 700 }}>{fmt(o.amount)}</td>
+                      <td style={{ padding: "12px 10px", fontWeight: 800, color: "#10B981" }}>{fmt(o.commissionAmount)}</td>
+                      <td style={{ padding: "12px 10px", color: "#64748B" }}>{new Date(o.createdAt).toLocaleDateString("en-IN")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
 
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-                  <button
-                    onClick={() => setShowDismissModal(false)}
-                    style={{
-                      padding: "9px 16px", borderRadius: 10, border: "1px solid #CBD5E1",
-                      background: "#FFFFFF", color: "#475569", fontSize: 13, fontWeight: 700, cursor: "pointer"
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmDismissNotice}
-                    style={{
-                      padding: "9px 18px", borderRadius: 10, border: "none",
-                      background: "#6366F1", color: "#FFFFFF", fontSize: 13, fontWeight: 700, cursor: "pointer",
-                      boxShadow: "0 4px 12px rgba(99,102,241,0.25)"
-                    }}
-                  >
-                    Dismiss Notice
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* ── TAB: PAYOUTS ── */}
+        {activeTab === "payouts" && (
+          <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 18, padding: 24, overflowX: "auto" }}>
+            <h2 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 16px" }}>Payout Settlements History</h2>
+            {!payouts.length ? (
+              <div style={{ textAlign: "center", padding: "40px", color: "#64748B", fontSize: 13 }}>No payouts recorded yet.</div>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid #E2E8F0", textAlign: "left", color: "#64748B" }}>
+                    <th style={{ padding: "10px" }}>Payout ID</th>
+                    <th style={{ padding: "10px" }}>Amount</th>
+                    <th style={{ padding: "10px" }}>Status</th>
+                    <th style={{ padding: "10px" }}>UTR / Ref</th>
+                    <th style={{ padding: "10px" }}>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payouts.map(p => (
+                    <tr key={p.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                      <td style={{ padding: "12px 10px", fontFamily: "monospace", fontWeight: 700 }}>{p.id}</td>
+                      <td style={{ padding: "12px 10px", fontWeight: 800, color: "#0F172A" }}>{fmt(p.amountPaise)}</td>
+                      <td style={{ padding: "12px 10px" }}>
+                        <span style={{
+                          fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 10,
+                          background: p.status === "SUCCESS" ? "#DCFCE7" : "#FEF3C7",
+                          color: p.status === "SUCCESS" ? "#15803D" : "#B45309"
+                        }}>
+                          {p.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: "12px 10px", fontFamily: "monospace" }}>{p.utr || "N/A"}</td>
+                      <td style={{ padding: "12px 10px", color: "#64748B" }}>{new Date(p.createdAt).toLocaleDateString("en-IN")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
 
-          {/* Stats Summary row */}
-          {activeTab !== "settings" && (
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 32 }}>
-              <StatCard icon={<DollarIcon size={24} />} label="Total Earnings" value={fmt(creator.totalEarningsPaise)} color="#6366F1" />
-              <StatCard icon={<CalendarIcon size={24} />} label="This Month" value={fmt(thisMonthEarnings)} color="#4F46E5" />
-              <StatCard icon={<DollarIcon size={24} />} label="Unpaid Balance" value={fmt(pendingPayoutPaise)} sub="Pending transfer" color="#D97706" />
-              <StatCard icon={<BriefcaseIcon size={24} />} label="Referred Sales" value={`${creator.totalReferrals} orders`} color="#10B981" />
-            </div>
-          )}
-
-          {/* ───────────────── Tab View: Overview ───────────────── */}
-          {activeTab === "overview" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-              {/* Progress Milestones Container */}
-              <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "24px" }}>
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 24px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <TrophyIcon size={20} color="#6366F1" /> Referral Milestone Levels (Static Badges)
-                </h2>
-                <MilestoneProgress milestones={milestones} current={creator.totalReferrals} />
-              </div>
-
-              {/* Rewards Program */}
-              <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 24 }}>
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <TargetIcon size={20} color="#6366F1" /> Extra Reward Missions
-                </h2>
-                <RewardMissionsList 
-                  rewards={rewards} 
-                  current={creator.totalReferrals} 
-                  rewardClaims={data.rewardClaims || []}
-                  onClaim={handleClaimReward}
-                  onShowCode={(claim) => setViewingClaim(claim)}
-                  claimingId={claimingRewardId}
-                  onCopyText={handleCopyText}
+        {/* ── TAB: ACCOUNT SETTINGS ── */}
+        {activeTab === "settings" && (
+          <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 18, padding: 24, maxWidth: 640 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 20px" }}>Account & Payout Settings</h2>
+            <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Full Name</label>
+                <input
+                  type="text"
+                  value={settingsForm.name}
+                  onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 13 }}
+                  required
                 />
               </div>
 
-              {/* Monthly stats chart bar */}
-              <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: 24 }}>
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: "0 0 24px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <BarChartIcon size={20} color="#6366F1" /> Earnings Performance Chart
-                </h2>
-                {Object.keys(monthlyEarnings).length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "24px 0", color: "#64748B", fontSize: 13 }}>No earnings data yet. Keep pushing coupon usage!</div>
-                ) : (
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 140, padding: "0 8px" }}>
-                    {Object.entries(monthlyEarnings).sort(([a], [b]) => a.localeCompare(b)).slice(-6).map(([month, amount]) => {
-                      const maxVal = Math.max(...Object.values(monthlyEarnings));
-                      const percentHeight = Math.max(8, (amount / maxVal) * 100);
-                      const active = month === thisMonth;
-                      return (
-                        <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: 10, color: "#64748B", fontWeight: 700 }}>{fmt(amount)}</span>
-                          <div style={{
-                            width: "100%", height: `${percentHeight}%`, borderRadius: "4px 4px 0 0",
-                            background: active ? "#6366F1" : "#E2E8F0"
-                          }} />
-                          <span style={{ fontSize: 10, color: active ? "#6366F1" : "#64748B", fontWeight: 700 }}>
-                            {new Date(month + "-01").toLocaleString("en-IN", { month: "short" })}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ───────────────── Tab View: Coupons ───────────────── */}
-          {activeTab === "coupons" && (
-            <div>
-              {coupons.length === 0 ? (
-                <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
-                  <div style={{ display: "flex", justifyContent: "center", color: "#94A3B8", marginBottom: 12 }}><CouponIcon size={40} /></div>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", margin: "0 0 4px" }}>No Coupons Assigned</h3>
-                  <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>The administrator will assign unique trackable coupons to your account shortly.</p>
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {coupons.map(c => (
-                    <div key={c.id} style={{
-                      background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, padding: "20px 24px",
-                      display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 16, alignItems: "center"
-                    }}>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                          <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 800, color: "#6366F1", background: "#EEF2F6", padding: "4px 10px", borderRadius: 8 }}>{c.id}</span>
-                          <span style={{
-                            fontSize: 10, fontWeight: 700, textTransform: "uppercase", padding: "2px 8px", borderRadius: 12,
-                            background: c.active ? "#E8F5E9" : "#FFEBEE", color: c.active ? "#2E7D32" : "#C62828"
-                          }}>{c.active ? "Active" : "Inactive"}</span>
-                        </div>
-                        <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 10px" }}>{c.description}</p>
-                        <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 12, color: "#64748B" }}>
-                          <span>Discount: <strong>{c.discountType === "percentage" ? `${c.discountAmount}%` : fmt(c.discountAmount * 100)}</strong></span>
-                          <span>Your Share: <strong>{c.commissionPercentage}% Commission</strong></span>
-                          <span>Uses: <strong>{c.usedCount} times</strong></span>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <button
-                          onClick={() => { navigator.clipboard.writeText(c.id); }}
-                          style={{
-                            padding: "8px 16px", borderRadius: 10, border: "1px solid #6366F1",
-                            background: "#FFFFFF", color: "#6366F1", fontSize: 12, fontWeight: 700, cursor: "pointer"
-                          }}
-                        >
-                          📋 Copy Code
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ───────────────── Tab View: Referred Sales ───────────────── */}
-          {activeTab === "orders" && (
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, overflow: "hidden" }}>
-              {paidOrders.length === 0 ? (
-                <div style={{ padding: "48px 24px", textAlign: "center" }}>
-                  <div style={{ display: "flex", justifyContent: "center", color: "#94A3B8", marginBottom: 12 }}><BriefcaseIcon size={40} /></div>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", margin: "0 0 4px" }}>No Referrals Recorded</h3>
-                  <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>Once buyers use your coupon, verified sales transactions will populate here.</p>
-                </div>
-              ) : (
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr style={{ background: "#F8FAFC", borderBottom: "1px solid #E2E8F0" }}>
-                        {["Gift Item", "Applied Code", "Order Price", "Earnings Earned", "Verified Date", "Status"].map(h => (
-                          <th key={h} style={{ padding: "12px 20px", fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", textAlign: "left" }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paidOrders.map((order, i) => (
-                        <tr key={order.id} style={{ borderBottom: "1px solid #F1F5F9", background: i % 2 === 0 ? "#FFFFFF" : "#F8FAFC" }}>
-                          <td style={{ padding: "14px 20px" }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: "#0F172A" }}>{order.productName.replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()}</div>
-                            <div style={{ fontSize: 11, color: "#94A3B8" }}>by {order.buyerName}</div>
-                          </td>
-                          <td style={{ padding: "14px 20px", fontSize: 12, fontWeight: 700, color: "#6366F1", fontFamily: "monospace" }}>{order.couponCode}</td>
-                          <td style={{ padding: "14px 20px", fontSize: 13, fontWeight: 700, color: "#334155" }}>{fmt(order.amount)}</td>
-                          <td style={{ padding: "14px 20px", fontSize: 14, fontWeight: 800, color: "#10B981" }}>{fmt(order.commissionAmount)}</td>
-                          <td style={{ padding: "14px 20px", fontSize: 12, color: "#64748B" }}>{new Date(order.createdAt).toLocaleDateString("en-IN")}</td>
-                          <td style={{ padding: "14px 20px" }}>
-                            <span style={{
-                              fontSize: 10, fontWeight: 700, textTransform: "uppercase", padding: "2px 8px", borderRadius: 20,
-                              background: order.status === "finalized" ? "#E8F5E9" : "#EEF2F6", color: order.status === "finalized" ? "#2E7D32" : "#6366F1"
-                            }}>{order.status}</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ───────────────── Tab View: Payouts ───────────────── */}
-          {activeTab === "payouts" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-              {/* Informational banner */}
-              <div style={{ background: "#EEF2F6", border: "1px solid #CBD5E1", borderRadius: 12, padding: "16px 20px" }}>
-                <p style={{ fontSize: 13, color: "#475569", margin: 0, lineHeight: 1.5 }}>
-                  ℹ️ Payouts are manually settled to your Google Pay, PhonePe, UPI ID, or bank account by the admin team whenever you cross the minimum threshold or request settlement.
-                </p>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Phone Number</label>
+                <input
+                  type="text"
+                  value={settingsForm.phone}
+                  onChange={e => setSettingsForm({ ...settingsForm, phone: e.target.value })}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 13 }}
+                />
               </div>
 
-              {/* Payout History Table */}
-              <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 16, overflow: "hidden" }}>
-                {payouts.length === 0 ? (
-                  <div style={{ padding: "48px 24px", textAlign: "center" }}>
-                    <div style={{ display: "flex", justifyContent: "center", color: "#94A3B8", marginBottom: 12 }}><DollarIcon size={40} /></div>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", margin: "0 0 4px" }}>No Payouts Yet</h3>
-                    <p style={{ color: "#64748B", fontSize: 13, margin: 0 }}>You haven't requested or received any payouts yet.</p>
-                  </div>
-                ) : (
-                  <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                      <thead>
-                        <tr style={{ background: "#F8FAFC", borderBottom: "1px solid #E2E8F0" }}>
-                          {["Settled Amount", "Transfer Channel", "Transaction Ref", "Date processed", "Status"].map(h => (
-                            <th key={h} style={{ padding: "12px 20px", fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", textAlign: "left" }}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {payouts.map((p, i) => (
-                          <tr key={p.id} style={{ borderBottom: "1px solid #F1F5F9", background: i % 2 === 0 ? "#FFFFFF" : "#F8FAFC" }}>
-                            <td style={{ padding: "14px 20px", fontSize: 14, fontWeight: 800, color: "#10B981" }}>{fmt(p.amountPaise)}</td>
-                            <td style={{ padding: "14px 20px", fontSize: 13, color: "#334155" }}>{p.method}</td>
-                            <td style={{ padding: "14px 20px", fontSize: 12, color: "#64748B", fontFamily: "monospace" }}>{p.reference || "Processing..."}</td>
-                            <td style={{ padding: "14px 20px", fontSize: 12, color: "#64748B" }}>{new Date(p.createdAt).toLocaleDateString("en-IN")}</td>
-                            <td style={{ padding: "14px 20px" }}>
-                              <span style={{
-                                fontSize: 10, fontWeight: 700, textTransform: "uppercase", padding: "2px 8px", borderRadius: 20,
-                                background: p.status === "paid" ? "#E8F5E9" : "#FFF3E0", color: p.status === "paid" ? "#2E7D32" : "#EF6C00"
-                              }}>{p.status}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>UPI ID for Payouts</label>
+                  <input
+                    type="text"
+                    value={settingsForm.upiId}
+                    onChange={e => setSettingsForm({ ...settingsForm, upiId: e.target.value })}
+                    placeholder="name@upi"
+                    style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 13 }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Account Holder Name</label>
+                  <input
+                    type="text"
+                    value={settingsForm.upiName}
+                    onChange={e => setSettingsForm({ ...settingsForm, upiName: e.target.value })}
+                    placeholder="Name as per UPI"
+                    style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 13 }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* ───────────────── Tab View: Settings ───────────────── */}
-          {activeTab === "settings" && (
-            <div className="settings-card">
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: "#0F172A", margin: "0 0 20px", display: "flex", alignItems: "center", gap: 10 }}>
-                <UserIcon /> Edit Creator Profile
-              </h2>
-              
-              <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={settingsForm.name}
-                    onChange={e => setSettingsForm(prev => ({ ...prev, name: e.target.value }))}
-                    style={{
-                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
-                      background: "#FFFFFF", border: "1px solid #CBD5E1",
-                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
-                    }}
-                  />
-                </div>
+              <button
+                type="submit"
+                disabled={settingsSaving}
+                style={{
+                  marginTop: 8, padding: "12px", borderRadius: 10, border: "none",
+                  background: "#6366F1", color: "#FFFFFF", fontSize: 13, fontWeight: 800, cursor: "pointer"
+                }}
+              >
+                {settingsSaving ? "Saving Settings..." : "Save Account Settings"}
+              </button>
+            </form>
+          </div>
+        )}
 
-                <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={settingsForm.phone}
-                    onChange={e => setSettingsForm(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }))}
-                    placeholder="10-digit phone number"
-                    style={{
-                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
-                      background: "#FFFFFF", border: "1px solid #CBD5E1",
-                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Instagram Handle
-                  </label>
-                  <input
-                    type="text"
-                    value={settingsForm.instagram}
-                    onChange={e => setSettingsForm(prev => ({ ...prev, instagram: e.target.value }))}
-                    placeholder="@username"
-                    style={{
-                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
-                      background: "#FFFFFF", border: "1px solid #CBD5E1",
-                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    YouTube Channel
-                  </label>
-                  <input
-                    type="text"
-                    value={settingsForm.youtube}
-                    onChange={e => setSettingsForm(prev => ({ ...prev, youtube: e.target.value }))}
-                    placeholder="Channel link or username"
-                    style={{
-                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
-                      background: "#FFFFFF", border: "1px solid #CBD5E1",
-                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Other Platform Link
-                  </label>
-                  <input
-                    type="text"
-                    value={settingsForm.other}
-                    onChange={e => setSettingsForm(prev => ({ ...prev, other: e.target.value }))}
-                    placeholder="Website or portfolio URL"
-                    style={{
-                      width: "100%", padding: "11px 14px", boxSizing: "border-box",
-                      background: "#FFFFFF", border: "1px solid #CBD5E1",
-                      borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
-                    }}
-                  />
-                </div>
-
-                <div style={{ borderTop: "1px solid #F1F5F9", paddingTop: 20, marginTop: 10 }}>
-                  <h3 style={{ fontSize: 13, fontWeight: 800, color: "#0F172A", margin: "0 0 16px", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    💳 Payout Payment Details
-                  </h3>
-                  
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    <div>
-                      <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                        UPI ID (VPA)
-                      </label>
-                      <input
-                        type="text"
-                        value={settingsForm.upiId}
-                        onChange={e => setSettingsForm(prev => ({ ...prev, upiId: e.target.value.trim() }))}
-                        placeholder="e.g. username@upi or mobile@paytm"
-                        style={{
-                          width: "100%", padding: "11px 14px", boxSizing: "border-box",
-                          background: "#FFFFFF", border: "1px solid #CBD5E1",
-                          borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                        Account Registered Name
-                      </label>
-                      <input
-                        type="text"
-                        value={settingsForm.upiName}
-                        onChange={e => setSettingsForm(prev => ({ ...prev, upiName: e.target.value }))}
-                        placeholder="Full name as registered in bank"
-                        style={{
-                          width: "100%", padding: "11px 14px", boxSizing: "border-box",
-                          background: "#FFFFFF", border: "1px solid #CBD5E1",
-                          borderRadius: 10, color: "#0F172A", fontSize: 13, outline: "none"
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {settingsMessage && (
-                  <div style={{
-                    padding: "10px 14px", borderRadius: 10,
-                    background: settingsMessage.startsWith("✅") ? "#E8F5E9" : "#FFEBEE",
-                    color: settingsMessage.startsWith("✅") ? "#2E7D32" : "#C62828",
-                    fontSize: 13, fontWeight: 600
-                  }}>
-                    {settingsMessage}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={settingsSaving}
-                  style={{
-                    background: settingsSaving ? "#A5B4FC" : "#6366F1",
-                    color: "#FFFFFF", border: "none", borderRadius: 10,
-                    padding: "12px 24px", fontSize: 14, fontWeight: 700,
-                    cursor: settingsSaving ? "not-allowed" : "pointer", alignSelf: "flex-start",
-                    transition: "all 0.2s"
-                  }}
-                >
-                  {settingsSaving ? "Saving..." : "Save Profile Details"}
-                </button>
-              </form>
-            </div>
-          )}
-        </div>
       </main>
 
-      {/* ─── VOUCHER SHOW CODE MODAL ─────────────────────────────────────── */}
+      {/* ── Voucher "Show Code" Modal ── */}
       {viewingClaim && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(4px)" }}>
-          <div style={{ background: "#FFFFFF", borderRadius: 20, padding: 28, maxWidth: 440, width: "100%", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)", textAlign: "center" }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(4px)" }}>
+          <div style={{ background: "#FFFFFF", borderRadius: 20, padding: 28, maxWidth: 440, width: "100%", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)", textAlign: "center" }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
               <RewardTypeIcon type={viewingClaim.rewardType} size={48} />
             </div>
             <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800, color: "#0F172A" }}>{viewingClaim.rewardLabel}</h3>
             <p style={{ margin: "0 0 20px", fontSize: 13, color: "#64748B" }}>
-              Your gift voucher code has been processed and verified by administration.
+              Your voucher code has been verified and issued by administration.
             </p>
 
-            {/* Voucher Code Box */}
             <div style={{ background: "#F8FAFC", border: "2px dashed #CBD5E1", borderRadius: 14, padding: 16, marginBottom: viewingClaim.hasPin && viewingClaim.voucherPin ? 14 : 20 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>VOUCHER CODE</div>
               <div style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#6366F1", letterSpacing: 1, marginBottom: 10, wordBreak: "break-all" }}>
                 {viewingClaim.voucherCode || "N/A"}
               </div>
               <button
-                onClick={() => {
-                  if (viewingClaim.voucherCode) handleCopyText(viewingClaim.voucherCode, "Voucher Code");
-                }}
+                onClick={() => { if (viewingClaim.voucherCode) handleCopyText(viewingClaim.voucherCode, "Voucher Code"); }}
                 style={{ padding: "6px 16px", borderRadius: 8, background: "#EEF2F6", color: "#6366F1", border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
               >
                 📋 Copy Code
               </button>
             </div>
 
-            {/* Voucher PIN Box */}
             {viewingClaim.hasPin && viewingClaim.voucherPin && (
               <div style={{ background: "#F8FAFC", border: "2px dashed #CBD5E1", borderRadius: 14, padding: 16, marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>VOUCHER PIN</div>
@@ -1514,9 +994,7 @@ export default function CreatorDashboard() {
                   {viewingClaim.voucherPin}
                 </div>
                 <button
-                  onClick={() => {
-                    if (viewingClaim.voucherPin) handleCopyText(viewingClaim.voucherPin, "Voucher PIN");
-                  }}
+                  onClick={() => { if (viewingClaim.voucherPin) handleCopyText(viewingClaim.voucherPin, "Voucher PIN"); }}
                   style={{ padding: "6px 16px", borderRadius: 8, background: "#EEF2F6", color: "#0F172A", border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
                 >
                   📋 Copy PIN
