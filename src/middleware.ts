@@ -42,6 +42,6 @@ export function middleware(req: NextRequest) {
 export const config = {
   // Only run middleware on paths that aren't static files, assets, or API routes
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|icons|assets).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|icons|assets|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
