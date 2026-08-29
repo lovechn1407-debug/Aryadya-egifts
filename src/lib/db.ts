@@ -905,11 +905,16 @@ export async function fulfillRewardClaimDB(
   claimId: string,
   data: { voucherCode?: string; voucherPin?: string; hasPin?: boolean; utr?: string }
 ): Promise<void> {
-  await update(ref(database, `affiliateProgram/rewardClaims/${claimId}`), {
-    ...data,
+  const updates: Record<string, any> = {
     status: "fulfilled",
     fulfilledAt: new Date().toISOString(),
-  });
+  };
+  if (data.hasPin !== undefined) updates.hasPin = data.hasPin;
+  if (data.voucherCode) updates.voucherCode = data.voucherCode;
+  if (data.voucherPin) updates.voucherPin = data.voucherPin;
+  if (data.utr) updates.utr = data.utr;
+
+  await update(ref(database, `affiliateProgram/rewardClaims/${claimId}`), updates);
 }
 
 

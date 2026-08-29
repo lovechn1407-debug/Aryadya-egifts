@@ -20,16 +20,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "claimId is required." }, { status: 400 });
     }
 
-    await fulfillRewardClaimDB(claimId, {
-      voucherCode: voucherCode ? String(voucherCode).trim() : undefined,
-      voucherPin: voucherPin ? String(voucherPin).trim() : undefined,
+    const payload: { voucherCode?: string; voucherPin?: string; hasPin?: boolean; utr?: string } = {
       hasPin: Boolean(hasPin),
-      utr: utr ? String(utr).trim() : undefined,
-    });
+    };
+
+    if (voucherCode && String(voucherCode).trim() !== "") {
+      payload.voucherCode = String(voucherCode).trim();
+    }
+    if (voucherPin && String(voucherPin).trim() !== "") {
+      payload.voucherPin = String(voucherPin).trim();
+    }
+    if (utr && String(utr).trim() !== "") {
+      payload.utr = String(utr).trim();
+    }
+
+    await fulfillRewardClaimDB(claimId, payload);
 
     return NextResponse.json({ success: true, message: "Reward claim fulfilled successfully." });
-  } catch (err) {
+  } catch (err: any) {
     console.error("[admin/affiliate/reward-claims POST] Error:", err);
-    return NextResponse.json({ success: false, message: "Internal server error." }, { status: 500 });
+    return NextResponse.json({ success: false, message: err?.message || "Internal server error." }, { status: 500 });
   }
 }

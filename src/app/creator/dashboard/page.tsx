@@ -325,25 +325,95 @@ function MilestoneProgress({ milestones, current }: { milestones: AffiliateMiles
           }
         }
       `}</style>
-    </div>
-  );
-}
-
-function RewardTypeIcon({ type, size = 24 }: { type?: RewardType; size?: number }) {
+   function RewardTypeIcon({ type, size = 26 }: { type?: RewardType; size?: number }) {
   if (type === "amazon") {
-    return <img src="/icons/amazon.png" alt="Amazon" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
+    return <img src="/icons/amazon.png" alt="Amazon" style={{ width: size, height: size, objectFit: "contain", borderRadius: 6, display: "inline-block", verticalAlign: "middle" }} />;
   }
   if (type === "flipkart") {
-    return <img src="/icons/flipkart.png" alt="Flipkart" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
+    return <img src="/icons/flipkart.png" alt="Flipkart" style={{ width: size, height: size, objectFit: "contain", borderRadius: 6, display: "inline-block", verticalAlign: "middle" }} />;
   }
   if (type === "myntra") {
-    return <img src="/icons/myntra.png" alt="Myntra" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
+    return <img src="/icons/myntra.png" alt="Myntra" style={{ width: size, height: size, objectFit: "contain", borderRadius: 6, display: "inline-block", verticalAlign: "middle" }} />;
   }
   if (type === "cash") {
     return <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>💵</span>;
   }
   return <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>🎁</span>;
 }
+
+function ToastNotification({ toast, onClose }: { toast: { message: string; type: "success" | "error" | "info" } | null; onClose: () => void }) {
+  if (!toast) return null;
+  const isSuccess = toast.type === "success";
+  const isError = toast.type === "error";
+
+  return (
+    <div style={{
+      position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)",
+      zIndex: 99999, display: "flex", alignItems: "center", gap: 12,
+      background: isSuccess ? "#064E3B" : isError ? "#7F1D1D" : "#1E1B4B",
+      color: "#FFFFFF", padding: "14px 22px", borderRadius: 16,
+      boxShadow: "0 20px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2)",
+      backdropFilter: "blur(12px)", border: `1px solid ${isSuccess ? "#10B981" : isError ? "#EF4444" : "#818CF8"}`,
+      animation: "fadeDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)", maxWidth: "90vw"
+    }}>
+      <span style={{ fontSize: 20 }}>{isSuccess ? "🎉" : isError ? "❌" : "ℹ️"}</span>
+      <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}>{toast.message}</div>
+      <button
+        onClick={onClose}
+        style={{
+          background: "rgba(255,255,255,0.2)", border: "none", color: "#FFF",
+          borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700,
+          cursor: "pointer", marginLeft: 8
+        }}
+      >
+        Dismiss
+      </button>
+    </div>
+  );
+}
+
+const BRAND_THEMES: Record<string, { border: string; bg: string; accent: string; badgeBg: string; badgeText: string; title: string }> = {
+  amazon: {
+    border: "#FDE68A",
+    bg: "linear-gradient(145deg, #FFFFFF 0%, #FFFDF5 100%)",
+    accent: "#D97706",
+    badgeBg: "#FEF3C7",
+    badgeText: "#92400E",
+    title: "Amazon Gift Card",
+  },
+  flipkart: {
+    border: "#BFDBFE",
+    bg: "linear-gradient(145deg, #FFFFFF 0%, #F0F9FF 100%)",
+    accent: "#2563EB",
+    badgeBg: "#DBEAFE",
+    badgeText: "#1E40AF",
+    title: "Flipkart Voucher",
+  },
+  myntra: {
+    border: "#FBCFE8",
+    bg: "linear-gradient(145deg, #FFFFFF 0%, #FDF2F8 100%)",
+    accent: "#DB2777",
+    badgeBg: "#FCE7F3",
+    badgeText: "#9D174D",
+    title: "Myntra Voucher",
+  },
+  cash: {
+    border: "#A7F3D0",
+    bg: "linear-gradient(145deg, #FFFFFF 0%, #F0FDF4 100%)",
+    accent: "#059669",
+    badgeBg: "#DCFCE7",
+    badgeText: "#166534",
+    title: "Cash Settlement",
+  },
+  other: {
+    border: "#DDD6FE",
+    bg: "linear-gradient(145deg, #FFFFFF 0%, #F5F3FF 100%)",
+    accent: "#7C3AED",
+    badgeBg: "#EDE9FE",
+    badgeText: "#5B21B6",
+    title: "Exclusive Bonus",
+  },
+};
 
 // Reward Missions
 function RewardMissionsList({ 
@@ -353,6 +423,7 @@ function RewardMissionsList({
   onClaim,
   onShowCode,
   claimingId,
+  onCopyText,
 }: { 
   rewards: AffiliateReward[]; 
   current: number;
@@ -360,91 +431,154 @@ function RewardMissionsList({
   onClaim: (rewardId: string) => void;
   onShowCode: (claim: RewardClaim) => void;
   claimingId: string | null;
+  onCopyText: (text: string, label: string) => void;
 }) {
   if (!rewards.length) return (
-    <div style={{ textAlign: "center", padding: "24px", color: "#64748B", fontSize: 13 }}>No rewards program set yet.</div>
+    <div style={{ textAlign: "center", padding: "32px", color: "#64748B", fontSize: 13 }}>No reward missions set yet.</div>
   );
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
       {rewards.map(r => {
         const unlocked = current >= r.referrals;
         const claim = rewardClaims.find(c => c.rewardId === r.id);
-        const ratio = Math.min(100, (current / r.referrals) * 100);
+        const ratio = Math.min(100, Math.round((current / r.referrals) * 100));
         const isPending = claim && claim.status === "pending";
         const isFulfilled = claim && claim.status === "fulfilled";
+        const type = r.rewardType || "other";
+        const theme = BRAND_THEMES[type] || BRAND_THEMES.other;
 
         return (
-          <div key={r.id} style={{
-            background: isFulfilled ? "#F0FDF4" : isPending ? "#FFFBEB" : unlocked ? "#FFFFFF" : "#FFFFFF",
-            border: `1px solid ${isFulfilled ? "#A7F3D0" : isPending ? "#FDE68A" : unlocked ? "#6366F1" : "#E2E8F0"}`,
-            borderRadius: 16, padding: 18, position: "relative",
-            display: "flex", flexDirection: "column", gap: 12,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
-          }}>
+          <div
+            key={r.id}
+            style={{
+              background: theme.bg,
+              border: `1.5px solid ${isFulfilled ? "#10B981" : isPending ? "#F59E0B" : unlocked ? theme.accent : "#E2E8F0"}`,
+              borderRadius: 20,
+              padding: 22,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+              boxShadow: isFulfilled
+                ? "0 10px 25px -5px rgba(16,185,129,0.12)"
+                : isPending
+                ? "0 10px 25px -5px rgba(245,158,11,0.12)"
+                : unlocked
+                ? "0 12px 28px -5px rgba(99,102,241,0.15)"
+                : "0 2px 8px rgba(0,0,0,0.03)",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Top brand bar */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <RewardTypeIcon type={r.rewardType} size={28} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "capitalize" }}>
-                  {r.rewardType || "Voucher"}
-                </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{
+                  width: 38, height: 38, borderRadius: 10, background: "#FFFFFF",
+                  border: "1px solid #E2E8F0", display: "flex", alignItems: "center",
+                  justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.04)"
+                }}>
+                  <RewardTypeIcon type={r.rewardType} size={24} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: theme.accent, textTransform: "uppercase", letterSpacing: 0.6 }}>
+                    {theme.title}
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: "#0F172A" }}>
+                    {fmt(r.rewardAmountPaise)}
+                  </div>
+                </div>
               </div>
+
+              {/* Status Badge */}
               <span style={{
-                fontSize: 11, fontWeight: 700,
-                color: isFulfilled ? "#166534" : isPending ? "#92400E" : unlocked ? "#4F46E5" : "#64748B",
+                fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 20,
                 background: isFulfilled ? "#DCFCE7" : isPending ? "#FEF3C7" : unlocked ? "#EEF2F6" : "#F1F5F9",
-                padding: "2px 8px", borderRadius: 20
+                color: isFulfilled ? "#15803D" : isPending ? "#B45309" : unlocked ? "#4F46E5" : "#64748B",
+                display: "inline-flex", alignItems: "center", gap: 4
               }}>
-                {isFulfilled ? "Fulfilled ✓" : isPending ? "Processing ⏳" : unlocked ? "Unlocked 🎉" : "Locked"}
+                {isFulfilled ? "Delivered ✓" : isPending ? "Reviewing ⏳" : unlocked ? "Goal Met 🎉" : `${ratio}%`}
               </span>
             </div>
-            
+
+            {/* Title & Description */}
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A", marginBottom: 4 }}>{r.label}</div>
-              <div style={{ fontSize: 12, color: "#64748B", marginBottom: 12, lineHeight: 1.4 }}>{r.description}</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A", marginBottom: 4, lineHeight: 1.3 }}>
+                {r.label}
+              </div>
+              <div style={{ fontSize: 12, color: "#64748B", lineHeight: 1.45 }}>
+                {r.description || `Complete ${r.referrals} sales to unlock this ${theme.title}.`}
+              </div>
             </div>
 
-            {/* If pending, display 24h processing notice */}
-            {isPending && (
-              <div style={{
-                background: "#FEF3C7", border: "1px solid #FCD34D", borderRadius: 10, padding: "8px 12px",
-                fontSize: 11, color: "#92400E", fontWeight: 700, lineHeight: 1.4
-              }}>
-                ⏳ Reward is being processed and will be credited within 24 hours.
+            {/* Progress bar for unlocked/locked state */}
+            {!isPending && !isFulfilled && (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 700, color: "#475569", marginBottom: 6 }}>
+                  <span>Referral Milestone</span>
+                  <span><strong>{current}</strong> / {r.referrals} Sales</span>
+                </div>
+                <div style={{ height: 7, background: "#E2E8F0", borderRadius: 99, overflow: "hidden" }}>
+                  <div style={{
+                    height: "100%", width: `${ratio}%`,
+                    background: unlocked ? "linear-gradient(90deg, #10B981, #059669)" : `linear-gradient(90deg, ${theme.accent}, #4F46E5)`,
+                    borderRadius: 99, transition: "width 0.6s ease"
+                  }} />
+                </div>
               </div>
             )}
 
-            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 4 }}>
-              <div>
-                <div style={{ fontSize: 10, color: "#94A3B8", fontWeight: 600, textTransform: "uppercase" }}>Bonus Value</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: isFulfilled ? "#10B981" : "#0F172A" }}>{fmt(r.rewardAmountPaise)}</div>
-              </div>
-              {!unlocked && (
-                <div style={{ textAlign: "right", minWidth: 80 }}>
-                  <span style={{ fontSize: 11, color: "#64748B", display: "block", marginBottom: 4 }}>{current} / {r.referrals} Sales</span>
-                  <div style={{ height: 4, background: "#E2E8F0", borderRadius: 4, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${ratio}%`, background: "#6366F1" }} />
-                  </div>
+            {/* 24h Processing Live Notice Banner */}
+            {isPending && (
+              <div style={{
+                background: "linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)",
+                border: "1px solid #FCD34D", borderRadius: 14, padding: "12px 14px",
+                display: "flex", flexDirection: "column", gap: 4,
+                boxShadow: "0 2px 8px rgba(245,158,11,0.08)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, color: "#92400E" }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#F59E0B", display: "inline-block", animation: "pulse 1.2s infinite" }} />
+                  ⚡ Claim Processing · Credited in 24 Hours
                 </div>
-              )}
-            </div>
+                <div style={{ fontSize: 11, color: "#B45309", lineHeight: 1.4 }}>
+                  Your claim request is undergoing standard admin verification. You will receive your code/credit shortly.
+                </div>
+              </div>
+            )}
 
-            {/* Claim Action Button Logic */}
+            {/* Action Buttons */}
             {isFulfilled ? (
               r.rewardType === "cash" ? (
                 <div style={{
-                  width: "100%", padding: "10px", borderRadius: 10, background: "#DCFCE7",
-                  border: "1px solid #86EFAC", color: "#166534", fontSize: 12, fontWeight: 800, textAlign: "center"
+                  width: "100%", padding: "11px 14px", borderRadius: 12, background: "#DCFCE7",
+                  border: "1px solid #86EFAC", color: "#15803D", fontSize: 12, fontWeight: 800,
+                  display: "flex", alignItems: "center", justifyContent: "space-between"
                 }}>
-                  Credited ✓ {claim.utr ? `(UTR: ${claim.utr})` : ""}
+                  <span>Credited to Account ✓</span>
+                  {claim.utr && (
+                    <button
+                      onClick={() => onCopyText(claim.utr!, "UTR Number")}
+                      style={{
+                        background: "#FFFFFF", border: "1px solid #86EFAC", color: "#166534",
+                        padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: "pointer",
+                        fontFamily: "monospace"
+                      }}
+                      title="Copy UTR Reference"
+                    >
+                      UTR: {claim.utr} 📋
+                    </button>
+                  )}
                 </div>
               ) : (
                 <button
                   onClick={() => onShowCode(claim)}
                   style={{
-                    width: "100%", padding: "10px", borderRadius: 10, border: "none",
-                    fontSize: 12, fontWeight: 800, cursor: "pointer",
+                    width: "100%", padding: "11px", borderRadius: 12, border: "none",
+                    fontSize: 13, fontWeight: 800, cursor: "pointer",
                     background: "linear-gradient(135deg, #10B981, #059669)",
-                    color: "#FFFFFF", boxShadow: "0 2px 8px rgba(16,185,129,0.25)"
+                    color: "#FFFFFF", boxShadow: "0 4px 14px rgba(16,185,129,0.3)",
+                    transition: "all 0.2s"
                   }}
                 >
                   Show Code 🎟️
@@ -454,27 +588,27 @@ function RewardMissionsList({
               <button
                 disabled
                 style={{
-                  width: "100%", padding: "10px", borderRadius: 10, border: "1px solid #FCD34D",
-                  fontSize: 12, fontWeight: 700, cursor: "not-allowed",
-                  background: "#FEF3C7", color: "#92400E"
+                  width: "100%", padding: "11px", borderRadius: 12, border: "1px solid #FCD34D",
+                  fontSize: 12, fontWeight: 800, cursor: "not-allowed",
+                  background: "#FEF3C7", color: "#B45309"
                 }}
               >
-                Processing (Credited in 24h) ⏳
+                Processing (Credited within 24h) ⏳
               </button>
             ) : (
               <button
                 onClick={() => onClaim(r.id)}
                 disabled={!unlocked || claimingId === r.id}
                 style={{
-                  width: "100%", padding: "10px", borderRadius: 10, border: "none",
-                  fontSize: 12, fontWeight: 700, cursor: unlocked ? "pointer" : "not-allowed",
+                  width: "100%", padding: "11px", borderRadius: 12, border: "none",
+                  fontSize: 13, fontWeight: 800, cursor: unlocked ? "pointer" : "not-allowed",
                   background: unlocked ? "linear-gradient(135deg, #6366F1, #4F46E5)" : "#EEF2F6",
                   color: unlocked ? "#FFFFFF" : "#64748B",
                   transition: "all 0.2s",
-                  boxShadow: unlocked ? "0 2px 8px rgba(99,102,241,0.25)" : "none"
+                  boxShadow: unlocked ? "0 4px 14px rgba(99,102,241,0.3)" : "none"
                 }}
               >
-                {claimingId === r.id ? "Submitting..." : unlocked ? "Claim Reward 🎁" : `Locked (Need ${r.referrals - current} More Sales)`}
+                {claimingId === r.id ? "Submitting Request..." : unlocked ? "Claim Reward 🎁" : `Locked (Need ${r.referrals - current} More Sales)`}
               </button>
             )}
           </div>
@@ -489,6 +623,14 @@ export default function CreatorDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "coupons" | "orders" | "payouts" | "settings">("overview");
+
+  // Custom Toast UI state
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   // Local state for editing settings
   const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", instagram: "", youtube: "", other: "", upiId: "", upiName: "" });
@@ -532,15 +674,22 @@ export default function CreatorDashboard() {
       });
       const json = await res.json();
       if (json.success) {
-        alert("🎉 Claim Request Submitted!\n\nYour reward claim has been registered. It is being processed and will be credited within 24 hours.");
+        showToast("Claim Request Submitted! Your reward is being processed and will be credited within 24 hours.", "success");
         await fetchData(data.creator.uid);
       } else {
-        alert(`❌ ${json.message || "Failed to submit claim."}`);
+        showToast(json.message || "Failed to submit claim.", "error");
       }
     } catch {
-      alert("❌ Network error. Please try again.");
+      showToast("Network error. Please try again.", "error");
     } finally {
       setClaimingRewardId(null);
+    }
+  };
+
+  const handleCopyText = (text: string, label: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      showToast(`📋 ${label} copied to clipboard!`, "success");
     }
   };
 
@@ -804,6 +953,8 @@ export default function CreatorDashboard() {
         }
       `}</style>
 
+      <ToastNotification toast={toast} onClose={() => setToast(null)} />
+
       {/* 1. Left Sidebar Navigation (Desktop) */}
       <aside className="sidebar">
         <div style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.5, padding: "0 16px 12px" }}>
@@ -976,6 +1127,7 @@ export default function CreatorDashboard() {
                   onClaim={handleClaimReward}
                   onShowCode={(claim) => setViewingClaim(claim)}
                   claimingId={claimingRewardId}
+                  onCopyText={handleCopyText}
                 />
               </div>
 
@@ -1342,8 +1494,7 @@ export default function CreatorDashboard() {
               </div>
               <button
                 onClick={() => {
-                  if (viewingClaim.voucherCode) navigator.clipboard.writeText(viewingClaim.voucherCode);
-                  alert("📋 Voucher Code copied to clipboard!");
+                  if (viewingClaim.voucherCode) handleCopyText(viewingClaim.voucherCode, "Voucher Code");
                 }}
                 style={{ padding: "6px 16px", borderRadius: 8, background: "#EEF2F6", color: "#6366F1", border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
               >
@@ -1360,8 +1511,7 @@ export default function CreatorDashboard() {
                 </div>
                 <button
                   onClick={() => {
-                    if (viewingClaim.voucherPin) navigator.clipboard.writeText(viewingClaim.voucherPin);
-                    alert("📋 Voucher PIN copied to clipboard!");
+                    if (viewingClaim.voucherPin) handleCopyText(viewingClaim.voucherPin, "Voucher PIN");
                   }}
                   style={{ padding: "6px 16px", borderRadius: 8, background: "#EEF2F6", color: "#0F172A", border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
                 >
