@@ -87,7 +87,7 @@ function NativeInput({ icon: Icon, placeholder, type = "text", value, onChange, 
         onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
         style={{
           flex: 1, padding: "16px 0", background: "transparent", border: "none",
-          fontSize: 16, outline: "none", color: "#111827", width: "100%"
+          fontSize: "clamp(14px, 4.3vw, 16px)", outline: "none", color: "#111827", width: "100%"
         }}
       />
     </div>
@@ -174,7 +174,7 @@ function PremiumMissionItem({ title, subtitle, rightValue, ratio, statusColor, i
             {Icon && <Icon size={24} />}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#111827", letterSpacing: "-0.01em" }}>{title}</span>
+            <span style={{ fontSize: "clamp(14px, 4.3vw, 16px)", fontWeight: 700, color: "#111827", letterSpacing: "-0.01em" }}>{title}</span>
             <span style={{ fontSize: 13, fontWeight: 600, color: statusColor }}>{subtitle}</span>
           </div>
         </div>
@@ -411,7 +411,7 @@ export default function CreatorDashboard() {
           </div>
           <div style={{
             width: 36, height: 36, borderRadius: "50%", background: "#F3F4F6", color: "#111827",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700,
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: "clamp(14px, 4.3vw, 16px)", fontWeight: 700,
             overflow: "hidden"
           }}>
             {creator.photoURL ? (
@@ -432,8 +432,8 @@ export default function CreatorDashboard() {
             {/* Hero Stats */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Earnings</div>
-              <div style={{ fontSize: 48, fontWeight: 800, letterSpacing: "-0.04em", color: "#111827", display: "flex", alignItems: "baseline", gap: 4 }}>
-                <span style={{ fontSize: 32, color: "#9CA3AF" }}>₹</span>
+              <div style={{ fontSize: "clamp(40px, 12.8vw, 48px)", fontWeight: 800, letterSpacing: "-0.04em", color: "#111827", display: "flex", alignItems: "baseline", gap: 4 }}>
+                <span style={{ fontSize: "clamp(25px, 8.5vw, 32px)", color: "#9CA3AF" }}>₹</span>
                 {(creator.totalEarningsPaise / 100).toLocaleString("en-IN")}
               </div>
               
@@ -451,14 +451,14 @@ export default function CreatorDashboard() {
 
             {/* Quick Actions (Coupons) */}
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>Your Codes</div>
+              <div style={{ fontSize: "clamp(14px, 4.8vw, 18px)", fontWeight: 700 }}>Your Codes</div>
               {coupons.slice(0, 2).map(c => (
                 <div key={c.id} style={{
                   background: "#FFFFFF", padding: 20, borderRadius: 16,
                   boxShadow: "0 2px 10px rgba(0,0,0,0.02)", display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
                   <div>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: "0.02em" }}>{c.id}</div>
+                    <div style={{ fontSize: "clamp(14px, 5.3vw, 20px)", fontWeight: 800, color: "#111827", letterSpacing: "0.02em" }}>{c.id}</div>
                     <div style={{ fontSize: 14, color: "#6B7280", marginTop: 4 }}>
                       {c.discountType === "percentage" ? `${c.discountAmount}% off` : `₹${c.discountAmount} off`} • {c.commissionPercentage}% comm.
                     </div>
@@ -485,7 +485,7 @@ export default function CreatorDashboard() {
                 <div style={{ display: "inline-block", background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 16 }}>
                   Coming Soon
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 8, letterSpacing: "-0.02em" }}>Unlock 5% Extra Commision</div>
+                <div style={{ fontSize: "clamp(16px, 5.9vw, 22px)", fontWeight: 800, marginBottom: 8, letterSpacing: "-0.02em" }}>Unlock 5% Extra Commision</div>
                 <div style={{ fontSize: 15, color: "#D1D5DB", lineHeight: 1.5, marginBottom: 24, maxWidth: "90%" }}>
                   Reach 100 overall sales to permanently boost your earning rate on all future orders.
                 </div>
@@ -508,7 +508,7 @@ export default function CreatorDashboard() {
         {/* ── MISSIONS TAB ── */}
         {activeTab === "rewards" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 12 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>Missions</h1>
+            <h1 style={{ fontSize: "clamp(22px, 7.5vw, 28px)", fontWeight: 800, letterSpacing: "-0.03em" }}>Missions</h1>
             
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {rewards.map(r => {
@@ -550,10 +550,10 @@ export default function CreatorDashboard() {
         {/* ── HISTORY TAB (Sales & Payouts) ── */}
         {activeTab === "sales" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 32, marginTop: 12 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>History</h1>
+            <h1 style={{ fontSize: "clamp(22px, 7.5vw, 28px)", fontWeight: 800, letterSpacing: "-0.03em" }}>History</h1>
             
             <div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Recent Payouts</h2>
+              <h2 style={{ fontSize: "clamp(14px, 4.8vw, 18px)", fontWeight: 700, marginBottom: 12 }}>Recent Payouts</h2>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {payouts.length === 0 ? (
                   <div style={{ color: "#6B7280", padding: "20px 0", fontSize: 14 }}>No payouts yet.</div>
@@ -571,7 +571,7 @@ export default function CreatorDashboard() {
             </div>
 
             <div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Recent Sales</h2>
+              <h2 style={{ fontSize: "clamp(14px, 4.8vw, 18px)", fontWeight: 700, marginBottom: 12 }}>Recent Sales</h2>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {paidOrders.length === 0 ? (
                   <div style={{ color: "#6B7280", padding: "20px 0", fontSize: 14 }}>No sales yet.</div>
@@ -593,7 +593,7 @@ export default function CreatorDashboard() {
         {/* ── SETTINGS TAB ── */}
         {activeTab === "settings" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 12 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>Profile</h1>
+            <h1 style={{ fontSize: "clamp(22px, 7.5vw, 28px)", fontWeight: 800, letterSpacing: "-0.03em" }}>Profile</h1>
 
             {/* Profile Card */}
             <div style={{
@@ -602,7 +602,7 @@ export default function CreatorDashboard() {
             }}>
               <div style={{
                 width: 72, height: 72, borderRadius: "50%", background: "#3B82F6",
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "#FFFFFF",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: "clamp(22px, 7.5vw, 28px)", fontWeight: 800, color: "#FFFFFF",
                 boxShadow: "0 0 0 4px rgba(255,255,255,0.1)", overflow: "hidden", flexShrink: 0
               }}>
                 {creator.photoURL ? (
@@ -612,7 +612,7 @@ export default function CreatorDashboard() {
                 )}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{creator.name}</h2>
+                <h2 style={{ fontSize: "clamp(16px, 5.9vw, 22px)", fontWeight: 800, margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{creator.name}</h2>
                 <div style={{ fontSize: 14, color: "#9CA3AF", marginBottom: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{creator.email}</div>
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                   {settingsForm.instagram && (
@@ -733,7 +733,7 @@ export default function CreatorDashboard() {
                       <RewardIcon type={r.rewardType} size={32} />
                     </div>
                     <div>
-                      <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 4px" }}>{r.label}</h3>
+                      <h3 style={{ fontSize: "clamp(14px, 5.3vw, 20px)", fontWeight: 800, margin: "0 0 4px" }}>{r.label}</h3>
                       <div style={{ fontSize: 14, color: "#6B7280" }}>{fmt(r.rewardAmountPaise)} Reward</div>
                     </div>
                   </div>
@@ -807,7 +807,7 @@ export default function CreatorDashboard() {
               <div style={{ width: 72, height: 72, borderRadius: 20, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
                 <RewardIcon type={viewingClaim.rewardType} size={40} />
               </div>
-              <h3 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", margin: "0 0 8px", color: "#111827" }}>{viewingClaim.rewardLabel}</h3>
+              <h3 style={{ fontSize: "clamp(18px, 6.4vw, 24px)", fontWeight: 900, letterSpacing: "-0.03em", margin: "0 0 8px", color: "#111827" }}>{viewingClaim.rewardLabel}</h3>
               <p style={{ fontSize: 15, color: "#10B981", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                 <CheckCircle size={18} /> Voucher is Ready
               </p>
@@ -833,7 +833,7 @@ export default function CreatorDashboard() {
                     display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
                     transition: "all 0.2s"
                   }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#111827", letterSpacing: "0.05em", wordBreak: "break-all" }}>{viewingClaim.voucherCode || "N/A"}</div>
+                    <div style={{ fontFamily: "monospace", fontSize: "clamp(16px, 5.9vw, 22px)", fontWeight: 900, color: "#111827", letterSpacing: "0.05em", wordBreak: "break-all" }}>{viewingClaim.voucherCode || "N/A"}</div>
                     <Copy size={20} color="#6B7280" />
                   </div>
                 </div>
@@ -846,7 +846,7 @@ export default function CreatorDashboard() {
                       display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
                       transition: "all 0.2s"
                     }}>
-                      <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#111827", letterSpacing: "0.05em" }}>{viewingClaim.voucherPin}</div>
+                      <div style={{ fontFamily: "monospace", fontSize: "clamp(16px, 5.9vw, 22px)", fontWeight: 900, color: "#111827", letterSpacing: "0.05em" }}>{viewingClaim.voucherPin}</div>
                       <Copy size={20} color="#6B7280" />
                     </div>
                   </div>
