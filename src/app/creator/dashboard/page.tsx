@@ -1,10 +1,17 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import type { Creator, AffiliateMilestone, AffiliateReward, Payout, RewardClaim, RewardType } from "@/lib/db";
 import type { Coupon } from "@/lib/data";
+import {
+  LayoutDashboard, Ticket, ShoppingBag, Banknote, UserCog,
+  LogOut, ChevronDown, CheckCircle2, Clock, Copy, ArrowUpRight,
+  ArrowDownRight, Loader2, Info, Gift, DollarSign, Target,
+  ChevronUp
+} from "lucide-react";
 
 interface OrderSummary {
   id: string; productName: string; buyerName: string;
@@ -26,99 +33,91 @@ interface DashboardData {
 
 function fmt(paise: number) { return `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`; }
 
-/* ── SVG Icons ── */
-function ChevronDownIcon({ className = "", size = 16 }: { className?: string; size?: number }) {
+/* ── UI Components (Shadcn-inspired) ── */
+
+function Card({ children, className = "", style }: any) {
+  return <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)", ...style }} className={className}>{children}</div>
+}
+
+function CardHeader({ children, style, className = "" }: any) {
+  return <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 6, ...style }} className={className}>{children}</div>
+}
+
+function CardTitle({ children, style }: any) {
+  return <h3 style={{ fontSize: 16, fontWeight: 600, color: "#0F172A", margin: 0, letterSpacing: "-0.01em", ...style }}>{children}</h3>
+}
+
+function CardContent({ children, style }: any) {
+  return <div style={{ padding: "0 24px 24px", ...style }}>{children}</div>
+}
+
+function Badge({ children, variant = "default", style }: any) {
+  const vStyles: any = {
+    default: { background: "#F1F5F9", color: "#0F172A", border: "1px solid transparent" },
+    outline: { background: "transparent", color: "#0F172A", border: "1px solid #E2E8F0" },
+    success: { background: "#DCFCE7", color: "#166534", border: "1px solid transparent" },
+    warning: { background: "#FEF3C7", color: "#92400E", border: "1px solid transparent" },
+    primary: { background: "#EFF6FF", color: "#1D4ED8", border: "1px solid transparent" },
+    brand: { background: "#F3F4F6", color: "#0F172A", border: "1px solid transparent" }
+  };
+  return <span style={{ display: "inline-flex", alignItems: "center", padding: "2px 10px", borderRadius: 9999, fontSize: 12, fontWeight: 500, whiteSpace: "nowrap", ...vStyles[variant], ...style }}>{children}</span>
+}
+
+function Button({ children, variant = "default", size = "default", style, ...props }: any) {
+  const vStyles: any = {
+    default: { background: "#0F172A", color: "#FFFFFF", border: "1px solid #0F172A" },
+    outline: { background: "#FFFFFF", color: "#0F172A", border: "1px solid #E2E8F0" },
+    secondary: { background: "#F1F5F9", color: "#0F172A", border: "1px solid transparent" },
+    ghost: { background: "transparent", color: "#0F172A", border: "1px solid transparent" },
+    primary: { background: "#2563EB", color: "#FFFFFF", border: "1px solid #2563EB" },
+  };
+  const sStyles: any = {
+    default: { padding: "8px 16px", fontSize: 14, height: 40 },
+    sm: { padding: "6px 12px", fontSize: 12, height: 32 },
+    icon: { padding: 8, height: 36, width: 36, justifyContent: "center" }
+  };
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="m6 9 6 6 6-6"/>
-    </svg>
+    <button
+      style={{
+        borderRadius: 8, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 8,
+        cursor: props.disabled ? "not-allowed" : "pointer", opacity: props.disabled ? 0.6 : 1,
+        transition: "all 0.2s", justifyContent: "center",
+        ...vStyles[variant], ...sStyles[size], ...style
+      }}
+      {...props}
+    >
+      {children}
+    </button>
   );
 }
 
-function ArrowUpIcon({ size = 14 }: { size?: number }) {
+function Input({ style, ...props }: any) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
-    </svg>
+    <input
+      style={{
+        width: "100%", height: 40, padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0",
+        background: "#FFFFFF", color: "#0F172A", fontSize: 14, outline: "none", transition: "border-color 0.2s",
+        ...style
+      }}
+      {...props}
+    />
   );
 }
 
-function ArrowDownIcon({ size = 14 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m19 12-7 7-7-7"/><path d="M12 5v14"/>
-    </svg>
-  );
+function Label({ children, style }: any) {
+  return <label style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#0F172A", marginBottom: 6, ...style }}>{children}</label>
 }
 
-function BarChartIcon({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10" />
-      <line x1="12" y1="20" x2="12" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="14" />
-    </svg>
-  );
+/* ── Icons & Helpers ── */
+
+function RewardIcon({ type, size = 20 }: { type?: RewardType, size?: number }) {
+  if (type === "amazon") return <img src="/icons/amazon.png" alt="Amazon" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4 }} />;
+  if (type === "flipkart") return <img src="/icons/flipkart.png" alt="Flipkart" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4 }} />;
+  if (type === "myntra") return <img src="/icons/myntra.png" alt="Myntra" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4 }} />;
+  if (type === "cash") return <DollarSign size={size} color="#16A34A" />;
+  return <Gift size={size} color="#64748B" />;
 }
 
-function BriefcaseIcon({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-    </svg>
-  );
-}
-
-function DollarIcon({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="1" x2="12" y2="23" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  );
-}
-
-function TrophyIcon({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <path d="M4 22h16" />
-      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </svg>
-  );
-}
-
-function TargetIcon({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
-    </svg>
-  );
-}
-
-function RewardTypeIcon({ type, size = 24 }: { type?: RewardType; size?: number }) {
-  if (type === "amazon") {
-    return <img src="/icons/amazon.png" alt="Amazon" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
-  }
-  if (type === "flipkart") {
-    return <img src="/icons/flipkart.png" alt="Flipkart" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
-  }
-  if (type === "myntra") {
-    return <img src="/icons/myntra.png" alt="Myntra" style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "inline-block", verticalAlign: "middle" }} />;
-  }
-  if (type === "cash") {
-    return <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>💵</span>;
-  }
-  return <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>🎁</span>;
-}
-
-/* ── Custom UI Toast Component ── */
 function ToastNotification({ toast, onClose }: { toast: { message: string; type: "success" | "error" | "info" } | null; onClose: () => void }) {
   if (!toast) return null;
   const isSuccess = toast.type === "success";
@@ -126,92 +125,48 @@ function ToastNotification({ toast, onClose }: { toast: { message: string; type:
 
   return (
     <div style={{
-      position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)",
-      zIndex: 99999, display: "flex", alignItems: "center", gap: 12,
-      background: isSuccess ? "#064E3B" : isError ? "#7F1D1D" : "#0F172A",
-      color: "#FFFFFF", padding: "12px 20px", borderRadius: 14,
-      boxShadow: "0 16px 32px -4px rgba(0,0,0,0.18)",
-      backdropFilter: "blur(12px)", border: `1px solid ${isSuccess ? "#10B981" : isError ? "#EF4444" : "#475569"}`,
-      maxWidth: "92vw"
+      position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)", zIndex: 99999,
+      display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8,
+      background: "#FFFFFF", color: "#0F172A", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
+      border: `1px solid ${isSuccess ? "#86EFAC" : isError ? "#FCA5A5" : "#E2E8F0"}`,
+      minWidth: 320, maxWidth: "90vw"
     }}>
-      <span style={{ fontSize: 18 }}>{isSuccess ? "🎉" : isError ? "❌" : "ℹ️"}</span>
-      <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}>{toast.message}</div>
-      <button
-        onClick={onClose}
-        style={{
-          background: "rgba(255,255,255,0.2)", border: "none", color: "#FFF",
-          borderRadius: 6, padding: "4px 8px", fontSize: 11, fontWeight: 700,
-          cursor: "pointer", marginLeft: 6
-        }}
-      >
-        Dismiss
-      </button>
+      <div style={{ color: isSuccess ? "#16A34A" : isError ? "#DC2626" : "#2563EB" }}>
+        {isSuccess ? <CheckCircle2 size={18} /> : isError ? <Info size={18} /> : <Info size={18} />}
+      </div>
+      <div style={{ fontSize: 14, fontWeight: 500, flex: 1 }}>{toast.message}</div>
     </div>
   );
 }
 
-/* ── Stat Card Component (Pure White Single Canvas Styling) ── */
-function StatCardPattern({
-  title,
-  value,
-  delta,
-  positive = true,
-  lastMonthText,
-  icon,
-}: {
-  title: string;
-  value: string;
-  delta?: string;
-  positive?: boolean;
-  lastMonthText?: string;
-  icon?: React.ReactNode;
-}) {
+/* ── Custom Cards ── */
+
+function StatCard({ title, value, delta, positive, subtitle, icon: Icon }: any) {
   return (
-    <div style={{
-      background: "#FFFFFF",
-      border: "1px solid #E5E7EB",
-      borderRadius: 16,
-      padding: "18px 20px",
-      display: "flex",
-      flexDirection: "column",
-      gap: 14,
-      flex: "1 1 220px",
-      minWidth: 0,
-    }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: "#64748B", margin: 0 }}>{title}</h3>
-        {icon && <div style={{ color: "#64748B" }}>{icon}</div>}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", letterSpacing: "-0.5px" }}>
-            {value}
-          </span>
+    <Card>
+      <CardHeader style={{ paddingBottom: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <CardTitle style={{ fontSize: 14, color: "#64748B", fontWeight: 500 }}>{title}</CardTitle>
+        {Icon && <Icon size={16} color="#94A3B8" />}
+      </CardHeader>
+      <CardContent>
+        <div style={{ fontSize: 28, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>{value}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
           {delta && (
-            <span style={{
-              fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20,
-              background: positive ? "#DCFCE7" : "#FEE2E2",
-              color: positive ? "#15803D" : "#B91C1C",
-              display: "inline-flex", alignItems: "center", gap: 2
-            }}>
-              {positive ? <ArrowUpIcon size={10} /> : <ArrowDownIcon size={10} />}
+            <span style={{ display: "flex", alignItems: "center", color: positive ? "#16A34A" : "#DC2626", fontWeight: 500 }}>
+              {positive ? <ArrowUpRight size={14} style={{ marginRight: 2 }} /> : <ArrowDownRight size={14} style={{ marginRight: 2 }} />}
               {delta}
             </span>
           )}
+          <span style={{ color: "#64748B" }}>{subtitle}</span>
         </div>
-        <div style={{ height: 1, background: "#F3F4F6", width: "100%" }} />
-        <div style={{ fontSize: 11, color: "#94A3B8" }}>
-          {lastMonthText || "Calculated real-time"}
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
-/* ── Expandable Mission Reward Card Component (Pure Single Canvas) ── */
-function ExpandableMissionCard({
-  reward: r,
-  current,
+function MissionCard({
+  reward,
+  currentSales,
   claim,
   onClaim,
   onShowCode,
@@ -219,259 +174,149 @@ function ExpandableMissionCard({
   onCopyText,
 }: {
   reward: AffiliateReward;
-  current: number;
+  currentSales: number;
   claim?: RewardClaim;
   onClaim: (rewardId: string) => void;
   onShowCode: (claim: RewardClaim) => void;
   claimingId: string | null;
   onCopyText: (text: string, label: string) => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const unlocked = current >= r.referrals;
-  const ratio = Math.min(100, Math.round((current / r.referrals) * 100));
+  const [expanded, setExpanded] = useState(false);
+  const unlocked = currentSales >= reward.referrals;
+  const ratio = Math.min(100, Math.round((currentSales / reward.referrals) * 100));
   const isPending = claim && claim.status === "pending";
   const isFulfilled = claim && claim.status === "fulfilled";
 
   return (
-    <div style={{
-      background: "#FFFFFF",
-      border: `1.5px solid ${isFulfilled ? "#10B981" : isPending ? "#F59E0B" : unlocked ? "#6366F1" : "#E5E7EB"}`,
-      borderRadius: 16,
-      padding: "18px 18px 12px",
-      position: "relative",
-      display: "flex",
-      flexDirection: "column",
-      gap: 14,
-      overflow: "hidden",
-    }}>
-      {/* Card Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 8, background: "#FFFFFF",
-            border: "1px solid #E5E7EB", display: "flex", alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <RewardTypeIcon type={r.rewardType} size={22} />
-          </div>
-          <div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: "#6366F1", textTransform: "uppercase", letterSpacing: 0.5 }}>
-              {r.rewardType ? `${r.rewardType.toUpperCase()} REWARD` : "MISSION REWARD"}
+    <Card style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16, cursor: "pointer" }} onClick={() => setExpanded(!expanded)}>
+        
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <div style={{ width: 40, height: 40, borderRadius: 8, border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8FAFC" }}>
+              <RewardIcon type={reward.rewardType} size={24} />
             </div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: "#0F172A" }}>
-              {fmt(r.rewardAmountPaise)}
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: "#0F172A" }}>{fmt(reward.rewardAmountPaise)}</div>
+              <div style={{ fontSize: 12, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600, marginTop: 2 }}>
+                {reward.rewardType || "Mission"} Reward
+              </div>
             </div>
           </div>
+          <Badge variant={isFulfilled ? "success" : isPending ? "warning" : unlocked ? "primary" : "default"}>
+            {isFulfilled ? "Delivered" : isPending ? "Reviewing" : unlocked ? "Unlocked" : `${ratio}%`}
+          </Badge>
         </div>
 
-        <span style={{
-          fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 20,
-          background: isFulfilled ? "#DCFCE7" : isPending ? "#FEF3C7" : unlocked ? "#EEF2F6" : "#F3F4F6",
-          color: isFulfilled ? "#15803D" : isPending ? "#B45309" : unlocked ? "#4F46E5" : "#64748B",
-        }}>
-          {isFulfilled ? "Delivered ✓" : isPending ? "Reviewing ⏳" : unlocked ? "Goal Met 🎉" : `${ratio}%`}
-        </span>
-      </div>
-
-      {/* Progress Box */}
-      <div style={{
-        border: "1px solid #F3F4F6", borderRadius: 12, padding: 12,
-        display: "flex", flexDirection: "column", gap: 8
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 600, color: "#64748B" }}>
-          <span>Milestone Progress</span>
-          <span>Sales Completed</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 800, color: "#0F172A" }}>
-          <span>{current} / {r.referrals} Sales</span>
-          <span>{ratio}%</span>
-        </div>
-        <div style={{ height: 6, background: "#F3F4F6", borderRadius: 99, overflow: "hidden" }}>
-          <div style={{
-            height: "100%", width: `${ratio}%`,
-            background: isFulfilled ? "#10B981" : isPending ? "#F59E0B" : "linear-gradient(90deg, #6366F1, #4F46E5)",
-            borderRadius: 99, transition: "width 0.5s ease"
-          }} />
-        </div>
-      </div>
-
-      {/* Expandable Body */}
-      <div style={{
-        maxHeight: isOpen ? 400 : 120,
-        overflow: "hidden",
-        transition: "max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-        position: "relative"
-      }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#0F172A" }}>{r.label}</div>
-          <div style={{ fontSize: 12, color: "#64748B", lineHeight: 1.4 }}>
-            {r.description || `Complete ${r.referrals} successful referrals to claim your ${r.rewardType || "voucher"} reward.`}
+        {/* Progress Bar */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 500, color: "#64748B" }}>
+            <span>{currentSales} / {reward.referrals} Sales</span>
+            <span>{ratio}%</span>
           </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 6, borderTop: "1px dashed #E5E7EB" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-              <span style={{ color: "#64748B" }}>Reward Amount</span>
-              <span style={{ fontWeight: 700, color: "#0F172A" }}>{fmt(r.rewardAmountPaise)}</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-              <span style={{ color: "#64748B" }}>Target Referrals</span>
-              <span style={{ fontWeight: 700, color: "#0F172A" }}>{r.referrals} Sales</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-              <span style={{ color: "#64748B" }}>Verification SLA</span>
-              <span style={{ fontWeight: 700, color: "#0F172A" }}>24 Hours Guaranteed</span>
-            </div>
-          </div>
-
-          {/* 24h Processing Notice Banner */}
-          {isPending && (
+          <div style={{ height: 6, background: "#F1F5F9", borderRadius: 9999, overflow: "hidden" }}>
             <div style={{
-              background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 10, padding: 10,
-              display: "flex", flexDirection: "column", gap: 3
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "#92400E" }}>
-                ⚡ Processing · Credited in 24 Hours
-              </div>
-              <div style={{ fontSize: 10, color: "#B45309" }}>
-                Claim registered! Admin is verifying your code/payout.
-              </div>
-            </div>
-          )}
+              height: "100%", width: `${ratio}%`, borderRadius: 9999, transition: "width 0.5s ease",
+              background: isFulfilled ? "#16A34A" : isPending ? "#D97706" : "#2563EB"
+            }} />
+          </div>
+        </div>
+        
+        {/* Expand Toggle Hint */}
+        <div style={{ display: "flex", justifyContent: "center", marginTop: -8 }}>
+           {expanded ? <ChevronUp size={16} color="#94A3B8" /> : <ChevronDown size={16} color="#94A3B8" />}
+        </div>
+      </div>
 
-          {/* Primary Action Button */}
+      {/* Expanded Content */}
+      {expanded && (
+        <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16, borderTop: "1px solid #F1F5F9", paddingTop: 20 }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172A", marginBottom: 4 }}>{reward.label}</div>
+            <div style={{ fontSize: 14, color: "#64748B", lineHeight: 1.5 }}>
+              {reward.description || `Complete ${reward.referrals} successful referrals to claim your reward.`}
+            </div>
+          </div>
+
+          <div style={{ background: "#F8FAFC", borderRadius: 8, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+              <span style={{ color: "#64748B" }}>Amount</span>
+              <span style={{ fontWeight: 600, color: "#0F172A" }}>{fmt(reward.rewardAmountPaise)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+              <span style={{ color: "#64748B" }}>Target</span>
+              <span style={{ fontWeight: 600, color: "#0F172A" }}>{reward.referrals} Sales</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+              <span style={{ color: "#64748B" }}>Verification</span>
+              <span style={{ fontWeight: 600, color: "#0F172A" }}>24 Hours SLA</span>
+            </div>
+          </div>
+
+          {/* Action Area */}
           {isFulfilled ? (
-            r.rewardType === "cash" ? (
-              <div style={{
-                width: "100%", padding: "8px 10px", borderRadius: 8, background: "#DCFCE7",
-                border: "1px solid #86EFAC", color: "#15803D", fontSize: 11, fontWeight: 800,
-                display: "flex", alignItems: "center", justifyContent: "space-between"
-              }}>
-                <span>Credited ✓</span>
+            reward.rewardType === "cash" ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ padding: "10px", borderRadius: 8, background: "#DCFCE7", color: "#166534", fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center", gap: 8 }}>
+                  <CheckCircle2 size={16} /> Cash credited successfully.
+                </div>
                 {claim?.utr && (
-                  <button
-                    onClick={() => onCopyText(claim.utr!, "UTR Number")}
-                    style={{
-                      background: "#FFFFFF", border: "1px solid #86EFAC", color: "#166534",
-                      padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: "pointer"
-                    }}
-                  >
-                    UTR: {claim.utr} 📋
-                  </button>
+                  <Button variant="outline" size="sm" onClick={() => onCopyText(claim.utr!, "UTR Number")} style={{ width: "100%" }}>
+                    <Copy size={14} /> Copy UTR: {claim.utr}
+                  </Button>
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => onShowCode(claim!)}
-                style={{
-                  width: "100%", padding: "9px", borderRadius: 8, border: "none",
-                  fontSize: 12, fontWeight: 800, cursor: "pointer",
-                  background: "linear-gradient(135deg, #10B981, #059669)", color: "#FFFFFF"
-                }}
-              >
-                Show Code 🎟️
-              </button>
+              <Button variant="primary" onClick={() => onShowCode(claim!)} style={{ width: "100%" }}>
+                <Ticket size={16} /> Show Voucher Code
+              </Button>
             )
           ) : isPending ? (
-            <button
-              disabled
-              style={{
-                width: "100%", padding: "9px", borderRadius: 8, border: "1px solid #FCD34D",
-                fontSize: 11, fontWeight: 700, cursor: "not-allowed",
-                background: "#FEF3C7", color: "#B45309"
-              }}
-            >
-              Processing (Credited within 24h) ⏳
-            </button>
+            <div style={{ padding: "10px", borderRadius: 8, background: "#FEF3C7", color: "#92400E", fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center", gap: 8 }}>
+              <Clock size={16} /> Processing claim (Wait 24h)
+            </div>
           ) : (
-            <button
-              onClick={() => onClaim(r.id)}
-              disabled={!unlocked || claimingId === r.id}
-              style={{
-                width: "100%", padding: "9px", borderRadius: 8, border: "none",
-                fontSize: 12, fontWeight: 800, cursor: unlocked ? "pointer" : "not-allowed",
-                background: unlocked ? "linear-gradient(135deg, #6366F1, #4F46E5)" : "#F3F4F6",
-                color: unlocked ? "#FFFFFF" : "#94A3B8"
-              }}
+            <Button
+              variant={unlocked ? "primary" : "secondary"}
+              disabled={!unlocked || claimingId === reward.id}
+              onClick={() => onClaim(reward.id)}
+              style={{ width: "100%" }}
             >
-              {claimingId === r.id ? "Submitting..." : unlocked ? "Claim Reward 🎁" : `Locked (${r.referrals - current} More Sales Needed)`}
-            </button>
+              {claimingId === reward.id ? (
+                <><Loader2 size={16} className="animate-spin" /> Submitting...</>
+              ) : unlocked ? (
+                <><Gift size={16} /> Claim Reward</>
+              ) : (
+                <><Target size={16} /> {reward.referrals - currentSales} More Sales Needed</>
+              )}
+            </Button>
           )}
         </div>
-
-        {!isOpen && (
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: 36,
-            background: "linear-gradient(to top, #FFFFFF, transparent)", pointerEvents: "none"
-          }} />
-        )}
-      </div>
-
-      {/* Expand Toggle Pill */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: -2 }}>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          style={{
-            background: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: 16,
-            padding: "3px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
-            fontSize: 10, fontWeight: 700, color: "#64748B"
-          }}
-        >
-          <span>{isOpen ? "Less Details" : "More Details"}</span>
-          <ChevronDownIcon size={12} className={isOpen ? "rotate-180 transition-transform duration-300" : "transition-transform duration-300"} />
-        </button>
-      </div>
-    </div>
+      )}
+    </Card>
   );
 }
 
-/* ── Main Creator Dashboard Component ── */
+/* ── Main Page ── */
+
 export default function CreatorDashboard() {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "coupons" | "orders" | "payouts" | "settings">("overview");
 
-  // Toast UI state
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Settings form state
   const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", instagram: "", youtube: "", other: "", upiId: "", upiName: "" });
   const [settingsSaving, setSettingsSaving] = useState(false);
 
-  // Claim modal state
   const [claimingRewardId, setClaimingRewardId] = useState<string | null>(null);
   const [viewingClaim, setViewingClaim] = useState<RewardClaim | null>(null);
-
-  // Floating Bottom Navbar References
-  const tabsList = [
-    { id: "overview", label: "Overview" },
-    { id: "coupons", label: "My Coupons" },
-    { id: "orders", label: "Referred Sales" },
-    { id: "payouts", label: "Payout History" },
-    { id: "settings", label: "Account Settings" },
-  ] as const;
-
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const pillRef = useRef<HTMLSpanElement | null>(null);
-
-  const updatePillPosition = useCallback(() => {
-    const activeIndex = tabsList.findIndex(t => t.id === activeTab);
-    const activeEl = tabRefs.current[activeIndex];
-    if (activeEl && pillRef.current) {
-      pillRef.current.style.transform = `translateX(${activeEl.offsetLeft}px)`;
-      pillRef.current.style.width = `${activeEl.offsetWidth}px`;
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    updatePillPosition();
-    window.addEventListener("resize", updatePillPosition);
-    return () => window.removeEventListener("resize", updatePillPosition);
-  }, [updatePillPosition]);
 
   const fetchData = useCallback(async (userId: string) => {
     try {
@@ -517,10 +362,10 @@ export default function CreatorDashboard() {
       });
       const json = await res.json();
       if (json.success) {
-        showToast("Claim Request Submitted! Your reward is being processed and will be credited within 24 hours.", "success");
+        showToast("Claim successful. We will process this within 24 hours.", "success");
         await fetchData(data.creator.uid);
       } else {
-        showToast(json.message || "Failed to submit claim.", "error");
+        showToast(json.message || "Failed to claim reward.", "error");
       }
     } catch {
       showToast("Network error. Please try again.", "error");
@@ -532,7 +377,7 @@ export default function CreatorDashboard() {
   const handleCopyText = (text: string, label: string) => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text);
-      showToast(`📋 ${label} copied to clipboard!`, "success");
+      showToast(`${label} copied to clipboard`, "success");
     }
   };
 
@@ -558,13 +403,13 @@ export default function CreatorDashboard() {
       });
       const json = await res.json();
       if (json.success) {
-        showToast("Account details updated successfully!", "success");
+        showToast("Settings updated successfully.", "success");
         await fetchData(data.creator.uid);
       } else {
         showToast(json.message || "Failed to update settings.", "error");
       }
     } catch {
-      showToast("Network error. Failed to update settings.", "error");
+      showToast("Network error.", "error");
     } finally {
       setSettingsSaving(false);
     }
@@ -572,10 +417,10 @@ export default function CreatorDashboard() {
 
   if (loading || !data) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FFFFFF", fontFamily: "sans-serif" }}>
-        <div style={{ textAlign: "center", color: "#64748B" }}>
-          <div style={{ fontSize: 24, marginBottom: 8 }}>🌀</div>
-          <div style={{ fontSize: 13, fontWeight: 700 }}>Loading Creator Portal...</div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FFFFFF", fontFamily: "system-ui, sans-serif" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, color: "#64748B" }}>
+          <Loader2 size={32} className="animate-spin" />
+          <div style={{ fontSize: 14, fontWeight: 500 }}>Loading Portal...</div>
         </div>
       </div>
     );
@@ -586,433 +431,310 @@ export default function CreatorDashboard() {
   const thisMonth = new Date().toISOString().slice(0, 7);
   const thisMonthEarnings = monthlyEarnings[thisMonth] || 0;
 
+  const navItems = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "coupons", label: "Coupons", icon: Ticket },
+    { id: "orders", label: "Sales", icon: ShoppingBag },
+    { id: "payouts", label: "Payouts", icon: Banknote },
+    { id: "settings", label: "Settings", icon: UserCog },
+  ] as const;
+
   return (
-    <div style={{ minHeight: "100vh", background: "#FFFFFF", fontFamily: "Inter, system-ui, sans-serif", color: "#0F172A" }}>
+    <div style={{ minHeight: "100vh", background: "#FFFFFF", fontFamily: "Inter, system-ui, sans-serif", color: "#0F172A", paddingBottom: 80 }}>
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
-      {/* ── Top Header ── */}
+      {/* Header */}
       <header style={{
-        background: "#FFFFFF", borderBottom: "1px solid #E5E7EB", padding: "14px 20px",
-        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12
+        position: "sticky", top: 0, zIndex: 50, background: "rgba(255, 255, 255, 0.9)", backdropFilter: "blur(8px)",
+        borderBottom: "1px solid #E2E8F0", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between"
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 10, background: "#0F172A",
-            color: "#FFF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16
-          }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 9999, background: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", color: "#0F172A", fontWeight: 600, border: "1px solid #E2E8F0" }}>
             {creator.name?.charAt(0)?.toUpperCase() || "C"}
           </div>
           <div>
-            <h1 style={{ fontSize: 15, fontWeight: 800, margin: 0, color: "#0F172A" }}>{creator.name}</h1>
-            <div style={{ fontSize: 11, color: "#64748B" }}>Creator Partner Portal</div>
+            <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>{creator.name}</h1>
+            <div style={{ fontSize: 13, color: "#64748B" }}>Partner Portal</div>
           </div>
         </div>
-
-        <button
-          onClick={async () => { await auth.signOut(); router.push("/creator"); }}
-          style={{
-            background: "#FFFFFF", border: "1px solid #CBD5E1", color: "#475569",
-            padding: "5px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer"
-          }}
-        >
-          Logout
-        </button>
+        <Button variant="ghost" size="icon" onClick={async () => { await auth.signOut(); router.push("/creator"); }}>
+          <LogOut size={20} color="#64748B" />
+        </Button>
       </header>
 
-      {/* ── Pure Single Background Canvas Content ── */}
-      <main style={{ maxWidth: 1140, margin: "0 auto", padding: "20px 16px 110px" }}>
-
-        {/* ── TAB: OVERVIEW ── */}
+      {/* Main Content Area */}
+      <main style={{ maxWidth: 1000, margin: "0 auto", padding: "24px" }}>
+        
+        {/* OVERVIEW */}
         {activeTab === "overview" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            {/* Stat Cards Mobile Responsive Grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
-              <StatCardPattern
-                title="Total Earnings"
-                value={fmt(creator.totalEarningsPaise)}
-                delta="12.5%"
-                positive={true}
-                lastMonthText="Vs last month: ₹11,000"
-                icon={<DollarIcon size={18} />}
-              />
-              <StatCardPattern
-                title="This Month"
-                value={fmt(thisMonthEarnings)}
-                delta="Active"
-                positive={true}
-                lastMonthText="Calculated real-time"
-                icon={<BarChartIcon size={18} />}
-              />
-              <StatCardPattern
-                title="Unpaid Balance"
-                value={fmt(pendingPayoutPaise)}
-                delta="Pending"
-                positive={false}
-                lastMonthText="Direct UPI transfer"
-                icon={<BriefcaseIcon size={18} />}
-              />
-              <StatCardPattern
-                title="Total Sales"
-                value={`${creator.totalReferrals}`}
-                delta="Tracked"
-                positive={true}
-                lastMonthText="Successful referred orders"
-                icon={<TrophyIcon size={18} />}
-              />
+          <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+              <StatCard title="Total Earnings" value={fmt(creator.totalEarningsPaise)} delta="Active" positive={true} subtitle="All time" icon={Banknote} />
+              <StatCard title="This Month" value={fmt(thisMonthEarnings)} subtitle="Calculated real-time" icon={LayoutDashboard} />
+              <StatCard title="Unpaid Balance" value={fmt(pendingPayoutPaise)} delta="Pending" positive={false} subtitle="Direct UPI transfer" icon={DollarSign} />
+              <StatCard title="Total Sales" value={`${creator.totalReferrals}`} subtitle="Successful orders" icon={ShoppingBag} />
             </div>
 
-            {/* Mission Rewards Container (Pure White Canvas) */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-                <TargetIcon size={18} color="#6366F1" /> Extra Reward Missions
-              </h2>
+            {/* Static Bonus Commission Milestone */}
+            <Card style={{ background: "#F8FAFC", border: "1px dashed #CBD5E1" }}>
+              <CardContent style={{ padding: "24px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #E2E8F0" }}>
+                  <Target size={24} color="#2563EB" />
+                </div>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <h4 style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 600, color: "#0F172A" }}>Bonus Commission Milestone</h4>
+                  <p style={{ margin: 0, fontSize: 14, color: "#64748B" }}>Reach 100 overall sales to unlock an additional 5% commission on all future orders.</p>
+                </div>
+                <Badge variant="primary" style={{ padding: "6px 12px", fontSize: 13 }}>Coming Soon</Badge>
+              </CardContent>
+            </Card>
 
+            <div>
+              <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#0F172A" }}>Reward Missions</h2>
               {!rewards.length ? (
-                <div style={{ textAlign: "center", padding: "32px", color: "#64748B", fontSize: 13, border: "1px solid #E5E7EB", borderRadius: 16 }}>No reward missions active yet.</div>
+                <Card><CardContent style={{ padding: 40, textAlign: "center", color: "#64748B" }}>No missions available right now.</CardContent></Card>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-                  {rewards.map(r => {
-                    const claim = rewardClaims.find(c => c.rewardId === r.id);
-                    return (
-                      <ExpandableMissionCard
-                        key={r.id}
-                        reward={r}
-                        current={creator.totalReferrals}
-                        claim={claim}
-                        onClaim={handleClaimReward}
-                        onShowCode={(c) => setViewingClaim(c)}
-                        claimingId={claimingRewardId}
-                        onCopyText={handleCopyText}
-                      />
-                    );
-                  })}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
+                  {rewards.map(r => (
+                    <MissionCard
+                      key={r.id} reward={r} currentSales={creator.totalReferrals}
+                      claim={rewardClaims.find(c => c.rewardId === r.id)}
+                      onClaim={handleClaimReward} onShowCode={setViewingClaim}
+                      claimingId={claimingRewardId} onCopyText={handleCopyText}
+                    />
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Monthly Earnings Chart */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 800, color: "#0F172A", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-                <BarChartIcon size={18} color="#6366F1" /> Monthly Performance Breakdown
-              </h2>
-              <div style={{ border: "1px solid #E5E7EB", borderRadius: 16, padding: 20 }}>
-                {Object.keys(monthlyEarnings).length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "20px 0", color: "#64748B", fontSize: 13 }}>No monthly data recorded yet.</div>
-                ) : (
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 130, padding: "0 4px" }}>
-                    {Object.entries(monthlyEarnings).sort(([a], [b]) => a.localeCompare(b)).slice(-6).map(([month, amount]) => {
-                      const maxVal = Math.max(...Object.values(monthlyEarnings));
-                      const percentHeight = Math.max(8, (amount / maxVal) * 100);
-                      const active = month === thisMonth;
-                      return (
-                        <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: 10, color: "#64748B", fontWeight: 700 }}>{fmt(amount)}</span>
-                          <div style={{
-                            width: "100%", height: `${percentHeight}%`, borderRadius: "4px 4px 0 0",
-                            background: active ? "#0F172A" : "#E5E7EB"
-                          }} />
-                          <span style={{ fontSize: 10, color: active ? "#0F172A" : "#64748B", fontWeight: 700 }}>
-                            {new Date(month + "-01").toLocaleString("en-IN", { month: "short" })}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         )}
 
-        {/* ── TAB: MY COUPONS ── */}
+        {/* COUPONS */}
         {activeTab === "coupons" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>Assigned Creator Coupons</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>My Coupons</h2>
             {!coupons.length ? (
-              <div style={{ textAlign: "center", padding: "40px", color: "#64748B", fontSize: 13, border: "1px solid #E5E7EB", borderRadius: 16 }}>No unique coupons assigned yet.</div>
+              <Card><CardContent style={{ padding: 40, textAlign: "center", color: "#64748B" }}>No coupons assigned yet.</CardContent></Card>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {coupons.map(c => (
-                  <div key={c.id} style={{
-                    border: "1px solid #E5E7EB", borderRadius: 14, padding: "16px 18px",
-                    display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12
-                  }}>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                        <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 800, color: "#6366F1" }}>{c.id}</span>
-                        <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 10, background: c.active ? "#DCFCE7" : "#FEE2E2", color: c.active ? "#15803D" : "#B91C1C" }}>
-                          {c.active ? "Active" : "Inactive"}
-                        </span>
+                  <Card key={c.id}>
+                    <CardContent style={{ padding: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                          <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: "1px", color: "#0F172A" }}>{c.id}</span>
+                          <Badge variant={c.active ? "success" : "default"}>{c.active ? "Active" : "Inactive"}</Badge>
+                        </div>
+                        <div style={{ display: "flex", gap: 16, fontSize: 13, color: "#64748B" }}>
+                          <span>Discount: <strong style={{ color: "#0F172A" }}>{c.discountType === "percentage" ? `${c.discountAmount}%` : fmt(c.discountAmount * 100)}</strong></span>
+                          <span>Commission: <strong style={{ color: "#0F172A" }}>{c.commissionPercentage}%</strong></span>
+                          <span>Uses: <strong style={{ color: "#0F172A" }}>{c.usedCount}</strong></span>
+                        </div>
                       </div>
-                      <div style={{ fontSize: 12, color: "#64748B" }}>
-                        Discount: <strong>{c.discountType === "percentage" ? `${c.discountAmount}%` : fmt(c.discountAmount * 100)}</strong> · Commission: <strong>{c.commissionPercentage}%</strong> · Used: <strong>{c.usedCount} times</strong>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleCopyText(c.id, "Coupon Code")}
-                      style={{
-                        padding: "7px 14px", borderRadius: 8, border: "1px solid #0F172A",
-                        background: "#0F172A", color: "#FFFFFF", fontSize: 12, fontWeight: 700, cursor: "pointer"
-                      }}
-                    >
-                      📋 Copy Code
-                    </button>
-                  </div>
+                      <Button variant="outline" onClick={() => handleCopyText(c.id, "Coupon Code")}>
+                        <Copy size={16} /> Copy Code
+                      </Button>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
           </div>
         )}
 
-        {/* ── TAB: REFERRED SALES ── */}
+        {/* ORDERS */}
         {activeTab === "orders" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>Referred Sales History</h2>
-            <div style={{ border: "1px solid #E5E7EB", borderRadius: 16, overflowX: "auto" }}>
-              {!paidOrders.length ? (
-                <div style={{ textAlign: "center", padding: "40px", color: "#64748B", fontSize: 13 }}>No referred orders recorded yet.</div>
-              ) : (
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 600 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Referred Sales</h2>
+            <Card style={{ overflow: "hidden" }}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 600 }}>
                   <thead>
-                    <tr style={{ borderBottom: "1px solid #E5E7EB", textAlign: "left", color: "#64748B" }}>
-                      <th style={{ padding: "12px 14px" }}>Order ID</th>
-                      <th style={{ padding: "12px 14px" }}>Product</th>
-                      <th style={{ padding: "12px 14px" }}>Amount</th>
-                      <th style={{ padding: "12px 14px" }}>Commission</th>
-                      <th style={{ padding: "12px 14px" }}>Date</th>
+                    <tr style={{ borderBottom: "1px solid #E2E8F0", background: "#F8FAFC", textAlign: "left", color: "#64748B" }}>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Order ID</th>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Product</th>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Amount</th>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Commission</th>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Date</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {paidOrders.map(o => (
-                      <tr key={o.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
-                        <td style={{ padding: "12px 14px", fontFamily: "monospace", fontWeight: 700 }}>{o.id}</td>
-                        <td style={{ padding: "12px 14px" }}>{o.productName}</td>
-                        <td style={{ padding: "12px 14px", fontWeight: 700 }}>{fmt(o.amount)}</td>
-                        <td style={{ padding: "12px 14px", fontWeight: 800, color: "#10B981" }}>{fmt(o.commissionAmount)}</td>
-                        <td style={{ padding: "12px 14px", color: "#64748B" }}>{new Date(o.createdAt).toLocaleDateString("en-IN")}</td>
-                      </tr>
-                    ))}
+                    {!paidOrders.length ? (
+                      <tr><td colSpan={5} style={{ padding: 40, textAlign: "center", color: "#64748B" }}>No referred orders yet.</td></tr>
+                    ) : (
+                      paidOrders.map(o => (
+                        <tr key={o.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                          <td style={{ padding: "16px 24px", fontFamily: "monospace", color: "#64748B" }}>{o.id}</td>
+                          <td style={{ padding: "16px 24px", fontWeight: 500 }}>{o.productName}</td>
+                          <td style={{ padding: "16px 24px", color: "#64748B" }}>{fmt(o.amount)}</td>
+                          <td style={{ padding: "16px 24px", fontWeight: 600, color: "#16A34A" }}>{fmt(o.commissionAmount)}</td>
+                          <td style={{ padding: "16px 24px", color: "#64748B" }}>{new Date(o.createdAt).toLocaleDateString("en-IN")}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
-              )}
-            </div>
+              </div>
+            </Card>
           </div>
         )}
 
-        {/* ── TAB: PAYOUT HISTORY ── */}
+        {/* PAYOUTS */}
         {activeTab === "payouts" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>Payout Settlements History</h2>
-            <div style={{ border: "1px solid #E5E7EB", borderRadius: 16, overflowX: "auto" }}>
-              {!payouts.length ? (
-                <div style={{ textAlign: "center", padding: "40px", color: "#64748B", fontSize: 13 }}>No payouts recorded yet.</div>
-              ) : (
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 600 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Payout History</h2>
+            <Card style={{ overflow: "hidden" }}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 600 }}>
                   <thead>
-                    <tr style={{ borderBottom: "1px solid #E5E7EB", textAlign: "left", color: "#64748B" }}>
-                      <th style={{ padding: "12px 14px" }}>Payout ID</th>
-                      <th style={{ padding: "12px 14px" }}>Amount</th>
-                      <th style={{ padding: "12px 14px" }}>Status</th>
-                      <th style={{ padding: "12px 14px" }}>UTR / Reference</th>
-                      <th style={{ padding: "12px 14px" }}>Date</th>
+                    <tr style={{ borderBottom: "1px solid #E2E8F0", background: "#F8FAFC", textAlign: "left", color: "#64748B" }}>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Payout ID</th>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Amount</th>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Status</th>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Reference</th>
+                      <th style={{ padding: "16px 24px", fontWeight: 500 }}>Date</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {payouts.map(p => (
-                      <tr key={p.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
-                        <td style={{ padding: "12px 14px", fontFamily: "monospace", fontWeight: 700 }}>{p.id}</td>
-                        <td style={{ padding: "12px 14px", fontWeight: 800, color: "#0F172A" }}>{fmt(p.amountPaise)}</td>
-                        <td style={{ padding: "12px 14px" }}>
-                          <span style={{
-                            fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 10,
-                            background: p.status === "paid" ? "#DCFCE7" : "#FEF3C7",
-                            color: p.status === "paid" ? "#15803D" : "#B45309"
-                          }}>
-                            {p.status.toUpperCase()}
-                          </span>
-                        </td>
-                        <td style={{ padding: "12px 14px", fontFamily: "monospace" }}>{p.reference || "N/A"}</td>
-                        <td style={{ padding: "12px 14px", color: "#64748B" }}>{new Date(p.createdAt).toLocaleDateString("en-IN")}</td>
-                      </tr>
-                    ))}
+                    {!payouts.length ? (
+                      <tr><td colSpan={5} style={{ padding: 40, textAlign: "center", color: "#64748B" }}>No payouts recorded yet.</td></tr>
+                    ) : (
+                      payouts.map(p => (
+                        <tr key={p.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                          <td style={{ padding: "16px 24px", fontFamily: "monospace", color: "#64748B" }}>{p.id}</td>
+                          <td style={{ padding: "16px 24px", fontWeight: 600 }}>{fmt(p.amountPaise)}</td>
+                          <td style={{ padding: "16px 24px" }}>
+                            <Badge variant={p.status === "paid" ? "success" : "warning"}>{p.status}</Badge>
+                          </td>
+                          <td style={{ padding: "16px 24px", fontFamily: "monospace", color: "#64748B" }}>{p.reference || "N/A"}</td>
+                          <td style={{ padding: "16px 24px", color: "#64748B" }}>{new Date(p.createdAt).toLocaleDateString("en-IN")}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
-              )}
-            </div>
+              </div>
+            </Card>
           </div>
         )}
 
-        {/* ── TAB: ACCOUNT SETTINGS ── */}
+        {/* SETTINGS */}
         {activeTab === "settings" && (
-          <div style={{ border: "1px solid #E5E7EB", borderRadius: 16, padding: 20, maxWidth: 640 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 16px" }}>Account & Payout Settings</h2>
-            <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div>
-                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Full Name</label>
-                <input
-                  type="text"
-                  value={settingsForm.name}
-                  onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })}
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 13 }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Phone Number</label>
-                <input
-                  type="text"
-                  value={settingsForm.phone}
-                  onChange={e => setSettingsForm({ ...settingsForm, phone: e.target.value })}
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 13 }}
-                />
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
-                <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>UPI ID for Payouts</label>
-                  <input
-                    type="text"
-                    value={settingsForm.upiId}
-                    onChange={e => setSettingsForm({ ...settingsForm, upiId: e.target.value })}
-                    placeholder="name@upi"
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 13 }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Account Holder Name</label>
-                  <input
-                    type="text"
-                    value={settingsForm.upiName}
-                    onChange={e => setSettingsForm({ ...settingsForm, upiName: e.target.value })}
-                    placeholder="Name as per UPI"
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #CBD5E1", fontSize: 13 }}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={settingsSaving}
-                style={{
-                  marginTop: 6, padding: "11px", borderRadius: 8, border: "none",
-                  background: "#0F172A", color: "#FFFFFF", fontSize: 13, fontWeight: 800, cursor: "pointer"
-                }}
-              >
-                {settingsSaving ? "Saving Settings..." : "Save Account Settings"}
-              </button>
-            </form>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 600 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Account Settings</h2>
+            <Card>
+              <CardContent style={{ padding: "24px 32px" }}>
+                <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                  <div>
+                    <Label>Full Name</Label>
+                    <Input value={settingsForm.name} onChange={(e: any) => setSettingsForm({ ...settingsForm, name: e.target.value })} required />
+                  </div>
+                  <div>
+                    <Label>Phone Number</Label>
+                    <Input value={settingsForm.phone} onChange={(e: any) => setSettingsForm({ ...settingsForm, phone: e.target.value })} />
+                  </div>
+                  <div style={{ borderTop: "1px solid #E2E8F0", margin: "8px 0" }} />
+                  <div>
+                    <Label>UPI ID (For Payouts)</Label>
+                    <Input value={settingsForm.upiId} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiId: e.target.value })} placeholder="username@upi" />
+                  </div>
+                  <div>
+                    <Label>Account Holder Name (UPI)</Label>
+                    <Input value={settingsForm.upiName} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiName: e.target.value })} />
+                  </div>
+                  <Button type="submit" disabled={settingsSaving} style={{ marginTop: 8 }}>
+                    {settingsSaving ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : "Save Settings"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
           </div>
         )}
 
       </main>
 
-      {/* ── FIXED FLOATING BOTTOM NAVBAR (.t-tabs pattern) ── */}
+      {/* Floating Bottom Navigation */}
       <nav style={{
-        position: "fixed",
-        bottom: 16,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 9999,
-        maxWidth: "94vw",
-        width: "max-content",
-        display: "flex",
-        justifyContent: "center"
+        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 9999,
+        background: "rgba(255, 255, 255, 0.9)", backdropFilter: "blur(12px)",
+        borderTop: "1px solid #E2E8F0", paddingBottom: "env(safe-area-inset-bottom)"
       }}>
-        <div className="t-tabs" role="tablist" style={{
-          position: "relative",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 3,
-          padding: 5,
-          borderRadius: 48,
-          background: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid #E2E8F0",
-          boxShadow: "0 14px 34px -4px rgba(15, 23, 42, 0.15), 0 4px 12px rgba(0, 0, 0, 0.05)",
-          maxWidth: "94vw",
-          overflowX: "auto",
-          WebkitOverflowScrolling: "touch",
-        }}>
-          <span ref={pillRef} className="t-tabs-pill" style={{
-            position: "absolute", top: 5, left: 0, height: 36, width: 0,
-            background: "#0F172A", borderRadius: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-            transition: "transform 250ms cubic-bezier(0.22, 1, 0.36, 1), width 250ms cubic-bezier(0.22, 1, 0.36, 1)",
-            zIndex: 0, pointerEvents: "none"
-          }} />
-          {tabsList.map((tab, idx) => {
-            const isSelected = activeTab === tab.id;
+        <div style={{ display: "flex", justifyContent: "space-around", alignItems: "center", height: 64, maxWidth: 600, margin: "0 auto", padding: "0 8px" }}>
+          {navItems.map(item => {
+            const isActive = activeTab === item.id;
+            const Icon = item.icon;
             return (
               <button
-                key={tab.id}
-                ref={el => { tabRefs.current[idx] = el; }}
-                onClick={() => setActiveTab(tab.id as any)}
-                role="tab"
-                aria-selected={isSelected}
+                key={item.id}
+                onClick={() => setActiveTab(item.id as any)}
                 style={{
-                  position: "relative", border: 0, background: "transparent", height: 36,
-                  padding: "6px 16px", color: isSelected ? "#FFFFFF" : "#64748B",
-                  cursor: "pointer", borderRadius: 48, zIndex: 1, fontSize: 12, fontWeight: 700,
-                  whiteSpace: "nowrap", transition: "color 250ms cubic-bezier(0.22, 1, 0.36, 1)"
+                  flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
+                  height: "100%", background: "transparent", border: "none", cursor: "pointer",
+                  color: isActive ? "#0F172A" : "#94A3B8", transition: "color 0.2s"
                 }}
               >
-                {tab.label}
+                <Icon size={24} style={{ strokeWidth: isActive ? 2.5 : 2 }} />
+                <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 500 }}>{item.label}</span>
               </button>
             );
           })}
         </div>
       </nav>
 
-      {/* ── Voucher "Show Code" Modal ── */}
+      {/* Voucher Modal */}
       {viewingClaim && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.5)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, backdropFilter: "blur(4px)" }}>
-          <div style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: 20, padding: 24, maxWidth: 420, width: "100%", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)", textAlign: "center" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-              <RewardTypeIcon type={viewingClaim.rewardType} size={44} />
-            </div>
-            <h3 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 800, color: "#0F172A" }}>{viewingClaim.rewardLabel}</h3>
-            <p style={{ margin: "0 0 18px", fontSize: 12, color: "#64748B" }}>
-              Your voucher code has been verified and issued by administration.
-            </p>
-
-            <div style={{ border: "2px dashed #CBD5E1", borderRadius: 12, padding: 14, marginBottom: viewingClaim.hasPin && viewingClaim.voucherPin ? 12 : 18 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>VOUCHER CODE</div>
-              <div style={{ fontFamily: "monospace", fontSize: 17, fontWeight: 900, color: "#6366F1", letterSpacing: 1, marginBottom: 8, wordBreak: "break-all" }}>
-                {viewingClaim.voucherCode || "N/A"}
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 99999, background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(4px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 24
+        }}>
+          <Card style={{ width: "100%", maxWidth: 400, overflow: "hidden", animation: "modalIn 0.2s ease-out" }}>
+            <CardHeader style={{ background: "#F8FAFC", borderBottom: "1px solid #E2E8F0", alignItems: "center", padding: "32px 24px 24px" }}>
+              <div style={{ width: 64, height: 64, borderRadius: 16, background: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #E2E8F0", marginBottom: 16, boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
+                <RewardIcon type={viewingClaim.rewardType} size={32} />
               </div>
-              <button
-                onClick={() => { if (viewingClaim.voucherCode) handleCopyText(viewingClaim.voucherCode, "Voucher Code"); }}
-                style={{ padding: "5px 14px", borderRadius: 6, background: "#F3F4F6", color: "#6366F1", border: "none", fontWeight: 700, fontSize: 11, cursor: "pointer" }}
-              >
-                📋 Copy Code
-              </button>
-            </div>
-
-            {viewingClaim.hasPin && viewingClaim.voucherPin && (
-              <div style={{ border: "2px dashed #CBD5E1", borderRadius: 12, padding: 14, marginBottom: 18 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>VOUCHER PIN</div>
-                <div style={{ fontFamily: "monospace", fontSize: 17, fontWeight: 900, color: "#0F172A", letterSpacing: 1, marginBottom: 8 }}>
-                  {viewingClaim.voucherPin}
+              <CardTitle style={{ fontSize: 20 }}>{viewingClaim.rewardLabel}</CardTitle>
+              <div style={{ fontSize: 14, color: "#64748B", textAlign: "center", marginTop: 8 }}>Your voucher has been verified and issued.</div>
+            </CardHeader>
+            <CardContent style={{ padding: 32 }}>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Voucher Code</div>
+                  <div style={{ padding: "16px", background: "#F1F5F9", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 700, color: "#0F172A", wordBreak: "break-all" }}>{viewingClaim.voucherCode || "N/A"}</span>
+                    <Button variant="ghost" size="icon" onClick={() => viewingClaim.voucherCode && handleCopyText(viewingClaim.voucherCode, "Voucher Code")}>
+                      <Copy size={18} />
+                    </Button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => { if (viewingClaim.voucherPin) handleCopyText(viewingClaim.voucherPin, "Voucher PIN"); }}
-                  style={{ padding: "5px 14px", borderRadius: 6, background: "#F3F4F6", color: "#0F172A", border: "none", fontWeight: 700, fontSize: 11, cursor: "pointer" }}
-                >
-                  📋 Copy PIN
-                </button>
-              </div>
-            )}
 
-            <button
-              onClick={() => setViewingClaim(null)}
-              style={{ width: "100%", padding: "10px", borderRadius: 8, background: "#0F172A", color: "#FFFFFF", border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
-            >
-              Close
-            </button>
-          </div>
+                {viewingClaim.hasPin && viewingClaim.voucherPin && (
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Voucher PIN</div>
+                    <div style={{ padding: "16px", background: "#F1F5F9", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 700, color: "#0F172A", wordBreak: "break-all" }}>{viewingClaim.voucherPin}</span>
+                      <Button variant="ghost" size="icon" onClick={() => viewingClaim.voucherPin && handleCopyText(viewingClaim.voucherPin, "Voucher PIN")}>
+                        <Copy size={18} />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <Button variant="outline" onClick={() => setViewingClaim(null)} style={{ width: "100%", marginTop: 8 }}>
+                  Close
+                </Button>
+              </div>
+
+            </CardContent>
+          </Card>
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+          ` }} />
         </div>
       )}
+
     </div>
   );
 }
