@@ -79,12 +79,19 @@ export default function CreatorLoginPage() {
   const [saving, setSaving] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined' && window.location.hostname.startsWith('creator.')) {
+      return '';
+    }
+    return '/creator';
+  };
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const existing = await getCreatorDB(user.uid);
         if (existing) {
-          router.replace("/creator/dashboard");
+          router.replace(`${getBaseUrl()}/dashboard`);
           return;
         }
       }
@@ -108,7 +115,7 @@ export default function CreatorLoginPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ uid: user.uid, name: user.displayName, email: user.email, photoURL: user.photoURL, googleId: user.uid }),
         });
-        router.replace("/creator/dashboard");
+        router.replace(`${getBaseUrl()}/dashboard`);
         return;
       }
 
@@ -151,7 +158,7 @@ export default function CreatorLoginPage() {
       });
       const data = await res.json();
       if (data.success) {
-        router.replace("/creator/dashboard");
+        router.replace(`${getBaseUrl()}/dashboard`);
       } else {
         setError(data.message || "Registration failed.");
       }

@@ -23,7 +23,14 @@ export function middleware(req: NextRequest) {
 
   // 2. Route subdomain traffic internally to the /creator folder
   if (isCreatorSubdomain) {
-    if (!url.pathname.startsWith('/creator')) {
+    if (url.pathname.startsWith('/creator')) {
+      // If the URL explicitly contains /creator on the subdomain, redirect to strip it
+      const newPath = url.pathname.replace(/^\/creator/, '') || '/';
+      const redirectUrl = new URL(`https://creator.aradhyagifts.in${newPath}`);
+      redirectUrl.search = url.search;
+      return NextResponse.redirect(redirectUrl, 308);
+    } else {
+      // Rewrite clean URL to internal folder
       url.pathname = `/creator${url.pathname}`;
       return NextResponse.rewrite(url);
     }

@@ -213,6 +213,13 @@ export default function CreatorDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "rewards" | "sales" | "settings">("overview");
   
+  const getBaseUrl = () => {
+    if (typeof window !== 'undefined' && window.location.hostname.startsWith('creator.')) {
+      return '';
+    }
+    return '/creator';
+  };
+
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     setToast({ message, type });
@@ -270,10 +277,10 @@ export default function CreatorDashboard() {
           other: json.creator.otherHandle || "", upiId: json.creator.upiId || "", upiName: json.creator.upiName || "",
         });
       } else {
-        router.replace("/creator");
+        router.replace(getBaseUrl() || '/');
       }
     } catch {
-      router.replace("/creator");
+      router.replace(getBaseUrl() || '/');
     } finally {
       setLoading(false);
     }
@@ -281,7 +288,7 @@ export default function CreatorDashboard() {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) { router.replace("/creator"); return; }
+      if (!user) { router.replace(getBaseUrl() || '/'); return; }
       await fetchData(user.uid);
     });
     return () => unsub();
@@ -672,7 +679,7 @@ export default function CreatorDashboard() {
                 Save Profile
               </NativeButton>
 
-              <NativeButton type="button" variant="danger" onClick={async () => { await auth.signOut(); router.push("/creator"); }} style={{ marginTop: 24, background: "transparent", border: "1px solid #FCA5A5" }}>
+              <NativeButton type="button" variant="danger" onClick={async () => { await auth.signOut(); router.push(getBaseUrl() || '/'); }} style={{ marginTop: 24, background: "transparent", border: "1px solid #FCA5A5" }}>
                 Log Out
               </NativeButton>
             </form>
