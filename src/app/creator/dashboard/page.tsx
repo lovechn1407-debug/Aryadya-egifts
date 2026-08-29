@@ -223,6 +223,7 @@ export default function CreatorDashboard() {
   });
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [verifyingUpi, setVerifyingUpi] = useState(false);
+  const [upiMessage, setUpiMessage] = useState<{text: string, type: "success"|"error"} | null>(null);
 
   const [claimingRewardId, setClaimingRewardId] = useState<string | null>(null);
   const [viewingClaim, setViewingClaim] = useState<RewardClaim | null>(null);
@@ -296,7 +297,9 @@ export default function CreatorDashboard() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           uid: data.creator.uid, email: data.creator.email,
-          ...settingsForm
+          name: settingsForm.name, phone: settingsForm.phone,
+          instagramHandle: settingsForm.instagram, youtubeHandle: settingsForm.youtube,
+          otherHandle: settingsForm.other, upiId: settingsForm.upiId, upiName: settingsForm.upiName
         }),
       });
       const json = await res.json();
@@ -315,8 +318,9 @@ export default function CreatorDashboard() {
   };
 
   const handleVerifyUpi = async () => {
-    if (!settingsForm.upiId) return showToast("Enter a UPI ID first.", "error");
+    if (!settingsForm.upiId) return setUpiMessage({text: "Enter a UPI ID first.", type: "error"});
     setVerifyingUpi(true);
+    setUpiMessage(null);
     try {
       const res = await fetch("/api/creator/verify-upi", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -325,12 +329,12 @@ export default function CreatorDashboard() {
       const data = await res.json();
       if (data.success) {
         setSettingsForm({ ...settingsForm, upiName: data.payeeAccountName });
-        showToast(data.message, "success");
+        setUpiMessage({text: `Verified: ${data.payeeAccountName}`, type: "success"});
       } else {
-        showToast(data.message, "error");
+        setUpiMessage({text: data.message || "Invalid UPI ID", type: "error"});
       }
     } catch (e: any) {
-      showToast("Verification failed.", "error");
+      setUpiMessage({text: "Verification failed. Try manually.", type: "error"});
     } finally {
       setVerifyingUpi(false);
     }
@@ -376,9 +380,14 @@ export default function CreatorDashboard() {
           </div>
           <div style={{
             width: 36, height: 36, borderRadius: "50%", background: "#F3F4F6", color: "#111827",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700,
+            overflow: "hidden"
           }}>
-            {creator.name?.charAt(0)?.toUpperCase() || "C"}
+            {creator.photoURL ? (
+              <img src={creator.photoURL} alt={creator.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              creator.name?.charAt(0)?.toUpperCase() || "C"
+            )}
           </div>
         </div>
       </header>
@@ -563,9 +572,13 @@ export default function CreatorDashboard() {
               <div style={{
                 width: 72, height: 72, borderRadius: "50%", background: "#3B82F6",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "#FFFFFF",
-                boxShadow: "0 0 0 4px rgba(255,255,255,0.1)"
+                boxShadow: "0 0 0 4px rgba(255,255,255,0.1)", overflow: "hidden", flexShrink: 0
               }}>
-                {creator.name?.charAt(0)?.toUpperCase() || "C"}
+                {creator.photoURL ? (
+                  <img src={creator.photoURL} alt={creator.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  creator.name?.charAt(0)?.toUpperCase() || "C"
+                )}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{creator.name}</h2>
@@ -601,16 +614,25 @@ export default function CreatorDashboard() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 8 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Payout Details (UPI)</div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <div style={{ flex: 1 }}>
-                    <NativeInput icon={Wallet} placeholder="UPI ID (e.g., name@upi)" value={settingsForm.upiId} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiId: e.target.value })} />
+                <div>
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <div style={{ flex: 1 }}>
+                      <NativeInput icon={Wallet} placeholder="UPI ID (e.g., name@upi)" value={settingsForm.upiId} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiId: e.target.value })} />
+                    </div>
+                    <button type="button" onClick={handleVerifyUpi} disabled={verifyingUpi} style={{
+                      padding: "0 20px", height: 56, background: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
+                      color: "#FFFFFF", border: "none", borderRadius: 16, boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+                      fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, transition: "transform 0.2s, box-shadow 0.2s"
+                    }}>
+                      {verifyingUpi ? <Loader2 size={18} className="animate-spin" /> : "Verify"}
+                    </button>
                   </div>
-                  <button type="button" onClick={handleVerifyUpi} disabled={verifyingUpi} style={{
-                    padding: "0 16px", background: "#EFF6FF", color: "#3B82F6", border: "1px solid #BFDBFE", borderRadius: 16,
-                    fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, transition: "0.2s"
-                  }}>
-                    {verifyingUpi ? <Loader2 size={18} className="animate-spin" /> : "Verify"}
-                  </button>
+                  {upiMessage && (
+                    <div style={{ marginTop: 8, fontSize: 13, fontWeight: 600, color: upiMessage.type === "success" ? "#10B981" : "#EF4444", display: "flex", alignItems: "center", gap: 6, paddingLeft: 12 }}>
+                      {upiMessage.type === "success" ? <CheckCircle size={16} /> : <Info size={16} />}
+                      {upiMessage.text}
+                    </div>
+                  )}
                 </div>
                 <NativeInput icon={Landmark} placeholder="Account Holder Name" value={settingsForm.upiName} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiName: e.target.value })} />
               </div>
