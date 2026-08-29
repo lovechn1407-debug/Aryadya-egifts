@@ -231,14 +231,20 @@ export default function CreatorDashboard() {
     try {
       const domain = settingsForm.upiId.split('@')[1].toLowerCase();
       let mapped = domain;
-      if (domain.includes('icici')) mapped = 'icici';
+      if (domain.startsWith('ok')) mapped = 'gpay';
+      else if (['ybl', 'ibl', 'axl'].includes(domain) || domain.includes('phonepe')) mapped = 'phonepe';
+      else if (domain.includes('paytm')) mapped = 'paytm';
+      else if (domain.includes('fam')) mapped = 'fampay';
+      else if (domain.includes('apl')) mapped = 'amazon';
+      else if (domain.includes('bhim')) mapped = 'bhim';
+      else if (domain.includes('mobikwik')) mapped = 'mobikwik';
+      else if (domain.includes('freecharge')) mapped = 'freecharge';
+      else if (domain.includes('icici')) mapped = 'icici';
       else if (domain.includes('hdfc')) mapped = 'hdfc';
       else if (domain.includes('sbi')) mapped = 'sbi';
-      else if (domain.includes('axis') || domain === 'axl') mapped = 'axis';
-      else if (domain.includes('yes') || domain === 'ybl') mapped = 'yes';
-      else if (domain.includes('paytm')) mapped = 'paytm';
-      else if (domain.includes('ok')) mapped = 'gpay';
-      else if (domain.includes('phonepe') || domain === 'ibl') mapped = 'phonepe';
+      else if (domain.includes('axis')) mapped = 'axis';
+      else if (domain.includes('yes')) mapped = 'yes';
+      else if (domain.includes('kotak')) mapped = 'kotak';
       
       const iconData = icons.getIcon(mapped, 'svg');
       if (iconData && iconData.icon_name !== 'default') return iconData.icon_url;
