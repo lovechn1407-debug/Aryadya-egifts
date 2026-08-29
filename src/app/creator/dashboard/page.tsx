@@ -881,13 +881,13 @@ export default function CreatorDashboard() {
                       <td style={{ padding: "12px 10px" }}>
                         <span style={{
                           fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 10,
-                          background: p.status === "SUCCESS" ? "#DCFCE7" : "#FEF3C7",
-                          color: p.status === "SUCCESS" ? "#15803D" : "#B45309"
+                          background: p.status === "paid" ? "#DCFCE7" : "#FEF3C7",
+                          color: p.status === "paid" ? "#15803D" : "#B45309"
                         }}>
-                          {p.status}
+                          {p.status.toUpperCase()}
                         </span>
                       </td>
-                      <td style={{ padding: "12px 10px", fontFamily: "monospace" }}>{p.utr || "N/A"}</td>
+                      <td style={{ padding: "12px 10px", fontFamily: "monospace" }}>{p.reference || "N/A"}</td>
                       <td style={{ padding: "12px 10px", color: "#64748B" }}>{new Date(p.createdAt).toLocaleDateString("en-IN")}</td>
                     </tr>
                   ))}
