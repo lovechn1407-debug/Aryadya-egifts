@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -14,6 +14,7 @@ import {
   Menu, User, Phone, Camera, Video, Globe, Landmark, Wallet
 } from "lucide-react";
 import { FaInstagram, FaYoutube } from "react-icons/fa";
+import icons from "payments-icons-library";
 
 interface OrderSummary {
   id: string; productName: string; buyerName: string;
@@ -225,6 +226,28 @@ export default function CreatorDashboard() {
   const [verifyingUpi, setVerifyingUpi] = useState(false);
   const [upiMessage, setUpiMessage] = useState<{text: string, type: "success"|"error"} | null>(null);
 
+  const upiIconUrl = useMemo(() => {
+    if (!settingsForm.upiId || !settingsForm.upiId.includes('@')) return null;
+    try {
+      const domain = settingsForm.upiId.split('@')[1].toLowerCase();
+      let mapped = domain;
+      if (domain.includes('icici')) mapped = 'icici';
+      else if (domain.includes('hdfc')) mapped = 'hdfc';
+      else if (domain.includes('sbi')) mapped = 'sbi';
+      else if (domain.includes('axis') || domain === 'axl') mapped = 'axis';
+      else if (domain.includes('yes') || domain === 'ybl') mapped = 'yes';
+      else if (domain.includes('paytm')) mapped = 'paytm';
+      else if (domain.includes('ok')) mapped = 'gpay';
+      else if (domain.includes('phonepe') || domain === 'ibl') mapped = 'phonepe';
+      
+      const iconData = icons.getIcon(mapped, 'svg');
+      if (iconData && iconData.icon_name !== 'default') return iconData.icon_url;
+    } catch (e) {
+      // ignore
+    }
+    return null;
+  }, [settingsForm.upiId]);
+
   const [claimingRewardId, setClaimingRewardId] = useState<string | null>(null);
   const [viewingClaim, setViewingClaim] = useState<RewardClaim | null>(null);
   const [selectedReward, setSelectedReward] = useState<AffiliateReward | null>(null); // For slide-up details panel
@@ -330,6 +353,8 @@ export default function CreatorDashboard() {
       if (data.success) {
         setSettingsForm({ ...settingsForm, upiName: data.payeeAccountName });
         setUpiMessage({text: `Verified: ${data.payeeAccountName}`, type: "success"});
+      } else if (data.isQueryPatternValid) {
+        setUpiMessage({text: "UPI ID format verified", type: "success"});
       } else {
         setUpiMessage({text: data.message || "Invalid UPI ID", type: "error"});
       }
@@ -617,7 +642,7 @@ export default function CreatorDashboard() {
                 <div>
                   <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                     <div style={{ flex: 1 }}>
-                      <NativeInput icon={Wallet} placeholder="UPI ID (e.g., name@upi)" value={settingsForm.upiId} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiId: e.target.value })} />
+                      <NativeInput icon={() => upiIconUrl ? <img src={upiIconUrl} alt="bank" style={{width:24, height:24, objectFit:"contain"}}/> : <Wallet size={20} color="#9CA3AF"/>} placeholder="UPI ID (e.g., name@upi)" value={settingsForm.upiId} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiId: e.target.value })} />
                     </div>
                     <button type="button" onClick={handleVerifyUpi} disabled={verifyingUpi} style={{
                       padding: "0 20px", height: 56, background: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",

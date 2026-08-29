@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
     } else {
       return NextResponse.json({
         success: false,
+        isQueryPatternValid: response.isQueryPatternValid,
         message: response.message || "Invalid UPI ID"
       });
     }
