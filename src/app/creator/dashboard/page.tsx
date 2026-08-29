@@ -162,10 +162,10 @@ function PremiumMissionItem({ title, subtitle, rightValue, ratio, statusColor, i
         transition: "transform 0.2s, box-shadow 0.2s"
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 0 }}>
           <div style={{
-            position: "relative", width: 48, height: 48, borderRadius: 14,
+            position: "relative", width: 48, height: 48, borderRadius: 14, flexShrink: 0,
             background: "#FFFFFF",
             border: "1px solid #E5E7EB",
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -173,16 +173,16 @@ function PremiumMissionItem({ title, subtitle, rightValue, ratio, statusColor, i
           }}>
             {Icon && <Icon size={24} />}
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span style={{ fontSize: "clamp(14px, 4.3vw, 16px)", fontWeight: 700, color: "#111827", letterSpacing: "-0.01em" }}>{title}</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: statusColor }}>{subtitle}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: "clamp(14px, 4vw, 16px)", fontWeight: 700, color: "#111827", letterSpacing: "-0.01em", display: "block", lineHeight: 1.3 }}>{title}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: statusColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{subtitle}</span>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
           <span style={{
-            fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 99,
+            fontSize: 12, fontWeight: 700, padding: "6px 10px", borderRadius: 99,
             background: isFulfilled ? "#D1FAE5" : isPending ? "#FEF3C7" : unlocked ? "#DBEAFE" : "#F3F4F6",
-            color: statusColor
+            color: statusColor, whiteSpace: "nowrap"
           }}>
             {rightValue}
           </span>
