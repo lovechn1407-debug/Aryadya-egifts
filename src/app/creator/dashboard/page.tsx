@@ -11,7 +11,7 @@ import {
   LogOut, ChevronRight, Check, Clock, Copy, ArrowUpRight,
   ArrowDownRight, Loader2, Info, Gift, DollarSign, Target,
   TrendingUp, Activity, CheckCircle, Smartphone, ExternalLink,
-  Menu
+  Menu, User, Phone, Camera, Video, Globe, Landmark, Wallet
 } from "lucide-react";
 
 interface OrderSummary {
@@ -66,6 +66,29 @@ function NativeButton({ children, variant = "primary", onClick, disabled, loadin
     >
       {loading ? <Loader2 size={18} className="animate-spin" /> : children}
     </button>
+  );
+}
+
+function NativeInput({ icon: Icon, placeholder, type = "text", value, onChange, required }: any) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 12, padding: "0 16px",
+      background: focused ? "#FFFFFF" : "#F9FAFB",
+      border: `2px solid ${focused ? "#3B82F6" : "#E5E7EB"}`,
+      borderRadius: 16, transition: "all 0.2s ease",
+      boxShadow: focused ? "0 4px 12px rgba(59, 130, 246, 0.1)" : "none"
+    }}>
+      {Icon && <Icon size={20} color={focused ? "#3B82F6" : "#9CA3AF"} style={{ transition: "color 0.2s ease" }} />}
+      <input
+        type={type} placeholder={placeholder} value={value} onChange={onChange} required={required}
+        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        style={{
+          flex: 1, padding: "16px 0", background: "transparent", border: "none",
+          fontSize: 16, outline: "none", color: "#111827", width: "100%"
+        }}
+      />
+    </div>
   );
 }
 
@@ -317,7 +340,7 @@ export default function CreatorDashboard() {
         borderBottom: "1px solid #E5E7EB", boxShadow: "0 2px 10px rgba(0,0,0,0.02)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src="/logo.png" alt="Aradhya E-Gifting" style={{ height: 32, objectFit: "contain" }} />
+          <img src="/logo.png" alt="Aradhya E-Gifting" style={{ height: 44, objectFit: "contain" }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ textAlign: "right" }}>
@@ -508,50 +531,21 @@ export default function CreatorDashboard() {
             <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Personal Info</div>
-                <input
-                  type="text" placeholder="Full Name" value={settingsForm.name}
-                  onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })}
-                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
-                  required
-                />
-                <input
-                  type="tel" placeholder="Phone Number" value={settingsForm.phone}
-                  onChange={e => setSettingsForm({ ...settingsForm, phone: e.target.value })}
-                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
-                />
+                <NativeInput icon={User} placeholder="Full Name" value={settingsForm.name} onChange={(e: any) => setSettingsForm({ ...settingsForm, name: e.target.value })} required />
+                <NativeInput icon={Phone} type="tel" placeholder="Phone Number" value={settingsForm.phone} onChange={(e: any) => setSettingsForm({ ...settingsForm, phone: e.target.value })} />
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 8 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Social Links</div>
-                <input
-                  type="text" placeholder="Instagram Username" value={settingsForm.instagram}
-                  onChange={e => setSettingsForm({ ...settingsForm, instagram: e.target.value })}
-                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
-                />
-                <input
-                  type="text" placeholder="YouTube Channel" value={settingsForm.youtube}
-                  onChange={e => setSettingsForm({ ...settingsForm, youtube: e.target.value })}
-                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
-                />
-                <input
-                  type="text" placeholder="Other Links (Website, etc.)" value={settingsForm.other}
-                  onChange={e => setSettingsForm({ ...settingsForm, other: e.target.value })}
-                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
-                />
+                <NativeInput icon={Camera} placeholder="Instagram Username" value={settingsForm.instagram} onChange={(e: any) => setSettingsForm({ ...settingsForm, instagram: e.target.value })} />
+                <NativeInput icon={Video} placeholder="YouTube Channel" value={settingsForm.youtube} onChange={(e: any) => setSettingsForm({ ...settingsForm, youtube: e.target.value })} />
+                <NativeInput icon={Globe} placeholder="Other Links (Website, etc.)" value={settingsForm.other} onChange={(e: any) => setSettingsForm({ ...settingsForm, other: e.target.value })} />
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 8 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Payout Details (UPI)</div>
-                <input
-                  type="text" placeholder="UPI ID (e.g., name@upi)" value={settingsForm.upiId}
-                  onChange={e => setSettingsForm({ ...settingsForm, upiId: e.target.value })}
-                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
-                />
-                <input
-                  type="text" placeholder="Account Holder Name" value={settingsForm.upiName}
-                  onChange={e => setSettingsForm({ ...settingsForm, upiName: e.target.value })}
-                  style={{ width: "100%", padding: "16px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#FFFFFF", fontSize: 16, outline: "none" }}
-                />
+                <NativeInput icon={Wallet} placeholder="UPI ID (e.g., name@upi)" value={settingsForm.upiId} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiId: e.target.value })} />
+                <NativeInput icon={Landmark} placeholder="Account Holder Name" value={settingsForm.upiName} onChange={(e: any) => setSettingsForm({ ...settingsForm, upiName: e.target.value })} />
               </div>
 
               <NativeButton type="submit" loading={settingsSaving} style={{ marginTop: 12 }}>
