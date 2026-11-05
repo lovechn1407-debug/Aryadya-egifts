@@ -329,7 +329,6 @@ function Hero() {
           fontFamily: "'Nunito', sans-serif",
           lineHeight: 1.15,
           color: "#0F172A",
-          textShadow: "0 1px 12px rgba(255, 255, 255, 0.8)",
           letterSpacing: "-0.02em",
         }}>
           Send <span style={{
@@ -348,7 +347,6 @@ function Hero() {
           lineHeight: 1.65,
           maxWidth: 560,
           margin: "18px auto 0",
-          textShadow: "0 1px 8px rgba(255, 255, 255, 0.9)",
         }}>
           Beautiful, personalised webpages for birthdays, proposals,
           anniversaries &amp; more. Preview it, pay once, customise &amp; share.
