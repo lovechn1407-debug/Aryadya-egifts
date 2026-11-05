@@ -140,43 +140,35 @@ function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> 
     if (marquees.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % marquees.length);
-    }, 4500);
+    }, 4000); // 4 seconds per message
     return () => clearInterval(interval);
   }, [marquees.length]);
 
   if (marquees.length === 0) return null;
 
   return (
-    <div style={{
-      height: 38,
-      overflow: "hidden",
-      position: "relative",
-      background: "linear-gradient(90deg, #FFF5F7 0%, #FAF5FF 50%, #FFF5F7 100%)",
-      borderBottom: "1px solid rgba(225, 29, 72, 0.08)",
-      zIndex: 101
-    }}>
+    <div style={{ height: 40, overflow: "hidden", position: "relative", background: "#fff", borderBottom: "1px solid #F3F4F6", zIndex: 101 }}>
       {marquees.map((mq, index) => {
-        const isActive = index === currentIndex;
-        const isPrev = index === (currentIndex - 1 + marquees.length) % marquees.length;
-
         let yPos = "100%";
         let opacity = 0;
         let zIndex = 0;
-        let transition = "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease";
+        let transition = "transform 0.5s ease, opacity 0.5s ease";
 
-        if (isActive) {
+        if (index === currentIndex) {
           yPos = "0";
           opacity = 1;
           zIndex = 2;
-        } else if (isPrev) {
+        } else if (index === (currentIndex - 1 + marquees.length) % marquees.length) {
+          // Just left the screen (moved up)
           yPos = "-100%";
           opacity = 0;
           zIndex = 1;
         } else {
+          // Waiting to enter from bottom
           yPos = "100%";
           opacity = 0;
           zIndex = 0;
-          transition = "none";
+          transition = "none"; // Reset instantly to bottom
         }
 
         return (
@@ -186,35 +178,18 @@ function MarqueeBar({ marquees }: { marquees: NonNullable<Settings["marquees"]> 
               position: "absolute",
               top: 0, left: 0, right: 0, height: "100%",
               display: "flex", alignItems: "center", justifyContent: "center",
-              gap: 8,
               transform: `translateY(${yPos})`,
               opacity,
               transition,
               zIndex,
-              fontSize: 12.5,
+              fontSize: 13,
               fontWeight: 600,
-              color: mq.color || "#1E1B4B",
+              color: mq.color || "#1F2937",
               textAlign: "center",
-              padding: "0 16px",
-              letterSpacing: "0.01em"
+              padding: "0 16px"
             }}
-          >
-            <span style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "2px 8px",
-              borderRadius: 999,
-              background: "rgba(225, 29, 72, 0.08)",
-              color: "#E11D48",
-              fontSize: 10.5,
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.05em"
-            }}>
-              ✨ Surprise
-            </span>
-            <span dangerouslySetInnerHTML={{ __html: mq.text }} />
-          </div>
+            dangerouslySetInnerHTML={{ __html: mq.text }}
+          />
         );
       })}
     </div>
@@ -228,1044 +203,139 @@ function Navbar({ onMenuClick, settings, onLoginClick }: { onMenuClick: () => vo
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 100,
-      background: "rgba(255, 255, 255, 0.88)",
-      backdropFilter: "blur(20px)",
-      WebkitBackdropFilter: "blur(20px)",
-      borderBottom: "1px solid rgba(15, 23, 42, 0.06)",
-      padding: "0 clamp(16px, 4vw, 48px)",
-      display: "flex", alignItems: "center", height: 64, gap: 16,
-      transition: "background 0.3s ease"
+      background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)",
+      borderBottom: "1px solid rgba(0,0,0,0.06)",
+      padding: "0 clamp(16px,4vw,48px)",
+      display: "flex", alignItems: "center", height: 60, gap: 12,
     }}>
-      {/* Brand Logo & Subtle Tag */}
-      <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-        <img
-          src={settings?.logoUrl || "/logo.png"}
-          alt="Aradhya E-Giftings"
-          style={{ height: 42, width: "auto", objectFit: "contain", transition: "transform 0.2s" }}
-        />
-        <div className="hero-nav-links-desktop" style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 800, color: "#E11D48" }}>
-            E-Giftings
-          </span>
-          <span style={{ fontSize: 11, color: "#64748B", fontWeight: 500, marginTop: -2 }}>
-            Digital Keepsakes
-          </span>
-        </div>
+      <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+        <img src={settings?.logoUrl || "/logo.png"} alt="Aradhya E-Giftings" style={{ height: 44, objectFit: "contain" }} />
       </Link>
-
-      {/* Desktop Quick Nav Links */}
-      <div className="hero-nav-links-desktop" style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 24 }}>
-        {[
-          { label: "Occasions", href: "#gifts" },
-          { label: "How It Works", href: "#how" },
-          { label: "Customer Stories", href: "#reviews" },
-          { label: "FAQs", href: "#faqs" },
-        ].map(item => (
-          <a
-            key={item.label}
-            href={item.href}
-            style={{
-              padding: "8px 14px",
-              borderRadius: 8,
-              fontSize: 13.5,
-              fontWeight: 600,
-              color: "#334155",
-              textDecoration: "none",
-              transition: "all 0.15s ease",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.color = "#E11D48";
-              e.currentTarget.style.background = "rgba(225, 29, 72, 0.05)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.color = "#334155";
-              e.currentTarget.style.background = "transparent";
-            }}
-          >
-            {item.label}
-          </a>
-        ))}
-      </div>
-
       <div style={{ flex: 1 }} />
-
-      {/* Track Orders / My Gifts quick link */}
-      <Link
-        href="/my-orders"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "7px 13px",
-          borderRadius: 999,
-          background: "rgba(15, 23, 42, 0.03)",
-          border: "1px solid rgba(15, 23, 42, 0.08)",
-          color: "#1E293B",
-          fontSize: 12.5,
-          fontWeight: 600,
-          textDecoration: "none",
-          transition: "all 0.2s ease"
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.background = "rgba(15, 23, 42, 0.07)";
-          e.currentTarget.style.borderColor = "rgba(15, 23, 42, 0.16)";
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.background = "rgba(15, 23, 42, 0.03)";
-          e.currentTarget.style.borderColor = "rgba(15, 23, 42, 0.08)";
-        }}
-      >
-        <GiftSVG size={14} color="#E11D48" />
-        <span className="hero-nav-links-desktop">My Gifts</span>
-      </Link>
-
-      {/* Auth / Account Button */}
-      {user ? (
-        <Link href="/my-orders" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-          {userProfile?.photoURL || user.photoURL ? (
-            <img
-              src={userProfile?.photoURL || user.photoURL || ""}
-              alt="User"
-              style={{
-                width: 38, height: 38, borderRadius: "50%",
-                objectFit: "cover", border: "2px solid #E11D48",
-                boxShadow: "0 2px 8px rgba(225, 29, 72, 0.2)"
-              }}
-            />
-          ) : (
-            <div style={{
-              width: 38, height: 38, borderRadius: "50%",
-              background: "linear-gradient(135deg, #E11D48, #9333EA)",
-              color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: 800, fontSize: 15, boxShadow: "0 2px 8px rgba(225, 29, 72, 0.25)"
-            }}>
-              {(userProfile?.name || user.displayName || "U")[0].toUpperCase()}
-            </div>
-          )}
-        </Link>
-      ) : (
-        <button
-          onClick={onLoginClick}
-          style={{
-            background: "linear-gradient(135deg, #E11D48, #9333EA)",
-            color: "#fff",
-            border: "none",
-            borderRadius: 999,
-            padding: "0 18px",
-            height: 38,
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: "pointer",
-            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-            whiteSpace: "nowrap",
-            boxShadow: "0 4px 14px rgba(225, 29, 72, 0.28)",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = "translateY(-1px)";
-            e.currentTarget.style.boxShadow = "0 6px 18px rgba(225, 29, 72, 0.38)";
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 4px 14px rgba(225, 29, 72, 0.28)";
-          }}
-        >
-          <span>Sign In</span>
-        </button>
-      )}
 
       {/* Hamburger Menu Icon */}
       <button 
         onClick={onMenuClick}
         aria-label="Toggle navigation menu"
         style={{
-          background: "rgba(15, 23, 42, 0.04)",
-          border: "1px solid rgba(15, 23, 42, 0.06)",
-          borderRadius: 10,
-          width: 38,
-          height: 38,
+          background: "rgba(124, 58, 237, 0.08)",
+          border: "none",
+          borderRadius: 6,
+          width: 40,
+          height: 40,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          color: "#1E293B",
-          transition: "all 0.2s"
+          color: "#7C3AED",
+          transition: "background 0.2s"
         }}
-        onMouseEnter={e => {
-          e.currentTarget.style.background = "rgba(15, 23, 42, 0.08)";
-          e.currentTarget.style.color = "#E11D48";
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.background = "rgba(15, 23, 42, 0.04)";
-          e.currentTarget.style.color = "#1E293B";
-        }}
+        onMouseEnter={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.15)"}
+        onMouseLeave={e => e.currentTarget.style.background = "rgba(124, 58, 237, 0.08)"}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="4" y1="12" x2="20" y2="12" />
-          <line x1="4" y1="6" x2="20" y2="6" />
-          <line x1="4" y1="18" x2="20" y2="18" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="18" x2="21" y2="18" />
         </svg>
       </button>
+
+      {/* Auth / Account Button */}
+      {user ? (
+        <Link href="/my-orders" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+          {userProfile?.photoURL || user.photoURL ? (
+            <img src={userProfile?.photoURL || user.photoURL || ""} alt="User" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid #7C3AED" }} />
+          ) : (
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
+              {(userProfile?.name || user.displayName || "U")[0].toUpperCase()}
+            </div>
+          )}
+        </Link>
+      ) : (
+        <button onClick={onLoginClick} style={{
+          background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", border: "none",
+          borderRadius: 6, padding: "0 16px", height: 40,
+          fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "0.2s",
+          whiteSpace: "nowrap", boxShadow: "none"
+        }}>
+          Login
+        </button>
+      )}
     </nav>
   );
 }
 
-/* ── Interactive Live Surprise Showcase in Hero ── */
-function HeroInteractiveShowcase() {
-  const [activeTheme, setActiveTheme] = useState<"birthday" | "romantic" | "apology">("birthday");
-  const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
-  const [isPlayingMusic, setIsPlayingMusic] = useState(true);
-
-  const themeData = {
-    birthday: {
-      song: "Happy Birthday Lo-Fi • Acoustic",
-      to: "To: Sneha 🎂",
-      badge: "Turning 24 Today ✨",
-      polaroidTitle: "Our Rooftop Sunset 🌅",
-      polaroidNote: "May 14, 2024",
-      envelopeLabel: "Tap to Open Birthday Letter 💌",
-      revealedTitle: "Happy Birthday My Sunshine! 💖",
-      revealedText: "You make every room brighter and every day sweeter. Here is to 100 more birthdays of laughing at nothing together!",
-      bgGradient: "linear-gradient(145deg, #FFF1F5 0%, #FDF4FF 100%)",
-      accent: "#E11D48",
-      accentBg: "rgba(225, 29, 72, 0.08)",
-      tapeColor: "rgba(254, 205, 211, 0.8)",
-      icon: "🎂"
-    },
-    romantic: {
-      song: "Kesariya • Soft Guitar Cover",
-      to: "To: My Forever, Simran 💍",
-      badge: "730 Days Together 🥂",
-      polaroidTitle: "Our 1st Trip to Udaipur 🏰",
-      polaroidNote: "October 2024",
-      envelopeLabel: "Tap to Open Love Note 💌",
-      revealedTitle: "I'd Choose You in Every Lifetime ❤️",
-      revealedText: "Two years of holding your hand, and you still give me butterflies every single morning. Happy Anniversary, my love.",
-      bgGradient: "linear-gradient(145deg, #FFF0F6 0%, #F5F3FF 100%)",
-      accent: "#C026D3",
-      accentBg: "rgba(192, 38, 211, 0.08)",
-      tapeColor: "rgba(245, 208, 254, 0.8)",
-      icon: "💍"
-    },
-    apology: {
-      song: "Dil Diyan Gallan • Soft Piano",
-      to: "To: My Kuchupuchu 🥺",
-      badge: "Official Peace Treaty 🕊️",
-      polaroidTitle: "Can We Please Make Up? ☕",
-      polaroidNote: "Warm Hugs Included",
-      envelopeLabel: "Tap to Read My Apology 💌",
-      revealedTitle: "I am really sorry baby ❤️",
-      revealedText: "I was wrong and I hate seeing you upset. Your smile is my favorite thing in the universe. Coffee & hugs on me tonight?",
-      bgGradient: "linear-gradient(145deg, #FFF5F5 0%, #FFFBEB 100%)",
-      accent: "#EA580C",
-      accentBg: "rgba(234, 88, 12, 0.08)",
-      tapeColor: "rgba(254, 215, 170, 0.8)",
-      icon: "💌"
-    }
-  };
-
-  const current = themeData[activeTheme];
-
-  return (
-    <div style={{ position: "relative", width: "100%", maxWidth: 460, margin: "0 auto" }}>
-      {/* Ambient lighting halo */}
-      <div style={{
-        position: "absolute",
-        inset: -20,
-        borderRadius: 40,
-        background: "radial-gradient(circle, rgba(225, 29, 72, 0.12) 0%, rgba(192, 38, 211, 0.08) 50%, transparent 75%)",
-        filter: "blur(32px)",
-        pointerEvents: "none",
-        zIndex: 0
-      }} />
-
-      {/* Floating Feature Badges */}
-      <div
-        className="hero-soft-float"
-        style={{
-          position: "absolute",
-          top: -18,
-          left: -12,
-          background: "#ffffff",
-          padding: "7px 14px",
-          borderRadius: 999,
-          boxShadow: "0 12px 28px -6px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          fontSize: 12,
-          fontWeight: 700,
-          color: "#0F172A",
-          zIndex: 4,
-          whiteSpace: "nowrap"
-        }}
-      >
-        <span style={{ fontSize: 14 }}>🎵</span>
-        <span>Autoplays Your Song</span>
-      </div>
-
-      <div
-        className="hero-soft-float"
-        style={{
-          position: "absolute",
-          bottom: -16,
-          right: -10,
-          background: "#ffffff",
-          padding: "7px 14px",
-          borderRadius: 999,
-          boxShadow: "0 12px 28px -6px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          fontSize: 12,
-          fontWeight: 700,
-          color: "#0F172A",
-          zIndex: 4,
-          whiteSpace: "nowrap",
-          animationDelay: "-3s"
-        }}
-      >
-        <span style={{ fontSize: 14 }}>⚡</span>
-        <span>Instant WhatsApp Link</span>
-      </div>
-
-      {/* Main Simulated Keepsake Device / Card */}
-      <div style={{
-        position: "relative",
-        zIndex: 2,
-        borderRadius: 32,
-        background: "#ffffff",
-        boxShadow: "0 25px 60px -15px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.06)",
-        overflow: "hidden",
-        border: "1px solid rgba(255, 255, 255, 0.8)",
-      }}>
-        {/* Device Top Bar: Browser / Notification Pill */}
-        <div style={{
-          padding: "12px 18px",
-          background: "#F8FAFC",
-          borderBottom: "1px solid #E2E8F0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#EF4444" }} />
-            <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#F59E0B" }} />
-            <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#10B981" }} />
-          </div>
-
-          <div style={{
-            fontSize: 11,
-            color: "#64748B",
-            fontWeight: 600,
-            background: "#ffffff",
-            padding: "3px 12px",
-            borderRadius: 999,
-            border: "1px solid #E2E8F0",
-            display: "flex",
-            alignItems: "center",
-            gap: 6
-          }}>
-            <LockSVG size={10} color="#10B981" />
-            <span>aradhyagifts.in/for-you</span>
-          </div>
-
-          <div style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: "#10B981",
-            display: "flex",
-            alignItems: "center",
-            gap: 4
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981" }} />
-            <span>Live</span>
-          </div>
-        </div>
-
-        {/* Live Audio Equalizer Banner */}
-        <div style={{
-          padding: "8px 16px",
-          background: "linear-gradient(90deg, #0F172A 0%, #1E293B 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          color: "#ffffff"
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, overflow: "hidden" }}>
-            {/* Equalizer animation */}
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 2.5, height: 18, width: 20 }}>
-              <div className={isPlayingMusic ? "eq-bar-1" : ""} style={{ width: 3, height: isPlayingMusic ? 6 : 4, background: "#F43F5E", borderRadius: 2 }} />
-              <div className={isPlayingMusic ? "eq-bar-2" : ""} style={{ width: 3, height: isPlayingMusic ? 14 : 6, background: "#FB7185", borderRadius: 2 }} />
-              <div className={isPlayingMusic ? "eq-bar-3" : ""} style={{ width: 3, height: isPlayingMusic ? 18 : 8, background: "#FDA4AF", borderRadius: 2 }} />
-              <div className={isPlayingMusic ? "eq-bar-4" : ""} style={{ width: 3, height: isPlayingMusic ? 10 : 5, background: "#F43F5E", borderRadius: 2 }} />
-            </div>
-            <span style={{
-              fontSize: 11.5,
-              fontWeight: 600,
-              color: "#F8FAFC",
-              whiteSpace: "nowrap",
-              textOverflow: "ellipsis",
-              overflow: "hidden",
-              maxWidth: 240
-            }}>
-              {current.song}
-            </span>
-          </div>
-
-          <button
-            onClick={() => setIsPlayingMusic(!isPlayingMusic)}
-            aria-label="Toggle preview music"
-            style={{
-              background: "rgba(255,255,255,0.12)",
-              border: "none",
-              borderRadius: 999,
-              padding: "3px 9px",
-              color: "#fff",
-              fontSize: 10.5,
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "background 0.2s"
-            }}
-          >
-            {isPlayingMusic ? "Pause ⏸" : "Play ▶"}
-          </button>
-        </div>
-
-        {/* Theme Switcher Tabs inside Showcase */}
-        <div style={{
-          display: "flex",
-          background: "#F1F5F9",
-          padding: "4px",
-          gap: 4
-        }}>
-          {[
-            { key: "birthday", label: "🎂 Birthday", icon: "🎂" },
-            { key: "romantic", label: "💍 Romantic", icon: "💍" },
-            { key: "apology", label: "💌 Apology", icon: "💌" },
-          ].map(t => {
-            const isTabActive = activeTheme === t.key;
-            return (
-              <button
-                key={t.key}
-                onClick={() => {
-                  setActiveTheme(t.key as any);
-                  setIsEnvelopeOpen(false);
-                }}
-                style={{
-                  flex: 1,
-                  padding: "6px 8px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: isTabActive ? "#ffffff" : "transparent",
-                  color: isTabActive ? "#0F172A" : "#64748B",
-                  fontSize: 12,
-                  fontWeight: isTabActive ? 700 : 600,
-                  cursor: "pointer",
-                  boxShadow: isTabActive ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
-                  transition: "all 0.15s ease"
-                }}
-              >
-                {t.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Card Canvas */}
-        <div style={{
-          padding: "24px 20px 20px",
-          background: current.bgGradient,
-          minHeight: 330,
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-          transition: "background 0.3s ease"
-        }}>
-          {/* Header row */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div>
-              <div style={{
-                fontSize: 11,
-                fontWeight: 800,
-                color: current.accent,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em"
-              }}>
-                Interactive Surprise
-              </div>
-              <h2 style={{
-                fontSize: 18,
-                fontWeight: 800,
-                color: "#1E293B",
-                margin: "2px 0 0"
-              }}>
-                {current.to}
-              </h2>
-            </div>
-            <span style={{
-              fontSize: 11.5,
-              fontWeight: 700,
-              background: current.accentBg,
-              color: current.accent,
-              padding: "4px 10px",
-              borderRadius: 999
-            }}>
-              {current.badge}
-            </span>
-          </div>
-
-          {/* Interactive Envelope / Love Letter Section */}
-          <div style={{
-            background: "#ffffff",
-            borderRadius: 18,
-            padding: "16px",
-            boxShadow: "0 8px 20px -4px rgba(0,0,0,0.06)",
-            border: "1px solid rgba(0,0,0,0.04)",
-            position: "relative",
-            overflow: "hidden"
-          }}>
-            {!isEnvelopeOpen ? (
-              <div style={{ textAlign: "center", padding: "10px 4px" }}>
-                <div style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 16,
-                  background: current.accentBg,
-                  margin: "0 auto 12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 26,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.04)"
-                }}>
-                  ✉️
-                </div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#1E293B", marginBottom: 4 }}>
-                  A Sealed Personal Letter
-                </div>
-                <div style={{ fontSize: 12, color: "#64748B", marginBottom: 14 }}>
-                  Customized with your private words &amp; secret memories
-                </div>
-                <button
-                  onClick={() => setIsEnvelopeOpen(true)}
-                  style={{
-                    background: current.accent,
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: 999,
-                    padding: "8px 20px",
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    boxShadow: `0 4px 14px ${current.accent}40`,
-                    transition: "transform 0.15s ease",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.transform = "scale(1.04)"}
-                  onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                >
-                  <span>{current.envelopeLabel}</span>
-                  <span>✨</span>
-                </button>
-              </div>
-            ) : (
-              <div style={{
-                animation: "fadeIn 0.35s ease",
-                padding: "4px"
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: current.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                    Private Letter Unlocked
-                  </span>
-                  <button
-                    onClick={() => setIsEnvelopeOpen(false)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: "#64748B",
-                      cursor: "pointer",
-                      textDecoration: "underline"
-                    }}
-                  >
-                    Close Envelope ✕
-                  </button>
-                </div>
-                <h3 style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: "#0F172A",
-                  marginBottom: 8
-                }}>
-                  {current.revealedTitle}
-                </h3>
-                <p style={{
-                  fontSize: 13,
-                  color: "#475569",
-                  lineHeight: 1.6,
-                  fontStyle: "italic",
-                  marginBottom: 12
-                }}>
-                  &ldquo;{current.revealedText}&rdquo;
-                </p>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  fontSize: 11,
-                  color: "#94A3B8",
-                  borderTop: "1px dashed #E2E8F0",
-                  paddingTop: 8
-                }}>
-                  <span>Forever yours ❤️</span>
-                  <span>Slide 2 of 8</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Mini Polaroid & Interactive Feature Strip */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 12
-          }}>
-            {/* Polaroid card */}
-            <div style={{
-              background: "#ffffff",
-              borderRadius: 12,
-              padding: "10px 10px 12px",
-              boxShadow: "0 6px 16px -2px rgba(0,0,0,0.06)",
-              transform: "rotate(-1.5deg)",
-              border: "1px solid rgba(0,0,0,0.04)",
-              position: "relative"
-            }}>
-              {/* Washi tape */}
-              <div style={{
-                position: "absolute",
-                top: -8,
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: 44,
-                height: 14,
-                background: current.tapeColor,
-                borderRadius: 2,
-                opacity: 0.9
-              }} />
-              <div style={{
-                height: 72,
-                borderRadius: 8,
-                background: "linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #E9D5FF 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 24,
-                marginBottom: 8
-              }}>
-                {current.icon}
-              </div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#1E293B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {current.polaroidTitle}
-              </div>
-              <div style={{ fontSize: 9.5, color: "#94A3B8" }}>
-                {current.polaroidNote}
-              </div>
-            </div>
-
-            {/* Countdown / Heart Grid Feature Mini Box */}
-            <div style={{
-              background: "#ffffff",
-              borderRadius: 12,
-              padding: "12px",
-              boxShadow: "0 6px 16px -2px rgba(0,0,0,0.06)",
-              transform: "rotate(1.5deg)",
-              border: "1px solid rgba(0,0,0,0.04)",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between"
-            }}>
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 800, color: current.accent, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  Features
-                </div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#1E293B", marginTop: 2 }}>
-                  Interactive Cake, Audio &amp; Wishes
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                {["🎂", "🎵", "💌", "📸"].map((emoji, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      width: 26,
-                      height: 26,
-                      borderRadius: 6,
-                      background: "#F8FAFC",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 12,
-                      border: "1px solid #E2E8F0"
-                    }}
-                  >
-                    {emoji}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Hero (World-Class Redesign) ── */
+/* ── Hero ── */
 function Hero() {
   return (
     <section style={{
-      position: "relative",
-      overflow: "hidden",
-      padding: "clamp(48px, 6vw, 84px) clamp(16px, 4vw, 48px) clamp(56px, 7vw, 96px)",
-      background: "radial-gradient(ellipse 80% 60% at 50% -10%, #FFF1F5 0%, #FAF8FF 40%, #FFFFFF 100%)",
+      position: "relative", overflow: "hidden",
+      padding: "80px clamp(16px,4vw,48px) 60px",
+      background: "linear-gradient(180deg, #FFF0F5 0%, #FFFFFF 100%)",
     }}>
-      {/* Subtle organic ambient lights (not harsh AI blobs) */}
-      <div style={{
-        position: "absolute",
-        top: -120,
-        right: -80,
-        width: 450,
-        height: 450,
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(244, 63, 94, 0.08) 0%, transparent 70%)",
-        pointerEvents: "none",
-        zIndex: 0
-      }} />
-      <div style={{
-        position: "absolute",
-        top: 200,
-        left: -100,
-        width: 400,
-        height: 400,
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(147, 51, 234, 0.06) 0%, transparent 70%)",
-        pointerEvents: "none",
-        zIndex: 0
-      }} />
+      {/* Decorative blobs */}
+      <div style={{ position: "absolute", top: -80, right: -60, width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(233,30,140,0.08),transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: -60, left: -80, width: 250, height: 250, borderRadius: "50%", background: "radial-gradient(circle,rgba(124,58,237,0.06),transparent 70%)", pointerEvents: "none" }} />
 
-      <div style={{
-        maxWidth: 1240,
-        margin: "0 auto",
-        position: "relative",
-        zIndex: 1,
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-        alignItems: "center",
-        gap: "clamp(36px, 5vw, 64px)"
-      }}>
-        {/* Left Column: Emotion, Typography & Action */}
-        <div>
-          {/* Eyebrow Pill */}
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 14px",
-            borderRadius: 999,
-            background: "linear-gradient(135deg, rgba(225, 29, 72, 0.08), rgba(147, 51, 234, 0.08))",
-            border: "1px solid rgba(225, 29, 72, 0.16)",
-            marginBottom: 20
-          }}>
-            <span
-              style={{ width: 8, height: 8, borderRadius: "50%", background: "#10B981" }}
-              className="live-pulse-dot"
-            />
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#9F1239" }}>
-              Custom Digital Surprises
-            </span>
-            <span style={{ color: "#CBD5E1", fontSize: 12 }}>•</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B" }}>
-              Ready in 2 Minutes
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 style={{
-            fontSize: "clamp(34px, 4.4vw, 58px)",
-            fontWeight: 900,
-            lineHeight: 1.12,
-            letterSpacing: "-0.03em",
-            color: "#0F172A",
-            margin: "0 0 20px"
-          }}>
-            Don&apos;t just send a text.
-            <br />
-            Send a{" "}
-            <span style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontStyle: "italic",
-              fontWeight: 700,
-              background: "linear-gradient(135deg, #E11D48 0%, #D946EF 55%, #7C3AED 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent"
-            }}>
-              moment
-            </span>{" "}
-            they&apos;ll replay forever.
-          </h1>
-
-          {/* Subtitle */}
-          <p style={{
-            fontSize: "clamp(15.5px, 1.8vw, 17.5px)",
-            color: "#475569",
-            lineHeight: 1.65,
-            maxWidth: 520,
-            margin: "0 0 32px",
-            fontWeight: 450
-          }}>
-            Turn your favorite memories, songs, secret jokes, love letters &amp; photo polaroids into a personalized interactive website. Opens instantly in any phone browser — no app download required.
-          </p>
-
-          {/* CTAs */}
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center", marginBottom: 36 }}>
-            <a
-              href="#gifts"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-                background: "linear-gradient(135deg, #E11D48 0%, #9333EA 100%)",
-                color: "#ffffff",
-                padding: "14px 30px",
-                borderRadius: 999,
-                fontSize: 15,
-                fontWeight: 700,
-                textDecoration: "none",
-                boxShadow: "0 10px 24px -4px rgba(225, 29, 72, 0.35)",
-                transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 14px 28px -4px rgba(225, 29, 72, 0.45)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 10px 24px -4px rgba(225, 29, 72, 0.35)";
-              }}
-            >
-              <span>Explore Gift Experiences</span>
-              <GiftSVG size={18} color="#ffffff" />
-            </a>
-
-            <a
-              href="#how"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: "#ffffff",
-                color: "#0F172A",
-                padding: "14px 26px",
-                borderRadius: 999,
-                fontSize: 15,
-                fontWeight: 600,
-                textDecoration: "none",
-                border: "1px solid rgba(15, 23, 42, 0.12)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-                transition: "all 0.2s ease"
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = "rgba(15, 23, 42, 0.25)";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = "rgba(15, 23, 42, 0.12)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <span style={{
-                width: 22, height: 22, borderRadius: "50%",
-                background: "rgba(225, 29, 72, 0.1)", color: "#E11D48",
-                display: "inline-flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, fontWeight: 900
-              }}>
-                ▶
-              </span>
-              <span>How It Works</span>
-            </a>
-          </div>
-
-          {/* Social Proof with Customer Avatars */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            flexWrap: "wrap",
-            paddingTop: 18,
-            borderTop: "1px solid rgba(15, 23, 42, 0.08)"
-          }}>
-            {/* Avatar Stack */}
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {[
-                { bg: "#F43F5E", initial: "A" },
-                { bg: "#8B5CF6", initial: "R" },
-                { bg: "#10B981", initial: "S" },
-                { bg: "#F59E0B", initial: "P" },
-              ].map((av, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    background: av.bg,
-                    color: "#fff",
-                    fontWeight: 800,
-                    fontSize: 12,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "2px solid #ffffff",
-                    marginLeft: i > 0 ? -10 : 0,
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
-                  }}
-                >
-                  {av.initial}
-                </div>
-              ))}
-            </div>
-
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 800, color: "#0F172A" }}>
-                <span style={{ color: "#F59E0B" }}>★★★★★</span>
-                <span>4.9 / 5</span>
-                <span style={{ color: "#94A3B8", fontWeight: 400 }}>·</span>
-                <span style={{ color: "#64748B", fontWeight: 600 }}>14,000+ Celebrations</span>
-              </div>
-              <div style={{ fontSize: 12, color: "#64748B", fontStyle: "italic", marginTop: 2 }}>
-                &ldquo;She cried happy tears when the song started playing…&rdquo;
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Occasion Discovery Chips */}
-          <div style={{ marginTop: 24, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Quick Jumps:
-            </span>
-            {[
-              { label: "🎂 Birthday Magic", href: "#gifts" },
-              { label: "💍 Romantic & Proposal", href: "#gifts" },
-              { label: "🥂 Anniversary", href: "#gifts" },
-              { label: "💌 Sweet Apology", href: "#gifts" },
-            ].map(chip => (
-              <a
-                key={chip.label}
-                href={chip.href}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "5px 12px",
-                  borderRadius: 999,
-                  background: "#ffffff",
-                  border: "1px solid rgba(15, 23, 42, 0.08)",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#334155",
-                  textDecoration: "none",
-                  transition: "all 0.15s ease",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.03)"
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = "#E11D48";
-                  e.currentTarget.style.color = "#E11D48";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = "rgba(15, 23, 42, 0.08)";
-                  e.currentTarget.style.color = "#334155";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                {chip.label}
-              </a>
-            ))}
-          </div>
+      <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", position: "relative", zIndex: 1 }}>
+        <div style={{
+          display: "inline-block", padding: "6px 18px", borderRadius: 999, fontSize: 13, fontWeight: 700,
+          background: "linear-gradient(135deg,rgba(233,30,140,0.1),rgba(124,58,237,0.1))",
+          color: "#E91E8C", marginBottom: 20,
+        }}>
+          ✨ India&apos;s Most Loved E-Gifting Platform
         </div>
 
-        {/* Right Column: Interactive Live Surprise Showcase */}
-        <div>
-          <HeroInteractiveShowcase />
-        </div>
-      </div>
+        <h1 style={{
+          fontSize: "clamp(32px,6vw,56px)", fontWeight: 900,
+          fontFamily: "'Nunito',sans-serif", lineHeight: 1.15,
+          color: "#1A1A2E",
+        }}>
+          Send <span style={{ color: "#E91E8C" }}>Magical</span> Digital
+          <br />Surprises to Your Loved Ones
+        </h1>
 
-      {/* Feature Strip below Hero */}
-      <div style={{
-        maxWidth: 1100,
-        margin: " clamp(48px, 6vw, 72px) auto 0",
-        padding: "20px 24px",
-        borderRadius: 24,
-        background: "rgba(255, 255, 255, 0.7)",
-        backdropFilter: "blur(12px)",
-        border: "1px solid rgba(15, 23, 42, 0.06)",
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: 20
-      }}>
-        {[
-          {
-            icon: "⚡",
-            title: "Ready in 2 Minutes",
-            desc: "Add your photos, choose songs & preview live instantly"
-          },
-          {
-            icon: "📲",
-            title: "Zero Apps Needed",
-            desc: "Opens seamlessly on any iPhone, Android or laptop"
-          },
-          {
-            icon: "🔒",
-            title: "100% Private & Permanent",
-            desc: "Only the people with your secret link can view it"
-          },
-          {
-            icon: "💳",
-            title: "One-Time ₹99 Payment",
-            desc: "No subscriptions, no ads, lifetime cloud hosting"
-          }
-        ].map(item => (
-          <div key={item.title} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-            <div style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: "rgba(225, 29, 72, 0.08)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 18,
-              flexShrink: 0
-            }}>
-              {item.icon}
+        <p style={{
+          fontSize: "clamp(15px,2vw,18px)", color: "#4A4A68",
+          lineHeight: 1.7, maxWidth: 540, margin: "20px auto 0",
+        }}>
+          Beautiful, personalised webpages for birthdays, proposals,
+          anniversaries &amp; more. Preview it, pay once, customise &amp; share.
+        </p>
+
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 32, flexWrap: "wrap" }}>
+          <a href="#gifts" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "linear-gradient(135deg,#E91E8C,#7C3AED)", color: "#fff",
+            borderRadius: 999, padding: "14px 32px", fontWeight: 700, fontSize: 15,
+            textDecoration: "none", boxShadow: "0 8px 24px rgba(233,30,140,0.25)",
+            transition: "transform 0.2s",
+          }}>
+            Browse Gifts <GiftSVG size={18} color="#fff" />
+          </a>
+          <a href="#how" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "#fff", color: "#1A1A2E",
+            border: "1px solid rgba(0,0,0,0.1)", borderRadius: 999,
+            padding: "14px 32px", fontWeight: 600, fontSize: 15,
+            textDecoration: "none", transition: "all 0.2s",
+          }}>
+            How it Works
+          </a>
+        </div>
+
+        {/* Trust indicators */}
+        <div style={{ display: "flex", gap: 28, justifyContent: "center", marginTop: 36, flexWrap: "wrap" }}>
+          {[
+            { icon: <LockSVG size={16} color="#E91E8C" />, text: "Secure Payments" },
+            { icon: <LightningSVG size={16} color="#7C3AED" />, text: "Instant Delivery" },
+            { icon: <CustomizeSVG size={16} color="#6366F1" />, text: "Fully Customisable" },
+          ].map(t => (
+            <div key={t.text} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#9CA3AF", fontWeight: 500 }}>
+              <span style={{ display: "inline-flex", alignItems: "center" }}>{t.icon}</span> {t.text}
             </div>
-            <div>
-              <div style={{ fontSize: 13.5, fontWeight: 700, color: "#0F172A", marginBottom: 2 }}>
-                {item.title}
-              </div>
-              <div style={{ fontSize: 12, color: "#64748B", lineHeight: 1.45 }}>
-                {item.desc}
-              </div>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );
