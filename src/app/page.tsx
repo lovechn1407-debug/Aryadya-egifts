@@ -12,6 +12,7 @@ import HomepagePopups from "@/components/HomepagePopups";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginModal from "@/components/LoginModal";
 import ChatWidget from "@/components/ChatWidget";
+import WaylumeBackground from "@/components/WaylumeBackground";
 
 
 /* ── Modern UI SVG Icons ── */
@@ -269,69 +270,150 @@ function Navbar({ onMenuClick, settings, onLoginClick }: { onMenuClick: () => vo
 function Hero() {
   return (
     <section style={{
-      position: "relative", overflow: "hidden",
-      padding: "80px clamp(16px,4vw,48px) 60px",
-      background: "linear-gradient(180deg, #FFF0F5 0%, #FFFFFF 100%)",
+      position: "relative",
+      overflow: "hidden",
+      isolation: "isolate",
+      padding: "clamp(60px, 8vw, 110px) clamp(16px, 4vw, 48px) clamp(50px, 7vw, 90px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "clamp(500px, 72vh, 640px)",
     }}>
-      {/* Decorative blobs */}
-      <div style={{ position: "absolute", top: -80, right: -60, width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(233,30,140,0.08),transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: -60, left: -80, width: 250, height: 250, borderRadius: "50%", background: "radial-gradient(circle,rgba(124,58,237,0.06),transparent 70%)", pointerEvents: "none" }} />
+      {/* Animated Aurora WebGL Background */}
+      <WaylumeBackground />
 
-      <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", position: "relative", zIndex: 1 }}>
+      {/* Soft gradient blend at bottom to transition seamlessly into section below */}
+      <div style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 120,
+        background: "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 70%, #FFFFFF 100%)",
+        pointerEvents: "none",
+        zIndex: 2,
+      }} />
+
+      <div style={{
+        maxWidth: 840,
+        margin: "0 auto",
+        textAlign: "center",
+        position: "relative",
+        zIndex: 10,
+        width: "100%",
+      }}>
+        {/* Eyebrow badge */}
         <div style={{
-          display: "inline-block", padding: "6px 18px", borderRadius: 999, fontSize: 13, fontWeight: 700,
-          background: "linear-gradient(135deg,rgba(233,30,140,0.1),rgba(124,58,237,0.1))",
-          color: "#E91E8C", marginBottom: 20,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "6px 18px",
+          borderRadius: 999,
+          fontSize: 13,
+          fontWeight: 700,
+          background: "rgba(255, 255, 255, 0.8)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          color: "#BE185D",
+          border: "1px solid rgba(225, 29, 72, 0.18)",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
+          marginBottom: 20,
         }}>
           ✨ India&apos;s Most Loved E-Gifting Platform
         </div>
 
+        {/* Hero Title */}
         <h1 style={{
-          fontSize: "clamp(32px,6vw,56px)", fontWeight: 900,
-          fontFamily: "'Nunito',sans-serif", lineHeight: 1.15,
-          color: "#1A1A2E",
+          fontSize: "clamp(30px, 5.5vw, 56px)",
+          fontWeight: 900,
+          fontFamily: "'Nunito', sans-serif",
+          lineHeight: 1.15,
+          color: "#0F172A",
+          textShadow: "0 1px 12px rgba(255, 255, 255, 0.8)",
+          letterSpacing: "-0.02em",
         }}>
-          Send <span style={{ color: "#E91E8C" }}>Magical</span> Digital
+          Send <span style={{
+            background: "linear-gradient(135deg, #E11D48 0%, #9333EA 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}>Magical</span> Digital
           <br />Surprises to Your Loved Ones
         </h1>
 
+        {/* Subtitle */}
         <p style={{
-          fontSize: "clamp(15px,2vw,18px)", color: "#4A4A68",
-          lineHeight: 1.7, maxWidth: 540, margin: "20px auto 0",
+          fontSize: "clamp(15px, 1.8vw, 18px)",
+          color: "#334155",
+          fontWeight: 500,
+          lineHeight: 1.65,
+          maxWidth: 560,
+          margin: "18px auto 0",
+          textShadow: "0 1px 8px rgba(255, 255, 255, 0.9)",
         }}>
           Beautiful, personalised webpages for birthdays, proposals,
           anniversaries &amp; more. Preview it, pay once, customise &amp; share.
         </p>
 
+        {/* CTA Buttons */}
         <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 32, flexWrap: "wrap" }}>
           <a href="#gifts" style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: "linear-gradient(135deg,#E91E8C,#7C3AED)", color: "#fff",
-            borderRadius: 999, padding: "14px 32px", fontWeight: 700, fontSize: 15,
-            textDecoration: "none", boxShadow: "0 8px 24px rgba(233,30,140,0.25)",
-            transition: "transform 0.2s",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            background: "linear-gradient(135deg, #E11D48, #7C3AED)",
+            color: "#fff",
+            borderRadius: 999,
+            padding: "14px 32px",
+            fontWeight: 700,
+            fontSize: 15,
+            textDecoration: "none",
+            boxShadow: "0 8px 24px rgba(225, 29, 72, 0.3)",
+            transition: "transform 0.2s, box-shadow 0.2s",
           }}>
             Browse Gifts <GiftSVG size={18} color="#fff" />
           </a>
           <a href="#how" style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: "#fff", color: "#1A1A2E",
-            border: "1px solid rgba(0,0,0,0.1)", borderRadius: 999,
-            padding: "14px 32px", fontWeight: 600, fontSize: 15,
-            textDecoration: "none", transition: "all 0.2s",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            background: "rgba(255, 255, 255, 0.88)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+            color: "#0F172A",
+            border: "1px solid rgba(15, 23, 42, 0.12)",
+            borderRadius: 999,
+            padding: "14px 32px",
+            fontWeight: 700,
+            fontSize: 15,
+            textDecoration: "none",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
+            transition: "all 0.2s",
           }}>
             How it Works
           </a>
         </div>
 
-        {/* Trust indicators */}
-        <div style={{ display: "flex", gap: 28, justifyContent: "center", marginTop: 36, flexWrap: "wrap" }}>
+        {/* Trust indicators pill */}
+        <div style={{
+          display: "inline-flex",
+          gap: 24,
+          justifyContent: "center",
+          marginTop: 36,
+          flexWrap: "wrap",
+          background: "rgba(255, 255, 255, 0.72)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          padding: "8px 24px",
+          borderRadius: 999,
+          border: "1px solid rgba(255, 255, 255, 0.9)",
+          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.03)",
+        }}>
           {[
-            { icon: <LockSVG size={16} color="#E91E8C" />, text: "Secure Payments" },
+            { icon: <LockSVG size={16} color="#E11D48" />, text: "Secure Payments" },
             { icon: <LightningSVG size={16} color="#7C3AED" />, text: "Instant Delivery" },
             { icon: <CustomizeSVG size={16} color="#6366F1" />, text: "Fully Customisable" },
           ].map(t => (
-            <div key={t.text} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#9CA3AF", fontWeight: 500 }}>
+            <div key={t.text} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#475569", fontWeight: 600 }}>
               <span style={{ display: "inline-flex", alignItems: "center" }}>{t.icon}</span> {t.text}
             </div>
           ))}
