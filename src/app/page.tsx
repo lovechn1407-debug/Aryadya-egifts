@@ -12,7 +12,6 @@ import HomepagePopups from "@/components/HomepagePopups";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginModal from "@/components/LoginModal";
 import ChatWidget from "@/components/ChatWidget";
-import WaylumeBackground from "@/components/WaylumeBackground";
 
 
 /* ── Modern UI SVG Icons ── */
@@ -278,9 +277,29 @@ function Hero() {
       alignItems: "center",
       justifyContent: "center",
       minHeight: "clamp(500px, 72vh, 640px)",
+      backgroundColor: "rgb(254, 227, 255)",
     }}>
-      {/* Animated Aurora WebGL Background */}
-      <WaylumeBackground />
+      {/* Seamless looping background video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <source src="/videos/hero-bg.webm" type="video/webm" />
+      </video>
 
       {/* Soft gradient blend at bottom to transition seamlessly into section below */}
       <div style={{
